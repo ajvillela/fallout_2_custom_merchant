@@ -78,7 +78,10 @@ procedure Node998;                                      // This Node is Always C
                                              give_pid_qty(self_obj, PID_ANNA_BONES, 1)       \
                                              drop_obj(restock_obj);                          \
                                              if (tile_in_anna_room(dude_tile)) then begin    \
-                                                dude_floater(550);                           \
+                                                if (dude_is_stupid) then                     \
+                                                   dude_floater(551);                        \
+                                                else                                         \
+                                                   dude_floater(550);                        \
                                              end                                             \
                                              destroy_object(self_obj);                       \
                                           end else if (helped_anna) then begin               \
@@ -175,7 +178,11 @@ procedure talk_p_proc begin
 end
 
 procedure destroy_p_proc begin
-   set_vic_dead;
+// set_vic_dead;  //killap's fix: setting vic to dead if anna dies? wahh?
+   //added by killap
+   if (get_anna_locket_pip(anna_locket_pip_assigned)) then
+      set_anna_locket_pip(anna_locket_pip_done);
+   //added by killap
 end
 
 procedure look_at_p_proc begin
@@ -203,7 +210,7 @@ procedure Node001 begin
    Reply(153);
    NOption(154,Node003,004);
    NOption(155,Node002,004);
-   NOption(156,Node005,006);
+   BOption(156,Node005,006);
    BOption(560, Node999, -003);
    NOption(561, Node999, -003);
 end
@@ -211,13 +218,13 @@ procedure Node002 begin
    debug_msg("Node002");
    Reply(157);
    NOption(158,Node003,004);
-   NOption(159,Node005,004);
+   BOption(159,Node005,004);
 end
 procedure Node003 begin
    debug_msg("Node003");
    Reply(160);
    NOption(161,Node004,004);
-   NOption(162,Node005,004);
+   BOption(162,Node005,004);
 end
 procedure Node004 begin
    debug_msg("Node004");

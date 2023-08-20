@@ -102,7 +102,7 @@
 #define GVAR_PLAYER_GOT_CAR                  (18)
 #define GVAR_DEN_VIC_STATUS                  (19)
 #define GVAR_DEN_MAGGIE_STILL                (20)
-#define GVAR_VIC_DEVICE                      (29)
+#define GVAR_CAME_FROM_BROKEN2               (29) //unused but not used for Lump in Broken Hills - killap
 #define GVAR_SLAVE_RUN                       (30)
 #define GVAR_SLAVES_COUNT                    (31)
 #define GVAR_HOSTILE_SLAVE_COUNT             (125)
@@ -138,6 +138,11 @@
 #define GVAR_QUEST_VIC_DEVICE                (100)
 #define GVAR_DEN_CAR_PART_PIP                (550)
 #define GVAR_DEN_ANNA_LOCKET_PIP             (551)
+#define GVAR_DEN_FRED_NO                     (704) //killap's code
+#define GVAR_DEN_FRED_PAID                   (705) //killap's code
+#define GVAR_DEN_FRED_COVERED                (706) //killap's code
+#define GVAR_DEN_FRED_LOAN                   (707) //killap's code
+
 
 // Klamath Information
 
@@ -146,7 +151,8 @@
 #define GVAR_TORR_MISSING                    (71)
 #define GVAR_TORR_SEARCH_SUCCESS             (72)
 #define GVAR_TRAPPER_RETURNED                (73)
-#define GVAR_DUNTONS_ANGRY                   (74)
+//#define GVAR_DUNTONS_ANGRY                   (74) //this is unused - killap
+#define GVAR_TORR_BRAHMIN_KILLED             (74) //moved here by killap
 #define GVAR_RUSTLE_FAIL_VIOLENT             (75)
 #define GVAR_RUSTLE_FAIL                     (76)
 #define GVAR_RUSTLE_SUCCESS                  (77)
@@ -163,7 +169,7 @@
 #define GVAR_SMILEY_STATUS                   (197)
 #define GVAR_STILL_STATUS                    (198)
 #define GVAR_STILL_FAILURE                   (199)
-#define GVAR_TORR_BRAHMIN_KILLED             (202)
+//#define GVAR_TORR_BRAHMIN_KILLED             (202)
 #define GVAR_ENEMY_TORR                      (203)
 #define GVAR_ENEMY_DUNTON                    (204)
 #define GVAR_ENEMY_SMILEY                    (205)
@@ -177,6 +183,8 @@
 #define GVAR_BATH_HOUSE_REJECT               (603)
 #define GVAR_KLAMATH_SCORPIONS_KILLED        (621)
 #define GVAR_KLAMATH_SCORPIONS_TOTAL         (622)
+#define GVAR_SCARE_DUNTONS                   (701)	//added by killap
+
 
 // Navarro
 // This flag indicates whether the player knows of the vertibirds/has the plans
@@ -188,6 +196,7 @@
 #define GVAR_NAVARRO_POWER_CENTER            (514)
 #define GVAR_NAVARRO_VERTIBIRDS              (515)
 #define GVAR_NAVARRO_XARN                    (554)
+#define GVAR_SCHREBER_DEAD                   (696) // Seraph's Code
 
 // Modoc
 #define GVAR_JONNY_STATE                     (113)
@@ -205,7 +214,7 @@
 #define GVAR_LADDIE_STATE                    (126)
 #define GVAR_LADDIE_TILE                     (127)
 #define GVAR_MODOC_JONNY_HOME                (128)
-#define GVAR_MODOC_KARL_HOME                 (129)
+#define GVAR_MODOC_KARL_HOME                 (129) //comment out by killap - not needed
 #define GVAR_MODOC_SPOKE_PROTECTOR           (130)
 #define GVAR_MODOC_MESSAGE                   (131)
 #define GVAR_MODOC_LOST_AND_FOUND            (134)
@@ -228,7 +237,7 @@
 #define GVAR_MODOC_FAMILY_FEUD_SEED_ONE      (105)
 #define GVAR_MODOC_FAMILY_FEUD_SEED_TWO      (106)
 #define GVAR_MODOC_BRAHMIN_SEED              (107)
-#define GVAR_MODOC_KARL_PIP                  (108)
+#define GVAR_MODOC_KARL_PIP                  (108) //killap comment out - not needed
 #define GVAR_MODOC_KARL_SEED                 (109)
 #define GVAR_MODOC_VERMIN_HUNTER_SEED        (110)
 #define GVAR_MODOC_GHOST_FARM_SEED           (111)
@@ -586,7 +595,8 @@
 #define GVAR_WADE_PAYOUT                     (517)
 #define GVAR_SAVINE_PAYOUT                   (518)
 #define GVAR_MORTON_GANG                     (580)
-
+#define GVAR_WIDOW_ROONEY                    (702)	//killap's code
+#define GVAR_MINE_DEED                       (703)	//killap's code
 
 // Raiders
 #define GVAR_RAIDERS_FLAGS                   (373)
@@ -690,6 +700,7 @@
 #define GVAR_MUTATE_STAGE                   (193)
 #define GVAR_GRAVE_FLAGS_1                  (200)
 #define GVAR_GRAVE_FLAGS_2                  (201)
+#define GVAR_GRAVE_FLAGS_3                  (202)
 #define GVAR_8_BALL_TOILET_SECRET           (243)
 #define GVAR_8_BALL_TRASH_SECRET            (244)
 #define GVAR_8_BALL_VAULT_TERMINAL          (599)
@@ -702,6 +713,7 @@
 #define GVAR_GAVE_GECK_EXP                  (629)
 #define GVAR_DUDE_START_SEQ_1               (630)
 #define GVAR_PARTY_MEMBERS_HIDDEN           (632)
+#define GVAR_PATCH_INVAIDITATOR             (695)
 
 
 //Random Encounter
@@ -744,7 +756,12 @@
 #define GVAR_ENDGAME_MOVIE_SAN_FRAN_SHI     (423)
 #define GVAR_ENDGAME_MOVIE_SAN_FRAN_ELRON   (424)
 #define GVAR_ENDGAME_MOVIE_SAN_FRAN_PUNKS   (425)
-
+// Begin Seraph's Code
+#define GVAR_ENDGAME_MOVIE_PRES_RICH        (697)
+#define GVAR_ENDGAME_MOVIE_MARCUS           (698)
+#define GVAR_ENDGAME_MOVIE_HAROLD           (699)
+#define GVAR_ENDGAME_MOVIE_ELDER            (700)
+// End Seraph's Code
 
 // Town Reps
 #define GVAR_TOWN_REP_ARROYO                (47)
@@ -775,7 +792,7 @@
 // --RESERVED GLOBAL VARS--
 // DO NOT USE UNTIL AFTER FALLOUT 2 SHIPS.
 // -RWH2
-#define GVAR_RESERVED_VAR0                  (633)
+#define GVAR_CAR_PLACED_TILE                (633)
 #define GVAR_RESERVED_VAR1                  (634)
 #define GVAR_RESERVED_VAR2                  (635)
 #define GVAR_RESERVED_VAR3                  (636)
@@ -835,6 +852,115 @@
 #define GVAR_RESERVED_VAR57                 (690)
 #define GVAR_RESERVED_VAR58                 (691)
 #define GVAR_RESERVED_VAR59                 (692)
+
+
+// Abbey - killap
+#define GVAR_ABBEY_BEAST			  (708)
+#define GVAR_ABBEY_PART			          (709)
+#define GVAR_ABBEY_PUMP				  (710)
+#define GVAR_ABBEY_GRAVES			  (711)
+#define GVAR_ABBEY_TULLY			  (712)
+
+//Primitive Tribe
+#define GVAR_TRIBE_WEAPONS                        (713)
+#define GVAR_ENEMY_PRIMITIVE_TRIBE                (714)
+#define GVAR_FIXTRIBE_WELL                        (715)
+#define GVAR_SULIK_SISTER                         (716)
+#define GVAR_TRIBE_GHOST                          (717)
+#define GVAR_SULIK_DEAD                           (718)
+#define GVAR_FIND_SULIK                           (719)
+#define GVAR_MISSING_WARRIOR                      (720)
+
+//Slavers Camp/Rangers' Safe House
+#define GVAR_WIPED_OUT_SLAVER_CAMP                (721)
+#define GVAR_WIPED_OUT_RANGER_SAFE_HOUSES         (722)
+
+//Vault Experiment Info
+#define GVAR_VAULT_EXPERIMENTS			  (723)
+
+//Chad skimming quest
+#define GVAR_CHAD_EVIDENCE_TIP                    (724)
+#define GVAR_SAINT_NICK_LINE                      (725)
+
+// Abbey cont.
+#define GVAR_ABBEY_KNOWLEDGE_EPA		  (726)
+#define GVAR_ABBEY_KNOWLEDGE			  (727)
+
+#define GVAR_DEN_ORPHANAGE			  (728)
+#define GVAR_DEN_ORPHANAGE_BUILD_TIME             (729)
+
+//Gecko Enclave Encounter
+#define GVAR_ENCLAVE_SENT			  (730)
+
+//Abbey cont.
+#define GVAR_ABBEY_BOOZE			  (731)
+#define GVAR_ABBEY_LIGHTER			  (732)
+
+//Tribe cont.
+#define GVAR_TRIBE_FIREWOOD                       (733)
+
+//Klamath
+#define GVAR_KLAMATH_FIND_RUSTLERS                (734)
+
+//Town reps
+#define GVAR_TOWN_REP_SLAVER_CAMP	          (735)
+#define GVAR_TOWN_REP_HUBOLOGIST_STASH            (736)
+#define GVAR_TOWN_REP_VAULT_VILLAGE		  (737)
+
+//EPA
+#define GVAR_FOUND_EPILEPSY_CURE	          (738)
+#define GVAR_FIX_HOLOGRAM00000                    (739)
+#define GVAR_FIX_VOICECOMP                        (740)
+#define GVAR_VAULT_VILLAGE_FLAGS                  (741)
+#define GVAR_ELECTRIC_CHAIR                       (742)
+#define GVAR_EPADOOR_LOCK                         (743)
+#define GVAR_PLANT_QUEST                          (744)
+#define GVAR_KILL_EPAPLANTS                       (745)
+#define GVAR_EPAVOICE_DOOR                        (746)
+#define GVAR_KILL_HOLOGRAMS                       (747)
+#define GVAR_OPEN_SECURITYDOORS                   (748)
+#define GVAR_MADE_DRUGS                           (749)
+#define GVAR_EPADOOR_OPEN                         (750)
+#define GVAR_EPA_RANDOMDRUGS                      (751)
+#define GVAR_EPALIGHTING_GEN                      (752)
+#define GVAR_EPADOCTOR_ATTACKED                   (753)
+#define GVAR_FREE_EPASLAVES                       (754)
+#define GVAR_EPA_SERVICE_ELEVATOR                 (755)
+#define GVAR_TOASTER_SLOTMACHINES                 (756)
+#define GVAR_MAGNETIC_FIELD                       (757)
+#define GVAR_PASSWORD_KNOWN                       (758)
+#define GVAR_FETCH_GECKOPELTS                     (759)
+#define GVAR_LOWER_EPAFIELDS                      (760)
+#define GVAR_DYNAMITE_SETTING                     (761)
+#define GVAR_DYNAMITE_TRIGGER                     (762)
+#define GVAR_FIX_STATICINGHOLOGRAM                (763)
+#define GVAR_FOOD_QUEST_VAULT_VILLAGE             (764)
+#define GVAR_CAME_ON_VERTIBIRD                    (765)
+#define GVAR_COLLECT_WIDGET_FOR_EPA_DOCTOR        (766)
+#define GVAR_NCR_ATTACK_SLAVER_CAMP               (767)
+#define GVAR_RND_ENCOUNTER_FLAGS                  (768)
+#define GVAR_REDDING_GENPES_COUNT                 (769)
+#define GVAR_TMP_GLOBAL_VAR                       (770)
+#define GVAR_V15_DOC_FREE                   	  (771)
+#define GVAR_EASTER_EGG_ENCOUNTER                 (772)
+#define GVAR_PLAYER_SMOKER			  			  (773)
+#define GVAR_MERCHANT_MEETING                     (774)
+#define GVAR_TEST_SOLAR_SCORCHER                  (775)
+#define GVAR_ABBEY_FORMAT_DATABASES               (776)
+#define GVAR_ABBEY_ESCORT_BROTHER_JASON           (777)
+#define GVAR_NEED_ERSI                   		  (778)
+#define GVAR_CHAR_MOD                   		  (779)
+#define GVAR_CAR_OUTTA_POWER_FIX	          	  (780)
+#define GVAR_TRIBE_SHAMAN_HERBS                   (781)
+#define GVAR_SHI_FIND_DR_SHENG                    (782)
+#define GVAR_SHI_DELIVER_SEEDS_TO_DR_SHENG        (783)
+#define GVAR_SHI_DELIVER_SEED_SAMPLE_TO_DR_WONG   (784)
+#define GVAR_SHI_ELIMINATE_DR_SHENG               (785)
+#define GVAR_SHI_ELIMINATE_DR_WONG                (786)
+#define GVAR_MET_SEYMOUR                   		  (787)
+#define GVAR_WOOZ_STATUS                   		  (788)
+#define GVAR_CLEAR_OUT_DR_SHENG_LAB               (789)
+#define GVAR_WESTIN_HEART_TROUBLE                 (790)
 
 /******************************************************************
     Variable States
@@ -946,6 +1072,11 @@
 //GVAR_TORR_GUARD_STATUS (KLAMATH)
 #define TORR_GUARD_ACCEPT                   (1)
 #define TORR_GUARD_SUCCESS                  (2)
+#define TORR_GUARD_FAIL                     (3)
+
+//GVAR_KLAMATH_FIND_RUSTLERS -added by killap
+#define FIND_RUSTLERS_ACCEPT		     (1)
+#define FIND_RUSTLERS_SUCCESS		     (2)
 
 //GVAR_SMILEY_STATUS (KLAMATH)
 #define SMILEY_QUEST_ACCEPTED               (1)
@@ -1049,20 +1180,44 @@
 #define REWARD_OFFERED                      (1)
 #define REWARD_OBTAINED                     (2)
 
-#define SERVANT_REFUSED                     (1)
-#define SERVANT_PISSED                      (2)
-#define SERVANT_MAP_VISITED                 (3)
-#define SERVANT_NO_GUNS                     (4)
-#define SERVANT_NOT_READY                   (5)
-#define SERVANT_FINISHED                    (6)
+//not using these...
+//#define SERVANT_REFUSED                     (1)
+//#define SERVANT_PISSED                      (2)
+//#define SERVANT_MAP_VISITED                 (3)
+//#define SERVANT_NO_GUNS                     (4)
+//#define SERVANT_NOT_READY                   (5)
+//#define SERVANT_FINISHED                    (6)
+
+
+#define SERVANT_TIME_EXTENDED               (1)
+#define SERVANT_BRAIN_AGREEMENT             (2)
+#define SERVANT_FINISHED_VIOLENT            (3)
+#define SERVANT_FINISHED_DIPLOMATIC         (4)
+#define SERVANT_TURNED_IN_HARRY             (5)
+
+#define SERVANT_QUEST_ACCEPTED              (1)
+#define SERVANT_QUEST_REFUSED               (2)
+#define SERVANT_QUEST_CHANGED_MIND          (3)
+#define SERVANT_QUEST_FINISHED              (4)
+
+
+#define GAVE_INFO                           (1)
+#define GAVE_AMULET                         (2)
 
 #define VILLAGE_KNOWN                       (1)
 #define VILLAGE_SCREWED                     (2)
-#define VILLAGE_GET_GUNS                    (3)
-#define VILLAGE_DELIVERED_GUNS              (4)
-#define VILLAGE_STAGE_ONE                   (5)
-#define VILLAGE_STAGE_TWO                   (6)
-#define VILLAGE_FINISHED                    (7)
+#define VILLAGE_STAGE_ONE                   (4)
+#define VILLAGE_STAGE_TWO                   (5)
+#define VILLAGE_FINISHED                    (6)
+
+#define VILLAGE_QUEST_GET_GUNS              (1)
+#define VILLAGE_QUEST_JOE_SPOKE             (2)
+#define VILLAGE_QUEST_GOT_GUNS              (3)
+#define VILLAGE_QUEST_DELIVERED_GUNS        (4)
+#define VILLAGE_QUEST_SPEAK_WITH_COUNCIL    (5)
+#define VILLAGE_QUEST_FINISHED_DIPLOMATIC   (6)
+#define VILLAGE_QUEST_NEED_FOOD             (7)
+#define VILLAGE_QUEST_DELIVERED_FOOD        (8)
 
 #define MOORE_NONE                          (0)
 #define MOORE_KNOWN                         (1)
@@ -1076,7 +1231,7 @@
 #define HOLODISK_ACCEPTED                   (1)
 #define HOLODISK_DECLINED                   (2)
 #define HOLODISK_DELIVERED                  (3)
-#define HOLODISK_DONE						(4)
+#define HOLODISK_DONE			    (4)
 
 // GVAR_DR_TROY_STATUS
 #define TROY_EXILED                         (1)
@@ -1139,8 +1294,9 @@
 #define SIERRA_LOCKOUT_FALSE                (0)
 #define SIERRA_LOCKOUT_TRUE                 (1)
 
-#define ECON_DISK_RECEIVED                  (1)
-#define ECON_DISK_GIVEN                     (2)
+#define ECON_DISK_GET_DISK                  (1)
+#define ECON_DISK_RECEIVED                  (2)
+#define ECON_DISK_GIVEN                     (3)
 
 #define REQ_FORM_STOLEN                     (1)
 #define REQ_FORM_GIVEN                      (2)
@@ -1184,6 +1340,7 @@
 #define CHAD_CONFIRMED                      (6)
 #define CHAD_ARRESTED                       (7)
 #define CHAD_KILLED                         (8)
+#define CHAD_FLED                           (9)
 
 #define FTM_QUESTIONED                      (0)
 #define FTM_FRIENDLY                        (1)
@@ -1225,11 +1382,13 @@
 #define MISSING_ACCEPT_CASH                 (2)
 #define MISSING_ACCEPT_FREE                 (3)
 #define MISSING_REJECT                      (4)
-#define MISSING_DISCOVERED_CASH             (5)
-#define MISSING_DISCOVERED_FREE             (6)
-#define MISSING_FINISHED_CASH               (7)
-#define MISSING_FINISHED_FREE               (8)
-#define MISSING_REWARDED                    (9)
+#define MISSING_TUNNELS_CASH				(5)
+#define MISSING_TUNNELS_FREE				(6)
+#define MISSING_DISCOVERED_CASH             (7)
+#define MISSING_DISCOVERED_FREE             (8)
+#define MISSING_FINISHED_CASH               (9)
+#define MISSING_FINISHED_FREE               (10)
+#define MISSING_REWARDED                    (11)
 
 #define MIGHTY_MAN_KNOWN                    (1)
 #define MIGHTY_MAN_CHALLENGED               (2)
@@ -1324,14 +1483,23 @@
 #define WANAMINGO_MORTON                    (1)
 #define WANAMINGO_CLEARED_OUT               (2)
 
+//CLEAR OUT MINE
+#define DEED_ACCEPTED                       (1)	//killap's code
+#define CLEARED_MINE                        (2)	//killap's code
+
+//WIDOW ROONEY
+#define WIDOW_JOB_ACCEPTED                  (1)	//killap's code
 
 // GVAR_BAR_BRAWL
 #define BRAWL_JOB_ACCEPTED                  (1)
-#define BRAWL_NEITHER_JAILED                (2)
-#define BRAWL_MORNINGSTAR_JAILED            (3)
-#define BRAWL_KOKOWEEF_JAILED               (4)
-#define BRAWL_BOTH_JAILED                   (5)
-#define BRAWL_KILLED                        (6)
+#define BRAWL_TALKED_BETTE                  (2) // Seraph's Code
+#define BRAWL_TALKED_CAMINT                 (3) // Seraph's Code
+#define BRAWL_NEITHER_JAILED                (4)
+#define BRAWL_MORNINGSTAR_JAILED            (5)
+#define BRAWL_KOKOWEEF_JAILED               (6)
+#define BRAWL_BOTH_JAILED                   (7)
+#define BRAWL_KILLED                        (8)
+#define BRAWL_TALKED_BOTH                   (9) // Seraph's Code
 
 // Frog Morton
 #define FROG_JOB_ACCEPTED                   (1)
@@ -1352,7 +1520,7 @@
 #define SHERIFF_FINISHED                    (3)
 
 // Redding Caravans
-#define REDDING_CARAVAN_NONE               (0)
+#define REDDING_CARAVAN_NONE                (0)
 #define REDDING_CARAVAN_AGREED              (1)
 #define REDDING_CARAVAN_NOT_READY_YET       (2)
 #define REDDING_CARAVAN_ABANDONED           (3)
@@ -1389,6 +1557,62 @@
 #define TURRET_ALERT                        (1)
 #define TURRET_MAINTENANCE                  (2)
 
+// Primitive Tribe
+#define MERCHANT_START             	    	(1)
+#define MERCHANT_BOUGHT_TRICKED             (2)
+#define MERCHANT_NO_DEAL                    (3)
+#define MERCHANT_BOUGHT_DISCOUNT            (4)
+#define MERCHANT_REALIZE_FAKE               (5)
+#define MERCHANT_DONE              	    	(6)
+#define MERCHANT_DONE_BAD              	    (7)
+
+// San Fran
+
+// Find sheng
+#define PLANT_QUEST_DRSHENG_KNOW     		(1)
+#define PLANT_QUEST_FIND_DRSHENG			(2)
+#define PLANT_QUEST_FOUND_DRSHENG			(3)
+#define PLANT_QUEST_DR_WONG_INFORMED	    (4)
+
+// Sheng get seeds
+#define PLANT_QUEST_GET_SEEDS_FOR_DRSHENG		(1)
+#define PLANT_QUEST_DELIVERED_SEEDS_TO_DRSHENG	(2)
+
+// Sheng delivered seeds
+#define PLANT_QUEST_RETURN_TO_DRWONG	    	    	    (1)
+#define PLANT_QUEST_RETURN_TO_DRWONG_KNOW_SEED_TRUTH	    (2)
+#define PLANT_QUEST_DELIVERED_SEED_SAMPLE   	    	    (3)
+#define PLANT_QUEST_DELIVERED_SEED_SAMPLE_DESTROYED   	    (4)
+
+// Sheng kill wong
+#define PLANT_QUEST_KILL_DRWONG		        (1)
+#define PLANT_QUEST_KILLED_DRWONG		    (2)
+
+// Wong kill sheng
+#define PLANT_QUEST_KIL_DRSHENG	            (1)
+#define PLANT_QUEST_KILLED_DRSHENG	        (2)
+
+
+// Character Modifications
+#define GENDER								(1)
+#define RACE								(2)
+#define HAIR								(3)
+
+// SHI SUB - GVAR_SHI_SUB
+#define SHI_SUB_KNOWN					(1)
+#define SHI_SUB_ALONE					(2)
+#define SHI_SUB_HAS_PASSWORD			(3)
+#define SHI_SUB_WITH_CREW				(4)
+#define SHI_SUB_DISABLED				(5)
+
+
+// ABBEY - GVAR_ABBEY_PUMP
+#define PUMP_BROKEN                   (0)
+#define PUMP_QUEST_GIVEN              (1)
+#define PUMP_FOUND_PROBLEM            (2)
+#define PUMP_GET_PART                 (3)
+#define PUMP_FIXED                    (4)
+#define PUMP_REPORTED                 (5)
 
 //GVAR_VIGNETTE_SEQUENCE States
 #define SEQ_1                           (bit_1)
@@ -1398,6 +1622,9 @@
 #define SEQ_1_DONE                      (bit_17)
 #define SEQ_2_DONE                      (bit_18)
 #define SEQ_3_DONE                      (bit_19)
+
+#define WOOZ_TALKED                     (bit_1)
+#define WOOZ_DEAD                       (bit_2)
 
 #define ON_VAULT13_SEQ        set_gvar_bit_on(GVAR_VIGNETTE_SEQUENCE, SEQ_1)
 #define VAULT13_SEQ           (gvar_bit(GVAR_VIGNETTE_SEQUENCE, SEQ_1))
@@ -1426,6 +1653,11 @@
 #define WESTIN_COMPLETE          bit_6
 #define WESTIN_SNUFF_KNOWN       bit_7
 #define WESTIN_KNOWN             bit_8
+#define WESTIN_LENNY_TALKED      bit_9
+#define WESTIN_DOC_JUB_TALKED    bit_10
+#define WESTIN_PILLS_KNOW        bit_11
+#define WESTIN_RENESCO_PISSED    bit_12
+#define WESTIN_HEART_PILLS_DEATH bit_13
 #define get_westin_flag(x)       (gvar_bit(GVAR_NEWRENO_SNUFF_WESTIN, x))
 #define set_westin_flag(x)       set_gvar_bit_on(GVAR_NEWRENO_SNUFF_WESTIN, x)
 #define know_westin              (get_westin_flag(WESTIN_KNOWN))
@@ -1440,6 +1672,7 @@
 #define CARLSON_CANCEL_SNUFF     bit_4
 #define CARLSON_COMPLETE         bit_5
 #define CARLSON_FAIL             bit_6
+#define CARLSON_GATE_CLOSED      bit_7
 #define get_carlson_flag(x)      (gvar_bit(GVAR_NEWRENO_SNUFF_CARLSON, x))
 #define set_carlson_flag(x)      set_gvar_bit_on(GVAR_NEWRENO_SNUFF_CARLSON, x)
 #define carlson_dead             (get_carlson_flag(CARLSON_DEAD))
@@ -1459,6 +1692,7 @@
 #define STRANGER_FEMALE         bit_3
 #define get_stranger_flag(x)    (global_var(GVAR_MYSTERIOUS_STRANGER) bwand x)
 #define set_stranger_flag(x)    set_global_var(GVAR_MYSTERIOUS_STRANGER, global_var(GVAR_MYSTERIOUS_STRANGER) bwor x)
+
 
 /******************************************************************/
 
@@ -1487,21 +1721,23 @@
 #define reached_tl_4                        (GAME_TIME_IN_DAYS >= TIME_LIMIT_4)
 
 //Kaga macros Rob the only one you probably care about is the dead macro
-#define KAGA_1    bit_1   //Encounter 1 with kaga
-#define KAGA_2    bit_2
-#define KAGA_3    bit_3
-#define KAGA_4    bit_4
-#define KAGA_5    bit_5
-#define KAGA_DEAD bit_6
+#define KAGA_BG   bit_1
+#define KAGA_1    bit_2   //Encounter 1 with kaga
+#define KAGA_2    bit_3
+#define KAGA_3    bit_4
+#define KAGA_4    bit_5
+#define KAGA_5    bit_6
 #define KAGA_MET  bit_7
+#define KAGA_DEAD bit_8
 
 #define set_kaga_1     set_global_var(GVAR_RND_KAGA_STATE, global_var(GVAR_RND_KAGA_STATE) bwor KAGA_1)
 #define set_kaga_2     set_global_var(GVAR_RND_KAGA_STATE, global_var(GVAR_RND_KAGA_STATE) bwor KAGA_2)
 #define set_kaga_3     set_global_var(GVAR_RND_KAGA_STATE, global_var(GVAR_RND_KAGA_STATE) bwor KAGA_3)
 #define set_kaga_4     set_global_var(GVAR_RND_KAGA_STATE, global_var(GVAR_RND_KAGA_STATE) bwor KAGA_4)
-#define set_kaga_5     set_global_var(GVAR_RND_KAGA_STATE, global_var(GVAR_RNDKAGA_STATE) bwor KAGA_5)
+#define set_kaga_5     set_global_var(GVAR_RND_KAGA_STATE, global_var(GVAR_RND_KAGA_STATE) bwor KAGA_5)
 #define set_kaga_dead  set_global_var(GVAR_RND_KAGA_STATE, global_var(GVAR_RND_KAGA_STATE) bwor KAGA_DEAD)
 #define set_kaga_met   set_global_var(GVAR_RND_KAGA_STATE, global_var(GVAR_RND_KAGA_STATE) bwor KAGA_MET)
+#define set_kaga_bg    set_global_var(GVAR_RND_KAGA_STATE, global_var(GVAR_RND_KAGA_STATE) bwor KAGA_BG)
 
 #define kaga_1     (global_var(GVAR_RND_KAGA_STATE) bwand KAGA_1)
 #define kaga_2     (global_var(GVAR_RND_KAGA_STATE) bwand KAGA_2)
@@ -1510,6 +1746,7 @@
 #define kaga_5     (global_var(GVAR_RND_KAGA_STATE) bwand KAGA_5)
 #define kaga_dead  (global_var(GVAR_RND_KAGA_STATE) bwand KAGA_DEAD)
 #define kaga_met   (global_var(GVAR_RND_KAGA_STATE) bwand KAGA_MET)
+#define kaga_bg    (global_var(GVAR_RND_KAGA_STATE) bwand KAGA_BG)
 
 
 #endif // _GLOBAL_H_DEFINED2 O0)  (1O9 )_ _ LI ( DW1O  (

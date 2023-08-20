@@ -165,11 +165,11 @@ procedure talk_p_proc begin
    CheckKarma;
 
    GetReaction;
-
-   if (global_var(GVAR_VAULT_CITIZEN) == CITIZEN_TRUE) then begin
+   
+   if (global_var(GVAR_VAULT_CITIZENSHIP) == CITIZEN_TRUE) then begin //was GVAR_VAULT_CITIZEN - killap
        call Node001;
    end
-   else if (TOWN_REPUTATION > 0) then begin
+   else if (TOWN_REPUTATION > 0 or (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then begin // edit by killap - added (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
        call Node002;
    end
    else begin

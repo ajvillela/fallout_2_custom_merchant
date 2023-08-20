@@ -129,6 +129,13 @@ end
 procedure use_obj_on_p_proc begin
    variable tool;
 
+   //added by killap
+   if ( (obj_pid(obj_being_used_with) == PID_MICRO_FUSION_CELL) or (obj_pid(obj_being_used_with) == PID_SMALL_ENERGY_CELL) ) then begin
+      script_overrides;
+      display_msg(g_mstr(20000));
+   end
+   //end added
+
    tool := obj_pid(obj_being_used_with);
 
    if (tool == PID_MULTI_TOOL) then begin
@@ -147,6 +154,12 @@ procedure start begin
 end
 
 procedure timed_event_p_proc begin
+   //added by killap - expansion
+   if (fixed_param == 40893) then begin
+      set_party_waiting;
+      critter_attempt_placement( self_obj, 15698, 0 );
+   end
+   //end added
 end
 
 /* This procedure will get called each time that the map is first entered. It will

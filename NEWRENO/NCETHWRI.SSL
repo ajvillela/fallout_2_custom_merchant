@@ -148,7 +148,7 @@ end
 
 procedure timed_event_p_proc begin
    if (fixed_param == float_param) then begin
-      if (self_visible == false) then begin
+      if (self_visible) then begin // was self_visible == false
          if (combat_is_initialized == false) then begin
             if (mrs_wright_at_church) then begin
                call Node002;
@@ -168,6 +168,19 @@ procedure map_enter_p_proc begin
          critter_add_trait(self_obj, TRAIT_OBJECT, OBJECT_AI_PACKET, AI_TOUGH_CITIZEN);
       end
       check_belongs_here
+      //added by killap
+      if (belongs_here == false) then begin
+         if (self_tile != map_exit_tile) then begin //added check by killap
+            if (cur_map_index == MAP_NEW_RENO_3) then begin
+               move_to(self_obj,map_exit_tile,self_elevation);
+            end else begin
+               move_to(self_obj,map_exit_tile,self_elevation);
+            end
+         end
+      end else if (self_tile != local_var(LVAR_Home_Tile)) then begin
+         move_to(self_obj,local_var(LVAR_Home_Tile),self_elevation);
+      end      
+      //end added
       if (belongs_here) then begin
          check_set_obj_visiblility(self_obj, false);
       end else begin
@@ -186,6 +199,7 @@ procedure map_update_p_proc begin
          check_belongs_here
          if (belongs_here) then begin
             check_set_obj_visiblility(self_obj, false);
+            reg_anim_clear(self_obj); //added by killap
             move_to(self_obj, map_exit_tile, self_elevation);
          end
       end
@@ -199,10 +213,12 @@ procedure critter_p_proc begin
    if ((self_can_see_dude) and ((hostile) or (warned_attack))) then begin
       self_attack_dude;
    end else if (belongs_here == false) then begin
-      if (cur_map_index == MAP_NEW_RENO_3) then begin
-         anim_move_to_point_rate(map_exit_tile, 5)
-      end else begin
-         anim_move_to_point_rate(map_exit_tile, 5)
+      if (self_tile != map_exit_tile) then begin //added check by killap
+         if (cur_map_index == MAP_NEW_RENO_3) then begin
+            anim_move_to_point_rate(map_exit_tile, 5)
+         end else begin
+            anim_move_to_point_rate(map_exit_tile, 5)
+         end
       end
    end else if (self_tile != local_var(LVAR_Home_Tile)) then begin
       anim_move_to_point_rate(local_var(LVAR_Home_Tile), 5)
@@ -224,7 +240,6 @@ procedure pickup_p_proc begin
 end
 
 procedure talk_p_proc begin
-   set_herebefore;
    prev_node := 0;
    do_assign_mission := false;
    if (new_reno_ethyl_wright_box != 0) then begin
@@ -241,7 +256,7 @@ procedure talk_p_proc begin
          start_dialog_at_node(Node039);
       end else if (dude_has_porn_star_rep) then begin
          start_dialog_at_node(Node035);
-      end else if ((has_rep_slaver) or (has_rep_childkiller) or (has_rep_berserker) or (mrs_wright_pissed)) then begin
+      end else if ( (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) and ((has_rep_slaver) or (has_rep_childkiller) or (has_rep_berserker) or (mrs_wright_pissed)) ) then begin //edit by killap - added (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) )
          start_dialog_at_node(Node037);
       end else if ((know_mrs_wright) and (herebefore)) then begin
          start_dialog_at_node(Node024);
@@ -257,6 +272,7 @@ procedure talk_p_proc begin
       set_still_mission(still_mission_assigned);
    end
    check_belongs_here
+   set_herebefore; //moved here by killap: Mrs. Wright would always greet you as if you already met.
 end
 
 procedure destroy_p_proc begin
@@ -284,6 +300,7 @@ end
 
 procedure Node998 begin
    set_hostile;
+   attack_family(self_family) //added by killap
 end
 procedure Node999 begin
 end

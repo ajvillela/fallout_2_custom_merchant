@@ -152,12 +152,20 @@ procedure Node030;
 #define give_eldridge_money(x)         item_caps_adjust(dude_obj, -x);  \
                                        item_caps_adjust(self_obj, x)
 
-#define MCOST                          (2000 * (250/(160 + has_skill(dude_obj, SKILL_BARTER))))
-#define DECOST                         (3000 * (250/(160 + has_skill(dude_obj, SKILL_BARTER))))
-#define HRCOST                         (4000 * (250/(160 + has_skill(dude_obj, SKILL_BARTER))))
-#define ARCOST                         (6000 * (250/(160 + has_skill(dude_obj, SKILL_BARTER))))
-#define FNCOST                         (12000 * (250/(160 + has_skill(dude_obj, SKILL_BARTER))))
-#define CPCOST                         (3000 * (250/(160 + has_skill(dude_obj, SKILL_BARTER))))
+// Begin Seraph's Fixes: changed each '250' to '25000' and added '/100' to the end
+// Magnum: replaced '2000' with '400'
+#define MCOST                          ((400 * (25000/(160 + has_skill(dude_obj, SKILL_BARTER))))/100)
+// Desert Eagle: replaced '3000' with '1500'
+#define DECOST                         ((1500 * (25000/(160 + has_skill(dude_obj, SKILL_BARTER))))/100)
+// Hunting Rifle: replaced '4000' with '1750'
+#define HRCOST                         ((1750 * (25000/(160 + has_skill(dude_obj, SKILL_BARTER))))/100)
+// Assault Rifle: replaced '6000' with '2000'
+#define ARCOST                         ((2000 * (25000/(160 + has_skill(dude_obj, SKILL_BARTER))))/100)
+// FN FAL: replaced '12000' with '4000'
+#define FNCOST                         ((4000 * (25000/(160 + has_skill(dude_obj, SKILL_BARTER))))/100)
+// Cattle Prod: replaced '3000' with '1500'
+#define CPCOST                         ((1500 * (25000/(160 + has_skill(dude_obj, SKILL_BARTER))))/100)
+// End Seraph's Fixes
 
 #define eldrid_mid_tile_1              (26311)
 #define eldrid_mid_tile_2              (23310)
@@ -173,7 +181,7 @@ import variable new_reno_eldridge_box_2;
 import variable new_reno_eldridge_obj;
 variable prev_node;
 variable return_node;
-
+variable investigated_barking := 0; // added by killap - expansion
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
    Needs to be saved, make it a map variable (MVAR_) */
@@ -260,20 +268,37 @@ procedure critter_p_proc begin
          end
       end
    end else if (anim_busy(self_obj) == false) then begin
-      if (eldridge_open) then begin
+     if (eldridge_open) then begin
          off_eldridge_bed_time;
-         if (self_tile != eldridge_front_room_tile) then begin
+         // edit by killap (expansion) - eldridge going to the back room to yell at the dogs
+         // could only happen at night before, but this would actullay never trigger
+         // since he was already in the back at night. I've enabled the code
+         // to trigger during the day now.
+         if (local_var(LVAR_Barks_Heard) >= barks_till_pissed) then begin
+            if (new_reno_barking_dog_obj != 0) then begin
+               anim_move_to_point_rate(eldridge_back_room_tile, 2)
+               else begin
+                  if (self_tile == eldridge_back_room_tile and investigated_barking == 0) then begin
+                     anim(self_obj, ANIMATE_ROTATION, 3);
+                     investigated_barking := 1;
+                     floater_rand(701, 702); // Seraph's Fix: floater only takes 1 arg; changed to floater_rand. Thanks Rob!
+                     nr_add_timer_event_rand(self_obj, 5, 10, float_param);
+                     //set_local_var(LVAR_Barks_Heard, 0);
+                  end
+               end
+            end
+         end else if (self_tile != eldridge_front_room_tile) then begin
             anim_move_to_point_rate(eldridge_front_room_tile, 2)
          end
-      end else if (local_var(LVAR_Barks_Heard) >= barks_till_pissed) then begin
+      /*end else if (local_var(LVAR_Barks_Heard) >= barks_till_pissed) then begin
          if (new_reno_barking_dog_obj != 0) then begin
             anim_move_to_point_rate(eldridge_back_room_tile, 2)
             else begin
-               floater(700, 702);
+               floater_rand(700, 702); // Seraph's Fix: floater only takes 1 arg; changed to floater_rand. Thanks Rob!
                nr_add_timer_event_rand(self_obj, 25, 35, float_param);
                set_local_var(LVAR_Barks_Heard, 0);
             end
-         end
+         end*/
       end else if (obj_in_eldridge_back_room(self_obj) == false) then begin
          set_eldridge_bed_time;
          anim_move_to_point_rate(eldridge_back_room_tile, 2)
@@ -294,6 +319,15 @@ procedure pickup_p_proc begin
 end
 
 procedure talk_p_proc begin
+   //added by killap
+   if (Fallout2_enclave_destroyed) then
+      gdialog_set_barter_mod(-200);
+   else if (made_man_set) then
+      gdialog_set_barter_mod(-20);
+   else if (get_jules_eldridge(jules_eldridge_discount)) then
+      gdialog_set_barter_mod(-10);
+   //added by killap
+   
    if (eldridge_bed_time) then begin
       call Node030;
    end else begin
@@ -369,41 +403,113 @@ procedure Node988 begin
    end
 end
 procedure Node987 begin
-   give_eldridge_money(MCOST);
-   remove_pid_qty(dude_obj, PID_44_MAGNUM_REVOLVER, 1)
-   give_pid_qty(dude_obj, PID_44_MAGNUM_SPEEDLOADER, 1)
-   call Node014;
+//final weapon/money check added by killap
+   if ((obj_is_carrying_obj_pid(dude_obj, PID_44_MAGNUM_REVOLVER)) and (dude_caps >= MCOST)) then begin
+      give_eldridge_money(MCOST);
+      remove_pid_qty(dude_obj, PID_44_MAGNUM_REVOLVER, 1)
+      give_pid_qty(dude_obj, PID_44_MAGNUM_SPEEDLOADER, 1)
+      call Node014;
+   end
+   else if ((dude_caps < MCOST)) then begin
+      Reply(802);
+      NOption(1346, Node999, 004);
+   end 
+   else if (not(obj_is_carrying_obj_pid(dude_obj, PID_44_MAGNUM_REVOLVER))) then begin
+      Reply(801);
+      NOption(1346, Node999, 004);
+   end 
 end
+//end final weapon/money check added by killap
 procedure Node986 begin
-   give_eldridge_money(DECOST);
-   remove_pid_qty(dude_obj, PID_DESERT_EAGLE, 1)
-   give_pid_qty(dude_obj, PID_DESERT_EAGLE_EXT_MAG, 1)
-   call Node014;
+//final weapon/money check added by killap
+   if ((obj_is_carrying_obj_pid(dude_obj, PID_DESERT_EAGLE)) and (dude_caps >= DECOST)) then begin
+      give_eldridge_money(DECOST);
+      remove_pid_qty(dude_obj, PID_DESERT_EAGLE, 1)
+      give_pid_qty(dude_obj, PID_DESERT_EAGLE_EXT_MAG, 1)
+      call Node014;
+   end
+   else if ((dude_caps < DECOST)) then begin
+      Reply(802);
+      NOption(1346, Node999, 004);
+   end 
+   else if (not(obj_is_carrying_obj_pid(dude_obj, PID_DESERT_EAGLE))) then begin
+      Reply(801);
+      NOption(1346, Node999, 004);
+   end 
 end
+//end final weapon/money check added by killap
 procedure Node985 begin
-   give_eldridge_money(HRCOST);
-   remove_pid_qty(dude_obj, PID_HUNTING_RIFLE, 1)
-   give_pid_qty(dude_obj, PID_SCOPED_HUNTING_RIFLE, 1)
-   call Node014;
+//final weapon/money check added by killap
+   if ((obj_is_carrying_obj_pid(dude_obj, PID_HUNTING_RIFLE)) and (dude_caps >= HRCOST)) then begin
+      give_eldridge_money(HRCOST);
+      remove_pid_qty(dude_obj, PID_HUNTING_RIFLE, 1)
+      give_pid_qty(dude_obj, PID_SCOPED_HUNTING_RIFLE, 1)
+      call Node014;
+   end
+   else if ((dude_caps < HRCOST)) then begin
+      Reply(802);
+      NOption(1346, Node999, 004);
+   end 
+   else if (not(obj_is_carrying_obj_pid(dude_obj, PID_HUNTING_RIFLE))) then begin
+      Reply(801);
+      NOption(1346, Node999, 004);
+   end 
 end
+//end final weapon/money check added by killap
 procedure Node984 begin
-   give_eldridge_money(ARCOST);
-   remove_pid_qty(dude_obj, PID_ASSAULT_RIFLE, 1)
-   give_pid_qty(dude_obj, PID_ASSAULT_RIFLE_EXT_MAG, 1)
-   call Node014;
+//final weapon/money check added by killap
+   if ((obj_is_carrying_obj_pid(dude_obj, PID_ASSAULT_RIFLE)) and (dude_caps >= ARCOST)) then begin
+      give_eldridge_money(ARCOST);
+      remove_pid_qty(dude_obj, PID_ASSAULT_RIFLE, 1)
+      give_pid_qty(dude_obj, PID_ASSAULT_RIFLE_EXT_MAG, 1)
+      call Node014;
+   end
+   else if ((dude_caps < ARCOST)) then begin
+      Reply(802);
+      NOption(1346, Node999, 004);
+   end 
+   else if (not(obj_is_carrying_obj_pid(dude_obj, PID_ASSAULT_RIFLE))) then begin
+      Reply(801);
+      NOption(1346, Node999, 004);
+   end 
 end
+//end final weapon/money check added by killap
 procedure Node983 begin
-   give_eldridge_money(FNCOST);
-   remove_pid_qty(dude_obj, PID_FN_FAL, 1)
-   give_pid_qty(dude_obj, PID_FN_FAL_NIGHT_SCOPE, 1)
-   call Node014;
+//final weapon/money check added by killap
+   if ((obj_is_carrying_obj_pid(dude_obj, PID_FN_FAL)) and (dude_caps >= FNCOST)) then begin
+      give_eldridge_money(FNCOST);
+      remove_pid_qty(dude_obj, PID_FN_FAL, 1)
+      give_pid_qty(dude_obj, PID_FN_FAL_NIGHT_SCOPE, 1)
+      call Node014;
+   end
+   else if ((dude_caps < FNCOST)) then begin
+      Reply(802);
+      NOption(1346, Node999, 004);
+   end 
+   else if (not(obj_is_carrying_obj_pid(dude_obj, PID_FN_FAL))) then begin
+      Reply(801);
+      NOption(1346, Node999, 004);
+   end 
 end
+//end final weapon/money check added by killap
 procedure Node982 begin
-   give_eldridge_money(CPCOST);
-   remove_pid_qty(dude_obj, PID_CATTLE_PROD, 1)
-   give_pid_qty(dude_obj, PID_SUPER_CATTLE_PROD, 1)
-   call Node014;
+//final weapon/money check added by killap
+   if ((obj_is_carrying_obj_pid(dude_obj, PID_CATTLE_PROD)) and (dude_caps >= CPCOST)) then begin
+      give_eldridge_money(CPCOST);
+      remove_pid_qty(dude_obj, PID_CATTLE_PROD, 1)
+      give_pid_qty(dude_obj, PID_SUPER_CATTLE_PROD, 1)
+      call Node014;
+   end
+   else if ((dude_caps < CPCOST)) then begin
+      Reply(802);
+      NOption(1346, Node999, 004);
+   end 
+   else if (not(obj_is_carrying_obj_pid(dude_obj, PID_CATTLE_PROD))) then begin
+      Reply(801);
+      NOption(1346, Node999, 004);
+   end 
 end
+//end final weapon/money check added by killap
 procedure Node981 begin
    give_voice_chip(self_obj)
    drop_obj(restock_obj);
@@ -435,12 +541,34 @@ procedure Node977 begin
 end
 procedure Node975 begin
    give_eldridge_box(new_reno_eldridge_box_2)
-   gdialog_barter;
+   
+   //added by killap
+   if (Fallout2_enclave_destroyed) then
+      gdialog_mod_barter(-200);
+   else if (made_man_set) then
+      gdialog_mod_barter(-20);
+   else if (get_jules_eldridge(jules_eldridge_discount)) then
+      gdialog_mod_barter(-10);
+   else
+   //end added by killap
+      gdialog_barter;
+      
    call return_node;
 end
 procedure Node974 begin
    give_eldridge_box(new_reno_eldridge_box)
-   gdialog_barter;
+   
+   //added by killap
+   if (Fallout2_enclave_destroyed) then
+      gdialog_mod_barter(-200);
+   else if (made_man_set) then
+      gdialog_mod_barter(-20);
+   else if (get_jules_eldridge(jules_eldridge_discount)) then
+      gdialog_mod_barter(-10);
+   else
+   //end added by killap
+      gdialog_barter;
+   
    call return_node;
 end
 procedure Node973 begin
@@ -473,7 +601,7 @@ procedure Node005 begin
    end else begin
       Reply(251);
    end
-   adj_eldridge_barter(200);
+   adj_eldridge_barter(-200); // Seraph's Fix: changed '200' to '-200'
    NOption(252, Node007, -003);
    NOption(253, Node999, -003);
    NOption(254, Node974, 004);
@@ -498,7 +626,7 @@ procedure Node005 begin
          NOption(259, Node025, 004);
       end
    end
-   NOption(260, Node998, 004);
+   NOption(260, Node988, 004); // Seraph's Fix: changed 'Node998' to 'Node988'
    BOption(261, Node999, 004);
    prev_node := 5;
 end
@@ -551,7 +679,7 @@ procedure Node008 begin
    return_node := "Node008";
    if (get_jules_eldridge(jules_eldridge_refer)) then begin
       set_jules_eldridge(jules_eldridge_discount);
-      adj_eldridge_barter(10);
+      adj_eldridge_barter(-10); // Seraph's Fix: changed '10' to '-10'
    end
 
    Reply(mstr(310) + mstr(311 + dude_is_female));
@@ -811,7 +939,7 @@ end
 procedure Node026 begin
    return_node := "Node026";
    if (made_man_set == false) then begin
-      adj_eldridge_barter(20);
+      adj_eldridge_barter(-20); // Seraph's Fix: changed '20' to '-20'
       set_made_man_set;
    end
    Reply(530);
@@ -821,7 +949,15 @@ procedure Node026 begin
    prev_node := 26;
 end
 procedure Node027 begin
-   floater_bad_rand(545, 550);
+   // added by killap - expansion
+   if (local_var(LVAR_Barks_Heard) < barks_till_pissed) then begin
+      floater_bad_rand(545, 547);
+   end else if (local_var(LVAR_Barks_Heard) == barks_till_pissed) then begin
+      floater_bad_rand(548, 549);
+   end else if (local_var(LVAR_Barks_Heard) > barks_till_pissed) then begin
+      floater_bad_rand(550, 550);
+   end
+   // end added
 end
 procedure Node028 begin
    floater_bad_rand(560, 564);

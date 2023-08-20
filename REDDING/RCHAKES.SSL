@@ -290,6 +290,7 @@ procedure Node007a begin
    display_msg(g_mstr(1006));
    give_xp(EXP_WHORE_CUT);
    inc_general_rep(REP_BONUS_REDDING_WHORE_CUT);
+   inc_global_var_amt(GVAR_TOWN_REP_REDDING, 5); //added by killap
    set_global_var(GVAR_REDDING_WHORE_CUT, WHORE_CUT_JAILED);
    set_obj_visibility(self_obj,1);               // invisible
    move_to(self_obj,12000,2);

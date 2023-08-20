@@ -26,7 +26,7 @@
         -rwh2   11/13/97
 */
 #include "..\headers\define.h"
-//#include "..\headers\<TownName.h>"
+#include "..\headers\reddown.h" // Seraph's Code
 
 #define NAME                    SCRIPT_RCDRJOHN
 #define TOWN_REP_VAR            (GVAR_TOWN_REP_REDDING)
@@ -147,6 +147,8 @@ procedure Node053a;
 #define LVAR_Said_48                    (12)
 #define LVAR_Said_8                     (13)
 #define LVAR_Gave_Antidote              (14)
+#define LVAR_Restock_Time               (15) //added by killap
+#define LVAR_Restock_Time_Fix           (16) //added by killap
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -172,6 +174,23 @@ procedure map_enter_p_proc begin
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_REDDING);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_DOCTOR);
    Doc_Johnson_Ptr:=self_obj;
+
+   //added by killap - expansion
+
+   //added by killap - fix for game_time going negative after 7 years
+   if (((game_time) < 0) and (local_var(LVAR_Restock_Time_Fix) == 0)) then begin
+      set_local_var(LVAR_Restock_Time, game_time - 1);
+      set_local_var(LVAR_Restock_Time_Fix, 1);
+   end
+
+   if (local_var(LVAR_Restock_Time) < game_time) then begin
+      debug_msg("Should have restocked");
+      check_restock_item(PID_STIMPAK, 4, 5, 100)
+      check_restock_item(PID_ANTIDOTE, 1, 1, 80)
+      check_restock_item(PID_BOTTLE_CAPS, 123, 200, 50)
+      set_local_var(LVAR_Restock_Time, (random(2,6) * ONE_GAME_DAY) + game_time);
+   end
+   //end added
 
    debug_msg("local_var(LVAR_Gave_Antidote) == "+local_var(LVAR_Gave_Antidote));
 
@@ -448,7 +467,28 @@ procedure Node003a begin
        if (Is_Injured(Bess_Ptr)) then
            dr_heal(Bess_Ptr);
    end
-
+   //added by killap - RP
+   else if (Dogmeat_In_Party) then begin
+       if (Is_Injured(Dogmeat_Ptr)) then
+           dr_heal(Dogmeat_Ptr);
+   end
+   else if (K9_In_Party) then begin
+       if (Is_Injured(K9_Ptr)) then
+           dr_heal(K9_Ptr);
+   end   
+   else if (Kitsune_In_Party) then begin
+       if (Is_Injured(Kitsune_Ptr)) then
+           dr_heal(Kitsune_Ptr);
+   end
+   else if (Dex_In_Party) then begin
+       if (Is_Injured(Dex_Ptr)) then
+           dr_heal(Dex_Ptr);
+   end
+   else if (Cat_Jules_In_Party) then begin
+       if (Is_Injured(Cat_Jules_Ptr)) then
+           dr_heal(Cat_Jules_Ptr);
+   end
+   //end added
    call Node014;
 end
 
@@ -530,7 +570,28 @@ procedure Node004a begin
        if (Is_Injured(Bess_Ptr)) then
            dr_heal(Bess_Ptr);
    end
-
+   //added by killap - RP
+   else if (Dogmeat_In_Party) then begin
+       if (Is_Injured(Dogmeat_Ptr)) then
+           dr_heal(Dogmeat_Ptr);
+   end
+   else if (K9_In_Party) then begin
+       if (Is_Injured(K9_Ptr)) then
+           dr_heal(K9_Ptr);
+   end
+   else if (Kitsune_In_Party) then begin
+       if (Is_Injured(Kitsune_Ptr)) then
+           dr_heal(Kitsune_Ptr);
+   end
+   else if (Dex_In_Party) then begin
+       if (Is_Injured(Dex_Ptr)) then
+           dr_heal(Dex_Ptr);
+   end
+   else if (Cat_Jules_In_Party) then begin
+       if (Is_Injured(Cat_Jules_Ptr)) then
+           dr_heal(Cat_Jules_Ptr);
+   end
+   //end added
    call Node014;
 end
 
@@ -616,10 +677,10 @@ procedure Node010 begin
        NOption(156,Node020,004);
    if (((global_var(GVAR_VAULT_REDDING_PROBLEM) == REDDING_PROBLEM_KNOW_JET) or (global_var(GVAR_VAULT_REDDING_PROBLEM) == REDDING_PROBLEM_KNOW_EXISTS)) and (vault_city_visit)) then
        NOption(157,Node010a,004);
-   If_Party_Has_Injured then
+   If_Party_Has_Injured or (get_critter_stat(dude_obj,STAT_current_hp) < get_critter_stat(dude_obj,STAT_max_hp)) then /* Seraph's Fix: combined with the commented out lines below */
        NOption(158,Node002,004);
-   if (get_critter_stat(dude_obj,STAT_current_hp) < get_critter_stat(dude_obj,STAT_max_hp)) then
-       NOption(158,Node002,004);
+   /*if (get_critter_stat(dude_obj,STAT_current_hp) < get_critter_stat(dude_obj,STAT_max_hp)) then
+       NOption(158,Node002,004);*/ // Commented out by Seraph
    NOption(159,Node010b,004);
    NOption(160,Node042,004);
    NOption(161,Node012,004);
@@ -745,8 +806,9 @@ end
 
 procedure Node021 begin
    Reply(205);
-
-   GOption(206,Node039,004);
+   //added check by killap
+   if (vault_city_visit) then
+     GOption(206,Node039,004);
    NOption(207,Node040,004);
    NOption(208,Node010,004);
 end
@@ -847,11 +909,17 @@ end
 
 procedure Node034a begin
    variable item;
-
+   
+   display_msg(mstr(329)); //added by killap
    set_local_var(LVAR_Gave_Antidote,game_time);
+   // Begin Seraph's Code
+   if (not fannie_cured) then
+      set_fannie(FANNIE_CURED_DOC);
+   // End Seraph's Code
    give_xp(EXP_REDDING_PROBLEM);
    item:=obj_carrying_pid_obj(dude_obj,PID_JET_ANTIDOTE);
    rm_obj_from_inven(dude_obj,item);
+   destroy_object(item); //added by killap
    set_global_var(GVAR_VAULT_REDDING_PROBLEM,REDDING_PROBLEM_DELIVERED_ANTIDOTE);
    set_global_var(GVAR_REDDING_JET_LEVEL,JET_ON_CURE);
    inc_general_rep(REP_BONUS_REDDING_CURED_JET_NICE);
@@ -869,7 +937,12 @@ end
 procedure Node035a begin
    variable item;
 
+   display_msg(mstr(329)); //added by killap
    set_local_var(LVAR_Gave_Antidote,game_time);
+   // Begin Seraph's Code
+   if (not fannie_cured) then
+      set_fannie(FANNIE_CURED_DOC);
+   // End Seraph's Code
    give_xp(EXP_REDDING_PROBLEM);
    item:=obj_carrying_pid_obj(dude_obj,PID_JET_ANTIDOTE);
    rm_obj_from_inven(dude_obj,item);
@@ -898,7 +971,12 @@ end
 procedure Node037a begin
    variable item;
 
+   display_msg(mstr(329)); //added by killap
    set_local_var(LVAR_Gave_Antidote,game_time);
+   // Begin Seraph's Code
+   if (not fannie_cured) then
+      set_fannie(FANNIE_CURED_DOC);
+   // End Seraph's Code
    give_xp(EXP_REDDING_PROBLEM);
    item:=obj_carrying_pid_obj(dude_obj,PID_JET_ANTIDOTE);
    rm_obj_from_inven(dude_obj,item);
@@ -1007,47 +1085,66 @@ end
 procedure Node050 begin
    Reply(297);
 
-   if ((item_caps_total(dude_obj) >= 5000) and (obj_is_carrying_obj_pid(dude_obj,PID_COMBAT_ARMOR))) then
+   if ((item_caps_total(dude_obj) >= 5000) and (dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then
        NOption(298,Node050a,004);
    NOption(299,Node049,004);
    if (item_caps_total(dude_obj) < 5000) then
-       NOption(300,Node999,004);
-   if (not(obj_is_carrying_obj_pid(dude_obj,PID_COMBAT_ARMOR))) then
+       NOption(300,Node999,004);  
+   if (not(dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then //edit
        NOption(301,Node999,004);
    NOption(302,Node999,004);
 end
 
 procedure Node050a begin
+//begin killap's code
    variable item;
+//second check for armor and money added by killap - prevents barter drop item exploit
+   if ((item_caps_total(dude_obj) >= 5000) and (dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR)) ) then begin //added by killap 
+      item_caps_adjust(dude_obj,-5000);
+      if (dude_item(PID_COMBAT_ARMOR)) then//added check - killap
+         item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR);
+      //added by killap
+      else if (dude_item(PID_COMBAT_ARMOR_MK_II)) then
+         item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR_MK_II);
+      else if (dude_item(PID_BROTHERHOOD_COMBAT_ARMOR)) then
+         item:=obj_carrying_pid_obj(dude_obj,PID_BROTHERHOOD_COMBAT_ARMOR);
+      //end added by killap
+      rm_obj_from_inven(dude_obj,item);
+      destroy_object(item);
+      critter_add_trait(dude_obj,TRAIT_PERK,PERK_dermal_armor_perk,1);
+      game_time_advance(2*ONE_GAME_DAY);
+      gfade_out(600);
+      gfade_in(600);
 
-   item_caps_adjust(dude_obj,-5000);
-   item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR);
-   rm_obj_from_inven(dude_obj,item);
-   destroy_object(item);
-   critter_add_trait(dude_obj,TRAIT_PERK,PERK_dermal_armor_perk,1);
-   game_time_advance(2*ONE_GAME_DAY);
-   gfade_out(600);
-   gfade_in(600);
-
-   From_50:=1;
-   From_51:=0;
-   From_52:=0;
-   From_53:=0;
-   call Node054;
+      From_50:=1;
+      From_51:=0;
+      From_52:=0;
+      From_53:=0;
+      call Node054;
+   end
+   else begin
+      Reply(297);
+      
+      if (item_caps_total(dude_obj) < 5000) then
+         NOption(300,Node999,004);
+      if (not(dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then
+         NOption(301,Node999,004);
+   end
 end
+//end killap's code
 
 procedure Node051 begin
    if (not(has_trait(TRAIT_PERK,dude_obj,PERK_dermal_armor_perk))) then
-       Reply(303);
+      Reply(303);
    else begin
-       Reply(304);
+      Reply(304);
 
-      if ((item_caps_total(dude_obj) >= 30000) and (obj_is_carrying_obj_pid(dude_obj,PID_COMBAT_ARMOR))) then
+      if ((item_caps_total(dude_obj) >= 30000) and (dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then //edit
           NOption(305,Node051a,004);
       NOption(306,Node049,004);
       if (item_caps_total(dude_obj) < 30000) then
           NOption(307,Node999,004);
-      if (not(obj_is_carrying_obj_pid(dude_obj,PID_COMBAT_ARMOR))) then
+      if (not(dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then //edit
           NOption(308,Node999,004);
    end
 
@@ -1055,69 +1152,107 @@ procedure Node051 begin
 end
 
 procedure Node051a begin
+//begin killap's code
    variable item;
+//second check for armor and money added by killap - prevents barter drop item exploit   
+   if ((item_caps_total(dude_obj) >= 30000) and (dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then begin
+      item_caps_adjust(dude_obj,-30000);
+      if (dude_item(PID_COMBAT_ARMOR)) then//added check - killap
+         item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR);
+      //added by killap
+      else if (dude_item(PID_COMBAT_ARMOR_MK_II)) then
+         item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR_MK_II);
+      else if (dude_item(PID_BROTHERHOOD_COMBAT_ARMOR)) then
+         item:=obj_carrying_pid_obj(dude_obj,PID_BROTHERHOOD_COMBAT_ARMOR);
+      //end added by killap
+      rm_obj_from_inven(dude_obj,item);
+      destroy_object(item);
+      critter_rm_trait(dude_obj,TRAIT_PERK,PERK_dermal_armor_perk,1);
+      critter_add_trait(dude_obj,TRAIT_PERK,PERK_dermal_enhancement_perk,1);
+      game_time_advance(5*ONE_GAME_DAY);
+      gfade_out(600);
+      gfade_in(600);
 
-   item_caps_adjust(dude_obj,-30000);
-   item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR);
-   rm_obj_from_inven(dude_obj,item);
-   destroy_object(item);
-   critter_rm_trait(dude_obj,TRAIT_PERK,PERK_dermal_armor_perk,1);
-   critter_add_trait(dude_obj,TRAIT_PERK,PERK_dermal_enhancement_perk,1);
-   game_time_advance(5*ONE_GAME_DAY);
-   gfade_out(600);
-   gfade_in(600);
-
-   From_50:=0;
-   From_51:=1;
-   From_52:=0;
-   From_53:=0;
-   call Node054;
+      From_50:=0;
+      From_51:=1;
+      From_52:=0;
+      From_53:=0;
+      call Node054;
+   end
+   else begin
+      Reply(304);
+      
+      if (item_caps_total(dude_obj) < 30000) then
+          NOption(307,Node999,004);
+      if (not(dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then //edit
+          NOption(308,Node999,004);
+   end
 end
+//end killap's code
 
 procedure Node052 begin
    Reply(310);
 
-   if ((item_caps_total(dude_obj) >= 8000) and (obj_is_carrying_obj_pid(dude_obj,PID_COMBAT_ARMOR))) then
+   if ((item_caps_total(dude_obj) >= 8000) and (dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then
        NOption(311,Node052a,004);
    NOption(312,Node049,004);
    if (item_caps_total(dude_obj) < 8000) then
        NOption(313,Node999,004);
-   if (not(obj_is_carrying_obj_pid(dude_obj,PID_COMBAT_ARMOR))) then
+   if (not(dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then //edit
        NOption(314,Node999,004);
    NOption(315,Node999,004);
 end
 
 procedure Node052a begin
+//killap's code
    variable item;
+//second check for armor and money added by killap - prevents barter drop item exploit
+   if ((item_caps_total(dude_obj) >= 8000) and (dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then begin  
+      item_caps_adjust(dude_obj,-8000);
+      if (dude_item(PID_COMBAT_ARMOR)) then//added check - killap
+         item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR);
+      //added by killap
+      else if (dude_item(PID_COMBAT_ARMOR_MK_II)) then
+         item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR_MK_II);
+      else if (dude_item(PID_BROTHERHOOD_COMBAT_ARMOR)) then
+         item:=obj_carrying_pid_obj(dude_obj,PID_BROTHERHOOD_COMBAT_ARMOR);
+      //end added by killap
+      rm_obj_from_inven(dude_obj,item);
+      destroy_object(item);
+      critter_add_trait(dude_obj,TRAIT_PERK,PERK_phoenix_armor_perk,1);
+      game_time_advance(3*ONE_GAME_DAY);
+      gfade_out(600);
+      gfade_in(600);
 
-   item_caps_adjust(dude_obj,-8000);
-   item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR);
-   rm_obj_from_inven(dude_obj,item);
-   destroy_object(item);
-   critter_add_trait(dude_obj,TRAIT_PERK,PERK_phoenix_armor_perk,1);
-   game_time_advance(3*ONE_GAME_DAY);
-   gfade_out(600);
-   gfade_in(600);
-
-   From_50:=0;
-   From_51:=0;
-   From_52:=1;
-   From_53:=0;
-   call Node054;
+      From_50:=0;
+      From_51:=0;
+      From_52:=1;
+      From_53:=0;
+      call Node054;
+   end
+   else begin
+      Reply(310);
+      
+      if (item_caps_total(dude_obj) < 8000) then
+         NOption(313,Node999,004);
+      if (not(dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then //edit
+         NOption(314,Node999,004);
+   end
 end
+//end killap's code
 
 procedure Node053 begin
    if (not(has_trait(TRAIT_PERK,dude_obj,PERK_phoenix_armor_perk))) then
-       Reply(316);
+      Reply(316);
    else begin
-       Reply(317);
+      Reply(317);
 
-      if ((item_caps_total(dude_obj) >= 48000) and (obj_is_carrying_obj_pid(dude_obj,PID_COMBAT_ARMOR))) then
+      if ((item_caps_total(dude_obj) >= 30000) and (dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then
           NOption(318,Node053a,004);
       NOption(319,Node049,004);
-      if (item_caps_total(dude_obj) < 48000) then
+      if (item_caps_total(dude_obj) < 30000) then
           NOption(320,Node999,004);
-      if (not(obj_is_carrying_obj_pid(dude_obj,PID_COMBAT_ARMOR))) then
+      if (not(dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then //edit
           NOption(321,Node999,004);
    end
 
@@ -1125,24 +1260,43 @@ procedure Node053 begin
 end
 
 procedure Node053a begin
+//killap's code
    variable item;
+//second check for armor and money added by killap - prevents barter drop item exploit   
+   if ((item_caps_total(dude_obj) >= 48000) and (dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then begin
+      item_caps_adjust(dude_obj,-48000);
+      if (dude_item(PID_COMBAT_ARMOR)) then//added check - killap
+         item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR);
+      //added by killap
+      else if (dude_item(PID_COMBAT_ARMOR_MK_II)) then
+         item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR_MK_II);
+      else if (dude_item(PID_BROTHERHOOD_COMBAT_ARMOR)) then
+         item:=obj_carrying_pid_obj(dude_obj,PID_BROTHERHOOD_COMBAT_ARMOR);
+      //end added by killap
+      rm_obj_from_inven(dude_obj,item);
+      destroy_object(item);
+      critter_rm_trait(dude_obj,TRAIT_PERK,PERK_phoenix_armor_perk,1);
+      critter_add_trait(dude_obj,TRAIT_PERK,PERK_phoenix_enhancement_perk,1);
+      game_time_advance(6*ONE_GAME_DAY);
+      gfade_out(600);
+      gfade_in(600);
 
-   item_caps_adjust(dude_obj,-30000);
-   item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR);
-   rm_obj_from_inven(dude_obj,item);
-   destroy_object(item);
-   critter_rm_trait(dude_obj,TRAIT_PERK,PERK_phoenix_armor_perk,1);
-   critter_add_trait(dude_obj,TRAIT_PERK,PERK_phoenix_enhancement_perk,1);
-   game_time_advance(6*ONE_GAME_DAY);
-   gfade_out(600);
-   gfade_in(600);
-
-   From_50:=0;
-   From_51:=0;
-   From_52:=0;
-   From_53:=1;
-   call Node054;
+      From_50:=0;
+      From_51:=0;
+      From_52:=0;
+      From_53:=1;
+      call Node054;
+   end
+   else begin
+      Reply(317);
+      
+      if (item_caps_total(dude_obj) < 48000) then //was 48000
+          NOption(320,Node999,004);
+      if (not(dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then //edit
+          NOption(321,Node999,004);
+   end
 end
+//end killap's code
 
 procedure Node054 begin
    if (From_50) then

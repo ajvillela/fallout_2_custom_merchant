@@ -246,13 +246,14 @@ procedure Node002 begin
       BMessage(217);
    end else begin
       set_node_2;
-      Reply(215 + (check_general_rep >= 0));
+      Reply(215 + ( (check_general_rep >= 0) and (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) ) ); //edit by killap - added (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)))
       if (has_rep_slaver == false) then begin
          NOption(218, Node010, 004);
+         NOption(221, Node010, -003); //added by killap
       end
       NOption(219, Node004, 004);
       NOption(220, Node999, 004);
-      NOption(221, Node999, -003);
+      //NOption(221, Node010, -003); //edit by killap - was 999
       NOption(222, Node999, -003);
    end
 end
@@ -273,13 +274,13 @@ procedure Node004 begin
    end
    from_where_to_go := false;
 
-   if (has_rep_slaver) then begin
+   if (has_rep_slaver == false) then begin //edit by killap - was true
       GOption(247, Node990, 004);
       NOption(248, Node011, 004);
       GOption(254, Node990, -003);
       GOption(256, Node005, -003);
    end
-   if(node_6 == false) then begin
+   if (node_6 == false) then begin
       NOption(249, Node006, 004);
    end
    if ((vic_dead == false) and (vic_talk == false) and (vic_free == false)) then begin
@@ -346,6 +347,7 @@ procedure Node010 begin
    set_node_10;
    NOption(322, Node004, 004);
    NOption(323, Node999, 004);
+   NOption(387, Node999, -003); //added by killap
 end
 procedure Node011 begin
    Reply(330 + node_11);
@@ -355,6 +357,8 @@ procedure Node011 begin
    NOption(334, Node999, 004);
 end
 procedure Node012 begin
+   //maybe add ability to get the location of the slave camp... - killap
+   
    if (node_12) then begin
       Reply(342);
       BOption(343, Node998, 004);
@@ -383,6 +387,7 @@ procedure Node015 begin
    NOption(371, Node999, 001);
 end
 procedure Node016 begin
+   set_metzger_known; //added by killap
    if (node_16) then begin
       NMessage(382);
    end else begin
@@ -390,10 +395,11 @@ procedure Node016 begin
       Reply(380 + dude_is_female);
       if (has_rep_slaver == false) then begin
          NOption(383, Node010, 004);
+         NOption(386, Node010, -003); //added by killap
       end
       NOption(384, Node004, 004);
       NOption(385, Node999, 004);
-      NOption(386, Node999, -003);
+      //NOption(386, Node010, -003); //edit by killap - was 999
       NOption(387, Node999, -003);
    end
 end

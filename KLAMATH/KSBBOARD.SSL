@@ -32,6 +32,7 @@
 #define floater(x)		float_msg(self_obj, message_str(NAME,x),FLOAT_MSG_RED)
 
 #include "..\headers\command.h"
+#include "..\headers\SanFran.h"
 
 #define Vault_Known             (1)     // Temp Until get command from Jesse
 #define Visited_City            (1)     // Temp Until get command from Jesse
@@ -109,14 +110,17 @@ procedure pickup_p_proc begin
 end
 */
 procedure use_p_proc begin
-   start_gdialog(NAME,self_obj,4,-1,-1);
-   gSay_Start;
-   if dude_low_iq then
-      call Node009;
-   else
-      call Node001;
-   gSay_End;
-   end_dialogue;
+   script_overrides; //added by killap
+   if (not(combat_is_initialized)) then begin //check added by killap
+      start_gdialog(NAME,self_obj,4,-1,-1);
+      gSay_Start;
+      if dude_low_iq then
+         call Node009;
+      else
+         call Node001;
+      gSay_End;
+      end_dialogue;
+   end
 end
 
 /* Look_at_p_proc gets called any time that the player passes the cursor over any object.
@@ -140,15 +144,19 @@ procedure use_skill_on_p_proc begin
 end
 
 procedure Node001 begin
+   
    Reply(110);
 
    NOption(120,Node002,004);
    NOption(130,Node003,004);
    NOption(140,Node007,004);
    NOption(150,Node005,004);
-   NOption(160,Node006,004);
+   if (global_var(GVAR_QUEST_RAT_GOD) != RAT_GOD_SUCCESS) then //added check by killap
+      NOption(160,Node006,004);
    NOption(170,Node008,004);
-   NOption(180,Node004,004);
+   if ((global_var(GVAR_SMILEY_STATUS) <= SMILEY_QUEST_ACCEPTED) or (global_var(GVAR_SMILEY_STATUS) == SMILEY_DEAD)) then //added check by killap
+      NOption(180,Node004,004);
+   NOption(190,Node999,004);
 end
 
 procedure Node002 begin

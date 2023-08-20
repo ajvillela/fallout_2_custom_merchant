@@ -85,6 +85,7 @@ procedure use_obj_on_p_proc begin
    Tool:=obj_pid(obj_being_used_with);
 
    if (local_var(LVAR_Active_Shock) == 0) then begin
+       script_overrides; //added by killap
        if (source_obj == dude_obj) then
            display_msg(mstr(120));
        else
@@ -94,6 +95,7 @@ procedure use_obj_on_p_proc begin
    end
 
    else if (Tool == PID_ELECTRONIC_LOCKPICKS) then begin
+       script_overrides; //added by killap
        Skill:=roll_vs_skill(source_obj,SKILL_LOCKPICK,Lockpick_Bonus);
 
        if (is_success(Skill)) then begin
@@ -115,6 +117,7 @@ procedure use_obj_on_p_proc begin
    end
 
    else if (Tool == PID_ELEC_LOCKPICK_MKII) then begin
+       script_overrides; //added by killap
        Skill:=roll_vs_skill(source_obj,SKILL_LOCKPICK,Super_Lock_Bonus);
 
        if (is_success(Skill)) then begin

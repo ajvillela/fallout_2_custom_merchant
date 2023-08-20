@@ -46,8 +46,41 @@ procedure description_p_proc;
 procedure start begin
 end
 
+//added by killap - expansion
+procedure map_enter_p_proc begin
+   if (Generator_Fixed) then begin
+      reg_anim_begin();
+      reg_anim_animate_forever(self_obj, ANIM_stand);
+      reg_anim_end();
+   end
+   add_timer_event(self_obj, 1, 1);
+end
+
+procedure map_update_p_proc begin
+   if ((combat_is_initialized == 0) and Generator_Fixed) then
+   begin
+      reg_anim_begin();
+      reg_anim_animate_forever(self_obj, ANIM_stand);
+      reg_anim_end();
+   end
+end
+
+procedure timed_event_p_proc
+begin
+  if (fixed_param == 1) then begin
+      if ( Generator_Fixed and (anim_busy(self_obj) == false) and (combat_is_initialized == 0) ) then begin
+         reg_anim_begin();
+         reg_anim_animate_forever(self_obj, ANIM_stand);
+         reg_anim_end();
+      end
+      add_timer_event(self_obj, 1, 1);
+  end
+  
+end
+//end added
+
 procedure use_skill_on_p_proc begin
-   if (not(Generator_Fixed)) then begin
+   if (not(Generator_Fixed) and (action_being_used == SKILL_REPAIR)) then begin //added (action_being_used == SKILL_REPAIR) by killap
       script_overrides;
       if (has_skill(source_obj,SKILL_REPAIR) < 50) then begin
          display_msg(mstr(104));
@@ -73,7 +106,7 @@ procedure use_skill_on_p_proc begin
 end
 
 procedure use_obj_on_p_proc begin
-   if ((not(Generator_Fixed)) and (obj_pid(obj_being_used_with) == PID_MULTI_TOOL)) then begin
+   if ( (not(Generator_Fixed)) and ((obj_pid(obj_being_used_with) == PID_MULTI_TOOL) or (obj_pid(obj_being_used_with) == PID_SUPER_TOOL_KIT)) ) then begin //added super_tool_kit - killap
       script_overrides;
       if (has_skill(source_obj,SKILL_REPAIR) < 50) then begin
          display_msg(mstr(104));

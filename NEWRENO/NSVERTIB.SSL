@@ -41,18 +41,18 @@ procedure start begin
 end
 procedure look_at_p_proc begin
    script_overrides;
-   display_msg(130);
+   display_msg(mstr(130)); //edit by killap - added mstr
 end
 
 procedure description_p_proc begin
    script_overrides;
-   display_msg(140);
+   display_msg(mstr(140)); //edit by killap - added mstr
 end
 
 procedure use_p_proc begin
    if ((source_obj == dude_obj) or (obj_in_party(source_obj))) then begin
       script_overrides;
-      display_msg(150);
+      display_msg(mstr(150)); //edit by killap - added mstr
    end else if (source_obj == handy_obj) then begin
       script_overrides;
       flush_add_timer_event(source_obj, 0, -1);

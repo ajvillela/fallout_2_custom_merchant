@@ -44,18 +44,18 @@ procedure start begin
 end
 procedure look_at_p_proc begin
    script_overrides;
-   display_msg(110);
+   display_msg(mstr(110)); //edit by killap - added mstr
 end
 
 procedure description_p_proc begin
    script_overrides;
-   display_msg(120);
+   display_msg(mstr(120)); //edit by killap - added mstr
 end
 
 procedure use_p_proc begin
    if ((source_obj == dude_obj) or (obj_in_party(source_obj))) then begin
       script_overrides;
-      display_msg(120);
+      display_msg(mstr(120)); //edit by killap - added mstr
    end else if (source_obj == handy_obj) then begin
       flush_add_timer_event(source_obj, 0, -1);
    end
@@ -65,7 +65,7 @@ procedure use_skill_on_p_proc begin
    if ((source_obj == dude_obj) or (obj_in_party(source_obj))) then begin
       if (action_being_used == SKILL_SCIENCE) then begin
          script_overrides;
-         display_msg(500);
+         display_msg(mstr(500)); //edit by killap - added mstr
       end
    end
 end

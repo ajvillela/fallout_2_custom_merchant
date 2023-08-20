@@ -52,6 +52,8 @@ procedure Node017;
 procedure Node018;
 procedure Node019;
 
+procedure Node020; //added by killap - expansion pack
+
 /* Local Variables which are saved. All Local Variables need to be
    prepended by LVAR_ */
 #define LVAR_Slot_Type                    (0)
@@ -228,15 +230,24 @@ variable obj_near_machine := 0;
       obj_near_machine := tile_get_next_critter(tile_num_in_direction(self_tile, 3, 1), self_elevation, 0);
    end
    if (obj_near_machine != 0) then begin
-      if ((obj_near_machine != dude_obj) and (obj_in_party(obj_near_machine) == false)) then begin
+      if ((obj_near_machine != dude_obj) and (obj_in_party(obj_near_machine) == false) and (obj_is_visible_flag(obj_near_machine))) then begin //added obj_is_visible_flag - killap
          obj_near_machine := 1;
       end
    end
-   if (obj_near_machine == 0) then begin
+
+   //edit by killap
+   if (obj_near_machine == 1) then begin
+      slot_display_mstr(4000);
+   end else begin
+      dialogue_system_enter;
+   end
+   //end edit
+   
+   /*if (obj_near_machine == 0) then begin
       dialogue_system_enter;
    end else begin
       slot_display_mstr(4000);
-   end
+   end*/
 end
 
 procedure destroy_p_proc begin
@@ -350,7 +361,7 @@ procedure Node985 begin
    call Node997;
 end
 
-#define rand_luck_message           (slot_mstr(3000) + slot_mstr(random(1105,1107)) + slot_mstr(random(3001,3002)))
+#define rand_luck_message           (slot_mstr(3000) + slot_mstr(random(1105,1107)) + slot_mstr(3001+dude_is_male)) //edit by killap - was random(3001,3002)
 #define insert_coin_options(the_slot, the_node)                                                                         \
         if ((coin_max >= the_slot) and (dude_caps >= (the_slot*low_bet))) then begin                                    \
            if (dude_caps == low_bet) then begin                                                                         \
@@ -361,11 +372,14 @@ end
               slot_option(slot_mstr(250) + (the_slot*low_bet) + slot_mstr(251), the_node, 001);                         \
            end                                                                                                          \
         end
+//added option below for using codes from toaster to get money - killap expansion pack
 #define show_insert_coin_options    insert_coin_options(1, Node981)                                \
                                     insert_coin_options(2, Node982)                                \
                                     insert_coin_options(3, Node983)                                \
                                     insert_coin_options(4, Node984)                                \
                                     insert_coin_options(5, Node985)                                \
+                                    if (global_var(GVAR_TOASTER_SLOTMACHINES) == 1) then           \
+                                       slot_option(5000, Node020, 001);                            \
                                     if (dude_is_high == false) then begin                          \
                                        slot_option(254+(dude_caps==0)+(night*2), Node999, 001);    \
                                     end else begin                                                 \
@@ -518,6 +532,10 @@ end
 procedure Node003 begin
    if ((dude_caps < low_bet) and (won_jackpot == false)) then begin
       slot_reply(2175);
+      //added by killap - expansion pack
+      if (global_var(GVAR_TOASTER_SLOTMACHINES) == 1) then          
+         slot_option(5000, Node020, 001);
+      //end added
       slot_option(2176,Node999,001);
    end else begin
       slot_reply(2185);
@@ -584,7 +602,8 @@ procedure Node016 begin
       slot_option(2345,Node017,001);
       slot_option(2346,Node017,001);
       slot_option(2347,Node017,001);
-   end else if (on_fix_tanker_quest) then begin
+   //end else if (on_fix_tanker_quest) then begin
+   end else if (Fallout2_fix_tanker) or (Fallout2_tanker_known) then begin //edit by killap
       slot_option(2344,Node017,001);
    end else if (tribe_kidnapped) then begin
       slot_option(2343,Node017,001);
@@ -611,3 +630,13 @@ procedure Node019 begin
    slot_reply(random(2401 - dude_is_female, 2401 + dude_is_male));
    slot_option(2403,Node999,001);
 end
+
+//added by killap - expansion pack
+procedure Node020 begin
+   item_caps_adjust(dude_obj, machine_starting_caps);                                         
+   set_local_var(LVAR_Caps_Restocked_Time, game_time + restock_time);
+   set_local_var(LVAR_Caps, slot_tube_size - machine_starting_caps); 
+   slot_reply(5001);
+   slot_option(5002,Node999,001);
+end
+//end added by killap

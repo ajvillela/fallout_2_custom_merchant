@@ -52,8 +52,10 @@ procedure map_enter_p_proc begin
          call ghost_town;
       end
    end
-
-   Lighting;
+   
+   //edit by killap
+   //Lighting;
+   Cavern_Lighting;
 
    set_global_var(GVAR_LOAD_MAP_INDEX,0);
 end
@@ -74,5 +76,7 @@ procedure ghost_town begin
 end
 
 procedure map_update_p_proc begin
-   Lighting;
+   //edit by killap
+   //Lighting;
+   Cavern_Lighting;
 end

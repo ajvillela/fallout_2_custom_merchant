@@ -88,6 +88,7 @@ procedure Node043;
    prepended by LVAR_ */
 #define LVAR_Flags                        (5)
 #define LVAR_Dying_Message                (6)
+#define LVAR_Player_Said_Have_Info        (7) //added by killap
 
 #define salvatore_has_oxygen              (obj_is_carrying_obj_pid(self_obj, PID_OXYGEN_TANK) > 0)
 #define self_family                       family_salvatore
@@ -103,7 +104,7 @@ procedure Node043;
                                           kill_critter(self_obj, ANIM_fall_back_blood_sf)
 
 #define check_assassinate_salvatore       if (salvatore_has_oxygen == false) then begin                              \
-                                             if (obj_is_carrying_obj_pid(dude_obj, PID_POISON_TANK) > 0) then begin  \
+                                             if (obj_is_carrying_obj_pid(self_obj, PID_POISON_TANK) > 0) then begin /* Seraph's Fix: changed 'dude_obj' to 'self_obj' */ \
                                                 debug_msg("salvatore_assassinated == "+salvatore_assassinated);      \
                                                 debug_msg("personal_enemy         == "+personal_enemy);              \
                                                 if ((salvatore_assassinated == false) and (personal_enemy == false)) then begin  \
@@ -207,10 +208,12 @@ procedure talk_p_proc begin
       debug_msg("salvatore_permission                          == "+salvatore_permission);
       debug_msg("get_tribute(tribute_failed)                   == "+get_tribute(tribute_failed));
       debug_msg("get_guard_assignment(guard_assignment_failed) == "+get_guard_assignment(guard_assignment_failed));
-      if (dude_family == self_family) then begin
-         call Node041;
-      end else if ((salvatore_permission == false) or (get_tribute(tribute_failed)) or (get_guard_assignment(guard_assignment_failed))) then begin
-         start_dialog_at_node(Node003);
+      if (self_family == dude_family) then begin
+         call Node040;  //killap's fix: changed from Node041
+      end else if (salvatore_done) then begin
+         call Node041; //moved up by killap - was never being called before.
+//      end else if ((salvatore_permission == false) or (get_tribute(tribute_failed)) or (get_guard_assignment(guard_assignment_failed))) then begin
+//         start_dialog_at_node(Node003);
       end else if ((get_track_lloyd(track_lloyd_mason)) or (get_track_lloyd(track_lloyd_assigned))) then begin
          call Node015;
       end else if (get_track_lloyd(track_lloyd_salvatore)) then begin
@@ -227,8 +230,12 @@ procedure talk_p_proc begin
          end else begin
             start_dialog_at_node(Node032);
          end
+   /* Begin killap comment out
       end else if (salvatore_done) then begin
          call Node041;
+   End killap comment out*/ 
+      end else if ((salvatore_permission == false) or (get_tribute(tribute_failed)) or (get_guard_assignment(guard_assignment_failed))) then begin //moved by killap
+         start_dialog_at_node(Node003); //moved by killap
       end else begin
          start_dialog_at_node(Node004);
       end
@@ -269,6 +276,8 @@ procedure Node998 begin
    if (hostile == false) then begin
       set_hostile;
    end
+   attack_family(self_family) //added by killap
+   set_salvatore_called_guards_on //added by killap
 end
 procedure Node999 begin
 end
@@ -279,6 +288,7 @@ procedure Node995 begin
 end
 procedure Node994 begin
    inc_salvatore_respect(1);
+   set_local_var(LVAR_Player_Said_Have_Info,1); //added by killap
    call Node006;
 end
 procedure Node993 begin
@@ -452,12 +462,13 @@ procedure Node003 begin
 end
 procedure Node004 begin
    Reply(230);
-   NOption(231, Node005, -003);
-   NOption(232, Node005, -003);
-   NOption(mstr(233) + dude_name + mstr(5233), Node005, -003);
-   NOption(234, Node999, -003);
+   NOption(231, Node003, -003); //edit by killap - was Node005
+   NOption(232, Node003, -003); //edit by killap - was Node005
+   NOption(mstr(233) + dude_name + mstr(5233), Node003, -003); //edit by killap - was Node005
+   NOption(234, Node999, -003); 
    if ((dude_charisma > 5) or (dude_iq > 7)) then begin
-      GOption(236, Node994, 004);
+      if (local_var(LVAR_Player_Said_Have_Info) == 0) then // added by killap
+        GOption(236, Node994, 004);
       GOption(238, Node992, 004);
    end else begin
       NOption(235, Node995, 004);
@@ -552,6 +563,7 @@ procedure Node011 begin
 end
 procedure Node012 begin
    set_track_lloyd(track_lloyd_mason);
+ //  set_salvatore_permission;
    Reply(350);
    if ((dude_charisma > 5) or (dude_iq > 7)) then begin
       GOption(352, Node984, 004);
@@ -673,9 +685,11 @@ procedure Node024 begin
 end
 procedure Node025 begin
    set_tribute(tribute_mason);
+ //  set_salvatore_permission;
    Reply(485);
    if ((dude_charisma > 5) or (dude_iq > 7)) then begin
-      NOption(487, Node984, 004);
+      //NOption(487, Node984, 004);
+      GOption(487, Node984, 004); //edit by killap
    end else begin
       NOption(351, Node985, 004);
    end
@@ -768,6 +782,7 @@ procedure Node033 begin
 end
 procedure Node034 begin
    set_guard_assignment(guard_assignment_mason);
+//   set_salvatore_permission;
    Reply(575);
    NOption(576, Node035, 004);
    NOption(577, Node035, 004);
@@ -780,7 +795,8 @@ end
 procedure Node035 begin
    Reply(585);
    if ((dude_charisma > 5) or (dude_iq > 7)) then begin
-      NOption(412, Node984, 004);
+      //NOption(412, Node984, 004);
+      GOption(487, Node984, 004); //edit by killap
    end else begin
       NOption(351, Node985, 004);
    end
@@ -791,15 +807,18 @@ procedure Node036 begin
    set_salvatore_pistol(salvatore_pistol_mason);
    Reply(595);
    if ((dude_charisma > 5) or (dude_iq > 7)) then begin
-      NOption(412, Node984, 004);
+      //NOption(412, Node984, 004);
+      GOption(412, Node984, 004); //edit by killap
    end else begin
       NOption(596, Node985, 004);
    end
    prev_node := 36;
 end
 procedure Node037 begin
-   display_mstr(925);
-   give_xp(EXP_NEW_RENO_SECRET_TRANS_GUARD);
+   if (dude_iq >=4) then begin   //check added by killap - prevent cheating
+      display_mstr(925);
+      give_xp(EXP_NEW_RENO_SECRET_TRANS_GUARD);
+   end
    Reply(mstr(605) + dude_name + mstr(5605));
    if ((dude_charisma > 5) or (dude_iq > 7)) then begin
       NOption(607, Node963, 004);
@@ -824,17 +843,20 @@ procedure Node039 begin
    set_salvatore_permission
    Reply(630);
    if ((dude_charisma > 5) or (dude_iq > 7)) then begin
-      NOption(468, Node984, 004);
+      //NOption(468, Node984, 004);
+      GOption(468, Node984, 004); //edit by killap
    end else begin
       NOption(596, Node985, 004);
    end
    prev_node := 39;
 end
 procedure Node040 begin
-   floater_good(mstr(640) + made_man_name + mstr(5640));
+   float_msg(self_obj, mstr(640) + made_man_name + mstr(5640), FLOAT_COLOR_NORMAL); //added by killap
+// floater_good(mstr(640) + made_man_name + mstr(5640));
 end
 procedure Node041 begin
-   floater_sick(mstr(645) + dude_name + mstr(5645));
+   float_msg(self_obj, mstr(645) + dude_name + mstr(5645), FLOAT_COLOR_BAD);  //added by killap
+// floater_sick(mstr(645) + dude_name + mstr(5645));
    prev_node := 41;
 end
 procedure Node042 begin

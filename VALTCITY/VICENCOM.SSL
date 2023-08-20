@@ -89,6 +89,15 @@ procedure Node006a;
 procedure Node006b;
 procedure Node010a;
 
+//added by killap - expansion pack
+procedure Node033a;
+procedure Node033b;
+procedure Node033;
+procedure Node034;
+procedure Node035;
+//end added
+
+
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
 // seen by the design Tool
@@ -102,6 +111,9 @@ procedure Node010a;
 #define LVAR_Said_23                    (3)
 #define LVAR_Gave_Bonus                 (4)
 
+#define LVAR_Classified_Entry           (5) //added by killap - expansion pack
+#define LVAR_Gave_Classified_Entry_XP   (6) //added by killap - expansion pack
+
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
    Needs to be saved, make it a map variable (MVAR_) */
@@ -109,6 +121,8 @@ procedure Node010a;
 
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
+
+variable came_from:=0;
 
 procedure start begin
 end
@@ -151,7 +165,7 @@ procedure look_at_p_proc begin
    script_overrides;
 
    if( global_var(GVAR_VAULT_PIP) > PIP_DOWNLOAD ) then
-      display_msg(106);
+      display_msg(mstr(106));
    else if (dude_iq > 3) then begin
        if (local_var(LVAR_Looked_Before) == 0) then begin
            inc_local_var(LVAR_Looked_Before);
@@ -314,20 +328,31 @@ end
 
 procedure Node009a begin
    variable elc_rest;
-
+   //variable elc_rest2;
+   
    gfade_out(600);
    gfade_in(600);
-
+   
    if( local_var( LVAR_Gave_Bonus ) == 0 ) then begin
       set_local_var( LVAR_Gave_Bonus, 1 );
-      elc_rest:=get_critter_stat(dude_obj,STAT_dmg_resist_electrical);
-
-      set_critter_stat(dude_obj,STAT_dmg_resist_electrical,elc_rest+5);
+      script_overrides;
+      
+      //elc_rest2:=get_critter_stat(dude_obj,STAT_dmg_resist_electrical );
+      //elc_rest:=get_critter_stat(dude_obj,STAT_dmg_resist_electrical ) + 5;
+      
+      //WARNING! this will not compile unless you use Timeslip's modified compile.exe file. 
+      //In addition, you must use his ddraw files and enable extended scripting or this script will crash in the game 
+      elc_rest := get_pc_extra_stat(STAT_dmg_resist_electrical) + 5;
+      set_pc_extra_stat(STAT_dmg_resist_electrical, elc_rest); //added by killap
+      //set_critter_stat(dude_obj,STAT_dmg_resist_electrical,elc_rest); - comment out by killap
+      
       critter_dmg( dude_obj, get_critter_stat(dude_obj,STAT_current_hp) - 1, ( DMG_electrical BWOR DMG_NOANIMATE ) );
-   end
 
+   end
+   
    Reply(185);
    NLowOption(186,Node006b);
+  
 end
 
 procedure Node010 begin
@@ -448,8 +473,19 @@ procedure Node021 begin
 
    NOption(227,Node023,004);
    NOption(228,Node024,004);
-   if (global_var(GVAR_VAULT_GECKO_PLANT) == PLANT_REPAIRED) then
+   //if (global_var(GVAR_VAULT_GECKO_PLANT) == PLANT_REPAIRED) then
+   if (global_var(GVAR_GECKO_ECON_DISK) >= ECON_DISK_RECEIVED) then //added by killap
        NOption(229,Node022,004);
+   //added by killap
+   if ((global_var(GVAR_VAULT_GECKO_PLANT) == PLANT_REACTOR_DATA_RECEIVED) and (obj_is_carrying_obj_pid(dude_obj,PID_REACTOR_DATA_DISK))) then
+       NOption(173,Node031,004);
+   if (global_var(GVAR_GRUTHAR_DSTATUS) == 2) then
+       NOption(174,Node010,004);
+   if (global_var(GVAR_VAULT_PIP) == PIP_FOUND) then
+       NOption(175,Node014,004);
+   if ((global_var(GVAR_VAULT_PIP) >= PIP_DOWNLOAD) and (Fallout2_enclave_destroyed)) then
+       NOption(176,Node027,004);
+   //end added
    NOption(230,Node006a,004);
 end
 
@@ -470,8 +506,8 @@ procedure Node023 begin
    else
        Reply(234);
 
-   NOption(236,Node021,004);
-   NOption(237,Node006a,004);
+   NOption(236,Node033a,004); //was 021 - killap expansion
+   NOption(237,Node033b,004); //was 006a - killap expansion
 end
 
 procedure Node024 begin
@@ -549,5 +585,59 @@ procedure Node032 begin
    NOption(270,Node021,004);
    NOption(271,Node006a,004);
 end
+
+//killap - expansion pack
+procedure Node033a begin
+   came_from := 331;
+
+   if ( (is_success(roll_vs_skill(dude_obj,SKILL_SCIENCE,-25))) and local_var(LVAR_Classified_Entry) == 0 ) then
+      call Node033;
+   else
+      call Node021;
+      
+end
+
+procedure Node033b begin
+   came_from := 332;
+
+   if ( (is_success(roll_vs_skill(dude_obj,SKILL_SCIENCE,-25))) and local_var(LVAR_Classified_Entry) == 0 ) then
+      call Node033;
+   else
+      call Node006a;
+      
+end
+
+procedure Node033 begin
+   set_local_var(LVAR_Classified_Entry,1);
+
+   if (came_from == 331) then
+      Reply(300);
+   else
+      Reply(301);
+      
+   NOption(302,Node034,004);
+end
+
+procedure Node034 begin
+   Reply(303);
+   NOption(304,Node035,004);
+   NOption(265,Node006a,004);
+end
+
+procedure Node035 begin
+   
+   if ( local_var(LVAR_Gave_Classified_Entry_XP) == 0 ) then begin
+      set_local_var(LVAR_Gave_Classified_Entry_XP,1);
+      set_global_var(GVAR_VAULT_EXPERIMENTS,1);
+      give_xp(800);
+      display_msg(mstr(308));
+   end
+   
+   Reply(305);
+   NOption(306,Node021,004);
+   NOption(307,Node006a,004);
+end
+//end expansion
+
 
 //xxxxxxxxxxxxxxxxxxxx

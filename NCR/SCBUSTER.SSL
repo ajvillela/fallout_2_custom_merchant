@@ -256,6 +256,7 @@ procedure talk_p_proc begin
    end
 
    Node001Count := 0;
+   call do_swap; //moved from Node999 - killap
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -304,7 +305,7 @@ end
 /* Anytime that there is a need for an ending to dialog, this node is to be called. It will just
    exit from the dialog system without any reprisals from the NPC. */
 procedure Node999 begin
-   call do_swap;
+   //call do_swap; -comment out by killap
 end
 
 
@@ -376,10 +377,11 @@ procedure Node004 begin
    if (merk_status >= MERK_STATUS_MET) then
       NOption(116, Node008, 4);
    if (global_var(GVAR_NEWRENO_SNUFF_WESTIN)) then
-      NOption(117, Node010, 4);
+      NOption(117, Node009, 4); // edit by killap - was 010
    if (global_var(GVAR_NEWRENO_SNUFF_CARLSON)) then
-      NOption(118, Node009, 4);
-   NOption(119, Node011, 4);
+      NOption(118, Node010, 4); // edit by killap - was 009
+   if( not( dude_found_geck ) ) then //added by killap
+      NOption(119, Node011, 4);
 end
 
 procedure Node005 begin

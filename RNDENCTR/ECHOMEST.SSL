@@ -45,6 +45,7 @@ procedure Node005;
 procedure Node006;
 procedure Node007;
 procedure Node008;
+procedure Node009;
 
 procedure NodeFleeing;
 procedure NodeFighting;
@@ -92,6 +93,13 @@ procedure map_enter_p_proc begin
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_GUARDS);
 end
 
+procedure map_exit_p_proc begin\
+   //added by killap - expansion
+   unset_rnd_flag(HOMESTEAD_REWARDED);
+   unset_rnd_flag(HOMESTEAD_SAVED);
+   set_rnd_enc_flag(HOMESTEAD_NONE);
+   //end added
+end
 
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from
    Movement to attacking the player on sight can be placed in here.*/
@@ -105,7 +113,17 @@ procedure critter_p_proc begin
    if ((local_var(LVAR_Hostile) == 2) and (obj_can_see_obj(self_obj,dude_obj))) then begin
        set_local_var(LVAR_Hostile,1);
        attack(dude_obj);
+   //added by killap - expansion
+   
+   if( cur_map_index != MAP_BH_RND_DESERT ) then begin
+      end else if ( not(local_var(LVAR_Hostile) == 2) and not(combat_is_initialized) and not(rnd_enc_flag(HOMESTEAD_REWARDED)) ) then begin
+         if (not combat_is_initialized) then begin
+            set_rnd_enc_flag(HOMESTEAD_SAVED);
+            call talk_p_proc;
+         end
+      end
    end
+   //end added
 
 end
 
@@ -137,10 +155,23 @@ end
 procedure talk_p_proc begin
    //call Node001 on some save condition
    //call Node002 after rewarding the save condition
-   if (local_var(LVAR_Herebefore) == 0) then begin
+   
+   //added by killap - expansion
+   if( cur_map_index == MAP_BH_RND_DESERT ) then begin
+      call Node009;
+   end else if (rnd_enc_flag(HOMESTEAD_REWARDED)) then begin
+      call Node002;
+   end else if (rnd_enc_flag(HOMESTEAD_SAVED)) then begin
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
-      call Node003;
+         call Node001;
+      gSay_End;
+      end_dialogue;
+   //end added
+   end else if (local_var(LVAR_Herebefore) == 0) then begin
+      start_gdialog(NAME,self_obj,4,-1,-1);
+      gSay_Start;
+         call Node003;
       gSay_End;
       end_dialogue;
    end else begin
@@ -156,6 +187,9 @@ procedure destroy_p_proc begin
 
 /* Increment the aligned critter counter*/
    inc_good_critter
+   
+   if not(rnd_enc_flag(HOMESTEAD_FAIL)) then
+      set_rnd_enc_flag(HOMESTEAD_FAIL);
 
 /* Set global_variable for Enemy status*/
 end
@@ -226,10 +260,13 @@ procedure giveReward begin
 end
 
 procedure Node001 begin
+   //added by killap - expansion
+   set_rnd_enc_flag(HOMESTEAD_REWARDED);
+   //end added
    call giveReward;
    Reply(103);
    NOption(104, Node999, 4);
-   NLowOption(105, Node999, 4);
+   NLowOption(105, Node999); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
 end
 
 procedure Node002 begin
@@ -279,6 +316,11 @@ end
 
 procedure NodeFighting begin
    float_msg(self_obj, mstr(Random(131, 136)), FLOAT_MSG_RED);
+end
+
+//added by killap - RP
+procedure Node009 begin
+   floater(random(200,201));
 end
 
 

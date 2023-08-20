@@ -111,7 +111,7 @@ procedure critter_p_proc begin
          add_timer_event(self_obj,game_ticks(random(6,21)),1);
       end
 
-      if ((TOWN_REPUTATION < 6) or (sleezy_stranger_flag)) then begin
+      if ((TOWN_REPUTATION < 6 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) or (sleezy_stranger_flag)) then begin // added by killap - not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
          scarydude:=tile_num(dude_obj);
          here:=tile_num(self_obj);
          if (run_from_dude == 0) then begin
@@ -191,7 +191,7 @@ end
    written by designers are placed in here. Additionally, Reactions are generated and
    stored which affects player interactions. */
 procedure talk_p_proc begin
-   if ((TOWN_REPUTATION < 6) or (sleezy_stranger_flag)) then begin
+   if ((TOWN_REPUTATION < 6 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) or (sleezy_stranger_flag)) then begin // edit by killap not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       call Node901;
       Flee_From_Dude
    end else call Node902;
@@ -203,7 +203,7 @@ end
 procedure destroy_p_proc begin
 /* Increment the aligned critter counter*/
    inc_good_critter
-   inc_childkiller
+   //inc_childkiller - redundant and makes it seem you killed two children when only was was killed  - killap
    dec_slag_cnt;
 end
 

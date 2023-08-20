@@ -124,7 +124,8 @@ end
 
 procedure description_p_proc begin
    script_overrides;
-   display_mstr_rand(160-(boxer_is_black*10), 162+(boxer_is_white*6));
+   display_msg(mstr(400)); //edit by killap
+   //display_mstr_rand(160-(boxer_is_black*10), 162+(boxer_is_white*6));
 end
 
 procedure use_skill_on_p_proc begin

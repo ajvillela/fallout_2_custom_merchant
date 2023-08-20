@@ -16,12 +16,12 @@ procedure start begin
 end
 
 procedure spatial_p_proc begin
-   if ( ( ( global_var(GVAR_BH_MISSING) == MISSING_ACCEPT_CASH ) or
-          ( global_var(GVAR_BH_MISSING) == MISSING_ACCEPT_FREE ) ) and
+   if ( ( ( global_var(GVAR_BH_MISSING) == MISSING_TUNNELS_CASH ) or //edit by killap - was *_ACCEPT_*
+          ( global_var(GVAR_BH_MISSING) == MISSING_TUNNELS_FREE ) ) and //edit by killap - was *_ACCEPT_*
         (source_obj == dude_obj) and
         (local_var(LVAR_herebefore) == 0) ) then begin
       inc_local_var(LVAR_herebefore);
-      if( global_var(GVAR_BH_MISSING) == MISSING_ACCEPT_FREE ) then
+      if( global_var(GVAR_BH_MISSING) == MISSING_TUNNELS_FREE ) then //edit by killap - was *_ACCEPT_*
          set_global_var(GVAR_BH_MISSING, MISSING_DISCOVERED_FREE );
       else
          set_global_var(GVAR_BH_MISSING, MISSING_DISCOVERED_CASH );

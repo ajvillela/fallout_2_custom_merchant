@@ -32,7 +32,8 @@
 
 #define NAME                    SCRIPT_KCTRAPR
 #define TOWN_REP_VAR            (GVAR_TOWN_REP_KLAMATH)
-#define floater(x)		float_msg(self_obj, message_str(NAME,x),FLOAT_MSG_RED)
+#define floater(x)		float_msg(self_obj, message_str(NAME,x),FLOAT_MSG_NORMAL)
+#define floater_angry(x)		float_msg(self_obj, message_str(NAME,x),FLOAT_MSG_RED)
 
 #include "..\headers\command.h"
 #include "..\headers\ModReact.h"
@@ -156,11 +157,11 @@ procedure talk_p_proc begin
       call Node004;
    end
 
-   else if (global_var(TOWN_REPUTATION) < 5) then begin
+   else if (global_var(TOWN_REPUTATION) < 5 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then begin // edit by killap - added not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       call Node001;
    end
 
-   else if (global_var(TOWN_REPUTATION) > 4) then begin
+   else if (global_var(TOWN_REPUTATION) > 4 or (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then begin // edit by killap - added (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       if (has_skill(dude_obj, SKILL_OUTDOORSMAN) > 30) then
          call Node003;
       else

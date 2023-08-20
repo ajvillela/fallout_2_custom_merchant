@@ -41,9 +41,12 @@ export variable book_obj3     := 0;
 export variable book_obj_look := 0;
 export variable buster_obj    := 0;
 export variable playerTmpBox  := 0;
+export variable playerTmpBox2  := 0;
 export variable lenny_obj     := 0;
 export variable patrolGuard   := 0;
 export variable merk_obj      := 0;
+export variable merk_guard1_obj := 0; //added by killap
+export variable merk_guard2_obj := 0; //added by killap
 export variable merk_guard_count := 0;
 export variable merk_visible  := 0;
 export variable Field1a_Ptr   := 0;
@@ -100,12 +103,30 @@ procedure map_enter_p_proc begin
       override_map_start_hex(20472,0,3);
    end
    if (map_first_run) then begin
+      display_msg(mstr(100)); //added by killap
    end
+   
+   //added by killap - prevent car from disappearing if the car runs out of gas while on the town circle
+   if ((metarule(30, 0) == 21) and (cur_map_index != MAP_CAR_DESERT) and (car_out_of_fuel)) then begin
+      set_global_var(GVAR_CAR_PLACED_TILE, 0);
+      Create_Car(CAR_NCR_HEX,CAR_NCR_ELEV)
+      if (tile_contains_pid_obj(CAR_NCR_HEX, CAR_NCR_ELEV, PID_DRIVABLE_CAR) != 0) then begin
+         Create_Trunk(CAR_NCR_HEX,CAR_NCR_ELEV)
+      end 
+   end else 
+      Check_Create_Car(CAR_NCR_HEX, CAR_NCR_ELEV)
+   //end added
+   
+   //Check_Create_Car(CAR_NCR_HEX, CAR_NCR_ELEV)
 
-   Check_Create_Car(CAR_NCR_HEX, CAR_NCR_ELEV)
+   //edit by killap
+   if( elevation( dude_obj ) == 1 ) then
+      Basement_Lighting;
+   else
+      Lighting;
 
-   Lighting;
    set_global_var(GVAR_LOAD_MAP_INDEX,0);
+   
 end
 
 procedure map_update_p_proc begin
@@ -115,7 +136,11 @@ procedure map_update_p_proc begin
          set_global_var( GVAR_FINISHED_STARK_RECON, 1 );
    end
 
-   Lighting;
+   //edit by killap
+   if( elevation( dude_obj ) == 1 ) then
+      Basement_Lighting;
+   else
+      Lighting;
 end
 
 

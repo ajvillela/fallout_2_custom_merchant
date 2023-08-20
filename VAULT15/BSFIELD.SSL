@@ -237,6 +237,7 @@ procedure Delay_Field begin
    set_mvar_bit_on(MVAR_Vault15_Field, FIELD_DELAY);
 //   set_local_var(LVAR_Field_Off_Time, game_time);
    display_msg(mstr(152));
+   call Check_State; //added by killap
 end
 
 procedure Destroy_Field begin

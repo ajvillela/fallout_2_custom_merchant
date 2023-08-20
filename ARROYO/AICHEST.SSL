@@ -66,6 +66,10 @@ procedure use_skill_on_p_proc;
 
 /* Local variables which do not need to be saved between map changes. */
 
+#define SHAMAN_CHEST_TILE     (13512) //added by killap - expansion
+
+import variable Hakunin_Ptr; //added by killap - expansion
+
 procedure start begin
 end
 
@@ -79,7 +83,11 @@ end
    This should only hold the most cursory of glances for the player. */
 procedure look_at_p_proc begin
    script_overrides;
-   display_msg(mstr(101));                      // describes as a vase
+   //added tile check - killap - expansion
+   if (self_tile == SHAMAN_CHEST_TILE) then
+      display_msg(mstr(103));
+   else
+      display_msg(mstr(101));                    // describes as a vase
                                                 // need to add in described as chest
 end
 
@@ -88,40 +96,65 @@ end
    if the critter is known to the player. */
 procedure description_p_proc begin
    script_overrides;
-   display_msg(mstr(101));                      // describes as a vase
-                                                // need to add in describe as chest
+   //added tile check - killap
+   if (self_tile == SHAMAN_CHEST_TILE) then
+      display_msg(mstr(103));
+   else
+      display_msg(mstr(101));                    // describes as a vase
+                                                // need to add in described as chest
 end
 
 procedure pickup_p_proc begin
-   if ((is_success(roll_vs_skill(dude_obj,SKILL_STEAL,-20))) and
+   /*if ((is_success(roll_vs_skill(dude_obj,SKILL_STEAL,-20))) and
        (map_var(MVAR_Stealing_From_Shaman) < 6)) then begin
        display_msg(mstr(104));
    end
    else begin
        script_overrides;
        set_map_var(MVAR_Stealing_From_Shaman,(map_var(MVAR_Stealing_From_Shaman) + 1));
-   end
+   end*/
 end
 
 procedure use_p_proc begin
-   if ((is_success(roll_vs_skill(dude_obj,SKILL_STEAL,-20))) and
-       (map_var(MVAR_Stealing_From_Shaman) < 6)) then begin
-       display_msg(mstr(104));
-   end
-   else begin
-       script_overrides;
-       set_map_var(MVAR_Stealing_From_Shaman,(map_var(MVAR_Stealing_From_Shaman) + 1));
+   if not(combat_is_initialized) then begin
+      if ((is_success(roll_vs_skill(dude_obj,SKILL_STEAL,-20))) and
+         (map_var(MVAR_Stealing_From_Shaman) < 6)) then begin
+         display_msg(mstr(104));
+      end
+      else begin
+         //added check by killap - expansion
+         if ((Hakunin_Ptr != -1) and (obj_can_see_obj(Hakunin_Ptr,dude_obj))) then begin
+            script_overrides;
+            set_map_var(MVAR_Stealing_From_Shaman,(map_var(MVAR_Stealing_From_Shaman) + 1));
+         end
+      end
+   end else begin
+      script_overrides;
    end
 end
 
 procedure use_skill_on_p_proc begin
-   if ((is_success(roll_vs_skill(dude_obj,SKILL_STEAL,-20))) and
-       (map_var(MVAR_Stealing_From_Shaman) < 6)) then begin
-       display_msg(mstr(104));
-   end
-   else begin
-       script_overrides;
-       set_map_var(MVAR_Stealing_From_Shaman,(map_var(MVAR_Stealing_From_Shaman) + 1));
+   if not(combat_is_initialized) then begin
+      if ((is_success(roll_vs_skill(dude_obj,SKILL_STEAL,-20))) and
+         (map_var(MVAR_Stealing_From_Shaman) < 6)) then begin
+       //display_msg(mstr(104));
+         if (obj_is_locked(self_obj)) then begin
+            obj_unlock(self_obj);
+            display_msg(mstr(106));
+         end else begin
+            obj_lock(self_obj);
+            display_msg(mstr(105));
+         end
+      end
+      else begin
+         //added check by killap - expansion
+         if ((Hakunin_Ptr != -1) and (obj_can_see_obj(Hakunin_Ptr,dude_obj))) then begin
+            script_overrides;
+            set_map_var(MVAR_Stealing_From_Shaman,(map_var(MVAR_Stealing_From_Shaman) + 1));
+         end
+      end
+   end else begin
+      script_overrides;
    end
 end
 

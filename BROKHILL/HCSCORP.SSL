@@ -209,6 +209,12 @@ end
    incrementing the death count for reputation purposes and Enemy Counters are placed
    in here. */
 procedure destroy_p_proc begin
+   // added by killap - expansion
+   variable tail := 0;
+
+   tail := create_object(PID_SMALL_SCORPION_TAIL,0,0);
+   add_obj_to_inven(self_obj,tail);
+   // end added
 
    set_map_var( MVAR_Scorpion_Dead, 1 );
 

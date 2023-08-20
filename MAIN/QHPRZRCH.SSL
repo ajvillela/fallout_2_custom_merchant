@@ -69,6 +69,7 @@ procedure Node008;
 procedure Node009;
 procedure Node010;
 procedure Node011;
+procedure Node011a; //added by killap
 procedure Node012;
 procedure Node013;
 procedure Node014;
@@ -79,6 +80,7 @@ procedure Node018;
 procedure Node019;
 procedure Node020;
 procedure Node021;
+procedure Node021a; //added by killap
 procedure Node022;
 procedure Node023;
 procedure Node024;
@@ -131,6 +133,8 @@ procedure Node043a;
 procedure Node046a;
 procedure Node048a;
 
+procedure Node911; //added by killap
+
 #define WEARING_DISGUISE    (obj_pid(critter_inven_obj(dude_obj,INVEN_TYPE_WORN)) == PID_PURPLE_ROBE)
 #define WEARING_MKII        (obj_pid(critter_inven_obj(dude_obj,INVEN_TYPE_WORN)) == PID_ADVANCED_POWER_ARMOR_MK2)
 
@@ -150,6 +154,7 @@ procedure Node048a;
 #define LVAR_Node21_Count               (9)
 #define LVAR_Node40_Count               (10)
 #define LVAR_Start_Dialog               (11)
+#define LVAR_Node4_Count                (12) //added by killap
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -228,8 +233,13 @@ procedure talk_p_proc begin
    GetReaction;
 
    inc_local_var(LVAR_Start_Dialog);
+   
+// Begin Seraph's Code - expansion
+   if (global_var(GVAR_ENDGAME_MOVIE_PRES_RICH) != 1) then
+      set_global_var(GVAR_ENDGAME_MOVIE_PRES_RICH,1);
+// End Seraph's Code
 
-   if (dude_is_stupid) then begin
+if (dude_is_stupid) then begin
       if (local_var(LVAR_Herebefore) == 0) then begin
          start_gdialog(NAME,self_obj,4,HEAD_PRESIDENT,BACKGROUND_PRESIDENT);
          gSay_Start;
@@ -240,7 +250,7 @@ procedure talk_p_proc begin
          call Node003;
       end
    end else begin
-      if (WEARING_MKII) then begin
+      if (dude_wearing_power_armor) then begin
          if (party_size_biped == 0) then begin
             start_gdialog(NAME,self_obj,4,HEAD_PRESIDENT,BACKGROUND_PRESIDENT);
             gSay_Start;
@@ -268,20 +278,21 @@ procedure talk_p_proc begin
             gSay_End;
             end_dialogue;
          end
-      end else if (WEARING_DISGUISE) then begin
-         if (party_size_biped == 0) then begin
-            start_gdialog(NAME,self_obj,4,HEAD_PRESIDENT,BACKGROUND_PRESIDENT);
-            gSay_Start;
-              call Node005;
-            gSay_End;
-            end_dialogue;
-         end else begin
-            start_gdialog(NAME,self_obj,4,HEAD_PRESIDENT,BACKGROUND_PRESIDENT);
-            gSay_Start;
-               call Node022;
-            gSay_End;
-            end_dialogue;
-         end
+    //commented out by killap - unimplemented content
+    //end else if (WEARING_DISGUISE) then begin
+    //   if (party_size_biped == 0) then begin
+    //      start_gdialog(NAME,self_obj,4,HEAD_PRESIDENT,BACKGROUND_PRESIDENT);
+    //      gSay_Start;
+    //        call Node005;
+    //      gSay_End;
+    //      end_dialogue;
+    //   end else begin
+    //      start_gdialog(NAME,self_obj,4,HEAD_PRESIDENT,BACKGROUND_PRESIDENT);
+    //      gSay_Start;
+    //         call Node022;
+    //      gSay_End;
+    //      end_dialogue;
+    //   end
       end else begin
          start_gdialog(NAME,self_obj,4,HEAD_PRESIDENT,BACKGROUND_PRESIDENT);
          gSay_Start;
@@ -291,7 +302,7 @@ procedure talk_p_proc begin
       end
    end
 
-   inc_local_var(LVAR_Herebefore);
+   inc_local_var(LVAR_Herebefore); 
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -348,6 +359,7 @@ end
 procedure NodeCallGuards begin
    //set flag pc = president discovered
    //call guards
+   set_map_var(MVAR_Pres_Ordered,1); //added by killap - the guards should now actually come.
    call Node999;
 end
 
@@ -386,11 +398,19 @@ procedure Node003 begin
 end
 
 procedure Node004 begin
-   Reply(119);
-   BOption(120, Node015, 4);
-   NOption(121, Node020, 4);
-   NOption(122, Node006, 4);
-end
+   //added check and else statement - killap
+   if (local_var(LVAR_Herebefore) == 0) then begin
+      Reply(119);
+      BOption(120, Node019, 4);
+      NOption(121, Node020, 4);
+      NOption(122, Node006, 4);
+   end else begin
+      Reply(183);
+      BOption(125, Node019, 4);
+      NOption(188, Node020, 4);
+      NOption(191, Node023, 4);
+   end
+end 
 
 procedure Node005 begin
    if (local_var(LVAR_Node5_Count) == 0) then begin
@@ -439,16 +459,36 @@ end
 
 procedure Node010 begin
    Reply(142);
-   BOption(143, Node012, 4);
-   GOption(144, NOde013, 4);
+   //intimidation check
+   BOption(143, Node911, 4); //edit by killap - was Node012
+   GOption(144, NOde911, 4); //edit by killap - was Node013
 end
 
+//added by killap
+procedure Node911 begin
+   if (skill_success(dude_obj, SKILL_CONVERSANT, 5)) then
+      call Node011;
+   else
+      call Node011a;
+end
+//end added
+
 procedure Node011 begin
-   Reply(mstr(145)+" "+mstr(146));
-   BOption(147, Node012, 4);
+   //Reply(mstr(145)+" "+mstr(146));
+   Reply(145);
+   GOption(147, Node013, 4); //edit by killap - was Node012
    NOption(148, Node020, 4);
    BOption(149, Node012, 4);
-end
+end 
+
+//added by killap
+procedure Node011a begin
+   Reply(146);
+   GOption(147, Node013, 4);
+   NOption(148, Node020, 4);
+   BOption(149, Node012, 4);
+end 
+//end added
 
 procedure Node012 begin
    Reply(150);
@@ -479,7 +519,8 @@ procedure Node015 begin
    Reply(160);
    NOption(161, Node019, 4);
    BOption(162, Node018, 4);
-   if (met_vice_pres) then
+   // unlocked by killap - expansion
+   if (map_var(MVAR_Met_Vice_Pres)) then
       NOption(163, Node026, 4);
    BOption(164, Node016, 4);
    GOption(165, Node013, 4);
@@ -521,26 +562,39 @@ procedure Node020 begin
 end
 
 procedure Node021 begin
+   Reply(182);
    if (local_var(LVAR_Node21_Count) == 0) then begin
       inc_local_var(LVAR_Node21_Count);
-      Reply(182);
+      BOption(120, Node015, 4);
+      NOption(185, Node999, 4);
    end else begin
-      Reply(183);
+      NOption(338, Node021a, 4);
+      NOption(185, Node999, 4);
    end
+end 
+
+procedure Node021a begin
+   Reply(183);
    NOption(184, Node020, 4);
-   NOption(185, Node999, 4);
-end
+   NOption(165, Node999, 4);
+end 
 
 procedure Node022 begin
-   if (party_size_male + party_size_female == 0) then
-      Reply(186);
-   else
-      Reply(187);
+   if (local_var(LVAR_Herebefore) == 0) then begin
+      if (party_size_male + party_size_female == 0) then
+         Reply(186);
+      else
+         Reply(187);
+   end else
+      Reply(183);
    NOption(188, Node020, 4);
    BOption(189, Node012, 4);
-   BOption(190, Node019, 4);
+   if (local_var(LVAR_Herebefore) == 0) then
+      BOption(190, Node019, 4);
+   else
+      BOption(125, Node019, 4);
    NOption(191, Node023, 4);
-end
+end 
 
 procedure Node023 begin
    Reply(192);
@@ -726,7 +780,7 @@ end
 
 procedure Node050 begin
    Reply(265);
-   NOption(266, Node053, 4);
+   NOption(266, Node056, 4); //edit by killap - was Node053
 end
 
 procedure Node051 begin

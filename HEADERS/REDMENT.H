@@ -18,10 +18,36 @@
 
 // States for Bar Brawl
 #define BRAWL_NONE                          (0)
-#define BRAWL_NEITHER_JAILED                (1)
-#define BRAWL_MORNINGSTAR_JAILED            (2)
-#define BRAWL_KOKOWEEF_JAILED               (3)
-#define BRAWL_BOTH_JAILED                   (4)
-#define BRAWL_KILLED                        (5)
+// Begin Seraph's Code
+#ifndef BRAWL_JOB_ACCEPTED
+   #define BRAWL_JOB_ACCEPTED               (1)
+#endif
+#ifndef BRAWL_TALKED_BETTE
+   #define BRAWL_TALKED_BETTE               (2)
+#endif
+// End Seraph's Code
+#ifndef BRAWL_TALKED_CAMINT
+   #define BRAWL_TALKED_CAMINT              (3) // Seraph Fix: changed from (1) to (3)
+#endif
+#ifndef BRAWL_NEITHER_JAILED
+   #define BRAWL_NEITHER_JAILED             (4) // Seraph Fix: changed from (2) to (4)
+#endif
+#ifndef BRAWL_MORNINGSTAR_JAILED
+   #define BRAWL_MORNINGSTAR_JAILED         (5) // Seraph Fix: changed from (3) to (5)
+#endif
+#ifndef BRAWL_KOKOWEEF_JAILED
+   #define BRAWL_KOKOWEEF_JAILED            (6) // Seraph Fix: changed from (4) to (6)
+#endif
+#ifndef BRAWL_BOTH_JAILED
+   #define BRAWL_BOTH_JAILED                (7) // Seraph Fix: changed from (5) to (7)
+#endif
+#ifndef BRAWL_KILLED
+   #define BRAWL_KILLED                     (8) // Seraph Fix: changed from (6) to (8)
+#endif
+// Begin Seraph's Code
+#ifndef BRAWL_TALKED_BOTH
+   #define BRAWL_TALKED_BOTH                (9)
+#endif
+// End Seraph's Code
 
 #endif // REDMENT_H

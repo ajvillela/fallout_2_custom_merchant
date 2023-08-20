@@ -123,22 +123,22 @@ procedure Node002 begin
 end
 
 procedure Node010 begin
-   if (map_var(MVAR_Bio_Brain) == 1) then
-       if (map_var(MVAR_Bio_Motivator) == 1) then
+   if (map_var(MVAR_Bio_Brain) == 1) then begin
+       if (map_var(MVAR_Bio_Motivator) == 1) then begin
            if (map_var(MVAR_Bio_Gel) == 1) then
                Reply(113);
            else
                Reply(117);
-       else if (map_var(MVAR_Bio_Gel) == 1) then
+       end else if (map_var(MVAR_Bio_Gel) == 1) then
            Reply(115);
        else
            Reply(119);
-   else if (map_var(MVAR_Bio_Motivator) == 1) then
+   end else if (map_var(MVAR_Bio_Motivator) == 1) then begin
        if (map_var(MVAR_Bio_Gel) == 1) then
            Reply(114);
        else
            Reply(118);
-   else if (map_var(MVAR_Bio_Gel) == 1) then
+   end else if (map_var(MVAR_Bio_Gel) == 1) then
        Reply(116);
    else
        Reply(120);

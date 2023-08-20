@@ -258,13 +258,16 @@ end
 //~~~~~~~~~~~~~~~~ DESIGN TOOL STARTS HERE
 
 procedure Node001 begin
+   Node6Repeat := 0; //added by killap
+   
    if (local_var(LVAR_Herebefore) == 0) then
       Reply(103);
    else
       Reply(104);
    NLowOption(105, Node002);
    NOption(mstr(106) + " " + dude_name + mstr(160), Node003, 4);
-   if (merk_seed_status(MSS_DR_HENRY_ACCEPT)) then
+   //if (merk_seed_status(MSS_DR_HENRY_ACCEPT)) then
+   if (merk_seed_status(MSS_DR_HENRY_ACCEPT) and not merk_seed_status(MSS_DR_HENRY_DONE)) then //added by killap
       NOption(107, Node013, 4);
    if (global_var(GVAR_NCR_ENCLAVE_INFO) bwand 1) then
       NOption(108, Node014, 4);
@@ -281,7 +284,7 @@ procedure Node003 begin
    NOption(112, Node004, 4);
    if (has_skill(dude_obj, SKILL_SCIENCE) > 79) then
       NOption(113, Node005, 4);
-   if (has_skill(dude_obj, SKILL_SCIENCE) > 79 and global_var(GVAR_NCR_HENRY_HYPO) != CYBER_DOG_JOIN) then
+   if ( ((has_skill(dude_obj, SKILL_SCIENCE) > 79) and (global_var(GVAR_NCR_HENRY_HYPO) < CYBER_DOG_JOIN)) ) then //edit by killap - changed to < rather than !=
       NOption(114, Node006, 4);
    NOption(115, Node999, 4);
 end
@@ -294,8 +297,9 @@ end
 procedure Node005 begin
    Reply(117);
    NOption(118, Node004, 4);
-   if (has_skill(dude_obj, SKILL_SCIENCE) > 79 and  global_var(GVAR_NCR_HENRY_HYPO) != CYBER_DOG_JOIN) then
+   if (has_skill(dude_obj, SKILL_SCIENCE) > 79 and  global_var(GVAR_NCR_HENRY_HYPO) < CYBER_DOG_JOIN) then //edit by killap - changed to < rather than !=
       NOption(119, Node006, 4);
+      //NOption(114, Node006, 4); --comment out by killap
    BOption(120, Node999, 4);
 end
 
@@ -345,6 +349,7 @@ end
 procedure Node012 begin
    add_obj_to_inven(dude_obj, create_object_sid(HENRY_SERUM, dude_tile, 0, SCRIPT_SIMSERUM));
    set_global_var(GVAR_NCR_HENRY_HYPO, HYPO_GIVEN);
+   set_global_var(GVAR_BH_FTM,FTM_ENLISTED);  //added by killap - RP
    Reply(139);
    ENDOPTION;
 end
@@ -440,6 +445,7 @@ end
 
 procedure DoCallGuards begin
    //Do guard stuff here
+   set_ncr_flag(NCR_GUARD_ENEMY); //added by killap
 end
 
 

@@ -1,7 +1,6 @@
 /*
 	Copyright 1998-2003 Interplay Entertainment Corp.  All rights reserved.
 */
-
 /*
         Name:
         Location: New Reno
@@ -22,6 +21,7 @@
 #include "..\headers\command.h"
 #include "..\headers\NewReno.h"
 #include "..\headers\PartyBkg.h"
+#include "..\headers\NEWR1.h" //added by killap
 
 /* Standard Script Procedures */
 procedure start;
@@ -68,6 +68,7 @@ procedure Node021;
 procedure Node022;
 procedure Node023;
 procedure Node024;
+procedure Node024a;
 procedure Node025;
 procedure Node026;
 procedure Node101;
@@ -210,7 +211,7 @@ procedure Node1100;
 
 #define hurt_family                       lvar_bit(LVAR_Flags, hurt_family_bit)
 #define set_hurt_family                   if (hurt_family == false) then begin            \
-                                             dec_family_counter_amt(family_mordino, -20); \
+                                             dec_family_counter_amt(family_mordino, 20);  /* Seraph's Fix: replaced '-20' with '20' */\
                                           end                                             \
                                           set_lvar_bit_on(LVAR_Flags, hurt_family_bit)
 
@@ -268,13 +269,16 @@ procedure Node1100;
 #define set_node_209                      set_lvar_bit_on(LVAR_Flags, node_209_bit)
 
 #define add_myron_to_party                set_gave_stuff;   \
-                                          party_add_self
+                                          party_add_self;  \
+                                          inven_unwield(self_obj)
+                                          
 #define combined_pid_qty(the_pid)         (obj_is_carrying_obj_pid(dude_obj, the_pid) + obj_is_carrying_obj_pid(self_obj, the_pid))
 
 #define myron_attracted_to_dude           ((dude_is_female) and (dude_charisma > 5))
 
 // making drugs etc...
-#define total_antidote_ingreds            total_ingreds := combined_pid_qty(PID_SCORPION_TAIL)
+#define total_antidote_ingreds            total_ingreds := combined_pid_qty(PID_SCORPION_TAIL);                 \
+                                          total_ingreds := total_ingreds + combined_pid_qty(PID_SMALL_SCORPION_TAIL) 
 #define total_stimpak_ingreds             total_ingreds := combined_pid_qty(PID_BROC_FLOWER);                  \
                                           if (total_ingreds > combined_pid_qty(PID_XANDER_ROOT)) then          \
                                              total_ingreds := combined_pid_qty(PID_XANDER_ROOT);               \
@@ -297,6 +301,7 @@ procedure Node1100;
                                              if ((x < left_to_make) and (x != -1)) then begin            \
                                                 left_to_make := x;                                       \
                                              end                                                         \
+                                             remove_pid_qty_shared(PID_SMALL_SCORPION_TAIL, left_to_make - combined_pid_qty(PID_SCORPION_TAIL))      \
                                              remove_pid_qty_shared(PID_SCORPION_TAIL, left_to_make)      \
                                              give_pid_qty(dude_obj, PID_ANTIDOTE, left_to_make)          \
                                              game_time_advance(ONE_GAME_HOUR * left_to_make);            \
@@ -377,6 +382,7 @@ variable prev_node;
 variable current_node;
 variable temp_qty;
 import variable new_reno_myron_obj;
+variable waiting := 0; //added by killap
 
 /* Local variables which do not need to be saved between map changes. */
 
@@ -411,16 +417,20 @@ procedure timed_event_p_proc begin
                   call Node004;
                end else if ((dude_is_sneaking) or (dude_is_armed)) then begin
                   call Node002;
-               end else if ((sulik_is_dude_companion) or (marcus_is_dude_companion)) then begin
+               end else if ( ((sulik_is_dude_companion) or (marcus_is_dude_companion)) and (random(1,2) == 1) ) then begin
                   call Node005;
-               end else if (lenny_is_dude_companion) then begin
-                  call Node007;
+               end else if ( (lenny_is_dude_companion) and (random(1,2) == 1) )then begin
+                  call Node006; //was Node007 - killap
                end else begin
                   call Node003;
                end
             end
          end else begin
-            if (party_healed_bad) then begin
+            //added by killap
+            if (Is_Crippled(self_obj)) then begin
+                  floater(5000);
+            //end
+            end else if (party_healed_bad) then begin
                call Node009;
             end else if (party_healed_good == false) then begin
                call Node008;
@@ -430,10 +440,14 @@ procedure timed_event_p_proc begin
                call Node011;
             end else if (cur_town == AREA_VAULT_CITY) then begin
                call Node026;
-            end else if (Miria_In_Party) then begin
+            end else if ( (Miria_In_Party) and (random(1,2) == 1) )then begin
                call Node024;
+            //added by killap - expansion
+            end else if ( (Kitsune_In_Party) and (random(1,2) == 1) )then begin
+               call Node024a;
+            //end added
             end else if (myron_doesnt_like_area) then begin
-               if ((Marcus_In_Party) or (Lenny_In_Party)) then begin
+               if (((Marcus_In_Party) or (Lenny_In_Party)) and (random(1,2) == 1)) then begin
                   call Node013;
                end else begin
                   call Node012;
@@ -444,10 +458,16 @@ procedure timed_event_p_proc begin
          end
       end
    end
-   nr_add_timer_event_rand(self_obj, 25, 45, float_param);
+   nr_add_timer_event_rand(self_obj, 80, 120, float_param); //edit by killap - was (25,45)
 end
 
 procedure map_update_p_proc begin
+   
+   //added by killap
+   if ( (cur_town == AREA_RENO_STABLES) ) then
+      new_reno_myron_obj := self_obj;
+   //end added
+
    if (combat_is_initialized == false) then begin
       if (anim_busy(self_obj) == false) then begin
          if (party_member_obj(obj_pid(self_obj)) != 0) then begin
@@ -475,6 +495,13 @@ procedure map_update_p_proc begin
          end
       end
    end
+   
+   //added by killap - needed for "hacky fix" for kitty drug... :(
+   if (waiting == 1) then begin
+      waiting := 0;
+   end
+   //end added
+   
 end
 
 procedure map_enter_p_proc begin
@@ -487,12 +514,48 @@ procedure map_enter_p_proc begin
       nr_add_timer_event_rand(self_obj, 25, 45, float_param);
    end
    if (cur_town == AREA_RENO_STABLES) then new_reno_myron_obj := self_obj;
+   
+   //added by killap - expansion
+   if (cur_map_index == MAP_EPA) then begin
+      if (map_first_run) then
+         floater(4000);
+   end
+   //end added
+   
 end
 
 procedure critter_p_proc begin
+   variable tmp1;
+   variable tmp2;
+   variable tmp;
+   
+   //added by killap
+   if ((cur_map_index == MAP_NEW_RENO_1) and (self_obj == party_member_obj(PID_MYRON)) and (map_var(MVAR_Kitty_Drug) == party_member_obj(PID_MYRON))) then begin 
+      set_map_var(MVAR_Kitty_Drug, 0);
+      waiting := 1;
+      if (get_critter_stat(self_obj, STAT_st) < 10) then begin
+         use_obj_on_obj(create_object_sid(PID_KITTY_SEX_DRUG_STRENGTH, 0, 0, -1), self_obj);
+      end
+   end 
+   //end added
+   
+   //added by killap - not tested, but most likely required when Myron goes up a level
+   //and changes protos.
+   if (expand_carry_limit) then begin
+      tmp1 := get_critter_extra_stat(self_obj, STAT_carry_amt);
+      tmp2 := get_critter_base_stat(self_obj, STAT_carry_amt);
+      if ( ((tmp1 + tmp2) > 124) and ((tmp1 + tmp2) < 135) ) then begin
+         tmp := get_critter_extra_stat(self_obj, STAT_carry_amt) + 10; 
+         set_critter_extra_stat(self_obj, STAT_carry_amt, tmp);
+      end
+   end
+   //end added
+   
    if (Myron_In_Party) then begin
       if (myron_paused == false) then begin
-         party_member_follow_dude
+         if (waiting != 1) then begin //check added by killap - needed for "hacky fix" for kitty drug... :(
+            party_member_follow_dude
+         end
       end
    end else if (self_can_see_dude) then begin
       if (hostile) then begin
@@ -529,6 +592,15 @@ procedure pickup_p_proc begin
 end
 
 procedure use_obj_on_p_proc begin
+
+   //added by killap
+   if ( (obj_pid(obj_being_used_with) == PID_MICRO_FUSION_CELL) or (obj_pid(obj_being_used_with) == PID_SMALL_ENERGY_CELL) ) then begin
+      script_overrides;
+      display_msg(g_mstr(20000));
+   end
+   //end added
+
+
    if (obj_pid(obj_being_used_with) == PID_JET) then begin
       script_overrides;
       if ((Marcus_In_Party) or (Lenny_In_Party)) then begin
@@ -554,6 +626,12 @@ procedure use_obj_on_p_proc begin
 end
 
 procedure talk_p_proc begin
+   //begin B-team mod
+   /*variable loc1;
+   variable loc2;
+   loc1:=critter_inven_obj(self_obj,0);*/
+   //end B-team mod
+
    find_party_background;
    smart := false;
    if (hostile == false) then begin
@@ -574,12 +652,77 @@ procedure talk_p_proc begin
       set_gave_stuff;
    end
    nr_add_timer_event_rand(self_obj, 25, 45, float_param);
+   
+   //begin B-team mod
+   /*loc2:= critter_inven_obj(self_obj, 2);
+   if (loc2 == 0) then begin
+      loc2 := critter_inven_obj(self_obj, 1);
+   end 
+   if  (critter_inven_obj(self_obj,0)!=loc1) then
+    begin
+     if (critter_inven_obj(self_obj,0)== 0 ) then
+     begin
+     // Ustawianie grafiki dla golej postaci 
+     metarule3(107,self_obj,16777304,0);
+     end
+     //else
+     //if ((obj_pid(critter_inven_obj(self_obj,0))== 1) or (obj_pid(critter_inven_obj(self_obj,0))==379)) then
+     //begin
+     //// Ustawianie grafiki dla Lether Armor
+     //metarule3(107,self_obj,16777260,0);
+     //end
+     else
+     if ((obj_pid(critter_inven_obj(self_obj,0))== 232) or (obj_pid(critter_inven_obj(self_obj,0))== 3 )) then
+     begin
+     // Ustawianie grafiki dla Power Armor
+     metarule3(107,self_obj,FID_NMMYPA,0);
+     end
+     else
+     if ((obj_pid(critter_inven_obj(self_obj,0))==349) or (obj_pid(critter_inven_obj(self_obj,0))==348 )) then
+     begin
+     // Ustawianie grafiki dla Advenced Power Armor
+     metarule3(107,self_obj,FID_HANPWR,0);
+     end
+     //else
+     //if ((obj_pid(critter_inven_obj(self_obj,0))==240) or (obj_pid(critter_inven_obj(self_obj,0))==380) or (obj_pid(critter_inven_obj(self_obj,0))==2 )) then
+     //begin
+     //// Ustawianie grafiki dla Metal Armor
+     //metarule3(107,self_obj,16777230,0);
+     //end
+     //else
+     //if ((obj_pid(critter_inven_obj(self_obj,0))==74) or (obj_pid(critter_inven_obj(self_obj,0))==265)) then
+     //begin
+     //// Ustawianie grafiki dla Lether Jacket
+     //metarule3(107,self_obj,16777229,0);
+     //end
+     else
+     if ((obj_pid(critter_inven_obj(self_obj,0))==239) or (obj_pid(critter_inven_obj(self_obj,0))==17) or (obj_pid(critter_inven_obj(self_obj,0))==381 )) then
+     begin
+     // Ustawianie grafiki dla Combat Armor
+     metarule3(107,self_obj,FID_NMMYCA,0);
+     end
+     else
+     if ((obj_pid(critter_inven_obj(self_obj,0))==524) or (obj_pid(critter_inven_obj(self_obj,0))==113)) then
+     begin
+     // Ustawianie grafiki dla habitu
+     metarule3(107,self_obj,FID_HAROBE,0);
+     end
+     restock_obj := critter_inven_obj(self_obj, 1);
+     debug_msg("armour pid == " + obj_pid(restock_obj));
+     rm_obj_from_inven(self_obj, restock_obj);
+     add_obj_to_inven(self_obj, restock_obj);
+     if (loc2 != 0) then begin
+      wield_obj_critter(self_obj, loc2);
+     end
+    end*/
+   //end B-team mod
 end
 
 procedure destroy_p_proc begin
    set_myron_dead;
    inc_evil_critter
    set_hurt_family;
+   set_global_var(GVAR_ENDGAME_MOVIE_RENO_ADD3, 0);
 end
 
 procedure push_p_proc begin
@@ -624,16 +767,19 @@ procedure Node988 begin
    call Node114A;
 end
 procedure Node985 begin
-   /* // *** put this in only if the expansion pack
+   variable tmp;
+   // *** put this in only if the expansion pack --unlocked by killap
    if (EPA_visible_on_map == false) then begin
       mark_EPA_on_map
-   end else
-   */
-   if (stash_found == false) then begin
+   end else if (stash_found == false) then begin
       set_stash_know;
    end else if (expand_carry_limit == false) then begin
       set_expand_carry_limit;
-      set_critter_stat(self_obj, STAT_carry_amt, get_critter_stat(self_obj, STAT_carry_amt) + 10);
+      //tmp := get_critter_stat(self_obj, STAT_carry_amt) + 10;
+      tmp := get_critter_extra_stat(self_obj, STAT_carry_amt) + 10; //added by killap - requires Timeslip's compiler and dlls
+      set_critter_extra_stat(self_obj, STAT_carry_amt, tmp); //added by killap - requires Timeslip's compiler and dlls
+      //set_pc_base_stat(STAT_carry_amt, 200);
+      //set_critter_stat(self_obj, STAT_carry_amt, 10); //altered by Seraph/killap
    end
 end
 procedure Node984 begin
@@ -821,9 +967,6 @@ procedure Node961 begin
    call Node998;
 end
 
-#define is_insert_message(x)  ((x == ) or (x == ) or        \
-                               ((<= x) and (x <= )) or     \
-                               (x == ))
 procedure Node002 begin
    set_myron_called_guards;
    floater_bad(210);
@@ -868,7 +1011,7 @@ procedure Node015 begin
    floater_bad_rand(485, 486 + sulik_is_dude_companion);
 end
 procedure Node016 begin
-   floater_bad_rand(496 + marcus_is_dude_companion, 497 + lenny_is_dude_companion);
+   floater_bad_rand(496 - marcus_is_dude_companion, 497 + lenny_is_dude_companion); //edit by killap - was + marcus_is_dude_companion
 end
 procedure Node017 begin
    floater_rand(505, 509);
@@ -893,6 +1036,9 @@ procedure Node023 begin
 end
 procedure Node024 begin
    floater_rand(590, 595);
+end
+procedure Node024a begin
+   floater_rand(596, 599);
 end
 procedure Node025 begin
    floater(600);
@@ -1274,12 +1420,10 @@ procedure Node141 begin
    prev_node := 141;
 end
 procedure Node142 begin
-   /* // *** put this in only if expansion pack
+   // *** put this in only if expansion pack --unlocked by killap
    if (EPA_visible_on_map == false) then begin
       Reply(1020);
-   end else
-   */
-   if (stash_found == false) then begin
+   end else if (stash_found == false) then begin
       set_stash_know;
       Reply(1021);
    end else begin
@@ -1672,7 +1816,8 @@ procedure Node229B begin
 end
 procedure Node230 begin
    if (dude_charisma == 1) then begin
-      Reply(1725);
+      //Reply(1725);
+      Reply(1549); //edit by killap
       NOption(1550, Node244, 004);
       BOption(1553, Node961, 004);
       NOption(1554, Node999, 004);
@@ -1712,6 +1857,7 @@ procedure Node232 begin
    display_mstr(1885);
    give_xp(EXP_MYRON_JOINS_PARTY);
    add_myron_to_party;
+   set_global_var(GVAR_ENDGAME_MOVIE_RENO_ADD3, 1);
    Reply(1577);
    NOption(1578, Node999, 004);
    NOption(1579, Node248, 004);
@@ -1977,13 +2123,17 @@ procedure Node1009 begin
    end else begin
       Reply(2001);
    end
-   party_member_options(mstr(619), mstr(3000), mstr(3001), mstr(620), mstr(627), mstr(628 + ((party_is_waiting) * (1 + myron_attracted_to_dude))), def_stupid_msg);
+   //edit by killap
+   party_member_options(mstr(619), mstr(3000), mstr(3001), mstr(620), mstr(627), mstr(1844 - (39*myron_attracted_to_dude)), def_stupid_msg);
+   //party_member_options(mstr(619), mstr(3000), mstr(3001), mstr(620), mstr(627), mstr(628 + ((party_is_waiting) * (1 + myron_attracted_to_dude))), def_stupid_msg);
 end
 procedure Node1010 begin
    // weapons that can be used
    current_node := 1010;
    Reply(2033);
-   party_member_options(mstr(619), mstr(3000), mstr(3001), mstr(620), mstr(627), mstr(628 + ((party_is_waiting) * (1 + myron_attracted_to_dude))), def_stupid_msg);
+   //edit by killap
+   party_member_options(mstr(619), mstr(3000), mstr(3001), mstr(620), mstr(627), mstr(1844), def_stupid_msg);
+   //party_member_options(mstr(619), mstr(3000), mstr(3001), mstr(620), mstr(627), mstr(628 + ((party_is_waiting) * (1 + myron_attracted_to_dude))), def_stupid_msg);
 end
 procedure Node1100 begin
    // join me

@@ -76,9 +76,6 @@ procedure description_p_proc begin
    float_msg( dude_obj, mstr(101), FLOAT_COLOR_NORMAL );
 end
 
-procedure use_obj_on_p_proc begin
-end
-
 procedure use_skill_on_p_proc begin
    if (action_being_used == SKILL_STEAL) then
       script_overrides;
@@ -89,3 +86,11 @@ procedure map_enter_p_proc begin
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
    add_timer_event(self_obj,game_ticks(random(1,5)),0);
 end
+
+//added by killap - expansion pack
+procedure use_obj_on_p_proc begin
+   if ((obj_pid(obj_being_used_with) == PID_BUG_SPRAY)) then begin
+      kill_critter(self_obj, ANIM_melted_to_nothing_sf);
+   end
+end
+//end added - expansion pack

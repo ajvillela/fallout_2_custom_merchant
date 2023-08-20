@@ -208,7 +208,7 @@ procedure talk_p_proc begin
 
    if (onPatrol == 0) then
       call Node001;
-   else begin
+   else if ( (obj_can_see_obj(self_obj, dude_obj)) and (tile_in_tile_rect(13725, 12485, 19125, 19085, dude_tile)) ) then begin //added check by killap
       call Node002;
       set_map_var(MVAR_Slavers_Attack, 1);
       reg_anim_clear(self_obj);

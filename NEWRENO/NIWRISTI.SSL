@@ -83,6 +83,7 @@ procedure use_skill_on_p_proc begin
             if (get_still_status(still_status_wrecked) == false) then begin
                set_still_status(still_status_wrecked);
                display_mstr(130);
+               display_mstr(300); //added by killap
             end else begin
                display_mstr(150);
             end
@@ -96,20 +97,28 @@ procedure use_skill_on_p_proc begin
 end
 
 procedure use_obj_on_p_proc begin
+   variable used_obj;
    check_tamper
    if (tampered == false) then begin
-      if (obj_pid(obj_being_used_with) == PID_SCORPION_TAIL) then begin
+      used_obj := obj_pid(obj_being_used_with);
+      //added code about small scorpion tails - killap (expansion)
+      if ((used_obj == PID_SCORPION_TAIL) or (used_obj == PID_SMALL_SCORPION_TAIL)) then begin
          if (get_still_status(still_status_none)) then begin
             script_overrides;
             set_still_status(still_status_poisoned);
             display_mstr(140);
-            remove_pid_qty(source_obj, PID_SCORPION_TAIL, 1)
+            if (used_obj == PID_SCORPION_TAIL) then begin
+               remove_pid_qty(source_obj, PID_SCORPION_TAIL, 1)
+            end else begin
+               remove_pid_qty(source_obj, PID_SMALL_SCORPION_TAIL, 1)
+            end
          end
       end else if (get_still_status(still_status_wrecked) == false) then begin
          if ((obj_pid(obj_being_used_with) == PID_WRENCH) or (obj_pid(obj_being_used_with) == PID_CROWBAR) or (obj_pid(obj_being_used_with) == PID_MULTI_TOOL)) then begin
             script_overrides;
             set_still_status(still_status_wrecked);
             display_mstr(130);
+            display_mstr(300); //added by killap
             the_roll := roll_vs_skill(dude_obj, SKILL_REPAIR, 0);
             if ((is_success(the_roll) == false) and (is_critical(the_roll))) then begin
                if (new_reno_wright_teen_obj != 0) then begin
@@ -127,6 +136,7 @@ procedure damage_p_proc begin
       if (source_obj != 0) then begin
          if (weapon_dmg_type(source_obj) == DMG_explosion) then begin
             set_still_status(still_status_wrecked);
+            display_mstr(300); //added by killap
             if (new_reno_wright_teen_obj != 0) then begin
                tampered := true;
                nr_add_timer_event_tic(new_reno_wright_teen_obj, 0, call_guards_param);
@@ -137,6 +147,7 @@ procedure damage_p_proc begin
          if (target_obj != 0) then begin
             if (weapon_dmg_type(target_obj) == DMG_explosion) then begin
                set_still_status(still_status_wrecked);
+               display_mstr(300); //added by killap
                if (new_reno_wright_teen_obj != 0) then begin
                   tampered := true;
                   nr_add_timer_event_tic(new_reno_wright_teen_obj, 0, call_guards_param);

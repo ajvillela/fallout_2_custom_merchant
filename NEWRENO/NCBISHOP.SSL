@@ -100,6 +100,7 @@ procedure Node060;
 procedure Node061;
 procedure Node062;
 procedure Node063;
+procedure Node976a; //added by killap
 
 /* Local Variables which are saved. All Local Variables need to be
    prepended by LVAR_ */
@@ -181,7 +182,7 @@ procedure talk_p_proc begin
    set_forced_dialog;
    start_gdialog(NAME,self_obj,4,-1,-1);
    gSay_Start;
-      if (dude_is_made_man) then begin
+      if ((dude_is_made_man) or (warned_attack)) then begin //killap's code: added (warned_attack)
          if (self_family == dude_family) then begin
             call Node056;
          end else begin
@@ -200,9 +201,9 @@ procedure talk_p_proc begin
       end else if (briefcase_delivery_happy) then begin
          if ((carlson_nothing or westin_nothing)) then begin
             call Node033;
-         end else begin
+         end /*else begin
             call Node032;
-         end
+         end - comment out by killap*/
       end else begin
          call Node002;
       end
@@ -254,9 +255,9 @@ procedure Node989 begin
    end
 end
 procedure Node988 begin
-   if ((westin_dead == false) or (carlson_dead == false)) then begin
+   if ((westin_dead == false) or (carlson_dead == false)) then begin //edit by killap - expansion
       call Node010;
-   end else if (raiders_dead) then begin
+   end else if ( (raiders_dead) or (raiders_scout_left) ) then begin
       call Node060;
    end else if ((angela_banged) or (mrs_bishop_banged)) then begin
       call Node057;
@@ -265,7 +266,7 @@ procedure Node988 begin
    end
 end
 procedure Node987 begin
-   if (raiders_dead) then begin
+   if ( (raiders_dead) or (raiders_scout_left) ) then begin //edit by killap - expansion
       call Node060;
    end else if ((angela_banged) or (mrs_bishop_banged)) then begin
       call Node057;
@@ -276,7 +277,7 @@ end
 procedure Node986 begin
    if (bishop_warning) then begin
       call Node001;
-   end else if (raiders_dead) then begin
+   end else if ( (raiders_dead) or (raiders_scout_left) ) then begin //edit by killap - expansion
       call Node060;
    end else if ((angela_banged) or (mrs_bishop_banged)) then begin
       call Node057;
@@ -291,7 +292,8 @@ procedure Node985 begin
    call Node015;
 end
 procedure Node984 begin
-   if ((dude_iq>=8) or (is_success(roll_vs_skill(dude_obj,SKILL_BARTER,50)))) then begin
+   if (((dude_iq>=8) and (is_success(roll_vs_skill(dude_obj,SKILL_BARTER,30))))) then begin //killap's fix: made this a bit harder to get now - 'and' instead of 'or' and now '30' instead of '50'
+      set_westin_price(1000)  //added by killap
       call Node018;
    end else begin
       call Node017;
@@ -329,6 +331,7 @@ procedure Node979 begin
 end
 procedure Node978 begin
    if (carlson_price_nothing) then begin
+      set_carlson_price(500) //added by killap
    end
    call Node038;
 end
@@ -343,6 +346,12 @@ procedure Node976 begin
    set_carlson_price(1000)
    call Node039;
 end
+//killap's code
+procedure Node976a begin
+   set_carlson_price(500)
+   call Node039;
+end
+//killap's code
 procedure Node975 begin
    set_snuff_carlson(snuff_carlson_succeed);
    call Node049;
@@ -355,7 +364,7 @@ procedure Node974 begin
    end
 end
 procedure Node973 begin
-   if (raiders_dead) then begin
+   if ( (raiders_dead) or (raiders_scout_left) ) then begin //edit by killap - expansion
       call Node060;
    end else if ((angela_banged) or (mrs_bishop_banged)) then begin
       call Node057;
@@ -380,10 +389,10 @@ procedure Node970 begin
 end
 procedure Node969 begin
    if (westin_dead == false) then begin
-      set_westin_price(0)
+      set_westin_price(-1)
       call Node011;
    end else if (carlson_dead == false) then begin
-      set_carlson_price(0)
+      set_carlson_price(-1)
       call Node036;
    end else begin
       call Node001;
@@ -551,7 +560,7 @@ procedure Node017 begin
    BOption(393, Node986, 004);
 end
 procedure Node018 begin
-   set_westin_price(1000)
+//   set_westin_price(1000)   //killap's fix
    Reply(400);
    NOption(401, Node014, 004);
    BOption(402, Node986, 004);
@@ -620,7 +629,7 @@ end
 procedure Node031 begin
    Reply(500 + local_var(LVAR_Node031));
    if (bishop_snuff) then begin
-      NOption(503, Node998, 004);
+      BOption(503, Node998, 004); //edit by killap - was NOption
    end
    if (westin_dead) then begin
       NOption(504, Node981, 004);
@@ -636,7 +645,7 @@ end
 procedure Node032 begin
    Reply(mstr(515 + dude_is_female) + mstr(517));
    BOption(209, Node998, 004);
-   NOption(519, Node998, 004);
+   BOption(519, Node998, 004);   //edit by killap - was NOption
    BOption(211, Node998, 004);
 end
 procedure Node033 begin
@@ -646,10 +655,14 @@ procedure Node033 begin
 end
 procedure Node034 begin
 variable temp;
+   // added by killap
+   variable xp_amount;
+   xp_amount := EXP_NEW_RENO_ASSASSINATE_WESTIN + (get_westin_flag(WESTIN_HEART_PILLS_DEATH)*2000);
+   // end added
    previous_node := 34;
    display_mstr(925);
    inc_reno_rep(REP_NEW_RENO_ASSASINATE_WESTIN);
-   give_xp(EXP_NEW_RENO_ASSASSINATE_WESTIN);
+   give_xp(xp_amount); // edit by killap - RP
    set_snuff_westin(snuff_westin_succeed);
    temp := mstr(695);
    if (westin_price >= 500) then begin
@@ -730,13 +743,13 @@ procedure Node040 begin
    if ((dude_iq < 8) and (westin_nothing)) then begin
       NOption(592, Node977, 004);
    end
-   NOption(593, Node039, 004);
+   NOption(593, Node976a, 004);   //killap's fix: changed from 039 to 976a - now you can get the $500.
    NOption(594, Node986, 004);
 end
 procedure Node041 begin
    Reply(600);
    GOption(601, Node976, 004);
-   NOption(602, Node976, 004);
+   BOption(602, Node976, 004);   //killap's fix: this should be a bad option, and not a neutral one.
    BOption(603, Node001, 004);
    BOption(604 + (check_general_rep >= 0), Node001, 004);
 end
@@ -747,7 +760,7 @@ procedure Node042 begin
    if ((dude_iq<7) or (has_skill(dude_obj, SKILL_DOCTOR)>50) or (has_skill(dude_obj,SKILL_FIRST_AID )>100)) then begin
       NOption(414, Node046, 004);
    end
-   NOption(414, Node046, 007);
+   //NOption(414, Node046, 007); - duplicate - killap
    NOption(622, Node047, 008);
    NOption(417, Node986, 004);
    set_local_var(LVAR_Node042, true);
@@ -773,7 +786,7 @@ procedure Node045 begin
 end
 procedure Node046 begin
    Reply(660);
-   NOption(456, Node042, 004);
+   NOption(631, Node042, 004); //was 456 - killap
    NOption(652, Node039, 004);
    NOption(428, Node986, 004);
 end
@@ -812,7 +825,7 @@ variable temp;
    Reply(temp);
    if (bishop_warning == false) then begin
       NOption(537, Node974, 004);
-      NOption(539, Node050, 004);
+      NOption(539, Node986, 004);   //killap's fix: was Node050
    end else begin
       NOption(538, Node051, 004);
    end
@@ -894,13 +907,16 @@ procedure Node061 begin
 variable temp;
    previous_node := 61;
    set_bishop_warning
-   temp := mstr(805);
+   if (raiders_scout_left) then
+      temp := mstr(1805);
+   else
+      temp := mstr(805);
    if (raiders_marcus) then begin
       temp += mstr(806);
-   end else if (raiders_robobrain) then begin
-      temp += mstr(807);
    end else if (raiders_bonenose) then begin
-      temp += mstr(808);
+      temp += mstr(808); //killap's fix: changed from 807
+   end else if (raiders_robobrain) then begin
+      temp += mstr(807);   //killap's fix: changed from 808
    end
    temp += mstr(809);
    Reply(temp);
@@ -912,7 +928,11 @@ variable temp;
    BOption(815, Node063, 004);
 end
 procedure Node062 begin
-   if ((raiders_marcus) or (raiders_robobrain) or (raiders_bonenose)) then begin
+   previous_node := 62; // added by killap
+   if (raiders_scout_left) then begin
+      Reply(1820);
+   end
+   else if ((raiders_marcus) or (raiders_robobrain) or (raiders_bonenose)) then begin
       Reply(822);
    end else begin
       Reply(mstr(820 + dude_is_female) + mstr(822));
@@ -926,7 +946,10 @@ variable temp := "";
    if (previous_node == 61) then begin
       temp := mstr(835);
    end
-   temp += mstr(836);
+   if (raiders_scout_left) then
+      temp += mstr(1836);
+   else
+      temp += mstr(836);
    if ((westin_dead == false) or (carlson_dead == false)) then begin
       temp += mstr(837);
    end
@@ -935,6 +958,9 @@ variable temp := "";
    if ((westin_dead == false) or (carlson_dead == false)) then begin
       NOption(789, Node969, 004);
    end
-   BOption(840, Node001, 004);
+   if (raiders_scout_left) then
+      BOption(1840, Node001, 004);
+   else
+      BOption(840, Node001, 004);
    BOption(763, Node998, 004);
 end

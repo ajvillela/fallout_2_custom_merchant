@@ -225,9 +225,9 @@ procedure destroy_p_proc begin
 
 /* Increment the aligned critter counter*/
    inc_good_critter
-   if (source_obj == dude_obj) then begin
+   /*if (source_obj == dude_obj) then begin
       inc_childkiller
-   end
+   end*-comment out by killap - counts as two childkills then/
 /* Set global_variable for Enemy status*/
 end
 

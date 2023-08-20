@@ -70,6 +70,7 @@ procedure Node009;
 procedure Node010;
 procedure Node011;
 procedure Node012;
+procedure Node013;
 
 procedure NodeFleeing;
 procedure NodeFighting;
@@ -171,6 +172,7 @@ procedure talk_p_proc begin
          call Node001;
       gSay_End;
       end_dialogue;
+      set_local_var(LVAR_Herebefore,1);
    end else begin
       call Node012;
    end
@@ -247,6 +249,8 @@ procedure checkChoiceOne begin
       call Node008;
    else if (one == 6) then
       call Node009;
+   else if (one == 7) then
+      call Node013;
 end
 
 procedure checkChoiceTwo begin
@@ -264,20 +268,24 @@ procedure checkChoiceTwo begin
       call Node008;
    else if (two == 6) then
       call Node009;
+   else if (two == 7) then
+      call Node013;
 end
 
 procedure Node002 begin
-   variable count := 10;
 
+   //variable count := 0;
+
+   /* Seraph's Fix
    if (one < 0 and two < 0) then begin
-      while (one != two and count < 10) do begin
+      while (count < 10) do begin
          one := Random(0, 6);
-         if (one == 6) then begin
-            one := Random(0, 6);
-         end
          two := Random(0, 6);
-         if (one == 6) then two := Random(0, 5);
-         else two := Random(0, 6);
+         if (one == two) then begin
+            while (one == two) do begin
+               two := Random(0, 6);
+            end
+         end
 
          count += 1;
       end
@@ -286,70 +294,91 @@ procedure Node002 begin
          two := 1;
       end
    end
+   */
 
+   // Seraph's Fix: Begin Rob's Code: simplify this to two rolls, with the same net
+   //                                 effect as re-rolling until they're different
+   if (Only_Once == 0) then begin //added check by killap
+      one := Random(0, 7);
+      two := Random(0, 6);
+      if (two >= one) then
+         two += 1;
+         
+      Only_Once := 1;
+   end
+   // End Rob's Code
+
+   Reply(106); //added by killap
    NOption(107 + one, checkChoiceOne, 4);
    NOption(107 + two, checkChoiceTwo, 4);
-   NOption(114, Node999, 4);
+   NOption(115, Node999, 4);
 end
 
 procedure Node003 begin
    mark_new_reno_on_map
-   Reply(115);
-   NOption(116, Node999, 4);
+   Reply(116);
+   NOption(150, Node002, 4); //added by killap
+   NOption(117, Node999, 4);
 end
 
 procedure Node004 begin
    mark_vault_city_on_map
-   Reply(117);
-   NOption(118, Node999, 4);
+   Reply(118);
+   NOption(150, Node002, 4); //added by killap
+   NOption(119, Node999, 4);
 end
 
 procedure Node005 begin
    mark_redding_on_map
-   Reply(119);
-   NOption(120, Node999, 4);
+   Reply(120);
+   NOption(150, Node002, 4); //added by killap
+   NOption(121, Node999, 4);
 end
 
 procedure Node006 begin
    mark_den_on_map
-   Reply(121);
-   NOption(122, Node999, 4);
+   Reply(122);
+   NOption(150, Node002, 4); //added by killap
+   NOption(123, Node999, 4);
 end
 
 procedure Node007 begin
    mark_san_francisco_on_map
-   Reply(123);
-   NOption(124, Node999, 4);
+   Reply(124);
+   NOption(150, Node002, 4); //added by killap
+   NOption(125, Node999, 4);
 end
 
 procedure Node008 begin
    mark_new_CA_republic_on_map
-   Reply(125);
-   NOption(126, Node999, 4);
+   Reply(126);
+   NOption(150, Node002, 4); //added by killap
+   NOption(127, Node999, 4);
 end
 
 procedure Node009 begin
-   mark_sierra_army_base_on_map
-   Reply(127);
-   NOption(128, Node999, 4);
+   mark_military_base_on_map
+   Reply(128);
+   NOption(150, Node002, 4); //added by killap
+   NOption(129, Node999, 4);
 end
 
 procedure Node010 begin
-   Reply(129);
-   NOption(130, Node002, 4);
-   NOption(131, Node011, 4);
-   NOption(132, Node999, 4);
+   Reply(132);
+   NOption(133, Node002, 4);
+   NOption(134, Node011, 4);
+   NOption(135, Node999, 4);
 end
 
 procedure Node011 begin
-   Reply(133);
-   NOption(134, Node002, 4);
-   NOption(135, Node010, 4);
-   NOption(136, Node999, 4);
+   Reply(136);
+   NOption(137, Node002, 4);
+   NOption(138, Node010, 4);
+   NOption(139, Node999, 4);
 end
 
 procedure Node012 begin
-   float_msg(self_obj, mstr(137 + n12Count), FLOAT_MSG_NORMAL);
+   float_msg(self_obj, mstr(140 + n12Count), FLOAT_MSG_NORMAL);
    n12Count += 1;
    if (n12Count > 3) then begin
       n12Count := 0;
@@ -357,12 +386,20 @@ procedure Node012 begin
    if (n12Count == 2 and not day) then n12Count := 3;
 end
 
+procedure Node013 begin
+   mark_EPA_on_map
+   Reply(130);
+   NOption(150, Node002, 4); //added by killap
+   NOption(131, Node999, 4);
+end
+
 procedure NodeFleeing begin
-   float_msg(self_obj, mstr(105 + Random(0, 3)), FLOAT_MSG_YELLOW);
+   //float_msg(self_obj, mstr(105 + Random(0, 3)), FLOAT_MSG_YELLOW);
+   float_msg(self_obj, mstr(145 + Random(0, 4)), FLOAT_MSG_YELLOW);
 end
 
 procedure NodeFighting begin
-   float_msg(self_obj, mstr(100 + Random(0, 4)), FLOAT_MSG_RED);
+   //float_msg(self_obj, mstr(100 + Random(0, 4)), FLOAT_MSG_RED);
 end
 
 

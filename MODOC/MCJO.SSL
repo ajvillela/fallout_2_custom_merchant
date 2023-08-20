@@ -150,10 +150,21 @@ procedure timed_event_p_proc begin
 end
 
 procedure map_enter_p_proc begin
-   if (jo_dead) then begin
+   /*if (jo_dead) then begin
       destroy_object(self_obj);
+   end*/
+   
+   //added by killap
+   if (jo_dead) then begin
+      if (cur_map_index == MAP_GHOST_FARM) then begin
+         check_set_obj_visiblility(self_obj, true);
+         destroy_object(self_obj);
+      end                     
+   end else begin
+      check_show_ghost_farm_attackers
    end
-   check_show_ghost_farm_attackers
+   //end added by killap
+   
    match_dude_elevation;
    modoc_jo_obj := self_obj;
    if (map_first_run) then begin
@@ -166,6 +177,7 @@ procedure map_enter_p_proc begin
    end else if (cur_map_index != MAP_GHOST_FARM) then begin
       critter_attempt_placement(self_obj, local_var(LVAR_Home_Tile), dude_elevation);
    end
+   
 end
 
 procedure map_update_p_proc begin
@@ -196,7 +208,7 @@ variable temp_line;
             set_next_stage_time(quick_stage_time)
             set_sub_stage(wedding_stage_ask_skip)
          end else if (get_sub_stage == wedding_stage_jo_question) then begin
-            display_mstr(602);
+            display_mstr(602 + (10*jo_dead)); // Altered by Seraph: added (10*jo_dead)
             floater(603);
             set_next_stage_time(default_stage_time)
             set_sub_stage(wedding_stage_question_response)
@@ -246,6 +258,7 @@ variable temp_line;
             clear_stage
             party_no_follow_off;
             gfade_in(1);
+            set_local_var(LVAR_Home_Tile, 20143); //added by killap
          end
       end
    end else begin
@@ -344,7 +357,7 @@ end
 procedure look_at_p_proc begin
    script_overrides;
    if (herebefore) then begin
-      display_mstr_rand(102,106);
+      display_mstr_rand(102 + (1398*jo_dead),106 + (1394*jo_dead)); // Altered by Seraph
    end else begin
       display_mstr(101);
    end
@@ -412,8 +425,6 @@ procedure Node001 begin
    if (ghost_farm_seed_unknown) then begin
       NOption(162,Node050,004);
       NOption(168,Node030,-003);
-   end else begin
-      NOption(183,Node011,004);
    end
    if (family_feud_seed_active) then begin
       NOption(164,Node060,004);
@@ -446,7 +457,7 @@ variable days_left;
    if (attack_slag_time_up) then begin
       Reply(803);
       NOption(804,Node991,004);
-      NOption(805,Node991,004);
+      NOption(805,Node999,004); //note, this should *not* go to node991 since you say you want no part, but yet you are taken to the ghost farm - killap
    end else if (days_left == 1) then begin
       Reply(802);
    end else begin
@@ -478,12 +489,13 @@ end
 procedure Node011 begin
    debug_msg("Node011");
    Reply(186);
-   NOption(187,Node035,004);
-   NOption(188,Node035,004);
+   BOption(187,Node035,004); //edit by killap was NOption
+   BOption(188,Node035,004); //edit by killap was NOption
    NOption(189,Node012,004);
    NOption(g_bye,Node999,001);
 end
 procedure Node012 begin
+   set_ghost_farm_seed_known; //moved from node050 - killap
    debug_msg("Node012");
    Reply(190);
    NOption(191,Node013,001);
@@ -586,6 +598,7 @@ procedure Node034 begin
    NOption(g_mstr(350),Node999,001);
 end
 procedure Node035 begin
+   //set_ghost_farm_seed_known; //moved from node050 - killap
    debug_msg("Node035");
    Reply(230);
    NOption(g_mstr(350),Node999,001);
@@ -666,7 +679,7 @@ procedure Node046 begin
 end
 procedure Node050 begin
    debug_msg("Node050");
-   set_ghost_farm_seed_known;
+   //set_ghost_farm_seed_known;
    Reply(262);
    NOption(263,Node011,004);
    NOption(264,Node999,001);
@@ -700,8 +713,10 @@ procedure Node061 begin
    set_modoc_ending_happy;
    set_kill_slag_time;
    remove_pid_qty(dude_obj, PID_SLAG_MESSAGE, 1)
+   set_message_delivered; //added by killap
    set_ghost_farm_seed_inactive;
-   inc_global_var(GVAR_TOWN_REP_MODOC,REP_TOWN_SOLVE_GHOST_FARM_REGULAR);
+   inc_global_var_amt(GVAR_TOWN_REP_MODOC,REP_TOWN_SOLVE_GHOST_FARM_REGULAR); // Seraph's Fix: changed 'inc_global_var' to 'inc_global_var_amt'. Thanks Rob!
+   inc_global_var_amt(GVAR_TOWN_REP_GHOST_FARM,REP_TOWN_SOLVE_GHOST_FARM_REGULAR); //added by killap
    display_mstr(1000);
    give_xp(EXP_SOLVE_GHOST_FARM_REGULAR);
    Reply(275);
@@ -711,6 +726,7 @@ procedure Node062 begin
    debug_msg("Node062");
    gdialog_set_barter_mod(-50);
    Reply(277);
+   mark_gecko_on_map //added by killap
    NOption(278,Node063,-003);
    NOption(220,Node999,001);
 end
@@ -794,10 +810,11 @@ end
 procedure Node075 begin
    debug_msg("Node075");
    set_karl_come_home;
-   set_ghost_pip(state_ghost_pip_complete);
+   set_ghost_pip(state_ghost_pip_send_karl_home); //killap's fix: changed from (state_ghost_pip_complete)
    set_karl_known;
    set_modoc_ending_happy;
-   inc_global_var(GVAR_TOWN_REP_MODOC,REP_TOWN_SOLVE_GHOST_FARM_BEST);
+   inc_global_var_amt(GVAR_TOWN_REP_MODOC,REP_TOWN_SOLVE_GHOST_FARM_BEST); // Seraph's Fix: changed 'inc_global_var' to 'inc_global_var_amt'. Thanks Rob!
+   inc_global_var_amt(GVAR_TOWN_REP_GHOST_FARM,REP_TOWN_SOLVE_GHOST_FARM_BEST);  //added by killap
    display_mstr(1000);
    give_xp(EXP_SOLVE_GHOST_FARM_BEST);
    Reply(302);
@@ -807,8 +824,9 @@ procedure Node076 begin
    debug_msg("Node076");
    set_shelf_unlocked;
    gdialog_set_barter_mod(-75);
-   set_ghost_farm_seeds_inactive;
+//   set_ghost_farm_seeds_inactive; //not needed here - now done just once in Karl's script (last thing left for ghost quest)
    Reply(304);
+   mark_gecko_on_map //added by killap
    NOption(g_bye,Node999,001);
 end
 procedure Node077 begin
@@ -839,10 +857,12 @@ procedure Node080 begin
    set_modoc_ending_wipeout_2;
    set_kill_slag_time;
    set_ghost_farm_seeds_inactive;
-   inc_global_var(GVAR_TOWN_REP_MODOC,REP_TOWN_SOLVE_GHOST_FARM_BAD);
+   inc_global_var_amt(GVAR_TOWN_REP_MODOC,REP_TOWN_SOLVE_GHOST_FARM_BAD); // Seraph's Fix: changed 'inc_global_var' to 'inc_global_var_amt'. Thanks Rob!
+   inc_global_var_amt(GVAR_TOWN_REP_GHOST_FARM,REP_TOWN_SOLVE_GHOST_FARM_BAD);   //added by killap
    give_xp(EXP_SOLVE_GHOST_FARM_BAD);
    set_angry;
    Reply(310);
+   mark_gecko_on_map //added by killap
    NOption(g_mstr(350),Node999,001);
 end
 procedure Node081 begin
@@ -877,7 +897,7 @@ procedure Node086 begin
    debug_msg("Node086");
    set_ghost_pip(state_ghost_pip_find_karl);
    set_karl_come_home;
-   set_ghost_pip(state_ghost_pip_complete);
+   set_ghost_pip(state_ghost_pip_send_karl_home); //killap's fix: changed from (state_ghost_pip_complete)
    set_karl_known;
    Reply(318);
    if (fake_known) then begin
@@ -893,7 +913,7 @@ procedure Node087 begin
    debug_msg("Node087");
    set_fake_known;
    Reply(322);
-   if (karl_found) then begin
+   if (karl_known) then begin //edit by killap - was karl_found
       NOption(320,Node088,004);
    end else begin
       if (karl_found) then begin
@@ -905,8 +925,9 @@ end
 procedure Node088 begin
    debug_msg("Node088");
    set_modoc_ending_happy;
-   set_ghost_farm_seeds_inactive;
-   inc_global_var(GVAR_TOWN_REP_MODOC,REP_TOWN_SOLVE_GHOST_FARM_BEST);
+//   set_ghost_farm_seeds_inactive; //not needed here - now done just once in Karl's script (last thing for ghost quest)
+   inc_global_var_amt(GVAR_TOWN_REP_MODOC,REP_TOWN_SOLVE_GHOST_FARM_BEST); // Seraph's Fix: changed 'inc_global_var' to 'inc_global_var_amt'. Thanks Rob!
+   inc_global_var_amt(GVAR_TOWN_REP_GHOST_FARM,REP_TOWN_SOLVE_GHOST_FARM_BEST);  //added by killap
    give_xp(EXP_SOLVE_GHOST_FARM_BEST);
    Reply(326);
    NOption(327,Node076,004);

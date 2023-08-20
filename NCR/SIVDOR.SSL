@@ -22,6 +22,7 @@
 
 /* Include Files */
 #include "..\headers\define.h"
+#include "..\headers\ncrent.h" // added by killap
 
 #define NAME                    SCRIPT_DOOR
 
@@ -188,10 +189,10 @@ procedure use_p_proc begin
    Traps_Roll:=roll_vs_skill(source_obj,SKILL_TRAPS,Trap_Bonus);
 
    debug_msg("SIVDOR: i_vortis_obj : " + i_vortis_obj);
-   if (obj_in_party(source_obj) and local_var(LVAR_Vortis_Warn) == 0 and (i_vortis_obj > 0)) then begin
+   if (obj_in_party(source_obj) and local_var(LVAR_Vortis_Warn) < 2 and (i_vortis_obj > 0)) then begin
       debug_msg("SIVDOR: past case");
       script_overrides;
-      set_local_var(LVAR_Vortis_Warn, 1);
+      set_local_var(LVAR_Vortis_Warn, local_var(LVAR_Vortis_Warn)+1);
       add_timer_event(i_vortis_obj, 0, VORTIS_TIMER_DOOR_CHECK);
    end else begin
       debug_msg("SIVDOR: in normal");
@@ -299,6 +300,7 @@ procedure use_skill_on_p_proc begin
       add_timer_event(i_vortis_obj, 0, VORTIS_TIMER_DOOR_CHECK);
    end else begin
       if (Skill_Used == SKILL_LOCKPICK) then begin
+         script_overrides; //added by killap
          if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
             call Unlock_Lock;
          end
@@ -308,6 +310,7 @@ procedure use_skill_on_p_proc begin
       end                                                          // End of Skill_Lockpick
 
       else if (Skill_Used == SKILL_TRAPS) then begin
+         script_overrides; //added by killap
          if (local_var(LVAR_Trapped) == STATE_ACTIVE) then begin
             call Skill_Disarm_Traps;
          end
@@ -343,6 +346,7 @@ procedure use_obj_on_p_proc begin
    end else begin
       if (LOCK_STATUS == STATE_STANDARD_LOCK) then begin
          if (Tool == PID_LOCKPICKS) then begin
+            script_overrides; //added by killap
             if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
                   call Lockpick_Lock;
             end
@@ -351,6 +355,7 @@ procedure use_obj_on_p_proc begin
             end
          end
          else if (Tool == PID_EXP_LOCKPICK_SET) then begin
+            script_overrides; //added by killap
             if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
                   call Super_Lockpick_Lock;
             end
@@ -362,6 +367,7 @@ procedure use_obj_on_p_proc begin
 
       else if (LOCK_STATUS == STATE_ELECTRIC_LOCK) then begin
          if (Tool == PID_ELECTRONIC_LOCKPICKS) then begin
+            script_overrides; //added by killap
             if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
                   call Lockpick_Lock;
             end
@@ -370,6 +376,7 @@ procedure use_obj_on_p_proc begin
             end
          end
          else if (Tool == PID_ELEC_LOCKPICK_MKII) then begin
+            script_overrides; //added by killap
             if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
                   call Super_Lockpick_Lock;
             end
@@ -380,10 +387,12 @@ procedure use_obj_on_p_proc begin
       end
 
       else if (Tool == PID_CROWBAR) then begin
+         script_overrides; //added by killap
          call Pry_Door;
       end
 
       else if ((Tool == PID_DYNAMITE) or (Tool == PID_PLASTIC_EXPLOSIVES)) then begin
+         script_overrides; //added by killap
          call Set_Trap;
       end
    end
@@ -402,6 +411,12 @@ procedure damage_p_proc begin
   /************ Wood Door ****************/
 
  if (weapon_dmg_type(target_obj) == DMG_explosion) then begin
+   // added by killap
+   if (i_vortis_obj > 0) then begin
+     script_overrides;
+     set_map_var(MVAR_Slavers_Attack, 1);
+   end
+   // end added
    if (DOOR_STATUS == STATE_WOOD) then begin
        if (local_var(LVAR_Trapped) == STATE_ACTIVE) then begin
            set_local_var(LVAR_Trapped, STATE_INACTIVE);

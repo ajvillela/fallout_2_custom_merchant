@@ -58,6 +58,7 @@ procedure Node001;
 procedure Node002;
 procedure Node003;
 procedure Node004;
+procedure Node004a; //added by killap
 procedure Node005;
 procedure Node05a;
 procedure Node05b;
@@ -175,7 +176,11 @@ procedure finish begin
 end
 
 procedure critter_p_proc begin
-   if ( ( map_var(MVAR_Xarn_Door) == 1 ) and ( local_var( LVAR_Said_Thanks ) == 0 ) ) then begin
+
+   if ( ( map_var(MVAR_Xarn_Door) == 1 ) and ( local_var( LVAR_met ) == 0 ) ) then begin
+      dialogue_system_enter;
+   //end else if ( ( map_var(MVAR_Xarn_Door) == 1 ) and ( local_var( LVAR_Said_Thanks ) == 0 ) ) then begin
+   end else if ( ( map_var(MVAR_Xarn_Door) == 1 ) and ( local_var( LVAR_Said_Thanks ) == 0 ) and ( not ( map_var(MVAR_Xarn_In_Party) == 1 ) ) ) then begin
       set_local_var( LVAR_Said_Thanks, 1 );
       call Node016;
    end
@@ -229,6 +234,7 @@ procedure leave_player begin
       gfade_out(600);
       move_to(self_obj,0,0);
       set_local_var(LVAR_freed,2);
+      critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_VAULT13);  //added by killap
       gfade_in(600);
    end
 end
@@ -256,7 +262,13 @@ procedure talk_p_proc begin
    if (local_var(LVAR_Personal_Enemy) == 1) then begin
        call Node998;
    end
-   if (talk_to_dude == 1) then begin
+
+   //added by killap
+   /*if ( map_var(MVAR_Xarn_Door) == 1 ) then begin
+      floater(178); //Xarn needs to exit thru door
+   end
+   //end added by killap
+   else */if (talk_to_dude == 1) then begin
       talk_to_dude:=0;
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
@@ -267,6 +279,11 @@ procedure talk_p_proc begin
    else if (map_var(MVAR_Xarn_In_Party) == 1) then begin
       call Node022;
    end
+   //added by killap
+   else if (local_var(LVAR_freed) == 1) then begin
+      floater(178);
+   end 
+   //end added
    else if( global_var(GVAR_NAVARRO_BASE_ALERT) > 0 ) then begin
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
@@ -318,14 +335,16 @@ procedure destroy_p_proc begin
 /* Increment the aligned critter counter*/
 
   //need to check if dude killed him as it might be someone else
-  if (source_obj == dude_obj) then begin
-     set_map_var(MVAR_Xarn_In_Party,0); //xarn no longer in party if dead
-     display_msg(mstr(800));
-     give_xp(EXP_XARN_KILL);
-     inc_general_rep(REP_BONUS_CC_XARN_KILL);
-     set_global_var(GVAR_NAVARRO_XARN, NAVARRO_XARN_FINISHED); //player has dealt w/xarn
-     inc_good_critter
-  end
+   if (source_obj == dude_obj) then begin
+      set_map_var(MVAR_Xarn_In_Party,0); //xarn no longer in party if dead
+      if (global_var(GVAR_NAVARRO_XARN) < NAVARRO_XARN_FINISHED) then begin//added by killap
+         display_msg(mstr(800));
+         give_xp(EXP_XARN_KILL);
+         inc_general_rep(REP_BONUS_CC_XARN_KILL);
+         set_global_var(GVAR_NAVARRO_XARN, NAVARRO_XARN_FINISHED); //player has dealt w/xarn
+      end
+      inc_good_critter
+   end
 end
 
 /* Look_at_p_proc gets called any time that the player passes the cursor over any object.
@@ -383,8 +402,22 @@ end
 procedure Node003 begin
    Reply(112);
 
-   NLowOption(113,Node004);
-   NOption(114,Node004,004);
+   if (map_var(MVAR_Xarn_Door)) then begin
+      NLowOption(900,Node004a);
+      NOption(901,Node004a,004);
+   end else begin
+      NLowOption(113,Node004);
+      NOption(114,Node004,004);
+   end
+end
+
+procedure Node004a begin
+   set_global_var(GVAR_NAVARRO_XARN, NAVARRO_XARN_KNOW_ABOUT);
+   set_local_var(LVAR_dq_accept, 1);
+   Reply(175);
+
+   NLowOption(176,Node999);
+   NOption(177,Node999,004); 
 end
 
 procedure Node004 begin
@@ -398,7 +431,7 @@ procedure Node004 begin
 end
 
 procedure Node005 begin
-   if (check_general_rep >= 0) then begin //KARMA not bad
+   if ( (check_general_rep >= 0) or (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)) ) then begin //KARMA not bad --added by killap  (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       call Node05a;
    end
    else begin
@@ -419,7 +452,7 @@ procedure Node05b begin
 end
 
 procedure Node05c begin
-   if (check_general_rep >= 0) then begin //KARMA not bad
+   if ( (check_general_rep >= 0) or (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)) ) then begin //KARMA not bad --added by killap -  (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       Reply(122);
 
       NLowOption(124,Node006);
@@ -532,12 +565,14 @@ procedure Node015 begin
 end
 
 procedure Node016 begin
-   set_local_var(LVAR_freed,1);
-   floater(178); //Xarn needs to exit thru door
-   display_msg(mstr(810));
-   give_xp(EXP_XARN_FREED);
-   inc_general_rep(REP_BONUS_CC_XARN_FREED);
-   set_global_var(GVAR_NAVARRO_XARN, NAVARRO_XARN_FINISHED); //player has dealt w/xarn
+   if (global_var(GVAR_NAVARRO_XARN) < NAVARRO_XARN_FINISHED) then begin   //everthing moved under conditional
+      set_local_var(LVAR_freed,1);
+      floater(178); //Xarn needs to exit thru door
+      display_msg(mstr(810));
+      give_xp(EXP_XARN_FREED);
+      inc_general_rep(REP_BONUS_CC_XARN_FREED);
+      set_global_var(GVAR_NAVARRO_XARN, NAVARRO_XARN_FINISHED); //player has dealt w/xarn
+   end 
    //give_xp();
 end
 
@@ -545,13 +580,13 @@ procedure Node017 begin
    if (local_var(LVAR_met) == 0) then begin
       Reply(179);
 
-      NLowOption(181,Node018,004);
+      NLowOption(181,Node018); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
       NOption(201,Node018,004);
    end
    else begin
       Reply(180);
 
-      NLowOption(182,Node018,004);
+      NLowOption(182,Node018); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
       NOption(202,Node018,004);
    end
 end
@@ -610,12 +645,14 @@ procedure Node022 begin
 end
 
 procedure Node800 begin
-   display_msg(mstr(820));
-   give_xp(EXP_XARN_JOIN);
-   inc_general_rep(REP_BONUS_CC_XARN_JOIN);
-   set_global_var(GVAR_NAVARRO_XARN, NAVARRO_XARN_FINISHED); //player has dealt w/ xarn
-   set_map_var(MVAR_Xarn_In_Party,1);
-   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_PLAYER);
+   if (global_var(GVAR_NAVARRO_XARN) < NAVARRO_XARN_FINISHED) then begin //all moved under condition - killap
+      display_msg(mstr(820));
+      give_xp(EXP_XARN_JOIN);
+      inc_general_rep(REP_BONUS_CC_XARN_JOIN);
+      set_global_var(GVAR_NAVARRO_XARN, NAVARRO_XARN_FINISHED); //player has dealt w/ xarn
+      set_map_var(MVAR_Xarn_In_Party,1);
+      critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_PLAYER);
+   end 
 end
 
 procedure Node997 begin

@@ -6,7 +6,6 @@
    have been designed.
 */
 
-procedure start;
 
 #include "..\headers\define.h"
 
@@ -41,10 +40,24 @@ procedure Node999;                                      // This Node is Always E
 //~~~~~~~~~~~~~~~~ DESIGNER TOOL STARTS HERE
 #define TAUNT_CHANCE 40
 
+#define On_Tent_Map                 (cur_map_index == MAP_RND_MOUNTAIN_4) or   \
+                                    (cur_map_index == MAP_RND_MOUNTAIN_5) or   \
+                                    (cur_map_index == MAP_RND_DESERT4) or      \
+                                    (cur_map_index == MAP_RND_DESERT5) or      \
+                                    (cur_map_index == MAP_RND_DESERT_9) or     \
+                                    (cur_map_index == MAP_RND_COAST7) or       \
+                                    (cur_map_index == MAP_RND_COAST8) or       \
+                                    (cur_map_index == MAP_RND_COAST9) or       \
+                                    (cur_map_index == MAP_RND_COAST_10) or     \
+                                    (cur_map_index == MAP_RND_COAST_11) or     \
+                                    (cur_map_index == MAP_RND_COAST_12)        
+
+
 procedure Node001;
 procedure Node002;
 procedure Node003;
 procedure Node004;
+procedure Node004a;
 procedure Node005;
 
 procedure NodeFleeing;
@@ -70,6 +83,30 @@ end
    set up the Team number and AI packet for this critter. This will override the
    default from the prototype, and needs to be set in scripts. */
 procedure map_enter_p_proc begin
+   if (cur_map_index == MAP_RND_MOUNTAIN_4) then
+      move_to(self_obj, 17278, 0);
+   else if (cur_map_index == MAP_RND_MOUNTAIN_5) then
+      move_to(self_obj, 17891, 0);
+   else if (cur_map_index == MAP_RND_DESERT4) then
+      move_to(self_obj, 18897, 0);
+   else if (cur_map_index == MAP_RND_DESERT5) then
+      move_to(self_obj, 19101, 0);
+   else if (cur_map_index == MAP_RND_DESERT_9) then
+      move_to(self_obj, 18293, 0);
+   else if (cur_map_index == MAP_RND_COAST7) then
+      move_to(self_obj, 20702, 0);
+   else if (cur_map_index == MAP_RND_COAST8) then
+      move_to(self_obj, 18306, 0);
+   else if (cur_map_index == MAP_RND_COAST9) then
+      move_to(self_obj, 17490, 0);
+   else if (cur_map_index == MAP_RND_COAST_10) then
+      move_to(self_obj, 16706, 0);
+   else if (cur_map_index == MAP_RND_COAST_11) then
+      move_to(self_obj, 18293, 0);
+   else if (cur_map_index == MAP_RND_COAST_12) then
+      move_to(self_obj, 19708, 0);
+
+
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_RND_NOMAD);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_CITIZEN);
 
@@ -77,7 +114,7 @@ procedure map_enter_p_proc begin
    check_restock_item(PID_CLUB, 5, 7, 80)
    check_restock_item(PID_KNIFE, 3, 5, 80)
    check_restock_item(PID_SHARPENED_POLE, 4, 6, 80)
-   check_restock_item(PID_RADSCORPION_PARTS, 5, 6, 80)
+   //check_restock_item(PID_RADSCORPION_PARTS, 5, 6, 80)
    check_restock_item(PID_GECKO_PELT, 5, 6, 80)
 end
 
@@ -187,20 +224,31 @@ end
 
 procedure NodeBarter begin
    gdialog_barter;
-   call Node999;
+   Reply(203);
+   NOption(204,Node999,004);
 end
 
 procedure Node001 begin
-   Reply(103);
-   NOption(104, Node002, 4);
-   NOption(105, Node003, 4);
-   NLowOption(106, Node005);
+   if (On_Tent_Map) then begin
+      Reply(103);
+      NOption(104, Node002, 4);
+      NOption(105, Node003, 4);
+      NLowOption(106, Node005);
+   end else begin
+      Reply(200);
+      NOption(201, Node002, 4);
+      NOption(105, Node003, 4);
+      NLowOption(106, Node005);
+   end
 end
 
 procedure Node002 begin
    Reply(107);
    NOption(108, NodeBarter, 4);
-   NOption(109, Node004, 4);
+   if (On_Tent_Map) then
+      NOption(109, Node004, 4);
+   else
+      NOption(109, Node004a, 4);
 end
 
 procedure Node003 begin
@@ -210,7 +258,12 @@ end
 
 procedure Node004 begin
    Reply(112);
-   NLowOption(113, Node999);
+   NOption(113, Node999, 4);
+end
+
+procedure Node004a begin
+   Reply(202);
+   NOption(113, Node999, 4);
 end
 
 procedure Node005 begin

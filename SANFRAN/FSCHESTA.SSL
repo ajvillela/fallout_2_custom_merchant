@@ -67,6 +67,7 @@ procedure Node008;
 procedure Node009;
 procedure Node010;
 procedure Node011;
+procedure doCallGuards; // added by killap
 
 #define PASSWORD_PAPERS_PID PID_PASSWORD_PAPER
 
@@ -151,6 +152,14 @@ procedure talk_p_proc begin
    end
 
    set_local_var(LVAR_Herebefore, 1);
+   
+   // added by killap
+   if (callGuards) then begin
+      callGuards := 0;
+      call doCallGuards;
+   end   
+   // end added      
+   
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -196,7 +205,7 @@ end
 procedure NodeHack begin
    if (skill_success(dude_obj, SKILL_SCIENCE, -110)) then begin
       call Node002;
-   end else if (skill_success(dude_obj, SKILL_SCIENCE, 100)) then begin
+   end else if (skill_success(dude_obj, SKILL_SCIENCE, -100)) then begin //edit by killap - was 100
       set_shihacked_flag(SHI_TRUE);
       call Node002;
    end else begin
@@ -246,6 +255,7 @@ end
 procedure Node004 begin
    set_local_var(LVAR_Denied, 1);
    set_shihacked_flag(SHI_TRUE);
+   callGuards := 1; // added by killap   
    Reply(116);
    NOption(117, Node999, 4);
 end
@@ -271,17 +281,28 @@ procedure Node005 begin
       game_time_advance(ONE_GAME_MINUTE * 15);
       Reply(119);
    end
+   // Begin Seraph's Code
+   if (not tanker_flag(TANK_FUEL) and not san_fran_flag(SF_GAS_ELRONS)) then begin
+      if (tanker_flag(TANK_KNOWN)) then
+         NOption(120, Node0708, 4);
+      if (san_fran_flag(SF_GAS_BEGUN)) then
+         NOption(121, Node007a, 4);
+   end
+   // End Seraph's Code
+
+   /* Disabled by Seraph
    if (tanker_flag(TANK_KNOWN) and not tanker_flag(TANK_FUEL)) then
       NOption(120, Node0708, 4);
    if (GASBEGUN and not san_fran_flag(SF_GAS_ELRONS)) then
       NOption(121, Node007a, 4);
-
+   /*/
    if (not (tanker_flag(TANK_KNOWN) and not tanker_flag(TANK_FUEL)) and not (GASBEGUN and not san_fran_flag(SF_GAS_ELRONS))) then
       NOption(137, Node011, 4);
    NOption(122, Node002, 4);
 end
 
 procedure Node006 begin
+   game_time_advance(ONE_GAME_MINUTE * 15); //added by killap
    Reply(123);
    NOption(124, Node002, 1);
 end
@@ -316,3 +337,9 @@ procedure Node011 begin
    Reply(138);
    NOption(124, Node002, 1);
 end
+
+//added by killap
+procedure doCallGuards begin
+   set_san_fran_flag(SF_SHI_ENEMY);
+end
+//end added

@@ -35,7 +35,7 @@
 
 #define NAME                    SCRIPT_KCYELLOW
 #define TOWN_REP_VAR            (GVAR_TOWN_REP_KLAMATH)
-#define floater(x)		float_msg(self_obj, message_str(NAME,x),FLOAT_MSG_RED)
+#define floater(x)		float_msg(self_obj, message_str(NAME,x),FLOAT_MSG_GREEN) //edit by killap - was "_RED"
 
 #include "..\headers\command.h"
 #include "..\headers\ModReact.h"
@@ -246,6 +246,7 @@ procedure Node920 begin
    if (obj_is_carrying_obj_pid(dude_obj, PID_MEAT_JERKY)) then begin
       meat:=obj_carrying_pid_obj(dude_obj, PID_MEAT_JERKY);
       rm_obj_from_inven(dude_obj,meat);
+      destroy_object(meat); //added by killap
       call Node002;
    end
    else begin
@@ -326,7 +327,7 @@ procedure Node003 begin
    NLowOption(131,Node004);
    NLowOption(132,Node999);
    NOption(133,Node999,004);
-   NOption(134,Node998,004);
+   BOption(134,Node998,004); //edit by killap: was NOption
 end
 
 procedure Node004 begin

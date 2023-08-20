@@ -50,11 +50,11 @@ procedure post_use_obj_on_p_proc begin
       if (site_is_covered) then begin
          if (obj_carrying_pid_obj(self_obj, PID_ANNA_BONES)) then begin
             remove_pid_qty(self_obj, PID_ANNA_BONES, 1)
-            give_xp(EXP_BURY_ANNA_BONES);
+ //           give_xp(EXP_BURY_ANNA_BONES);
             inc_general_rep(REP_BONUS_DEN_BURY_ANNA_BONES);
             inc_den_rep(REP_TOWN_BURY_ANNA);
             display_mstr(200);
-            give_exp_points(EXP_BURY_ANNA_BONES);
+            give_xp(EXP_BURY_ANNA_BONES); //killap's fix: changed to "give_xp"
          end
       end
    end

@@ -239,7 +239,12 @@ procedure talk_p_proc begin
 
    GetReaction;
 
-   if( ((Marcus_Ptr != 0) or (Lenny_Ptr != 0)) and (global_var(GVAR_VAULT_CITIZEN) != CITIZEN_CAPTAIN_GUARD) ) then begin
+   //added by killap - expansion
+   if(Fallout2_enclave_destroyed) then begin
+      floater(300);
+   end
+   //end added
+   else if( ((Marcus_Ptr != 0) or (Lenny_Ptr != 0)) and (global_var(GVAR_VAULT_CITIZEN) != CITIZEN_CAPTAIN_GUARD) ) then begin
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node001;

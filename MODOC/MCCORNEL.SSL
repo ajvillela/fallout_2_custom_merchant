@@ -206,7 +206,7 @@ procedure talk_p_proc begin
       end_dialogue;
       inc_local_var(LVAR_Here_Before);
    end else begin
-      display_msg(550);
+      display_msg(mstr(550)); //edit by killap - was missing mstr
    end
 end
 
@@ -269,9 +269,9 @@ procedure Node001 begin
       NOption(152,Node011,004);
    end
    if (family_feud_seed_unknown) then begin
-      NOption(153,Node012,004);
-      NOption(154,Node013,004);
-      NOption(155,Node014,004);
+//      NOption(153,Node012,004);  killap's fix: moved this line and the two below it to the end of this procedure
+//      NOption(154,Node013,004);
+//      NOption(155,Node014,004);
       NOption(162,Node017,004);
    end
    if ((wall_safe_found) and (feud_help_cornelius_seed_active) and (local_var(LVAR_Told_Kill_Farrel) == false)) then begin
@@ -281,6 +281,9 @@ procedure Node001 begin
       NOption(164,Node024,004);
       NOption(165,Node025,004);
    end
+   NOption(153,Node012,004);
+   NOption(154,Node013,004);
+   NOption(155,Node014,004);
    NOption(g_mstr(301),Node027,-003);
    NOption(g_mstr(375),Node999,004);
 end
@@ -290,6 +293,11 @@ procedure Node002 begin
    if ((feud_help_farrel_seed_active) and (feud_help_cornelius_seed_accepted == false) and (dude_has_cornelius_watch == false)) then begin
       NOption(152,Node011,004);
    end
+   //killap's code
+   if (family_feud_seed_unknown) then begin
+        NOption(162,Node017,004);
+   end
+   //end killap's code
    if ((family_feud_seed_active) and (dude_has_cornelius_watch)) then begin
       NOption(164,Node024,004);
       NOption(165,Node025,004);
@@ -297,9 +305,10 @@ procedure Node002 begin
       NOption(153,Node012,004);
       NOption(154,Node013,004);
       NOption(155,Node014,004);
-      NOption(162,Node017,004);
+//      NOption(162,Node017,004); //killap's fix: this will always show up then and therefore keep talking about the watch even when it is returned.
    end
-   if ((wall_safe_found) and (local_var(LVAR_Told_Kill_Farrel) == false)) then begin
+   //if ((wall_safe_found) and (local_var(LVAR_Told_Kill_Farrel) == false)) then begin
+   if ((wall_safe_found) and (feud_help_cornelius_seed_active) and (local_var(LVAR_Told_Kill_Farrel) == false)) then begin //edit by killap
       NOption(163,Node996,004);
    end
    NOption(g_bye,Node999,004);
@@ -404,8 +413,9 @@ variable the_watch;
    // remove watch from player's inventory
    remove_pid_qty(dude_obj, cornelius_watch_pid, 1)
    set_family_feud_seed_inactive
-   inc_global_var(GVAR_TOWN_REP_MODOC,REP_TOWN_SOLVE_FAMILY_FEUD_BEST);
+   inc_global_var_amt(GVAR_TOWN_REP_MODOC,REP_TOWN_SOLVE_FAMILY_FEUD_BEST); // Seraph's Fix: changed 'inc_global_var' to 'inc_global_var_amt'. Thanks Rob!
    inc_general_rep(REP_POINT_MODOC_RETURN_WATCH);
+   display_mstr(600); //added by killap
    display_mstr(650);
    give_xp(EXP_SOLVE_FAMILY_FEUD_BEST);
    Reply(207);

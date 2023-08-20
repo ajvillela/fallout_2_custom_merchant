@@ -8,12 +8,16 @@
 #define set_next_float_time(x,y,z)                    set_local_var(z, game_time + (random(x,y) * ONE_GAME_SECOND))
 #define set_next_float_time_def(z)                    set_next_float_time(15,30,z)
 
-#define mid_tile(x,y)                                 temp_tile := x;                                                                    \
+#ifndef mid_tile
+   #define mid_tile(x,y)                              temp_tile := x;                                                                      \
                                                       while (tile_distance(temp_tile, y) > (tile_distance(x,y)/2)) do                    \
                                                          temp_tile := tile_num_in_direction(temp_tile, rotation_to_tile(temp_tile,y), 1)
-#define random_tile_in_box(ul, ur, lr, ll)            mid_tile(ul,lr);                                                                        \
+#endif
+#ifndef random_tile_in_box
+   #define random_tile_in_box(ul, ur, lr, ll)         mid_tile(ul,lr);                                                                           \
                                                       temp_tile := tile_num_in_direction(temp_tile, random(0,5), (tile_distance(ul,lr))/2);   \
                                                       if (tile_in_box(temp_tile, ul, ur, lr, ll) == false) then temp_tile := 0
+#endif
 #define Meet_Obj_Face(the_obj)                        if (tile_distance_objs(self_obj, the_obj) > 1) then begin                          \
                                                          mid_tile(self_tile, tile_num(the_obj));                                         \
                                                          animate_move_to_tile(temp_tile);                                                \
@@ -82,6 +86,9 @@
 #define off_head_help_param                           (47)
 #define check_ui_param                                (48)
 #define sing_param                                    (100)
+
+#define tamper_good_CSObj_param						  (200)
+#define tamper_CSObj_param							  (201)
 
 variable last_timed_obj;
 variable last_timed_param;
@@ -199,6 +206,16 @@ variable last_timed_param;
 // flag 4
 #define player_bites_masticator_ear_bit               bit_1
 #define ui_should_be_disabled_bit                     bit_2
+#define chop_shop_hostile_bit                         bit_3
+#define porn_studio_hostile_bit                       bit_4
+#define myron_date_bit                                bit_5
+
+//for Ms Kitty, Myron date - added by killap
+#define myron_date                     get_new_reno_flag(myron_date_bit, 4)
+#define set_myron_date                 if (myron_date == false) then begin             \
+                                          give_xp(EXP_NEW_RENO_WHORE_FOR_MYRON);       \
+                                       end                                             \
+                                       set_new_reno_flag_on(myron_date_bit, 4)
 
 // for dan
 #define marcus_laid                                   get_new_reno_flag(marcus_laid_bit, 3)
@@ -234,9 +251,13 @@ variable last_timed_param;
 #define lenny_is_dude_companion                       check_companion(PID_LENNY)
 #define sulik_is_dude_companion                       check_companion(PID_SULIK)
 #define robodog_is_dude_companion                     check_companion(PID_CYBERDOG)
-#define miria_is_dude_companion                       check_companion(PID_MIRIA)
+#ifndef miria_is_dude_companion
+   #define miria_is_dude_companion                    check_companion(PID_MIRIA)
+#endif
 #define davin_is_dude_companion                       check_companion(PID_DAVIN)
-#define vic_is_dude_companion                         check_companion(PID_VIC)
+#ifndef vic_is_dude_companion
+   #define vic_is_dude_companion                      check_companion(PID_VIC)
+#endif
 #define macrae_is_dude_companion                      check_companion(PID_JOHN_MACRAE)
 
 // generic end
@@ -245,9 +266,9 @@ variable last_timed_param;
 // general object in locations
 #define obj_in_lloyds_room(x)                         (obj_in_loc(x, 12899, 12895, 14495, 14499, MAP_NEW_RENO_1, 2))
 #define obj_cats_paw_building(x)                      (obj_in_loc(x, 20493, 20481, 26481, 26493, MAP_NEW_RENO_1, 0))
-#define obj_mordino_casino(x)                         ((obj_in_loc(x, 8292, 8262, 15062, 15092, MAP_NEW_RENO_1, 0)) or    \
-                                                       (obj_in_loc(x, 9862, 9858, 15058, 15062, MAP_NEW_RENO_1, 0)) or    \
-                                                       (obj_in_loc(x, 10258, 10246, 12246, 12258, MAP_NEW_RENO_1, 0)))
+#define obj_mordino_casino(x)                         ((obj_in_loc(x, 10696, 10676, 17478, 17496, MAP_NEW_RENO_1, 0)) or    \
+                                                       (obj_in_loc(x, 10676, 10662, 17462, 17478, MAP_NEW_RENO_1, 0)) or    \
+                                                       (obj_in_loc(x, 12262, 12250, 14650, 14662, MAP_NEW_RENO_1, 0)))
 #define obj_mordino_basement(x)                       (obj_in_loc(x, 9882, 9848, 18248, 18282, MAP_NEW_RENO_1, 1))
 #define obj_mordino_2nd_floor(x)                      ((obj_in_loc(x, 10700, 10666, 17466, 17500, MAP_NEW_RENO_1, 2)) or           \
                                                        (obj_in_loc(x, 12666, 12654, 14654, 14666, MAP_NEW_RENO_1, 2)))
@@ -443,7 +464,7 @@ variable check_still_kill;
                                                          if (x == still_status_wrecked) then begin                               \
                                                             if (get_still_status(still_status_wrecked) == false) then begin      \
                                                                inc_reno_rep(REP_NEW_RENO_DESTROY_WRIGHT_STILLS);                 \
-                                                               display_mstr(200);                                                \
+                                                               /*display_mstr(200);                                                */\
                                                                if (get_still_mission(still_mission_assigned)) then begin         \
                                                                   give_xp(EXP_NEW_RENO_DESTROY_STILL);                           \
                                                                end                                                               \
@@ -474,7 +495,9 @@ variable check_still_kill;
                                                       end                                                            \
                                                       set_global_var(GVAR_NEW_RENO_WRIGHT_MYSTERY, x)
 #define get_mystery_flag(x)                           (global_var(GVAR_NEW_RENO_WRIGHT_MYSTERY) == x)
-#define clear_mystery                                 set_mystery_flag(MYSTERY_STATE_BAD_SOLVED);
+#define clear_mystery                                 if (global_var(GVAR_NEW_RENO_WRIGHT_MYSTERY) == MYSTERY_STATE_ASSIGNED) then begin \
+						      	set_mystery_flag(MYSTERY_STATE_BAD_SOLVED);  \
+						      end
 // wrights end
 
 // willie start
@@ -515,6 +538,9 @@ variable check_still_kill;
 #define set_car_is_now_being_stolen                   set_new_reno_flag_on(car_is_now_being_stolen_bit, 3)
 #define off_car_is_now_being_stolen                   set_new_reno_flag_off(car_is_now_being_stolen_bit, 3)
 
+#define chop_shop_hostile                             get_new_reno_flag(chop_shop_hostile_bit, 4)
+#define set_chop_shop_hostile                         set_new_reno_flag_on(chop_shop_hostile_bit, 4)
+
 #define stolen_car_none                               (0)
 #define stolen_car_stolen                             (1)
 #define stolen_car_recovered                          (2)
@@ -533,7 +559,10 @@ variable check_still_kill;
 #define set_super_car                                 if (get_super_car == false) then begin                   \
                                                          set_car_carry_amount((110*car_carry_amount) / 100);   \
                                                       end                                                      \
-                                                      set_global_var(GVAR_NEW_RENO_CAR_UPGRADE, 1)
+                                                      set_global_var(GVAR_NEW_RENO_CAR_UPGRADE, 1);            \
+                                                      gfade_out(ONE_GAME_SECOND);                              \
+                                                      game_time_advance(ONE_GAME_HOUR);                        \
+                                                      gfade_in(ONE_GAME_SECOND)
 
 
 #define get_ram_plate                                 (global_var(GVAR_NEW_RENO_SUPER_CAR) != 0)
@@ -605,6 +634,9 @@ variable check_still_kill;
 #define fluf                                          get_new_reno_flag(flufer_bit, 2)
 #define set_fluf                                      set_new_reno_flag_on(flufer_bit, 2)
 
+#define porn_studio_hostile                           get_new_reno_flag(porn_studio_hostile_bit, 4)
+#define set_porn_studio_hostile                       set_new_reno_flag_on(porn_studio_hostile_bit, 4)
+
 #define extortion_bros_none                           (0)
 #define extortion_bros_assigned                       (1)
 #define extortion_bros_collected                      (2)
@@ -651,7 +683,7 @@ variable check_still_kill;
                                                       end else if (obj_on_wright(self_obj)) then begin            \
                                                          the_result := family_wright;                             \
                                                       end                                                         \
-                                                      debug_msg("")
+                                                      debug_msg("" + the_result)
 // setting the correct team based on the family
 #define set_family_team(the_family)                   if (the_family == family_salvatore) then begin                                         \
                                                          critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NEW_RENO_SALVATORE);   \
@@ -697,7 +729,10 @@ variable check_still_kill;
                                                          clear_guard_assignment                       \
                                                       end else if (x == family_bishop) then begin     \
                                                          off_bishop_permission                        \
-                                                         clear_snuff_carlson                          \
+                                                         if (global_var(GVAR_MOORE_ACCEPT_DELIVERY) > 0) then begin  \
+                                                           set_briefcase_flag(4); /*added by killap - 4 means failed	 */ \
+									   					 end 										  \
+									   					 clear_snuff_carlson                          \
                                                          clear_snuff_westin                           \
                                                       end else if (x == family_mordino) then begin    \
                                                          clear_delivery                               \
@@ -1001,9 +1036,12 @@ variable check_still_kill;
 #define mcgee_played_machine                          (global_var(GVAR_NEW_RENO_MCGEE_SEED) == mcgee_state_played_machine)
 #define mcgee_jackpot                                 (global_var(GVAR_NEW_RENO_MCGEE_SEED) == mcgee_state_jackpot)
 #define mcgee_jackpot_settled                         (global_var(GVAR_NEW_RENO_MCGEE_SEED) == mcgee_state_jackpot_settled)
-#define set_mcgee_played_machine                      if (mcgee_state_none) then begin                                           \
-                                                         set_global_var(GVAR_NEW_RENO_MCGEE_SEED, mcgee_state_played_machine);   \
-                                                      end
+//killap comment out
+//#define set_mcgee_played_machine                      if (mcgee_state_none) then begin                                \
+//                                                         set_global_var(GVAR_NEW_RENO_MCGEE_SEED, mcgee_state_played_machine);   \
+//                                                      end
+#define set_mcgee_played_machine        	      	set_global_var(GVAR_NEW_RENO_MCGEE_SEED, mcgee_state_played_machine);  //killap
+
 #define set_mcgee_jackpot_settled                     set_global_var(GVAR_NEW_RENO_MCGEE_SEED, mcgee_state_jackpot_settled);
 #define dude_leaving_mcgee_casino                     (tile_bishop_casino(dude_tile) == false)
 #define mcgee_playing_slots                           (tile_distance_objs(mcGeeOBJ,mcGeeSlotMachineOBJ) <= 2)
@@ -1390,8 +1428,7 @@ variable check_still_kill;
 #define set_masticator_dead                           set_new_reno_flag_on(masticator_dead_bit, 3)
 #define masticator_bit_ear                            (get_new_reno_flag(masticator_bit_ear_bit, 3))
 #define set_masticator_bit_ear                        if (masticator_bit_ear == false) then begin           \
-                                                         global_temp := dude_charisma - 1;                  \
-                                                         set_critter_stat(dude_obj, STAT_ch, global_temp);  \
+                                                         set_critter_stat(dude_obj, STAT_ch, -1);           \
                                                          display_msg(nr_mstr(1600));                        \
                                                          give_pid_qty(dude_obj, PID_PLAYERS_EAR, 1)         \
                                                       end                                                   \
@@ -1409,7 +1446,7 @@ variable check_still_kill;
 #define fight_level_done                              (3)
 #define fight_level                                   (global_var(GVAR_NEW_RENO_FIGHT_LEVEL))
 #define inc_fight_level                               if (global_var(GVAR_NEW_RENO_FIGHT_LEVEL) <= fight_level_done) then begin   \
-                                                         display_msg(nr_mstr(1400 + fight_level));                               \
+                                                         display_msg(nr_mstr(1400 + fight_level + ( ((fight_level >= 3) and (not(fighting_main_boxer))) * 2 )));                               \
                                                          inc_global_var(GVAR_NEW_RENO_FIGHT_LEVEL);                              \
                                                          if (fight_level == 1) then begin                                        \
                                                             give_xp(EXP_NEW_RENO_BOXER_LEVEL_1);                                 \
@@ -1424,9 +1461,10 @@ variable check_still_kill;
                                                             give_xp(EXP_NEW_RENO_BOXER_LEVEL_4);                                 \
                                                             inc_reno_rep(REP_NEW_RENO_BOXER_LEVEL_4);                            \
                                                             critter_mod_skill(dude_obj, SKILL_UNARMED_COMBAT, 5);                \
-                                                            global_temp := get_critter_stat(dude_obj, STAT_dmg_resist) + 5;      \
-                                                            set_critter_stat(dude_obj, STAT_dmg_resist, global_temp);            \
+							    global_temp := get_pc_extra_stat(STAT_dmg_resist) + 5;               \
+							    set_pc_extra_stat(STAT_dmg_resist, global_temp);                     \
                                                             set_global_var(GVAR_NEW_RENO_HAS_REP_PRIZEFIGHTER, 1);               \
+                                                             display_msg(nr_mstr(1404));					 \
                                                          end                                                                     \
                                                       end                                                                        \
                                                       debug_msg("inc_fight_level == " + fight_level)
@@ -1549,6 +1587,7 @@ variable check_still_kill;
                                                          set_ui_should_be_disabled;                            \
                                                          reg_anim_clear(dude_obj);                             \
                                                          move_obj_inven_to_obj(dude_obj, new_reno_temp_box);   \
+                                                         call doVaultBoxerAppearance; \
                                                          clear_dude_score;                                     \
                                                          clear_boxer_score;                                    \
                                                          off_killed_opponent;                                  \
@@ -1578,6 +1617,7 @@ variable check_still_kill;
                                                          check_set_obj_visiblility(ring_girl_obj, false);      \
                                                          nr_add_timer_event(announcer_obj, 5, 100);            \
                                                       gfade_in(ONE_GAME_SECOND);                               \
+                                                      debug_msg("tile_set_center(tile_num(announcer_obj)): " + tile_set_center(tile_num(announcer_obj))); \
                                                       debug_msg("start boxing match: end")
 #define heal_boxer(x)                                 critter_heal(x, get_critter_stat(x, STAT_en))
 
@@ -1590,14 +1630,15 @@ variable check_still_kill;
                                                          move_boxers_to_corners                                \
                                                          set_new_round_time;                                   \
                                                       gfade_in(ONE_GAME_SECOND);                               \
-                                                      off_ui_should_be_disabled;                               \
-                                                      play_sfx("boxbel1");                                     \
+						      off_ui_should_be_disabled;                               \
+                                                      play_sfx("boxbell1");                                     \
                                                       attack_setup(prize_fighter_obj, dude_obj);               \
                                                       debug_msg("start boxing round: end")
-#define end_boxing_round                              play_sfx("boxbel2");                                                    \
+#define end_boxing_round                              play_sfx("boxbell2");                                                    \
+                                                         terminate_combat;													\
+                                                         gfade_out(ONE_GAME_SECOND);                                          \
                                                          check_set_obj_visiblility(announcer_obj, true);                      \
                                                          check_set_obj_visiblility(ring_girl_obj, true);                      \
-                                                         gfade_out(ONE_GAME_SECOND);                                          \
                                                          debug_msg("end boxing round start");                                 \
                                                          set_ui_should_be_disabled;                                          \
                                                          debug_msg("combat terminated");                                      \
@@ -1661,10 +1702,10 @@ variable check_still_kill;
 
 #define lose_boxing_match(x)                          set_fight_status(-x);            \
                                                       call_fight_over;                 \
-                                                      debug_msg("lose boxing match")
+                                                      debug_msg("lose boxing match: "+ self_name)
 #define win_boxing_match(x)                           set_fight_status(x);             \
                                                       call_fight_over;                 \
-                                                      debug_msg("win boxing match")
+                                                      debug_msg("win boxing match: " + self_name)
 #define cleanup_boxing_match                          debug_msg("cleanup boxing match: start");                                                                                                                                  \
                                                       gfade_out(ONE_GAME_SECOND);                                                                                                                                                \
                                                          set_ui_should_be_disabled;                                                                                                                                              \
@@ -1897,9 +1938,19 @@ end
             call ChooseFromList;                                        \
          end
 
+/*#define setup_set_porn_star_name(the_msg, the_node)                     \
+         begin                                                          \
+            var_num := GVAR_NEW_RENO_PORN_STAR;                         \
+            top_msg := porn_star_msg_start + (50*dude_is_female) + 1;   \
+            stored_msg := the_msg;                                      \
+            stored_node := the_node;                                    \
+            call ChooseFromList;                                        \
+         end*/
+
 #define setup_set_porn_star_name(the_msg, the_node)                     \
          begin                                                          \
             var_num := GVAR_NEW_RENO_PORN_STAR;                         \
+            set_global_var(var_num, 0);                                 \
             top_msg := porn_star_msg_start + (50*dude_is_female) + 1;   \
             stored_msg := the_msg;                                      \
             stored_node := the_node;                                    \
@@ -1946,6 +1997,9 @@ variable hs_temp;
             if (get_guard_assignment(guard_assignment_none)) then begin          \
                flush_add_timer_event(self_obj, 0, 250);                          \
             end                                                                  \
+         end                                                                     \
+         if (combat_is_initialized == false) then begin                          \
+            attack(dude_obj);                                                    \
          end
 
 #define short_line_time                   (ONE_GAME_SECOND * 3)
@@ -1981,17 +2035,16 @@ variable hs_temp;
                      debug_msg("getting into some bad mojo now");                                        \
                      if ((said_message == false) and (salvatore_guard_obj != 0)) then begin              \
                         set_said_message;                                                                \
+                        reg_anim_clear(dude_obj);                                                        \
+                        Face_Critter(dude_obj, self_obj);                                                \
                         float_msg(self_obj, mstr(random(300, 302)), FLOAT_COLOR_NORMAL);                 \
                      end                                                                                 \
                   end else begin                                                                         \
                      set_guard_assignment(guard_assignment_failed);                                      \
                      if (salvatore_guard_1_obj != 0) then begin                                          \
-                        debug_msg("HEY FUCKER, YOU'RE GONNA DIE!!! 1");                                  \
                         flush_add_timer_event(salvatore_guard_1_obj, 0, 350);                            \
                      end else if (salvatore_guard_2_obj != 0) then begin                                 \
-                        debug_msg("HEY FUCKER, YOU'RE GONNA DIE!!! 2");                                  \
                         flush_add_timer_event(salvatore_guard_2_obj, 0, 350);                            \
-                        debug_msg("HEY FUCKER, YOU'RE GONNA DIE!!! 3");                                  \
                      end else begin                                                                      \
                         helicopter_script_node998                                                        \
                      end                                                                                 \
@@ -2165,8 +2218,12 @@ variable hs_temp;
 
 // new school warning macros
 // have default as well as modified
-#define WARNING_IGNORE_ALL_CASE                       ((dude_wearing_power_armor == false) and (Fallout2_enclave_destroyed == false) and (dude_family != self_family))
-#define WARNING_IGNORE_CASE                           ((dude_has_porn_star_rep) or (dude_is_prizefighter))  // redefinable
+#ifndef WARNING_IGNORE_ALL_CASE
+   #define WARNING_IGNORE_ALL_CASE                    ((dude_wearing_power_armor == false) and (Fallout2_enclave_destroyed == false) and (dude_family != self_family))
+#endif
+#ifndef WARNING_IGNORE_CASE
+   #define WARNING_IGNORE_CASE                        ((dude_has_porn_star_rep) or (dude_is_prizefighter))  // redefinable
+#endif
 #define WARNING_FAMILY_CONDITIONS                     dude_is_made_man                 // redefinable
 #define WARNING_WEAPON_CONDITIONS                     dude_is_armed                    // redefinable
 #define WARNING_SNEAK_CONDITIONS                      dude_is_sneaking                 // redefinable
@@ -2233,7 +2290,8 @@ variable hs_temp;
    #define CHECK_LENNY
 #endif
 
-#define check_should_weild_weapon                     if (anim_busy(self_obj) == false) then begin                         \
+#ifndef check_should_weild_weapon
+   #define check_should_weild_weapon                  if (anim_busy(self_obj) == false) then begin                         \
                                                          if (warning_timer_up) then begin                                  \
                                                             if (self_is_armed) then begin                                  \
                                                                if (warning_is_off(warning_attack)) then begin              \
@@ -2246,6 +2304,7 @@ variable hs_temp;
                                                             wield_best_new_reno_weapon                                     \
                                                          end                                                               \
                                                       end
+#endif
 
 #define check_all_warnings                            warning_result := warning_result_none;                                  \
                                                       if ((combat_is_initialized == false) and (self_visible)) then begin     \

@@ -74,6 +74,7 @@ procedure Node014;
 procedure Node015;
 procedure Node016;
 procedure Node017;
+procedure Node017a; //added by killap
 procedure Node018;
 procedure Node019;
 procedure Node020;
@@ -294,21 +295,25 @@ end
 //~~~~~~~~~~~~~~~~ DESIGN TOOL STARTS HERE
 
 procedure Node001 begin
-   floater( mstr(104) + dude_name + mstr(193) );
+   //floater( mstr(104) + dude_name + mstr(193) );
+   float_msg(self_obj,mstr(104) + dude_name + mstr(193),FLOAT_COLOR_NORMAL); //edit by killap
 end
 
 procedure Node002 begin
-   floater(105);
+   float_msg(self_obj,mstr(105),FLOAT_COLOR_BAD); //edit by killap
+   //floater(105);
    call Node998;
 end
 
 procedure Node003 begin
-   floater(106);
+   float_msg(self_obj,mstr(106),FLOAT_COLOR_BAD); //edit by killap
+   //floater(106);
    call Node998;
 end
 
 procedure Node004 begin
-   floater(107);
+   float_msg(self_obj,mstr(107),FLOAT_COLOR_BAD); //edit by killap
+   //floater(107);
    call Node998;
 end
 
@@ -425,15 +430,22 @@ procedure Node017 begin
    else
       Reply(158);
 
-   From_17 := 1;
+   //From_17 := 1;
 
    if( ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_CAPTAIN_GUARD ) and
        ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_REAL_CITIZEN ) and
        ( local_var( LVAR_Kohl_Status ) != KOHL_CONVINCED ) ) then
-      NOption(159, Node017, 004);
+      NOption(159, Node017a, 004); //was 017 - edit by killap
    NOption(160, Node012, 004);
    NOption(161, Node999, 004);
 end
+
+//added by killap
+procedure Node017a begin
+   From_17 := 1;
+   call Node017;
+end
+//end added
 
 procedure Node018 begin
    Reply(162);

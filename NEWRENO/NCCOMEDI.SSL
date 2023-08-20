@@ -64,7 +64,7 @@ procedure Node999;                                      // This Node is Always E
                                              if ((Fallout2_enclave_destroyed) and (random(0,1))) then begin          \
                                                 if (random(0,1)) then begin                                          \
                                                    new_joke := 11;                                                   \
-                                                end else if (((angela_pregnant) or (mrs_bishop_pregnant)) and (random(0,1))) then begin   \
+                                                end else if (angela_pregnant) then begin                             \
                                                    new_joke := 10;                                                   \
                                                 end                                                                  \
                                              end                                                                     \
@@ -78,12 +78,18 @@ procedure Node999;                                      // This Node is Always E
                                           set_local_var(LVAR_Routine, new_joke);                                    \
                                           nr_add_timer_event_rand(self_obj, 3, 5, local_var(LVAR_Routine) * 1000)
 
+//#define self_family                       self_family_var // added by killap - expansion pack
+
 import variable commedian_audience_1_obj;
 import variable commedian_audience_2_obj;
 import variable commedian_audience_3_obj;
+
+import variable comedian_obj; //added by killap - expansion pack
+
 variable new_joke;
 variable last_floater;
 variable start_new_routine;
+//variable self_family_var; // added by killap - expansion pack
 
 #define attempt_float_on_member(x, y)     if ((commedian_audience_##x##_obj != 0) and (last_floater != commedian_audience_##x##_obj)) then begin     \
                                              last_floater := commedian_audience_##x##_obj;                                                           \
@@ -116,6 +122,7 @@ variable start_new_routine;
                                           send_all_to(2,y)     \
                                           send_all_to(3,y)
 procedure start begin
+   comedian_obj := self_obj; // added by killap - expansion
 end
 
 #define is_crowd_floater(x)               ((x == 1001) or (x == 1002) or (x == 2001) or (x == 2002) or (x == 3001) or (x == 1005) or  \
@@ -135,7 +142,7 @@ procedure timed_event_p_proc begin
       end
    end else begin
       // do tell joke stuff
-      if (fixed_param == 10000) then begin
+      if (fixed_param == 10001) then begin   //killap's fix: changed from 10000
          nr_add_timer_event_tic(self_obj, 7, assassinate_param);
       end else if (fixed_param == 9005) then begin
          dude_floater(9005 + (check_general_rep >= 0));
@@ -183,6 +190,17 @@ procedure timed_event_p_proc begin
 end
 
 procedure map_enter_p_proc begin
+   comedian_obj := self_obj; // added by killap - expansion
+   
+   /*// added by killap - expansion
+   self_family_var := family_bishop;
+   
+   if (self_family == family_bishop and bishop_dead and warned_attack) then begin
+      destroy_object(self_obj);
+      return;   
+   end
+   // end added*/
+
    if (is_loading_game == false) then begin
       if (map_first_run) then begin
          set_local_var(LVAR_Home_Tile, self_tile);
@@ -194,6 +212,7 @@ procedure map_enter_p_proc begin
    end
 end
 procedure map_update_p_proc begin
+   comedian_obj := self_obj; // added by killap - expansion
    check_hide_durring_boxing_fight
    if (stopped_routine) then begin
       if ((combat_is_initialized == false) or (self_visible)) then begin

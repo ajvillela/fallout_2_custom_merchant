@@ -112,6 +112,7 @@ procedure critter_p_proc begin
        set_local_var(LVAR_Fight_Status,FIGHT_INIT);
 
    if ((map_var(MVAR_Rat_Fighter1) != 0) and (map_var(MVAR_Rat_Fighter2) != 0) and (local_var(LVAR_Fight_Status) == FIGHT_INIT)) then begin
+       debug_msg("ECKAGA1: tile_set_center(21336): " + tile_set_center(21336)); //screen will recenter - added by killap
        if (map_var(MVAR_Rat_Fighter1) == local_var(LVAR_Rat_Number)) then begin
            set_local_var(LVAR_Fight_Status,FIGHT_ON);
            call Setup_Fighting;
@@ -213,7 +214,7 @@ procedure Find_Ptr begin
 end
 
 procedure Setup_Fighting begin
-
+   game_ui_disable; //added by killap
    // Getting the Pointer to Fighter 1
    if (map_var(MVAR_Rat_Fighter1) == 1) then
        Fighter1:=Molerat_Ptr1;
@@ -437,6 +438,8 @@ procedure Fighter_Sequence(variable Combat1, variable Combat2) begin
 end
 
 procedure End_Fight(variable Combatant) begin
+   game_ui_enable; //added by killap
+
    debug_msg("map_var(MVAR_Rat_Fighter1) == "+map_var(MVAR_Rat_Fighter1)+". map_var(MVAR_Rat_Fighter2) == "+map_var(MVAR_Rat_Fighter2)+". local_var(LVAR_Rat_Number) == "+local_var(LVAR_Rat_Number));
 
    set_local_var(LVAR_Fight_Status,FIGHT_INIT);

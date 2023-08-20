@@ -105,7 +105,7 @@ procedure use_p_proc begin
    else if (global_var(GVAR_SIERRA_BASE_ENEMY) == 1) then begin
        Damage:=random(LOW_DAMAGE,HIGH_DAMAGE);
        critter_damage(source_obj,Damage);
-       display_msg(message_str(SCRIPT_WSTERM1B,300));
+       display_msg(message_str(SCRIPT_WSTERM1A,300)); //was SCRIPT_WSTERM1B - killap
    end
 
    else if (get_critter_stat(source_obj,STAT_iq) < 4) then begin
@@ -134,7 +134,9 @@ procedure talk_p_proc begin
        end_dialogue;
    end
 
-   else if (global_var(GVAR_SIERRA_LOCKOUT) == 1) then begin
+   //else if (global_var(GVAR_SIERRA_LOCKOUT) == 1) then begin
+   //edit by killap
+   else if ((global_var(GVAR_SIERRA_LOCKOUT) == 1) or (global_var(GVAR_SIERRA_LOCKOUT) == 3)) then begin 
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node003;
@@ -222,7 +224,7 @@ procedure Node002 begin
 end
 
 procedure Node002a begin
-   set_global_var(MVAR_Security_Level_1,1);
+   set_map_var(MVAR_Security_Level_1,1); // Seraph's Fix.  Original Code: set_global_var(MVAR_Security_Level_1,1);
 
    call Node001;
 end
@@ -259,7 +261,7 @@ procedure Node012 begin
    Reply(131);
 
    NOption(132,Node013,004);
-   NOption(133,Node014,004);
+   NOption(133,Node001,004); //edit by killap - was Node014
    NOption(134,Node999,004);
 end
 
@@ -286,7 +288,8 @@ procedure Node014 begin
 end
 
 procedure Node015 begin
-   set_global_var(GVAR_SIERRA_LOCKOUT,1);
+   //set_global_var(GVAR_SIERRA_LOCKOUT,1);
+   set_global_var(GVAR_SIERRA_LOCKOUT,global_var(GVAR_SIERRA_LOCKOUT)+1);  //edit by killap
 
    Reply(139);
 

@@ -247,7 +247,7 @@ procedure Node002 begin
       Reply(106);
    else
       Reply(107);
-   NOption(dude_name, Node003, 4);
+   NOption(dude_name + ".", Node003, 4);
    NOption(109, Node010, 4);
    NOption(110, Node014, 4);
 end
@@ -357,7 +357,7 @@ end
 procedure Node010 begin
    Reply(131);
    NOption(132, Node011, 4);
-   NOption(133, Node012, 4);
+   BOption(133, Node012, 4); //edit by killap - was NOption
 end
 
 procedure Node011 begin
@@ -371,7 +371,7 @@ procedure Node012 begin
    if (dude_has_alcohol) then
       NOption(136, Node007a, 4);
    NOption(137, Node006, 4);
-   NOption(138, Node004, 4);
+   BOption(138, Node004, 4); //edit by killap - was NOption
 end
 
 procedure Node013 begin

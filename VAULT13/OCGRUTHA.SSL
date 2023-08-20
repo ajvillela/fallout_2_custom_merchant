@@ -120,7 +120,7 @@ procedure checkGeck;
 #define LVAR_Complete                   (16)
 #define LVAR_Teleport                   (17)
 #define LVAR_Caught_Thief               (18)
-#define LVAR_Last_Matt_Obj              (19)
+#define LVAR_Matt_Death_Speech          (19)
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -129,7 +129,7 @@ import variable i_matt_obj;
 import variable i_gruthar_obj;
 
 #define GRUTHAR_NO_LIKE_YOU    \
-   ((bad_critter_reaction) or (check_general_rep < 0) or (global_var(TOWN_REP_VAR) < 0) or (has_rep_childkiller) or (has_rep_berserker))
+   ( (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) and ( (bad_critter_reaction) or ( check_general_rep < 0 ) or (global_var(TOWN_REP_VAR) < 0) or (has_rep_childkiller) or ( has_rep_berserker ) ) ) //edit by killap - added (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)))
 
 #define STARTTILE 14695
 
@@ -184,7 +184,7 @@ procedure map_enter_p_proc begin
    if (map_var(MVAR_Dude_See) == 0) then
       set_obj_visibility(self_obj, OBJ_INVIS);
 
-   set_local_var(LVAR_Last_Matt_Obj, i_matt_obj);
+   //set_local_var(LVAR_Last_Matt_Obj, i_matt_obj);
 
    geck_container := tile_contains_pid_obj(GECK_LOCKER, GECK_LOCKER_ELE, PID_LOCKER_CLEAN_LEFT);
    debug_msg("OCGRUTHA: checkgeck: " + checkGeck);
@@ -262,9 +262,10 @@ procedure critter_p_proc begin
       end
    end
 
-   if (local_var(LVAR_Last_Matt_Obj) != 0 and local_var(LVAR_Hostile) == 0 and local_var(LVAR_Personal_Enemy) == 0) then begin
-      if (is_critter_dead(local_var(LVAR_Last_Matt_Obj))) then begin
-         set_local_var(LVAR_Last_Matt_Obj, 0);
+   if ( (local_var(LVAR_Matt_Death_Speech) == 0) and (local_var(LVAR_Hostile) == 0) and (local_var(LVAR_Personal_Enemy) == 0) ) then begin
+      //if (is_critter_dead(local_var(LVAR_Last_Matt_Obj))) then begin
+      if (i_matt_obj == -1) then begin //added by killap
+         set_local_var(LVAR_Matt_Death_Speech, 1);
          doMattTalk := 1;
          dialogue_system_enter;
       end
@@ -305,6 +306,8 @@ procedure talk_p_proc begin
    CheckKarma;
 
    GetReaction;
+
+   ReactToLevel; //added by killap
 
 
    if (doMattTalk == 1) then begin
@@ -419,8 +422,8 @@ end
 /* Any time a skill is used on a critter this call is made. This can be to give examinations
    for things like Doctor skill or messages for various other skills. */
 procedure use_skill_on_p_proc begin
-   if (local_var(LVAR_Personal_Enemy) == 0) then
-      set_local_var(LVAR_Personal_Enemy,1);
+//   if (local_var(LVAR_Personal_Enemy) == 0) then  //both lines commented out by killap - odd to set enemy here.
+//      set_local_var(LVAR_Personal_Enemy,1);
 end
 
 /* Should the Player ever cause the NPC too much discomfort that he desires to attack the player,
@@ -680,7 +683,7 @@ end
 procedure Node018 begin
    SETDSTATUS(GDCOMPLETE);
    add_timer_event(dude_obj, 0, TIMER_INIT_V13_SEQUENCE);
-   set_global_var(GVAR_V13_COMP_QST, 2);
+   set_global_var(GVAR_V13_COMP_QST, 2);   // Seraph - unlocked by killap
    inc_general_rep(REP_BONUS_V13_FIX_COMPUTER);
    inc_vault13_rep(REP_HERO_V13_FIX_COMPUTER);
    give_xp(EXP_FIX_COMPUTER);

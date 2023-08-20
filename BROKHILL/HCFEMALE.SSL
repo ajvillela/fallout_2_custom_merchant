@@ -173,10 +173,10 @@ procedure talk_p_proc begin
    else if (global_var(GVAR_BH_MISSING) == MISSING_REWARDED ) then begin
       call Node012;
    end
-   else if (TOWN_REP_VAR >= 15) then begin //high rep
+   else if (global_var(TOWN_REP_VAR) >= 15) then begin //high rep - edit by killap: TOWN_REP_VAR, changed to global_var(TOWN_REP_VAR)
       call Node015;
    end
-   else if (TOWN_REP_VAR <= -15) then begin //low rep
+   else if (global_var(TOWN_REP_VAR) <= -15) then begin //low rep - edit by killap: TOWN_REP_VAR, changed to global_var(TOWN_REP_VAR)
       call Node016;
    end
    else if (global_var(GVAR_ENEMY_BROKEN_HILLS) == 1) then begin

@@ -162,8 +162,27 @@ procedure combat_p_proc begin
 end
 
 procedure map_enter_p_proc begin
+   //added by killap
+   if (grisham_dead) then begin
+      destroy_object(self_obj);
+   end
+   //end added by killap
+
+   reg_anim_clear(dude_obj); //added by killap
+   
    match_dude_elevation;
-   check_show_ghost_farm_attackers
+   
+   //added by killap
+   //if (grisham_dead) then begin
+   //   if (cur_map_index == MAP_GHOST_FARM) then begin
+   //      check_set_obj_visiblility(self_obj, true);
+   //      destroy_object(self_obj);
+   //   end                     
+   //end else begin
+      check_show_ghost_farm_attackers
+   //end
+   //end added by killap
+   
    if (map_first_run) then begin
       set_local_var(LVAR_Home_Tile, self_tile);
       if (cur_map_index != MAP_GHOST_FARM) then begin
@@ -173,6 +192,7 @@ procedure map_enter_p_proc begin
    end else if (cur_map_index != MAP_GHOST_FARM) then begin
       critter_attempt_placement(self_obj, local_var(LVAR_Home_Tile), dude_elevation);
    end
+
 end
 procedure map_exit_p_proc begin
    if ((is_staging_rape) or (is_staging_wedding)) then begin
@@ -185,7 +205,8 @@ procedure critter_p_proc begin
    if (is_staging_wedding) then begin
       off_hostile;
       if (self_is_armed == false) then begin
-         set_drew_gun;
+         arm_obj(self_obj, PID_SHOTGUN, 1, 0, 1) //added by killap
+         //set_drew_gun; --comment out by killap - did nothing and everytime you enter dialog, you must rearm, so making note of being armed is meaningless
       end
       if (get_sub_stage == wedding_stage_place_important) then begin
          set_sub_stage(wedding_stage_place_party)
@@ -215,18 +236,18 @@ procedure critter_p_proc begin
          set_sub_stage(wedding_stage_ready)
       end else if (stage_time_ready) then begin
          if (get_sub_stage == wedding_stage_grisham_what) then begin
-            if ((self_can_see_dude) and (anim_busy(self_obj) == false)) then begin
+            if ( ( (self_can_see_dude) or (dude_is_sneaking) ) and (anim_busy(self_obj) == false)) then begin //edit by killap - added (dude_is_sneaking)
                gfade_in(1);
                game_ui_enable;
                floater_bad(400);
                set_next_stage_time(quick_stage_time)
                set_sub_stage(wedding_stage_what_response)
             end else begin
-               animate_run_to_tile(((28103 * is_staging_miria_wedding) + (28097 * is_staging_davin_wedding)));
+               critter_attempt_placement(self_obj, ((28103 * is_staging_miria_wedding) + (28097 * is_staging_davin_wedding)), self_elevation); // Altered by Seraph
             end
          end else if (get_sub_stage == wedding_stage_grisham_response) then begin
             if (sex_act_straight) then begin
-               floater_type_msg(mstr(403) + mstr(412 + is_staging_davin_wedding) + mstr(453), FLOAT_COLOR_BAD);
+               floater_type_msg(mstr(403 + (1000*grisham_dead)) + mstr(412 + is_staging_davin_wedding + (1000*grisham_dead)) + mstr(453), FLOAT_COLOR_BAD); // Seraph's Fix: added (1000*grisham_dead)
             end else begin
                floater_type_msg(mstr(402) + mstr(412 + is_staging_davin_wedding) + mstr(452), FLOAT_COLOR_BAD);
             end
@@ -234,6 +255,7 @@ procedure critter_p_proc begin
             set_sub_stage(wedding_stage_response_wait)
          end else if (get_sub_stage == wedding_stage_response_wait) then begin
             gfade_out(1);
+            game_time_advance(5*ONE_GAME_MINUTE); //added by killap
             move_to(modoc_jo_obj, church_jo_spot, dude_elevation);
             place_in_church_seat(self_obj, church_grisham_seat);
             place_in_church_seat(dude_obj, church_player_seat);
@@ -241,7 +263,7 @@ procedure critter_p_proc begin
             reg_anim_clear(dude_obj);
             set_sub_stage(wedding_stage_place_important)
          end else if (get_sub_stage == wedding_stage_ask_skip) then begin
-            floater(404);
+            floater(404 + (10*jo_dead)); // Altered by Seraph: added (10*jo_dead)
             set_next_stage_time(quick_stage_time)
             set_sub_stage(wedding_stage_jo_question)
          end else if (get_sub_stage == wedding_stage_question_response_2) then begin
@@ -252,23 +274,33 @@ procedure critter_p_proc begin
             floater_type_msg(mstr(410) + mstr(412 + is_staging_davin_wedding) + mstr(460 + is_staging_davin_wedding), FLOAT_COLOR_BAD);
             set_next_stage_time(default_stage_time)
             set_sub_stage(wedding_stage_player_vow_response)
+            set_local_var(LVAR_Home_Tile, 28710); //added by killap
          end
       end else if (get_sub_stage == wedding_stage_response_wait) then begin
-         Follow_Dude_Run_Only(4, 1)
+         if (get_sub_stage == wedding_stage_grisham_what) then begin
+            if (is_staging_davin_wedding) then begin
+              animate_run_to_tile(27495);
+            end else begin
+              animate_run_to_tile(27501);
+            end
+         end else begin
+            Follow_Dude_Run_Only(4, 1)
+         end
          if (tile_in_grisham_wedding_wait_zone(dude_tile) == false) then begin
-            floater_bad(220 + dude_is_female);
+            floater_bad(420 + dude_is_female); // Seraph's Fix: changed '220' to '420'; thanks Wasteland Ghost!
             call Node998;
          end
       end
    end else if (is_staging_rape) then begin
       if (self_is_armed == false) then begin
-         set_drew_gun;
+         arm_obj(self_obj, PID_SHOTGUN, 1, 0, 1) //added by killap
+         //set_drew_gun;  --comment out by killap - did nothing and everytime you enter dialog, you must rearm, so making note of being armed is meaningless
       end
-      if (self_can_see_dude) then begin
-         if (inven_count(dude_obj) > 0) then begin
+      if ( (self_can_see_dude) or (dude_is_sneaking) ) then begin //edit by killap - added (dude_is_sneaking)
+         /* if (inven_count(dude_obj) > 0) then begin // Disabled by Seraph
             clear_stage
             self_attack_dude;
-         end else if (stage_time_ready) then begin
+         end else */ if (stage_time_ready) then begin
             if (get_sub_stage == rape_stage_confront) then begin
                game_ui_enable;
                gfade_in(1);
@@ -287,7 +319,11 @@ procedure critter_p_proc begin
             end
          end
       end else begin
-         Follow_Dude_Run_Only(4, 1)
+         if (get_sub_stage == rape_stage_confront) then begin
+            animate_run_to_tile(27501);
+         end else begin
+            Follow_Dude_Run_Only(4, 1)
+         end
       end
    end else begin
       if (cur_map_index == MAP_GHOST_FARM) then begin
@@ -348,11 +384,11 @@ variable temp_dog;
       script_overrides;
       if (grisham_angry) then begin
          floater(random(151,154));
-      end else if (dude_is_married) then begin
+      end else if ((dude_is_married) and not(brahmin_seed_active)) then begin // edit by killap - added not(brahmin_seed_active)
          if (marriage_same_sex) then begin
-            floater(random(156 - dude_spouse_is_female,157 + dude_spouse_is_male));
+            floater(random(156 - dude_spouse_is_female + (1000*grisham_dead),157 + dude_spouse_is_male + (1000*grisham_dead))); // Seraph's Fix: added (1000*grisham_dead)
          end else begin
-            floater(random(160 - dude_spouse_is_female,160 + dude_spouse_is_male));
+            floater(random(160 - dude_spouse_is_female + (1000*grisham_dead),160 + dude_spouse_is_male + (1000*grisham_dead))); // Seraph's Fix: added (1000*grisham_dead)
          end
       end else if (dude_was_married) then begin
          if (grisham_dead == false) then begin
@@ -398,12 +434,18 @@ variable temp_dog;
       set_herebefore;
       debug_msg("  brahmin seed state == "+global_var(GVAR_MODOC_BRAHMIN_SEED));
    end
+   //added by killap
+   if (self_is_armed == false) then begin
+      arm_obj(self_obj, PID_SHOTGUN, 1, 0, 0) //added by killap
+      //set_drew_gun; --comment out by killap - did nothing and everytime you enter dialog, you must rearm, so making note of being armed is meaningless
+   end
+   //end added  
 end
 
 procedure destroy_p_proc begin
-   if (grisham_dead) then begin
+   /*if (grisham_dead) then begin
       destroy_object(self_obj);
-   end
+   end*/
    inc_good_critter
    set_grisham_dead;
 end
@@ -411,7 +453,7 @@ end
 procedure look_at_p_proc begin
    script_overrides;
    if (herebefore) then begin
-      display_msg(mstr(101));
+      display_msg(mstr(101 + (1000*grisham_dead))); // Seraph's Fix: added (1000*grisham_dead)
    end else begin
       display_msg(mstr(100));
    end
@@ -543,10 +585,17 @@ end
 procedure Node002 begin
    item_caps_adjust(dude_obj, brahmin_seed_reward);
    set_brahmin_seed_inactive;
+   
+   //moved out of the 'if' statement below to allow both cases (no brahmin killed/some brahmin killed) to get the rewards- killap
+   inc_global_var_amt(GVAR_TOWN_REP_MODOC,REP_TOWN_FINISH_BRAHMIN_SEED); // Seraph's Fix: changed 'inc_global_var' to 'inc_global_var_amt'. Thanks Rob!
+   display_mstr(800);
+   give_xp(EXP_FINISH_BRAHMIN_SEED);
+   //end move out of 'if' statement
+   
    if (brahmin_killed > 0) then begin
-      inc_global_var(GVAR_TOWN_REP_MODOC,REP_TOWN_FINISH_BRAHMIN_SEED);
-      display_mstr(800);
-      give_xp(EXP_FINISH_BRAHMIN_SEED);
+//      inc_global_var_amt(GVAR_TOWN_REP_MODOC,REP_TOWN_FINISH_BRAHMIN_SEED); // Seraph's Fix: changed 'inc_global_var' to 'inc_global_var_amt'. Thanks Rob!
+//      display_mstr(800);
+//      give_xp(EXP_FINISH_BRAHMIN_SEED);
       Reply(mstr(170) + brahmin_killed + mstr(171) + brahmin_seed_reward + mstr(172));
       if (found_catch == false) then begin
          NOption(173,Node018,004);
@@ -661,6 +710,7 @@ procedure Node020 begin
    NOption(201,Node024,004);
 end
 procedure Node021 begin
+   set_brahmin_seed_inactive; // Seraph's Code
    Reply(202);
    NOption(g_mstr(350),Node999,004);
 end
@@ -676,11 +726,13 @@ procedure Node023 begin
    NOption(207,Node024,004);
 end
 procedure Node024 begin
+   set_brahmin_seed_inactive; // Seraph's Code
    set_grisham_angry;
    Reply(208);
    NOption(g_mstr(350),Node999,004);
 end
 procedure Node026 begin
+   set_brahmin_seed_inactive; // Seraph's Code
    set_grisham_angry;
    Reply(209);
    NOption(g_mstr(350),Node999,004);
@@ -732,28 +784,32 @@ procedure Node036 begin
 end
 procedure Node040 begin
    set_next_stage_time_only(0)
-   Reply(228 + dude_is_female);
+   Reply(228 + dude_is_female + (1000*grisham_dead)); // Seraph's Fix: added (1000*grisham_dead)
+   if (jo_dead) then
+      modoc_jo_obj := create_object_sid(PID_JO, 20143, elevation(self_obj), SCRIPT_MCJO); // Seraph's Code - added here too by killap
    NOption(g_mstr(350),Node999,001);
 end
 procedure Node041 begin
-   Reply(230 + having_sex_with_davin);
+   Reply(230 + having_sex_with_davin + (1000*grisham_dead)); // Seraph's Fix: added (1000*grisham_dead)
    NOption(233 + having_sex_with_davin,Node046,004);
    NOption(232,Node042,004);
    NOption(235,Node043,004);
 end
 procedure Node042 begin
    if (dude_is_male) then begin
-      Reply(236);
+      Reply(236 + (1000*grisham_dead)); // Seraph's Fix: added (1000*grisham_dead)
    end else begin
-      Reply(237);
+      Reply(237 + (1000*grisham_dead)); // Seraph's Fix: added (1000*grisham_dead)
    end
+   if (jo_dead) then
+      modoc_jo_obj := create_object_sid(PID_JO, 20143, elevation(self_obj), SCRIPT_MCJO); // Seraph's Code - added here too by killap
    NOption(g_mstr(350),Node999,004);
 end
 procedure Node043 begin
    if (having_sex_with_davin) then begin
-      Reply(239);
+      Reply(239 + (1000*grisham_dead)); // Seraph's Fix: added (1000*grisham_dead)
    end else begin
-      Reply(238);
+      Reply(238 + (1000*grisham_dead)); // Seraph's Fix: added (1000*grisham_dead)
    end
    NOption(240,Node044,004);
 end
@@ -763,6 +819,8 @@ procedure Node044 begin
 end
 procedure Node045 begin
    Reply(243);
+   if (jo_dead) then
+      modoc_jo_obj := create_object_sid(PID_JO, 20143, elevation(self_obj), SCRIPT_MCJO); // Seraph's Code - added here too by killap
    NOption(g_mstr(350),Node999,004);
 end
 procedure Node046 begin
@@ -771,6 +829,7 @@ procedure Node046 begin
 end
 procedure Node047 begin
    clear_stage
+   party_no_follow_off; // Seraph's Code
    Reply(246);
    NOption(247,Node999,004);
 end

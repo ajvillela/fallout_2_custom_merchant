@@ -61,7 +61,7 @@ procedure Node999;                                      // This Node is Always E
 // Do NOT add in any lines here.
 //~~~~~~~~~~~~~~~~ DESIGNER TOOL STARTS HERE
 
-procedure Node000;
+//procedure Node000; - comment out by killap
 procedure Node001;
 procedure Node001a;
 procedure Node002;
@@ -69,6 +69,7 @@ procedure Node002a;
 procedure Node003;
 procedure Node004;
 procedure Node005;
+procedure Node005a; //added by killap
 procedure Node006;
 procedure Node006a;
 procedure Node007;
@@ -146,11 +147,13 @@ procedure Node122;
    pointers and variables that need not be saved. If a variable
    Needs to be saved, make it a map variable (MVAR_) */
 
+import variable Hakunin_Ptr;  //added by killap
 
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
 variable From19:=0;
 variable From17:=0;
+variable From996:=0; //added by killap
 
 procedure start begin
 end
@@ -165,9 +168,17 @@ procedure map_enter_p_proc begin
 
    if (cur_map_index == MAP_DESTROYED_ARROYO_BRIDGE) then begin
        anim(self_obj,ANIM_fall_front_sf,ANIMATE_FORWARD);
+   end else begin
+      Hakunin_Ptr := self_obj; //added by killap
    end
 end
 
+//added by killap
+procedure map_update_p_proc begin
+   if ( cur_map_index == MAP_ARROYO_VILLAGE ) then
+      Hakunin_Ptr := self_obj;
+end
+//end added
 
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from
    Movement to attacking the player on sight can be placed in here.*/
@@ -182,25 +193,32 @@ procedure critter_p_proc begin
        if (local_var(LVAR_Herebefore) == 0) then begin
            mark_navarro_on_map
            set_f2(f2_state_tribe_kidnapped);
+           //added by killap
+           if ((global_var(GVAR_ARROYO_SPEAR) >= SPEAR_GET_POWDER) and (global_var(GVAR_ARROYO_SPEAR) < SPEAR_FINISHED)) then
+             set_global_var(GVAR_ARROYO_SPEAR,4); //failure
+           //end added
            dialogue_system_enter;
        end
    end
 
-   else if (global_var(GVAR_ENEMY_ARROYO) == 1) then begin
+   else if ( (global_var(GVAR_ENEMY_ARROYO) == 1) and (obj_can_see_obj(self_obj,dude_obj)) ) then begin //edit by killap - added (obj_can_see_obj(self_obj,dude_obj))
        attack(dude_obj);
    end
 
    else if ((obj_can_see_obj(self_obj,dude_obj)) and (map_var(MVAR_Stealing_From_Shaman) == 1)) then begin
        set_map_var(MVAR_Stealing_From_Shaman,2);
-       floater(218);
+       //floater(218);
+       floater(300);
    end
    else if ((obj_can_see_obj(self_obj,dude_obj)) and (map_var(MVAR_Stealing_From_Shaman) == 3)) then begin
        set_map_var(MVAR_Stealing_From_Shaman,4);
-       floater(219);
+       //floater(219);
+       floater(300);
    end
    else if ((obj_can_see_obj(self_obj,dude_obj)) and (map_var(MVAR_Stealing_From_Shaman) == 5)) then begin
        set_map_var(MVAR_Stealing_From_Shaman,6);
-       floater(220);
+       //floater(220);
+       floater(301);
        set_local_var(LVAR_Hostile,2);
    end
 
@@ -238,6 +256,7 @@ end
    written by designers are placed in here. Additionally, Reactions are generated and
    stored which affects player interactions. */
 procedure talk_p_proc begin
+   From996 := 0; //added by killap
    Evil_Critter:=0;
    Slavery_Tolerant:=SLAVE_INTOLERANT;
    Karma_Perception:=KARMA_PERCEPTION10;
@@ -245,10 +264,16 @@ procedure talk_p_proc begin
    CheckKarma;
 
    GetReaction;
+   
+   ReactToLevel; //added by killap
 
    if (cur_map_index == MAP_DESTROYED_ARROYO_BRIDGE) then begin
        set_local_var(LVAR_Herebefore,1);
-       start_gdialog(NAME,self_obj,4,HEAD_DYING_HAKUNIN,BACKGROUND_WASTELAND);
+       if ((game_time_hour >= 2000) or (game_time_hour < 600)) then begin //added by killap - RP
+         start_gdialog(NAME,self_obj,4,HEAD_DYING_HAKUNIN_NIGHT,BACKGROUND_WASTELAND_NIGHT);
+       end else begin
+         start_gdialog(NAME,self_obj,4,HEAD_DYING_HAKUNIN,BACKGROUND_WASTELAND);
+       end
        gSay_Start;
            call Node101;
        gSay_End;
@@ -256,16 +281,23 @@ procedure talk_p_proc begin
        kill_critter(self_obj,ANIM_fall_front_sf);
    end
 
-   else if ((check_general_rep < 0) or (local_var(LVAR_reaction_level) == REACTION_LEVEL_BAD)) then begin
+   else if ( (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) and ((check_general_rep < 0) or (local_var(LVAR_reaction_level) <= REACTION_LEVEL_BAD))) then begin //killap fix: changed to <= AND expansion edit -  (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
        start_gdialog(NAME,self_obj,4,HEAD_HAKUNIN,BACKGROUND_TENT);
        gSay_Start;
-           call Node012;
+         //added by killap
+         if ((global_var(GVAR_KILL_EVIL_PLANTS) == QUEST_COMPLETED) and (local_var(LVAR_One_Reward) == 0)) then begin
+            set_local_var(LVAR_One_Reward,1);
+            call Node018;
+         end else begin
+         //end added
+            call Node012;
+         end
        gSay_End;
        end_dialogue;
    end
 
 
-   else if (vault_13_visit) then begin
+   else if (Fallout2_vault13_entered) then begin //killap's fix: changed from (vault_13_visit)
        start_gdialog(NAME,self_obj,4,HEAD_HAKUNIN,BACKGROUND_TENT);
        gSay_Start;
            call Node101;
@@ -330,13 +362,13 @@ procedure talk_p_proc begin
        end_dialogue;
    end
 
-   else if (local_var(LVAR_Herebefore) == 0) then begin
+/*   else if (local_var(LVAR_Herebefore) == 0) then begin
        start_gdialog(NAME,self_obj,4,HEAD_HAKUNIN,BACKGROUND_TENT);
        gSay_Start;
            call Node000;
        gSay_End;
        end_dialogue;
-   end
+   end -comment out by killap */
 
    else begin
        start_gdialog(NAME,self_obj,4,HEAD_HAKUNIN,BACKGROUND_TENT);
@@ -359,7 +391,7 @@ procedure destroy_p_proc begin
                                                         // loot the containers after he is dead
    inc_good_critter
    set_global_var(GVAR_TOWN_REP_ARROYO, global_var(GVAR_TOWN_REP_ARROYO) - 50);
-
+   Hakunin_Ptr := -1; //added by killap
 /* Set global_variable for Enemy status*/
 end
 
@@ -367,7 +399,7 @@ end
    This should only hold the most cursory of glances for the player. */
 procedure look_at_p_proc begin
    script_overrides;
-   if (not(vault_13_visit)) then
+   if (not(Fallout2_vault13_entered)) then //killap's fix: changed from (vault_13_visit)
        display_msg(mstr(100));
    else if (local_var(LVAR_Looked_Before) == 0) then begin
        inc_local_var(LVAR_Looked_Before);
@@ -382,7 +414,7 @@ end
    if the critter is known to the player. */
 procedure description_p_proc begin
    script_overrides;
-   if (not(vault_13_visit)) then
+   if (not(Fallout2_vault13_entered)) then //killap's fix: changed from (vault_13_visit)
        display_msg(mstr(100));
    else
        display_msg(mstr(103));
@@ -420,6 +452,7 @@ procedure Node995 begin
 end
 
 procedure Node996 begin
+   From996 := 1; //added by killap
    if (get_critter_stat(dude_obj,STAT_ch) >= 8) then begin
        call Node010;
    end
@@ -456,9 +489,9 @@ end
 // The Following lines are from the Design Tool
 //~~~~~~~~~~~~~~~~ DESIGN TOOL STARTS HERE
 
-procedure Node000 begin
-   call Node001;
-end
+//procedure Node000 begin
+//   call Node001;
+//end
 
 procedure Node001 begin
    Reply(104);
@@ -503,7 +536,7 @@ end
 procedure Node003 begin
    Reply(123);
 
-   GLowOption(124,Node004,);
+   GLowOption(124,Node004); // Seraph's Fix: GLowOption only takes 2 args. Thanks Rob!
    NLowOption(125,Node999);
 end
 
@@ -526,10 +559,28 @@ procedure Node005 begin
    NOption(134,Node996,004);
 end
 
+//added by killap - same proc as above expect NOption(134,Node996,004) is not present.
+//Needs to be done to have logical dialogue flow for "evil" characters. (expansion)
+procedure Node005a begin
+   Reply(128);
+
+   NOption(129,Node011,004);
+   NOption(130,Node011,004);
+   NOption(131,Node997,004);
+   NOption(132,Node009,004);
+   NOption(133,Node009,004);
+end
+//end added
+
 procedure Node006 begin
    Reply(135);
-
-   NOption(136,Node007,004);
+   
+   //added check by killap
+   if (From996) then
+      NOption(136,Node007,004);
+   else
+      NOption(118,Node005a,004);
+      
    NOption(137,Node006a,004);
    BOption(138,Node008,004);
    BOption(139,Node008,004);
@@ -545,14 +596,17 @@ end
 procedure Node007 begin
    Reply(143);
 
-   BOption(144,Node007a,004);
+   GOption(144,Node007a,004); //was boption - killap
    NOption(145,Node007a,004);
-   NOption(146,Node008,004);
+   BOption(146,Node008,004); //was noption - killap
    NOption(147,Node007a,004);
 end
 
 procedure Node007a begin
-   set_global_var(GVAR_KILL_EVIL_PLANTS,QUEST_ACCEPTED);
+   if (global_var(GVAR_KILL_EVIL_PLANTS) < QUEST_ACCEPTED) then begin //added check by killap
+      UpReactModerate; //added by killap
+      set_global_var(GVAR_KILL_EVIL_PLANTS,QUEST_ACCEPTED);
+   end
 end
 
 procedure Node008 begin
@@ -588,8 +642,11 @@ end
 
 procedure Node012 begin
    Reply(160);
-
-   GOption(161,Node013,004);
+   //added by killap
+   if (global_var(GVAR_KILL_EVIL_PLANTS) < QUEST_COMPLETED) then begin
+      GOption(161,Node013,004);
+   end
+   //end added
    NOption(162,Node008,004);
    NOption(163,Node999,004);
    BLowOption(164,Node008);
@@ -599,7 +656,7 @@ procedure Node013 begin
    Reply(165);
 
    if (global_var(GVAR_KILL_EVIL_PLANTS) == 0) then begin
-       NOption(166,Node007a,004);
+       GOption(166,Node007a,004);
        NOption(167,Node007a,004);
    end
    BOption(168,Node994,004);
@@ -747,7 +804,9 @@ procedure Node023 begin
        add_mult_objs_to_inven(dude_obj,item,total_healing);
        root:=rm_mult_objs_from_inven(dude_obj,root_ptr,total_healing);
        flower:=rm_mult_objs_from_inven(dude_obj,flower_ptr,total_healing);
-
+       destroy_object(root_ptr); //added by killap
+       destroy_object(flower_ptr); //added by killap
+       
        gfade_out(600);
        gfade_in(600);
 
@@ -908,7 +967,7 @@ end
 procedure Node108 begin
    Reply(263);
 
-   NLowOption(264,Node999,004);
+   NLowOption(264,Node999); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
 end
 
 procedure Node109 begin

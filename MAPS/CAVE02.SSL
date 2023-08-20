@@ -38,7 +38,7 @@
 procedure start;
 procedure map_enter_p_proc;
 procedure map_update_p_proc;
-procedure map_enter_p_proc;
+procedure map_exit_p_proc;
 
 procedure LoadCritters;
 procedure LoadCritterPos;
@@ -158,7 +158,12 @@ procedure map_enter_p_proc begin
 end
 
 procedure map_update_p_proc begin
-   Cavern_Lighting;
+   //added by killap
+   if( elevation( dude_obj ) == 0 ) then
+      Lighting;
+   else
+   //end
+      Cavern_Lighting;
 end
 
 

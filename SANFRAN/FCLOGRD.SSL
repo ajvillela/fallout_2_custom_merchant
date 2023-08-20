@@ -118,7 +118,10 @@ end
 
 procedure map_enter_p_proc begin
    Only_Once:=1;
-   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_SAN_FRAN_LOPAN);
+   if (cur_map_index == MAP_SHI_TEMPLE) then
+      critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_SAN_FRAN_SHI);
+   else
+      critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_SAN_FRAN_LOPAN);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_SF_SHI_GUARD);
    add_timer_event(self_obj, ONE_GAME_SECOND, TIMER_LOOK);
 end
@@ -148,9 +151,13 @@ procedure damage_p_proc begin
 /* If the player causes damage to this critter, then he will instantly consider the player
    his personal enemy. In Critter_Proc or through dialog, actions will be taken against
    the player for his evil acts. */
-   if (obj_in_party(source_obj)) then begin
-       set_local_var(LVAR_Personal_Enemy,1);
-       set_san_fran_flag(SF_LOPAN_ENEMY);
+   
+   set_local_var(LVAR_Personal_Enemy,1);
+   
+   if not(cur_map_index == MAP_SHI_TEMPLE) then begin //added check by killap
+      if (obj_in_party(source_obj)) then begin
+         set_san_fran_flag(SF_LOPAN_ENEMY);
+      end
    end
 
 end
@@ -190,7 +197,8 @@ procedure talk_p_proc begin
    end
    */
 
-   if (san_fran_flag(SF_SHI_ENEMY)) then begin
+   //if (san_fran_flag(SF_SHI_ENEMY)) then begin
+   if (san_fran_flag(SF_LOPAN_ENEMY)) then begin //edit by killap
       call Node003;
    end else begin
       call Node001;

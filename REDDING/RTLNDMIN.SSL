@@ -30,7 +30,7 @@
 #include "..\headers\command.h"
 
 // Tile Nums for the Trap
-#define LANDMINE_TILE1          (22387)
+#define LANDMINE_TILE1          (23287)  //was 22387 - killap
 #define LANDMINE_TILE2          (23491)
 #define LANDMINE_TILE3          (23091)
 #define LANDMINE_TILE4          (22491)
@@ -39,7 +39,7 @@
 #define LANDMINE_TILE7          (25107)
 #define LANDMINE_TILE8          (26313)
 #define LANDMINE_TILE9          (20910)
-#define LANDMINE_TILE10         (17503)
+#define LANDMINE_TILE10         (17702) //was 17503 - killap
 #define LANDMINE_TILE11         (16100)
 #define LANDMINE_TILE12         (13898)
 #define LANDMINE_TILE13         (18667)
@@ -65,8 +65,8 @@
 
 // Trap Art
 #define ART_TRAP_VISIBLE                (PID_CAVE_FLOOR_TRAP_VISIBLE)
-#define ART_TRAP_EXPLODED               (PID_CAVE_FLOOR_TRAP_DISARMED)
-#define ART_TRAP_DISARMED               (PID_CAVE_FLOOR_TRAP_DEPRESSED)
+#define ART_TRAP_EXPLODED               (PID_CAVE_FLOOR_TRAP_DEPRESSED) // edit by killap - swapped with the one below
+#define ART_TRAP_DISARMED               (PID_CAVE_FLOOR_TRAP_DISARMED)  // edit by killap - swapped with the one above
 
 
 #define Which_Tile_Var(x)       if (x == LANDMINE_TILE1) then          \
@@ -143,7 +143,8 @@ procedure use_skill_on_p_proc begin
            Traps_Roll:=roll_vs_skill(source_obj,SKILL_TRAPS,TRAPS_BONUS);
 
            if (is_success(Traps_Roll)) then begin
-               Trap:=create_object_sid(ART_TRAP_DISARMED,tile_num(self_obj),elevation(self_obj),CUR_SCRIPT);
+               //Trap:=create_object_sid(ART_TRAP_DISARMED,tile_num(self_obj),elevation(self_obj),CUR_SCRIPT);
+               Trap:=create_object(ART_TRAP_DISARMED,tile_num(self_obj),elevation(self_obj)); // edit by killap
                set_map_var(Landmine_Var,MINE_DISARMED);
                if (source_obj == dude_obj) then
                    display_msg(message_str(SCRIPT_GENERIC,102));
@@ -158,15 +159,17 @@ procedure use_skill_on_p_proc begin
            else if (is_critical(Traps_Roll)) then begin
                set_map_var(Landmine_Var,MINE_EXPLODED);
                if (source_obj == dude_obj) then
-                   display_msg(message_str(SCRIPT_GENERIC,104));
+                  display_msg(message_str(SCRIPT_GENERIC,104));
                else
-                   display_msg(obj_name(source_obj)+message_str(SCRIPT_GENERIC,107));
-               if (tile_contains_obj_pid(tile_num(self_obj),elevation(self_obj),ART_TRAP_VISIBLE)) then begin
+                  display_msg(obj_name(source_obj)+message_str(SCRIPT_GENERIC,107));
+               //for some reason this code segment causes issues - killap
+               /*if (tile_contains_obj_pid(tile_num(self_obj),elevation(self_obj),ART_TRAP_VISIBLE)) then begin
                    debug_msg("Destroying Visible Trap");
                    destroy_object(tile_contains_pid_obj(tile_num(self_obj),elevation(self_obj),ART_TRAP_VISIBLE));
                    debug_msg("Destroyed Visible Trap");
-               end
-               Trap:=create_object_sid(ART_TRAP_EXPLODED,tile_num(self_obj),elevation(self_obj),CUR_SCRIPT);
+               end*/
+               //Trap:=create_object_sid(ART_TRAP_EXPLODED,tile_num(self_obj),elevation(self_obj),CUR_SCRIPT);
+               Trap:=create_object(ART_TRAP_EXPLODED,tile_num(self_obj),elevation(self_obj)); // edit by killap
                explosion(tile_num(self_obj),elevation(self_obj),random(MIN_DMG,MAX_DMG));
            end
 
@@ -190,7 +193,8 @@ procedure Check_Active(variable Mine_Var) begin
            debug_msg("Destroyed Visible Trap");
        end
        Trap:=create_object(ART_TRAP_EXPLODED,tile_num(self_obj),elevation(self_obj));
-       if ((source_obj == dude_obj) and (has_trait(TRAIT_PERK,dude_obj,PERK_light_step_perk)) and (is_success(do_check(dude_obj,STAT_ag,-3)))) then
+       //if ((source_obj == dude_obj) and (has_trait(TRAIT_PERK,dude_obj,PERK_light_step_perk)) and (is_success(do_check(dude_obj,STAT_ag,-3)))) then
+       if ((source_obj == dude_obj) and (has_trait(TRAIT_PERK,dude_obj,PERK_light_step_perk)) and (random(0,1) == 1)) then //added by killap
            debug_msg("Used Light Step.");
        else
            explosion(tile_num(self_obj),elevation(self_obj),random(MIN_DMG,MAX_DMG));

@@ -123,11 +123,20 @@ end
    incrementing the death count for reputation purposes and Enemy Counters are placed
    in here. */
 procedure destroy_p_proc begin
-   variable item;
+   variable tail :=0;
+
 
    if (has_trait(TRAIT_PERK,dude_obj,PERK_gecko_skinning_perk)) then begin
-       item:=create_object(PID_GECKO_PELT,0,0);
-       add_obj_to_inven(self_obj,item);
+       if ((obj_pid(self_obj) == PID_GECKO_SMALL) or (obj_pid(self_obj) == PID_TOUGH_GECKO_SMALL)) then
+            tail := create_object(PID_GECKO_PELT,0,0);
+       // Begin Seraph's Code
+       else if ((obj_pid(self_obj) == PID_FIRE_GECKO) or (obj_pid(self_obj) == PID_TOUGH_FIRE_GECKO)) then
+            tail := create_object(PID_FIRE_GECKO_PELT,0,0);
+       // End Seraph's Code
+       else if ((obj_pid(self_obj) == PID_GOLDEN_GECKO ) or (obj_pid(self_obj) == PID_TOUGH_GOLDEN_GECKO)) then
+            tail := create_object(PID_GOLDEN_GECKO_PELT,0,0);
+
+      add_obj_to_inven(self_obj,tail);
    end
 end
 

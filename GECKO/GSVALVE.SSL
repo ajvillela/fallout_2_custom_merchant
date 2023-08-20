@@ -169,6 +169,7 @@ procedure repair_it begin
    if (is_success(repair_check)) then begin
       item:=obj_carrying_pid_obj(dude_obj, PID_HY_MAG_PART);
       rm_obj_from_inven(dude_obj,item);
+      destroy_object(item); //added by killap
       set_global_var(GVAR_VAULT_GECKO_PLANT, PLANT_REPAIRED);
       set_global_var(GVAR_VAULT_PLANT_STATUS, PLANT_REPAIRED);
       display_msg(mstr(122));

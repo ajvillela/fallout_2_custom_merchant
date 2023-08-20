@@ -229,6 +229,12 @@ procedure destroy_p_proc begin
          dog_object := 0;
       end
       do_kill_dog;
+      //added by killap
+      if (all_dogs_dead) then begin
+         display_msg(mstr(300));
+         modoc_dude_floater(500 + (dude_is_stupid));
+      end
+      //end added
    end else begin
       // dogs in cage
       if (dog_that_can_see_dude == self_obj) then begin

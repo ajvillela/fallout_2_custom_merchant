@@ -27,6 +27,7 @@
 #include "..\headers\define.h"
 #include "..\headers\klamath.h"
 #include "..\headers\kladwtn.h"
+#include "..\headers\NEWR1.h" //added by killap
 
 #define NAME                    SCRIPT_KCSULIK
 #define TOWN_REP_VAR            GVAR_TOWN_REP_KLAMATH
@@ -41,6 +42,7 @@
 
 /* Standard Script Procedures */
 procedure start;
+procedure combat_p_proc;
 procedure critter_p_proc;
 procedure pickup_p_proc;
 procedure talk_p_proc;
@@ -145,6 +147,7 @@ procedure Node70a;
 //procedure Node070;
 procedure Node071;
 procedure Node072;
+procedure Node072a; //added by killap
 //procedure Node073;
 procedure Node074;
 //procedure Node075;
@@ -183,9 +186,17 @@ procedure Node1009;
 procedure Node1010;
 procedure Node1100;
 
+//added by killap - expansion pack (Tribe)
+procedure Node091;
+procedure Node092;
+procedure Node093;
+procedure Node094;
+procedure Node087a;
+procedure Node087b;
+procedure timed_event_p_proc;
+
 
 #define sulik_joins_party                 party_add_self;                                                   \
-                                          add_timer_event(self_obj,game_ticks(1),1);                             \
                                           critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_PLAYER)
 #define dude_has_free_slot_for_sulik        ((dude_at_max_party_size == false) and (Sulik_In_Party == false))
 
@@ -195,6 +206,8 @@ procedure Node1100;
 
 #define sulik_party_member_options                                            \
          NOption(3070,Node026,004);                                           \
+         if (local_var(LVAR_Gave_Tribe_Location) == 0) then                   \
+            NOption(3101,Node094,004);                                        \
          party_member_default_options
 
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
@@ -207,7 +220,7 @@ procedure Node1100;
 #define LVAR_Herebefore                 (4)
 #define LVAR_Hostile                    (5)
 #define LVAR_Personal_Enemy             (6)
-#define LVAR_26before                  (7)
+#define LVAR_26before                   (7)
 #define LVAR_69_before                  (8)
 #define LVAR_81_before                  (9)
 #define LVAR_57_before                  (10)
@@ -219,6 +232,12 @@ procedure Node1100;
 #define LVAR_never_again                (16)
 #define LVAR_second_look                (17)
 
+#define LVAR_At_Tribe                   (18)
+#define LVAR_Tribe_Reunion              (19)
+#define LVAR_Sulik_Not_Stay             (20)
+#define LVAR_Gave_Stuff                 (21)
+#define LVAR_Gave_Tribe_Location        (22)
+
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
    Needs to be saved, make it a map variable (MVAR_) */
@@ -226,9 +245,17 @@ procedure Node1100;
 
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
-variable Charisma_Roll;
+//variable Charisma_Roll; --comment out by killap - never used
 variable luk_check;
 variable k;
+variable From_86 := 0;
+variable waiting := 0; //added by killap
+
+variable a := 0;
+variable b := 0;
+variable c := 0;
+variable d := 0;
+variable e := 0;
 
 procedure start begin
 end
@@ -237,16 +264,25 @@ end
    set up the Team number and AI packet for this critter. This will override the
    default from the prototype, and needs to be set in scripts. */
 procedure map_enter_p_proc begin
-   party_member_map_enter;
-   if (Sulik_In_Party) then begin
+   
+    if ( (cur_town == AREA_PRIMITIVE_TRIBE) and not (Sulik_In_Party) and not (party_is_waiting) and (local_var(LVAR_At_Tribe) > 0) ) then begin
+         add_timer_event(self_obj,game_ticks(random(15,25)),1);
+    end else begin
+   
+      party_member_map_enter;
+      if (Sulik_In_Party) then begin
       //do nothing
-   end
-   else begin
-      Only_Once:=0;
-      critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_KLAMATH);
-      //NEVER SET AI FOR NPCs
-      //critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_PARTY_SULIK_DEFENSIVE);
-   end
+      end
+      else begin
+         Only_Once:=0;
+         critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_KLAMATH);
+         //NEVER SET AI FOR NPCs
+         //critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_PARTY_SULIK_DEFENSIVE);
+      end
+    end
+    
+    //added by killap
+    add_timer_event(self_obj, random(25, 40), 900);
 end
 
 procedure map_update_p_proc begin
@@ -277,17 +313,43 @@ procedure map_update_p_proc begin
          end
       end
    end
+   
+   //added by killap - needed for "hacky fix" for kitty drug... :(
+   if (waiting == 1) then begin
+      waiting := 0;
+   end
+   //end added  
+   
 end
 
+//added by killap - RP
+procedure combat_p_proc begin
+   if (cur_town == AREA_PRIMITIVE_TRIBE) then begin
+      if ( (local_var(LVAR_Hostile) != 2) and (REP_ENEMY_PRIMITIVE_TRIBE) ) then begin
+         set_self_abandon_party;
+         set_local_var(LVAR_Hostile,2);
+      end
+   end
+end
+//end added
+ 
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from
    Movement to attacking the player on sight can be placed in here.*/
 procedure critter_p_proc begin
-
 /* If the critter is mad at the player for any reason, it will attack and remember to attack
    the player should the game be saved and loaded repeatedly. Additionally, if any special
    actions need to be taken by the critter based on previous combat, the critter will remember
    this as well. */
 
+   //added by killap
+   if ((cur_map_index == MAP_NEW_RENO_1) and (self_obj == party_member_obj(PID_SULIK)) and (map_var(MVAR_Kitty_Drug) == party_member_obj(PID_SULIK))) then begin 
+      set_map_var(MVAR_Kitty_Drug, 0);
+      waiting := 1;
+      if (get_critter_stat(self_obj, STAT_st) < 10) then begin
+         use_obj_on_obj(create_object_sid(PID_KITTY_SEX_DRUG_STRENGTH, 0, 0, -1), self_obj);
+      end
+   end 
+   //end added
 
    if ( ((local_var(LVAR_Hostile) == 2) or
          (local_var(LVAR_Personal_Enemy) == 1)) and
@@ -296,33 +358,52 @@ procedure critter_p_proc begin
        attack(dude_obj);
    end
    else if (Sulik_In_Party) then begin
-      if (global_var(GVAR_PLAYER_REPUTATION) < SULIK_BAD_KARMA) then begin
+      if ( (global_var(GVAR_PLAYER_REPUTATION) < SULIK_BAD_KARMA) and (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) ) then begin //edit by killap - added (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)))
          call Node70a;
          debug_msg("SULIK: Evil Spirit");
       end
-      else if (has_rep_childkiller) then begin
+      else if ( (has_rep_childkiller) and (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) ) then begin //edit by killap - added (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)))
          call Node074;
          debug_msg("SULIK: Child Destroyer");
       end
-      else if (has_rep_berserker) then begin
+      else if ( (has_rep_berserker) and (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) ) then begin //edit by killap - added (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)))
          call Node70a;
          debug_msg("SULIK: Crazed Spirit");
       end
-      else if (has_rep_slaver) then begin
+      else if ( (has_rep_slaver) and (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) ) then begin //edit by killap - added (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)))
          call Node071;
          debug_msg("SULIK: Spirit Enslaver");
       end
       else if ((cur_town == AREA_KLAMATH) and (REP_ENEMY_KLAMATH)) then begin
          call Node072;
          debug_msg("SULIK: Causing trouble in Klamath");
-      end
+      end 
       else if (party_is_waiting == false) then begin
-         party_member_follow_dude
+         if (waiting != 1) then begin //check added by killap - needed for "hacky fix" for kitty drug... :(
+            party_member_follow_dude
+         end
       end
    end
    else if ((cur_town == AREA_KLAMATH) and (REP_ENEMY_KLAMATH)) then begin
        call Node998;
    end
+   
+   //added by killap - RP
+   if (cur_town == AREA_PRIMITIVE_TRIBE) then begin
+      if ( (local_var(LVAR_Hostile) != 2) and (REP_ENEMY_PRIMITIVE_TRIBE) ) then begin
+         set_self_abandon_party;
+         set_local_var(LVAR_Hostile,2);
+      end else if ((Sulik_In_Party) and (global_var(GVAR_SULIK_SISTER) == 1) ) then begin
+         if (local_var(LVAR_At_Tribe) == 0) then begin
+            if (dude_elevation == 1) then begin
+               set_local_var(LVAR_At_Tribe,1);
+               add_timer_event(self_obj,5,2);
+            end
+         end
+      end
+   end
+   //end added
+   
 end
 
 /* Whenever the critter takes damage of any type, this procedure will be called. Things
@@ -346,7 +427,9 @@ end
    will be remembered. */
 procedure pickup_p_proc begin
    if (source_obj == dude_obj) then begin
-       set_local_var(LVAR_Hostile,2);
+      if (Sulik_In_Party == false) then begin //added by killap
+         set_local_var(LVAR_Hostile,2);
+      end
    end
 end
 
@@ -354,6 +437,12 @@ end
    written by designers are placed in here. Additionally, Reactions are generated and
    stored which affects player interactions. */
 procedure talk_p_proc begin
+   //B-team mod code
+   /*variable loc1;
+   variable loc2;
+   loc1:=critter_inven_obj(self_obj,0);*/
+   //end B-team mod code
+
    GetReaction;
 
    find_party_background;
@@ -374,10 +463,10 @@ procedure talk_p_proc begin
       if ((get_critter_stat(dude_obj,STAT_iq) <= (0-LOW_IQ))) then begin
          call Node001;
       end
-      else if (has_rep_slaver) then begin
+      else if ( (has_rep_slaver) and (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) ) then begin //added by killap - (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)))
          call Node002;
       end
-      else if (global_var(GVAR_SULIK_FREE) == 0) then begin
+      else if ( (global_var(GVAR_SULIK_FREE) == 0) and ( (global_var(GVAR_ARDIN_FREEDOM) == 0) or (global_var(GVAR_ARDIN_FREEDOM) == 1) ) ) then begin //edit by killap - added (global_var(GVAR_ARDIN_FREEDOM) == 0/1)
          call Node054;
       end
       else begin //else sulik must be free
@@ -386,32 +475,58 @@ procedure talk_p_proc begin
       gSay_End;
       end_dialogue;
    end
-/*
-   else if (Sulik on Primitive Tribe map) then begin
-      if (sister not found) then begin
-         call Node089;
-      end
-      else if (sister found) then begin
-         call Node086;
-      end
-      else begin
-         call Node091;
+        //and not (Sulik_In_Party) and not (party_is_waiting)
+   else if ( (cur_town == AREA_PRIMITIVE_TRIBE) and (local_var(LVAR_At_Tribe) > 0) and (local_var(LVAR_Sulik_Not_Stay) == 0)  ) then begin
+      if (local_var(LVAR_At_Tribe) == 1) then begin
+         set_local_var(LVAR_At_Tribe,2);
+         set_local_var(LVAR_Tribe_Reunion,game_time);
+         start_gdialog(NAME,self_obj,4,HEAD_SULIK,PartyMemberBackground);
+         gSay_Start;
+            call Node087;
+         gSay_End;
+         end_dialogue;
+      end else if ( (local_var(LVAR_At_Tribe) == 2) and ((game_time - local_var(LVAR_Tribe_Reunion)) < ONE_GAME_HOUR * 2) ) then begin
+         start_gdialog(NAME,self_obj,4,HEAD_SULIK,PartyMemberBackground);
+         gSay_Start;
+            call Node087;
+         gSay_End;
+         end_dialogue;
+      end else if (local_var(LVAR_At_Tribe) == 3) then begin
+         start_gdialog(NAME,self_obj,4,HEAD_SULIK,PartyMemberBackground);
+         gSay_Start;
+            call Node087a;
+         gSay_End;
+         end_dialogue;
+      end else begin
+         if (global_var(GVAR_SULIK_SISTER) > 1) then begin
+            start_gdialog(NAME,self_obj,4,HEAD_SULIK,PartyMemberBackground);
+            gSay_Start;
+               call Node086;
+            gSay_End;
+            end_dialogue;
+         end else begin
+            start_gdialog(NAME,self_obj,4,HEAD_SULIK,PartyMemberBackground);
+            gSay_Start;
+               call Node089;
+            gSay_End;
+            end_dialogue;
+         end
       end
    end
 
-
+/*
   else if (Sulik in Party) then begin
      call Node065;
   end
 
 */
-   else if (has_rep_childkiller) then begin
+   else if ( (has_rep_childkiller) and (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) ) then begin //edit by killap - added (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)))
       call Node074;
    end
-   else if (has_rep_slaver) then begin
+   else if ( (has_rep_slaver) and (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) ) then begin //edit by killap - added (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)))
       call Node071;
    end
-   else if (global_var(GVAR_PLAYER_REPUTATION) < SULIK_BAD_KARMA) then begin
+   else if ( (global_var(GVAR_PLAYER_REPUTATION) < SULIK_BAD_KARMA) and (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) ) then begin //edit by killap - added (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)))
       call Node70a;
    end
    else if ((Sulik_In_Party) or (party_is_waiting)) then begin
@@ -480,6 +595,70 @@ procedure talk_p_proc begin
    end
 */
 
+//B-team mod code
+/*loc2 := critter_inven_obj(self_obj, 2);
+if (loc2 == 0) then begin
+   loc2 := critter_inven_obj(self_obj, 1);
+end 
+if  (critter_inven_obj(self_obj,0)!=loc1) then
+ begin
+  if (critter_inven_obj(self_obj,0)== 0 ) then
+  begin
+  // Ustawianie grafiki dla golej postaci 
+  metarule3(107,self_obj,FID_NMWARR,0);
+  end
+  else
+  if ((obj_pid(critter_inven_obj(self_obj,0))== 1) or (obj_pid(critter_inven_obj(self_obj,0))==379)) then
+  begin
+  // Ustawianie grafiki dla Lether Armor
+  metarule3(107,self_obj,FID_NMSULA,0);
+  end
+  else
+  if ((obj_pid(critter_inven_obj(self_obj,0))== 232) or (obj_pid(critter_inven_obj(self_obj,0))== 3 )) then
+  begin
+  // Ustawianie grafiki dla Power Armor
+  metarule3(107,self_obj,FID_NMSUPA,0);
+  end
+  else
+  if ((obj_pid(critter_inven_obj(self_obj,0))==349) or (obj_pid(critter_inven_obj(self_obj,0))==348 )) then
+  begin
+  // Ustawianie grafiki dla Advenced Power Armor
+  metarule3(107,self_obj,FID_HANPWR,0);
+  end
+  else
+  if ((obj_pid(critter_inven_obj(self_obj,0))==240) or (obj_pid(critter_inven_obj(self_obj,0))==380) or (obj_pid(critter_inven_obj(self_obj,0))==2 )) then
+  begin
+  // Ustawianie grafiki dla Metal Armor
+  metarule3(107,self_obj,FID_NMSUMA,0);
+  end
+  else
+  if ((obj_pid(critter_inven_obj(self_obj,0))==74) or (obj_pid(critter_inven_obj(self_obj,0))==265)) then
+  begin
+  // Ustawianie grafiki dla Lether Jacket
+  metarule3(107,self_obj,FID_NMSULJ,0);
+  end
+  else
+  if ((obj_pid(critter_inven_obj(self_obj,0))==239) or (obj_pid(critter_inven_obj(self_obj,0))==17) or (obj_pid(critter_inven_obj(self_obj,0))==381 )) then
+  begin
+  // Ustawianie grafiki dla Combat Armor
+  metarule3(107,self_obj,FID_NMSUCA,0);
+  end
+  else
+  if ((obj_pid(critter_inven_obj(self_obj,0))==524) or (obj_pid(critter_inven_obj(self_obj,0))==113)) then
+  begin
+  // Ustawianie grafiki dla habitu
+  metarule3(107,self_obj,FID_HAROBE,0);
+  end
+  restock_obj := critter_inven_obj(self_obj, 1);
+  debug_msg("armour pid == " + obj_pid(restock_obj));
+  rm_obj_from_inven(self_obj, restock_obj);
+  add_obj_to_inven(self_obj, restock_obj);
+  if (loc2 != 0) then begin
+   wield_obj_critter(self_obj, loc2);
+  end
+ end*/
+//end B-team mod code
+
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -489,6 +668,7 @@ procedure destroy_p_proc begin
 
 /* Increment the aligned critter counter*/
    inc_good_critter
+   set_global_var(GVAR_SULIK_DEAD,1);
 
 /* Set global_variable for Enemy status*/
 end
@@ -511,7 +691,7 @@ end
    if the critter is known to the player. */
 procedure description_p_proc begin
    script_overrides;
-   display_msg(mstr(101));
+   display_msg(mstr(102)); //edit by killap - was 101
 end
 
 procedure push_p_proc begin
@@ -534,6 +714,15 @@ procedure Node910 begin
       call Node025;
    end
 end
+
+//added by killap
+procedure use_obj_on_p_proc begin
+   if ( (obj_pid(obj_being_used_with) == PID_MICRO_FUSION_CELL) or (obj_pid(obj_being_used_with) == PID_SMALL_ENERGY_CELL) ) then begin
+      script_overrides;
+      display_msg(g_mstr(20000));
+   end
+end
+//end added
 
 /*
 procedure Node911 begin
@@ -711,7 +900,10 @@ end
 procedure Node005 begin
    if (global_var(GVAR_SULIK_FREE) == 0) then begin
       Reply(116);
-      NLowOption(118,Node006);
+      if (global_var(GVAR_ARDIN_FREEDOM) == 0) then //added check by killap
+         NLowOption(118,Node006);               
+      else
+         NLowOption(118,Node999);  //added by killap
       NOption(119,Node006,004);
    end
    else begin
@@ -990,6 +1182,12 @@ procedure Node027 begin
      or (cur_map_index == MAP_DEN_RESIDENTIAL) ) then begin //others?
       Reply(random(380,382));
    end
+   //added by killap
+   else if ( (cur_town == AREA_PRIMITIVE_TRIBE)  ) then begin
+      Reply(random(3064,3066));
+   
+   end
+   //end added
    //PRIMITIVE_TRIBE..goes here
 /*
    else if ( (cur_map_index == MAP_)
@@ -1069,8 +1267,21 @@ procedure Node027 begin
      or (cur_map_index == MAP_BROKEN_HILLS2) ) then begin
       Reply(random(470,471));
    end
-   //SAN FRANCISCO
-   //EPA *deleted from fallout2*
+   //SAN FRANCISCO - restored by killap - RP
+   else if ( (cur_map_index == MAP_SAN_FRAN_TANKER)
+     or (cur_map_index == MAP_SAN_FRAN_DOCK)
+     or (cur_map_index == MAP_SAN_FRAN_CHINATOWN) 
+     or (cur_map_index == MAP_SHUTTLE_EXTERIOR) 
+     or (cur_map_index == MAP_ELRONOLOGIST_BASE) ) then begin
+      Reply(random(480,483));
+   end
+   //EPA *deleted from fallout2 - restored by killap - RP*
+   else if ( (cur_map_index == MAP_EPA)
+     or (cur_map_index == MAP_EPA_SUBLEVELS_1)
+     or (cur_map_index == MAP_EPA_SUBLEVELS_2) 
+     or (cur_map_index == MAP_EPA_SECRET) ) then begin
+      Reply(random(490,492));
+   end
    //MILITARY BASE
    else if ( (cur_map_index == MAP_MILITARY_BASE_12)
      or (cur_map_index == MAP_MILITARY_BASE_34)
@@ -1087,8 +1298,7 @@ procedure Node027 begin
      or (cur_map_index == MAP_NCR_COUNCIL)
      or (cur_map_index == MAP_NCR_WESTIN_RANCH)
      or (cur_map_index == MAP_NCR_GRAZING_LANDS)
-     or (cur_map_index == MAP_NCR_BAZAAR)
-     or (cur_map_index == MAP_NCR_COUNCIL) ) then begin
+     or (cur_map_index == MAP_NCR_BAZAAR) ) then begin
       Reply(random(520,522));
    end
    //VAULT 15
@@ -1100,7 +1310,20 @@ procedure Node027 begin
    else if (cur_map_index == MAP_NAVARRO_ENTRANCE) then begin
       Reply(random(540,542));
    end
-   //ABBEY
+   //ABBEY - added by killap - RP
+   else if ( (cur_map_index == MAP_ABBEY_OUTSIDE)
+     or (cur_map_index == MAP_ABBEY_BASEMENT)
+     or (cur_map_index == MAP_ABBEY_CAVE) ) then begin
+      Reply(random(550,551));
+   end
+   //VAULT VILLAGE - added by killap - RP
+   else if (cur_map_index == MAP_VAULT_VILLAGE) then begin
+      Reply(random(263,264));
+   end
+   //SLAVER CAMP - added by killap - RP
+   else if (cur_map_index == MAP_SLAVER_CAMP) then begin
+      Reply(random(267,268));
+   end
    //AREA NOT COVERED
    else begin
       Reply(320);
@@ -1183,9 +1406,9 @@ procedure Node043 begin
    else if dude_has_free_slot_for_sulik then begin
       Reply(754);
       NLowOption(757,Node999);
-      NLowOption(758,Node800);
+      NLowOption(758,Node052); //was Node800 - killap
       NOption(759,Node999,004);
-      NOption(760,Node800,004);
+      NOption(760,Node052,004); //was Node800 - killap
    end
    else
       NMessage(756);
@@ -1205,6 +1428,7 @@ procedure Node044 begin
    if (local_var(LVAR_whos_we) == 0) then
       NOption(126,Node06a,004);
    NOption(766,Node047,004);
+   
    NOption(767,Node048,004);
    NOption(768,Node054,004);
    if ( (dude_has_free_slot_for_sulik) and (global_var(GVAR_SULIK_FREE) == 1) ) then //check if sulik free as well
@@ -1218,6 +1442,18 @@ procedure Node045 begin
    NOption(772,Node044,004);
    NOption(773,Node050,007);
    NOption(774,Node999,004);
+   //added by killap - expansion pack (Primitive Tribe)
+   mark_on_map(AREA_PRIMITIVE_TRIBE)
+   set_local_var(LVAR_Gave_Tribe_Location,1);
+
+
+   //if (metarule(17, 18) == 0) then
+   //begin
+    //  debug_msg("  mark_on_map(" + 18 + ")");
+   //   mark_area_known(0, AREA_PRIMITIVE_TRIBE, MARK_STATE_KNOWN);
+  //end
+   //end
+   
 end
 
 procedure Node046 begin
@@ -1244,7 +1480,10 @@ procedure Node048 begin
    if (global_var(GVAR_SULIK_FREE) == 0) then begin
       Reply(779);
       NOption(782,Node007,004);
-      NOption(783,Node006,004);
+      if (global_var(GVAR_ARDIN_FREEDOM) == 1) then //added check by killap
+         NOption(3200,Node999,004);             //added line by killap - prevents exploit of getting xp for freeing sulik in two ways
+      else
+         NOption(783,Node006,004);
    end
    else begin
       if ( (dude_has_free_slot_for_sulik) and (global_var(GVAR_SULIK_FREE) == 1) ) then begin //check if sulik free as well
@@ -1293,7 +1532,7 @@ procedure Node052 begin
    //if (???) then
    //   Reply(790);
    //else
-
+   
    if (dude_charisma <= 1) then begin
      NMessage(722);
    end
@@ -1302,6 +1541,7 @@ procedure Node052 begin
 
       GLowOption(792,Node800);
       NOption(793,Node053,004);
+      set_global_var(GVAR_SULIK_SISTER,1); //find sister
    end
    else begin
       NMessage(918);
@@ -1331,6 +1571,12 @@ procedure Node054 begin
    if ( (dude_has_free_slot_for_sulik) and (global_var(GVAR_SULIK_FREE) == 1) ) then
       NOption(802,Node052,004);
    NOption(803,Node999,004);
+   
+   //added by killap
+   NLowOption(926,Node003);
+   NLowOption(927,Node999);
+   //end added
+   
 end
 
 procedure Node055 begin
@@ -1363,7 +1609,8 @@ procedure Node057 begin
    end
    NOption(814,Node059,004);
    NOption(815,Node060,004);
-   NOption(816,Node061,004);
+   if (global_var(GVAR_SMILEY_STATUS) < SMILEY_RETURNED) then // added by killap
+      NOption(816,Node061,004);
    if (global_var(GVAR_TORR_MISSING) == 1) then begin
       NOption(817,Node079,004);
    end
@@ -1481,7 +1728,8 @@ procedure Node70a begin
    //BAD KARMA or BERSERKER
    //set_local_var(LVAR_never_again,1);
    if (self_visible) then
-      floater(1021);
+      float_msg(self_obj, mstr(1021), FLOAT_MSG_RED); //edit by killap
+      //floater(1021);
    set_self_abandon_party;
    //party_remove(self_obj);
    //leave party
@@ -1492,7 +1740,8 @@ procedure Node071 begin
    set_local_var(LVAR_never_again,1);
    set_local_var(LVAR_Personal_Enemy,1);
    if (self_visible) then
-      floater(1020);
+      float_msg(self_obj, mstr(1020), FLOAT_MSG_RED); //edit by killap
+      //floater(1020);
    set_self_abandon_party;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_KLAMATH);
    //party_remove(self_obj);
@@ -1503,10 +1752,23 @@ procedure Node072 begin
    //ENEMY OF KLAMATH
    set_local_var(LVAR_never_again,1);
    if (self_visible) then
-      floater(1025);
+      float_msg(self_obj, mstr(1025), FLOAT_MSG_RED); //edit by killap
+      //floater(1025);
    set_self_abandon_party;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_KLAMATH);
 end
+
+//added by killap - expansion
+procedure Node072a begin
+   //ENEMY OF Primitive Tribe
+   set_local_var(LVAR_never_again,1);
+   if (self_visible) then
+      float_msg(self_obj, mstr(1026), FLOAT_MSG_RED); //edit by killap
+      //floater(1026);
+   set_self_abandon_party;
+   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_PRIMITIVE_TRIBE);
+end
+//end added
 
 /*
 procedure Node072 begin
@@ -1530,7 +1792,8 @@ procedure Node074 begin
    //CHILDKILLER
    set_local_var(LVAR_never_again,1);
    if (self_visible) then
-      floater(1023);
+      float_msg(self_obj, mstr(1023), FLOAT_MSG_RED); //edit by killap
+      //floater(1023);
    set_self_abandon_party;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_KLAMATH);
    //party_remove(self_obj);
@@ -1644,42 +1907,172 @@ procedure Node084 begin
 end
 */
 
-procedure Node086 begin
+/*procedure Node086 begin
    Reply(3050);
    GOption(3051,Node087,004);
    BOption(3052,Node088,004);
+end*/
+
+//added by killap
+procedure Node086 begin
+   Reply(3050);
+   GOption(3051,Node092,004);
+   NOption(3052,Node999,004);
+   NOption(3081,Node088,004);
+   
+   From_86 := 1;
+   
+      
+   //added by killap
+   NLowOption(123,Node999);
+   NLowOption(124,Node092);
+   //end added
+   
 end
+//end
+
+
+
+/*procedure Node087 begin
+//FIX NBK
+   Reply(3053);
+   NOption(3054,Node999,004); //sulik leaves party and moves around tribe map
+   party_remove_self;
+   add_timer_event(self_obj,1,1);
+//when pc leaves sulik is back in party
+end*/
+
 
 procedure Node087 begin
 //FIX NBK
    Reply(3053);
-   NOption(3054,Node999,004); //sulik leaves party and moves around tribe map
+   NOption(3054,Node087b,001); //sulik leaves party and moves around tribe map
+   
 //when pc leaves sulik is back in party
 end
 
-procedure Node088 begin
+procedure Node087b begin
+   //party_remove_self;
+   add_timer_event(self_obj,1,1);   
+end
+
+
+procedure Node087c begin
+   Reply(3063);
+   NOption(3068,Node092,004);
+   NOption(3052,Node999,004);
+   if (local_var(LVAR_Gave_Stuff) == 0) then
+      NOption(3069,Node088,004);
+   else
+      NOption(3069,Node999,004);
+      
+      
+   //added by killap
+   NLowOption(123,Node999);
+   NLowOption(124,Node092);
+   //end added
+end
+
+//added by killap
+procedure Node087a begin
+   Reply(3067);
+   //Reply(3067 + 3063)
+   NOption(3100,Node087c,001);
+end
+//end added by killap
+
+
+
+/*procedure Node088 begin
 //FIX NBK
    Reply(3055);
    BOption(3054,Node999,004); //put suliks inventory on player, sulik leaves to move about the village
    GOption(3056,Node087,004);
+end*/
+
+//added by killap
+procedure Node088 begin
+//FIX NBK
+   Reply(3055);
+   BOption(3103,Node093,004); //put suliks inventory on player, sulik leaves to move about the village
+   GOption(3056,Node092,004);
+
 end
+//end added by killap
 
 procedure Node089 begin
    Reply(3057);
-   BOption(3058,Node087,004);
-   GOption(3059,Node090,004);
+   GOption(3058,Node092,004);
+   NOption(3059,Node090,004);
+   
+      
+   //added by killap
+   NLowOption(123,Node999);
+   NLowOption(124,Node092);
+   //end added
 end
 
+/*
 procedure Node090 begin
 //FIX NBK
    Reply(3060);
    BOption(3061,Node999,004); //put suliks inventory on player, sulik leaves to move about the village
    GOption(3062,Node087,004);
 end
+*/
 
+//added by killap - expansion
+procedure Node090 begin
+   Reply(3060);
+   BOption(3061,Node093,004); //put suliks inventory on player, sulik leaves to move about the village
+   GOption(3062,Node092,004);
+end
+
+/*
 procedure Node091 begin
 //add several conditional floats
 end
+*/
+
+//added by killap - expansion
+procedure Node091 begin
+   floater(random(3082,3084));
+end
+procedure Node092 begin
+   if (dude_charisma <= 1) then begin
+      //set_self_abandon_party;
+      Reply(722);
+      NOption(g_mstr(10007),Node999,001);
+   end else if (dude_at_max_party_size) then begin
+      //set_self_abandon_party;
+      Reply(918); //was 2000
+      NOption(g_mstr(10007),Node999,001);
+   end else if (town_rep_is_hated) then begin
+      //set_self_abandon_party;
+      Reply(921); //was 2100
+      NOption(g_mstr(10007),Node999,001);
+   end else begin
+      set_local_var(LVAR_Sulik_Not_Stay,1);
+      call Node800;
+      call Node1000;
+   end
+end
+
+procedure Node093 begin
+   set_local_var(LVAR_Gave_Stuff,1);
+   //add sulik stuff to player inventory
+   inven_unwield(self_obj);
+   move_obj_inven_to_obj(self_obj, dude_obj);
+   set_local_var(LVAR_At_Tribe,3);
+end
+
+procedure Node094 begin
+   Reply(771);
+   mark_on_map(AREA_PRIMITIVE_TRIBE)
+   set_local_var(LVAR_Gave_Tribe_Location,1);
+   NOption(3102,Node1000,004);
+end
+//end added
 
 procedure Node700 begin
    inven_unwield(self_obj);
@@ -1687,6 +2080,7 @@ end
 
 procedure Node800 begin
    sulik_joins_party;
+   call Node1000; // added by killap
 end
 
 // party stuff
@@ -1784,5 +2178,52 @@ procedure Node1100 begin
       end_party_waiting;
       Reply(880);
       sulik_party_member_options;
+   end
+end
+
+//added by killap - expansion pack
+procedure timed_event_p_proc begin
+   //added by killap
+   if (fixed_param == 900) then begin
+      if( ( not( combat_is_initialized ) ) and ( self_visible ) ) then begin
+         if( Sulik_Ptr != 0 ) then begin
+            if (Is_Crippled(self_obj)) then
+               floater(3500);
+            else if (get_critter_stat(self_obj, STAT_current_rad)) then 
+               floater(3501);
+            else if (get_poison(self_obj)) then
+               floater(3502);
+         end
+      end
+      add_timer_event(self_obj, random(50, 80), 900);
+   //end added
+   end else if (fixed_param == 1) then begin
+      if Sulik_In_Party then begin
+         party_remove_self;
+         //party_remove(self_obj);
+         anim_move_to_point_rate(22506, 4)
+         add_timer_event(self_obj,game_ticks(random(40,50)),1);
+         game_ui_enable;
+      end else begin
+         if (tile_distance(tile_num(self_obj), 22506) > 10) then begin
+            anim_move_to_point_rate(22506, 4)
+         end else begin
+            animate_move_to_tile(tile_num_in_direction(tile_num(self_obj),random(0,5),random(3,7)));
+         end
+         add_timer_event(self_obj,game_ticks(random(15,25)),1);
+         if (random(1,3) == 1) then
+            call Node091;
+      end
+   end else if (fixed_param == 2) then begin
+      //call talk_p_proc;
+      //start_dialog_at_node(Node087);
+      if (global_var(GVAR_SULIK_SISTER) == 1) then
+         floater(3090);
+      else
+         floater(3091);
+      set_local_var(LVAR_At_Tribe,2);
+      set_local_var(LVAR_Tribe_Reunion,game_time);
+      set_local_var(LVAR_Sulik_Not_Stay,0);
+      add_timer_event(self_obj,5,1);
    end
 end

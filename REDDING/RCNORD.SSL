@@ -151,7 +151,7 @@ end
    written by designers are placed in here. Additionally, Reactions are generated and
    stored which affects player interactions. */
 procedure talk_p_proc begin
-   set_global_var(GVAR_STANWELL_PAYOUT,1);
+//   set_global_var(GVAR_STANWELL_PAYOUT,1); //moved down by killap
 
    Evil_Critter:=0;
    Slavery_Tolerant:=SLAVE_TOLERANT;
@@ -160,24 +160,29 @@ procedure talk_p_proc begin
    CheckKarma;
 
    GetReaction;
+   //check added to prevent infinite payoff - killap
+   if (global_var(GVAR_STANWELL_PAYOUT) != 1) then begin
+      if (dude_iq < 4) then begin
+         start_gdialog(NAME,self_obj,4,-1,-1);
+         gSay_Start;
+            call Node007;
+         gSay_End;
+         end_dialogue;
+      end
 
-   if (dude_iq < 4) then begin
-       start_gdialog(NAME,self_obj,4,-1,-1);
-       gSay_Start;
-           call Node007;
-       gSay_End;
-       end_dialogue;
-   end
-
-   else begin
-       start_gdialog(NAME,self_obj,4,-1,-1);
-       gSay_Start;
-           call Node008;
-       gSay_End;
-       end_dialogue;
-   end
-
-   set_global_var(CARAVAN_GVAR,REDDING_CARAVAN_NONE);
+      else begin
+         start_gdialog(NAME,self_obj,4,-1,-1);
+         gSay_Start;
+            call Node008;
+         gSay_End;
+         end_dialogue;
+      end
+      
+      set_global_var(CARAVAN_GVAR,REDDING_CARAVAN_NONE);
+      set_global_var(GVAR_STANWELL_PAYOUT,1);   //moved down by killap
+      
+   end else
+       float_msg(self_obj,mstr(123),FLOAT_COLOR_NORMAL); //added by killap
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -296,17 +301,17 @@ procedure Node008a begin
        call Node001;
    else if (global_var(CARAVAN_GVAR) == REDDING_CARAVAN_THEFT) then
        call Node002;
-   else if ((caravan_guards_left > (caravan_total_guards/2)) or
-            (caravan_brahmin_left > ((caravan_total_brahmin*6)/10))) then
-       call Node003;
-   else if ((caravan_guards_left > (caravan_total_guards/4)) or
-            (caravan_brahmin_left > ((caravan_total_brahmin*4)/10))) then
+   else if ((caravan_guards_left < (caravan_total_guards/4)) or //edit by killap was > in both checks
+            (caravan_brahmin_left < ((caravan_total_brahmin*4)/10))) then
        call Node004;
+   else if ((caravan_guards_left < (caravan_total_guards/2)) or //edit by killap was > in both checks
+            (caravan_brahmin_left < ((caravan_total_brahmin*6)/10))) then
+       call Node003;
    else if ((caravan_guards_left == caravan_total_guards) and
             (caravan_brahmin_left == caravan_total_brahmin)) then
        call Node006;
-   else if ((caravan_guards_left <= (caravan_total_guards - 1)) and
-            (caravan_brahmin_left <= (caravan_total_brahmin - 2))) then
+   else if ((caravan_guards_left >= (caravan_total_guards - 1)) and //edit by killap was <= in both checks
+            (caravan_brahmin_left >= (caravan_total_brahmin - 2))) then
        call Node005;
    else
        call Node004;

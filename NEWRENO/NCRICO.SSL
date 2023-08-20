@@ -14,12 +14,21 @@
            Updated:
 */
 
+/*
+NOTES:
+   Need to add a global var to have Rico attack dud_obj when Monte is under attack.
+*/
+
+
+
+
 /* Include Files */
 #include "..\headers\define.h"
 #define NAME                    SCRIPT_NCRICO
 #define TOWN_REP_VAR            GVAR_TOWN_REP_NEW_RENO
 #include "..\headers\command.h"
 #include "..\headers\NewReno.h"
+#include "..\headers\NEWR1.H"
 
 /* Standard Script Procedures */
 procedure start;
@@ -77,8 +86,7 @@ procedure map_enter_p_proc begin
 end
 
 procedure critter_p_proc begin
-   if ((hostile) and (self_can_see_dude)) then begin
-
+   if ( ( (hostile) or (map_var(MVAR_Monte_Attacked)) ) and (self_can_see_dude) ) then begin
       self_attack_dude;
    end
 end
@@ -86,6 +94,7 @@ end
 procedure damage_p_proc begin
    if (source_obj == dude_obj) then begin
       set_personal_enemy;
+      call Node998;
    end
 end
 
@@ -97,7 +106,6 @@ end
 
 procedure talk_p_proc begin
    call Node002;
-   set_herebefore;
 end
 
 procedure destroy_p_proc begin
@@ -131,5 +139,6 @@ procedure Node002 begin
       floater_rand(200, 210 + (4*dude_is_female));
    end else begin
       floater(215);
+      set_herebefore;
    end
 end

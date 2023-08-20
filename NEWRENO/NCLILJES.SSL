@@ -261,7 +261,7 @@ procedure talk_p_proc begin
    if (warning_result == warning_result_none) then begin
       if (pissed) then begin
          call Node036;
-      end else if ((dude_wielding_knife) and (get_knife(knife_none))) then begin
+      end else if ( (dude_wielding_knife) and (get_knife(knife_none)) and (has_skill(dude_obj, SKILL_MELEE) <= 295) ) then begin //added melee check - killap (so he does not chastise when you have a skill greater than he can teach
          start_dialog_at_node(Node063);
       end else if (dude_family == self_family) then begin
          start_dialog_at_node(Node033);
@@ -324,6 +324,7 @@ procedure Node998 begin
    if (hostile == false) then begin
       set_hostile;
    end
+   attack_family(self_family) //added by killap
 end
 procedure Node999 begin
 end
@@ -363,7 +364,7 @@ end
 procedure Node983 begin
 variable knife_skill_bonus := 5;
    gfade_out(5);
-      up_sex_status;
+      //up_sex_status; -edit by killap - no sex happens as a male so why do this?
       game_time_advance(ONE_GAME_HOUR + (10 * ONE_GAME_MINUTE));
       if ((dude_is_female) and ((dude_charisma > 5) or (dude_has_porn_star_rep))) then begin
          up_sex_status;
@@ -393,7 +394,7 @@ end
 #define floater_bad_rand_with_check(x, y, z)             floater_rand_with_check_type(x, y, z, floater_bad)
 
 procedure Node001 begin
-   floater_rand_with_check_cust(200, 203, dude_name, 5000);
+   floater_rand_with_check_cust(200, 203, dude_name); // Seraph's Fix: floater_rand_with_check_cust only takes 3 args. Thanks Rob!
 end
 procedure Node002 begin
    floater(220);
@@ -405,13 +406,13 @@ procedure Node004 begin
    float_msg(self_obj, mstr(240) + made_man_name + mstr(5240), FLOAT_COLOR_NORMAL);
 end
 procedure Node005 begin
-   floater_rand_with_check_cust(250, 259, made_man_name, 5000);
+   floater_rand_with_check_cust(250, 259, made_man_name); // Seraph's Fix: floater_rand_with_check_cust only takes 3 args. Thanks Rob!
 end
 procedure Node007 begin
    floater_bad_rand_with_check(273 - (3*dude_is_male), 277 + (4*dude_is_female), dude_family_name);
 end
 procedure Node009 begin
-   floater_bad(300, 301);
+   floater_bad_rand(300, 301); // Seraph's Fix: floater_bad only takes 1 arg; changed to floater_bad_rand. Thanks Rob!
 end
 procedure Node010 begin
    floater_bad_rand(310, 311);
@@ -423,7 +424,7 @@ procedure Node012 begin
    floater(330);
 end
 procedure Node013 begin
-   floater_rand_with_check_cust(343 - (3*dude_is_male), 351 + (3*dude_is_female), prizefighter_name, 5000);
+   floater_rand_with_check_cust(343 - (3*dude_is_male), 351 + (3*dude_is_female), prizefighter_name); // Seraph's Fix: floater_rand_with_check_cust only takes 3 args. Thanks Rob!
 end
 procedure Node015 begin
    floater_bad_rand(370, 371);
@@ -435,7 +436,7 @@ procedure Node017 begin
    floater_bad(390);
 end
 procedure Node018 begin
-   floater_rand_with_check_cust(401 - dude_is_male, 407 + (5*dude_is_female), porn_star_name, 5000);
+   floater_rand_with_check_cust(401 - dude_is_male, 407 + (5*dude_is_female), porn_star_name); // Seraph's Fix: floater_rand_with_check_cust only takes 3 args. Thanks Rob!
 end
 procedure Node020 begin
    floater_bad(425);
@@ -716,7 +717,7 @@ procedure Node053 begin
    set_pissed;
    Reply(920);
    if (dude_is_male) then begin
-      NOption(924, Node998, 004);
+      BOption(924, Node998, 004); //edit by killap - was NOption
    end
    BOption(921, Node998, 004);
    BOption(922, Node998, 004);

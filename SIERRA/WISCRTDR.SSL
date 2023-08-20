@@ -28,6 +28,7 @@
 
 #include "..\headers\define.h"
 #include "..\headers\depolva.h"
+#include "..\headers\depolvb.h"
 
 #define WALL_BLOCKING_HEX       (50332269)
 
@@ -49,11 +50,19 @@ procedure map_update_p_proc begin
            if (tile_contains_obj_pid(tile_num(self_obj),elevation(self_obj),WALL_BLOCKING_HEX)) then
                destroy_object(tile_contains_pid_obj(tile_num(self_obj),elevation(self_obj),WALL_BLOCKING_HEX));
        end
-       if ((elevation(self_obj) == 2) and (global_var(GVAR_SIERRA_BASE_ENEMY) == 1)) then begin
+       if ((elevation(self_obj) == 2) and (global_var(GVAR_SIERRA_BASE_ENEMY) == 1)) then begin //edit by killap (expansion)
+       //if ((elevation(self_obj) == 2) and (map_var(MVAR_Security_Level_3) == 1)) then begin
            animate_stand;
            if (tile_contains_obj_pid(tile_num(self_obj),elevation(self_obj),WALL_BLOCKING_HEX)) then
                destroy_object(tile_contains_pid_obj(tile_num(self_obj),elevation(self_obj),WALL_BLOCKING_HEX));
        end
+       //added by killap
+       if ((cur_map_index == MAP_SIERRA_4) and (map_var(MVAR_Security_Level_4) == 1)) then begin
+           animate_stand;
+           if (tile_contains_obj_pid(tile_num(self_obj),elevation(self_obj),WALL_BLOCKING_HEX)) then
+               destroy_object(tile_contains_pid_obj(tile_num(self_obj),elevation(self_obj),WALL_BLOCKING_HEX));
+       end 
+       //end added by killap 
    end
    else begin
        animate_stand_reverse;

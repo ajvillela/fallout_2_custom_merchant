@@ -210,7 +210,7 @@ procedure talk_p_proc begin
          gSay_End;
          end_dialogue;
       end
-   end else if (armor_flag(ARMOR_SOLDFUELTANKER) or armor_flag(ARMOR_SOLDMONEY)) then begin
+   end else if (/*armor_flag(ARMOR_SOLDFUELTANKER) or */armor_flag(ARMOR_SOLDMONEY)) then begin //killap's fix: commented out since this is the tanker variable and in addition, the elron variable is not needed since the fuel was requested for the spaceship and not Crocke (why would he get mad then?)
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
          call Node021;
@@ -223,6 +223,13 @@ procedure talk_p_proc begin
       gSay_End;
       end_dialogue;
    end
+
+   //added by killap
+   if (callGuards) then begin
+      callGuards := 0;
+      call doCallGuards;
+   end
+   //end added
 
    set_local_var(LVAR_Herebefore, 1);
 end
@@ -300,14 +307,18 @@ procedure Node001 begin
    end
 
    NLowOption(104, Node002);
-   if (armor_flag(ARMOR_START)) then begin
-      NOption(105, Node003, 4);
-   end
-   if (armor_flag_any or local_var(LVAR_Armor_Known)) then begin
-      if (not local_var(LVAR_Upgrade_Flag)) then
-         NOption(106, Node320, 4);
-      else
-         NOption(185, Node320, 4);
+   if (local_var(LVAR_Timer) == 0) then begin //added check by killap - only ask if he is not already making one.
+      if (armor_flag(ARMOR_START)) then begin
+         //NOption(105, Node003, 4);
+         NOption(105, Node320, 4); //edit by killap
+      end
+   
+      if (armor_flag_any or local_var(LVAR_Armor_Known)) then begin
+         if (not local_var(LVAR_Upgrade_Flag)) then
+            NOption(106, Node320, 4);
+         else
+            NOption(185, Node320, 4);
+      end
    end
    NOption(107, Node004, 4);
    NOption(108, Node005, 4);
@@ -378,7 +389,7 @@ procedure Node009b begin
       destroy_object(obj);
       call Node009;
    end else begin
-      call NOde010;
+      call Node010;
    end
 end
 
@@ -415,6 +426,8 @@ procedure Node009 begin
       Reply(136);
    else
       Reply(184);
+      
+   inc_local_var(LVAR_Upgrade_Flag); //moved by killap from Node019
    NOption(137, Node001, 4);
    NOption(138, Node999, 4);
 end
@@ -441,7 +454,7 @@ end
 
 procedure Node013 begin
    Reply(149);
-   NOption(150, Node998a, 4);
+   BOption(150, Node998a, 4); //edit by killap - was NOption
    NOption(151, Node014, 4);
 end
 
@@ -476,7 +489,7 @@ procedure Node017 begin
    //NOption(161, Node001, 4);
    if (local_var(LVAR_Timer) and (local_var(LVAR_Upgrade_Flag) < 2)) then
       NOption(162, Node1819, 4);
-   NOption(163, Node998a, 4);
+   BOption(163, Node998a, 4); //edit by killap - was NOption
    NOption(164, Node999, 4);
 end
 
@@ -487,25 +500,30 @@ procedure Node018 begin
 end
 
 procedure Node019 begin
-   inc_local_var(LVAR_Upgrade_Flag);
+//   inc_local_var(LVAR_Upgrade_Flag); //fix by killap - moved to Node009
+   //added by killap
+   if (armor_flag(ARMOR_START)) then
+      set_armor_flag(ARMOR_GOTTEN); 
+   //end added
    add_obj_to_inven(dude_obj, create_object(PID_HARDENED_POWER_ARMOR, 0, 0));
    set_local_var(LVAR_Timer, 0);
    Reply(168);
    NOption(169, Node001, 4);
    NOption(170, Node999, 4);
-   NOption(171, Node998a, 4);
+   BOption(171, Node998a, 4); //edit by killap - was NOption
 end
 
 procedure Node020 begin
    Reply(172);
    NOption(173, Node001, 4);
-   NOption(174, Node998a, 4);
+   BOption(174, Node998a, 4); //edit by killap - was NOption
    NOption(175, Node999, 4);
 end
 
 procedure Node021 begin
    Reply(176);
-   NOption(177, Node999, 4);
+   //NOption(177, Node999, 4);
+   NOption(177, Node001, 4);
    NOption(178, Node022, 4);
 end
 
@@ -517,7 +535,7 @@ end
 
 procedure Node022 begin
    Reply(179);
-   NOption(180, Node998a, 4);
+   BOption(180, Node998a, 4); //edit by killap - was NOption
    NOption(181, NOde999a, 4);
 end
 

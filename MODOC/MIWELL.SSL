@@ -78,6 +78,7 @@ procedure use_obj_on_p_proc begin
       if (obj_pid(obj_being_used_with) == PID_ROPE) then begin
          script_overrides;
          rope_well
+         rm_obj_from_inven(dude_obj,obj_being_used_with); //added by killap
          destroy_object(obj_being_used_with);
       end
    end else if (well_covered) then begin

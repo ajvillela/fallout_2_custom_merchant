@@ -35,7 +35,8 @@ variable global_temp;
 #define run_away_tile_dir(x)                tile_num_in_direction(tile_num(self_obj), x, run_away_from_dist)
 #define Run_Away_From_Dude_Tile             run_away_tile_dir(Run_Away_From_Dude_Dir)
 
-#define Current_Distance_From_Dude          tile_distance_objs(self_obj,dude_obj)
+#define Current_Distance_From_Obj(the_obj)  tile_distance_objs(self_obj,the_obj)
+#define Current_Distance_From_Dude          Current_Distance_From_Obj(dude_obj)
 
 #define Future_Distance_From_Obj(x, y)      tile_num_in_direction(tile_num(x), ((has_trait(TRAIT_OBJECT,x,OBJECT_CUR_ROT) + 3)%6), y)
 #define Future_Distance_From_Dude(x)        Future_Distance_From_Obj(dude_obj, x)
@@ -78,6 +79,19 @@ variable global_temp;
                                                    anim_move_to_point_rate(tile_num_in_direction(tile_num(the_obj), rotation_to_tile(tile_num(the_obj), self_tile), the_dist), get_follow_point_dist(the_obj))  \
                                                 end                                                             \
                                             end
+#define party_follow_dude_point(the_range, the_dist)                                                              \
+                                            if (Current_Distance_From_Dude > the_range) then begin                \
+                                                if (anim_busy(self_obj) == false) then begin                      \
+                                                   dest_tile := tile_num_in_direction(tile_num_in_direction(dude_tile, Run_Away_From_Dude_Dir, the_dist), random(0, 5), random(0, 2)); \
+                                                   if (Current_Distance_From_Dude > (the_range * 2)) then begin   \
+                                                      animate_run_to_tile(dest_tile);                             \
+                                                   end else begin                                                 \
+                                                      animate_move_to_tile(dest_tile);                            \
+                                                   end                                                            \
+                                                end else if (self_distance_from_dude < tile_distance(self_tile, dest_tile)) then begin  \
+                                                   reg_anim_clear(self_obj);                                      \
+                                                end                                                               \
+                                            end
 #define follow_dude_point(the_range, the_dist)     follow_obj_point(the_range, the_dist, dude_obj)
 
 #define Follow_Dude_Run_Only(X,Y)           if (Current_Distance_From_Dude > X) then begin                  \
@@ -104,7 +118,7 @@ variable global_temp;
 
 #define next_and_face_obj(the_obj, the_type, the_rate)                                                                                                                       \
                                              if (tile_distance_objs(self_obj, the_obj) > 1) then begin                                                             \
-                                                the_type(tile_num_in_direction(tile_num(the_obj), rotation_to_tile(tile_num(the_obj),tile_num(self_obj)), 1), the_rate);     \
+                                                the_type(tile_num_in_direction(tile_num(the_obj), rotation_to_tile(tile_num(the_obj),tile_num(self_obj)), 1)); /* Seraph's Fix: 'the_type' only takes one argument. Thanks Rob! */\
                                              end else if (rotation_to_tile(tile_num(self_obj),tile_num(the_obj)) != self_cur_rot) then begin                       \
                                                 if (anim_busy(self_obj) == false) then begin                                                                       \
                                                    Face_Critter(the_obj, self_obj);                                                                                \
@@ -113,7 +127,7 @@ variable global_temp;
 
 #define point_next_and_face_obj(the_obj, the_type, the_rate)                                                                                                                 \
                                              if (tile_distance_objs(self_obj, the_obj) > 1) then begin                                                             \
-                                                the_type(tile_num_in_direction(tile_num(the_obj), rotation_to_tile(tile_num(the_obj),tile_num(self_obj)), 1), the_rate) \
+                                                the_type(tile_num_in_direction(tile_num(the_obj), rotation_to_tile(tile_num(the_obj),tile_num(self_obj)), 1)) /* Seraph's Fix: 'the_type' only takes one argument. Thanks Rob! */\
                                              end else if (rotation_to_tile(tile_num(self_obj),tile_num(the_obj)) != self_cur_rot) then begin                       \
                                                 if (anim_busy(self_obj) == false) then begin                                                                       \
                                                    Face_Critter(the_obj, self_obj);                                                                                \
@@ -149,14 +163,15 @@ variable step_tile;
                                                    if ((self_tile != the_tile) and (the_tile != 0)) then begin                                                                                  \
                                                       if ((dest_tile == the_tile) and (step_tile < 0)) then begin                                                                               \
                                                          step_tile += 1;                                                                                                                        \
+						        						 debug_msg("step_tile: " + step_tile); \
                                                       end else if (anim_busy(self_obj) == false) then begin                                                                                     \
                                                          dest_tile := the_tile;                                                                                                                 \
                                                          step_tile := the_tile;                                                                                                                 \
                                                          animate_##move_type##_to_tile(step_tile);                                                                                              \
-                                                         debug_msg("move_to_point: self_tile == "+self_tile);                                                                                   \
                                                          while ((anim_busy(self_obj) == false) and (((tile_distance(self_tile, the_tile)) >= (tile_distance(step_tile, the_tile))))) do begin   \
+							    							debug_msg("rot: " + rotation_to_tile(step_tile, self_tile)); \
                                                             step_tile := tile_num_in_direction(step_tile, rotation_to_tile(step_tile, self_tile), (x % tile_distance(step_tile, self_tile)));   \
-                                                            debug_msg("move_to_point: step_tile == "+step_tile);                                                                                \
+							    							debug_msg("step_var: " + step_tile); \
                                                             animate_##move_type##_to_tile(step_tile);                                                                                           \
                                                          end                                                                                                                                    \
                                                          if (anim_busy(self_obj) == false) then begin                                                                                           \
@@ -300,11 +315,14 @@ variable step_tile;
 #define dude_spouse_was_male              (global_var(GVAR_PLAYER_WAS_MARRIED) == spouse_male)
 #define dude_spouse_was_female            (global_var(GVAR_PLAYER_WAS_MARRIED) == spouse_female)
 #define dude_was_married                  (global_var(GVAR_PLAYER_WAS_MARRIED) != 0)
-#define set_dude_was_married              if (dude_is_married == false) then begin                                      \
+#define set_dude_was_married              debug_msg("start: set_dude_was_married");                                     \
+                                          if ((dude_is_married) and (dude_was_married == false)) then begin             \
+                                             debug_msg("   GVAR_PLAYER_WAS_MARRIED before == " + global_var(GVAR_PLAYER_WAS_MARRIED)); \
                                              set_global_var(GVAR_PLAYER_WAS_MARRIED, global_var(GVAR_PLAYER_MARRIED));  \
+                                             debug_msg("   GVAR_PLAYER_WAS_MARRIED after == " + global_var(GVAR_PLAYER_WAS_MARRIED));  \
                                              set_global_var(GVAR_PLAYER_MARRIED, spouse_none);                          \
                                           end                                                                           \
-                                          debug_msg("set_dude_was_married")
+                                          debug_msg("finished: set_dude_was_married")
 
 /*********************************************************
  General information dealing with a critter script
@@ -371,7 +389,7 @@ variable step_tile;
 
 
 // some timer event macros
-#define check_set_obj_visiblility(the_obj, x)      if (obj_is_visible_flag(the_obj) == x) then set_obj_visibility(the_obj, x)
+#define check_set_obj_visiblility(the_obj, x)       if (obj_is_visible_flag(the_obj) == x) then set_obj_visibility(the_obj, x)
 
 #define flush_add_timer_event(obj, time, param)    rm_fixed_timer_event(obj, param);               \
                                                    add_timer_event(obj, time, param)
@@ -421,7 +439,9 @@ variable step_tile;
 /***************************************************************
 ****************  Dialogue Information   ***********************
 ***************************************************************/
-#define floater(x)              float_msg(self_obj, message_str(NAME,x), FLOAT_COLOR_NORMAL)
+#ifndef floater
+   #define floater(x)           float_msg(self_obj, message_str(NAME,x), FLOAT_COLOR_NORMAL)
+#endif
 #define floater_rand(x,y)       floater(random(x,y))
 
 #define dude_floater(x)         float_msg(dude_obj, message_str(NAME,x), FLOAT_COLOR_NORMAL)
@@ -716,7 +736,7 @@ FLOAT_MSG_BLUE
 #define max_stomach_size               (100 + (2 * (dude_endurance - 10)))
 #define dude_stomach_amt               (global_var(GVAR_DUDE_STOMACH))
 #define dude_can_eat_food(amt)         ((dude_stomach_amt + amt) <= max_stomach_size)
-#define dude_eat_food(amt)             inc_global_var(GVAR_DUDE_STOMACH, amt);                             \
+#define dude_eat_food(amt)             inc_global_var_amt(GVAR_DUDE_STOMACH, amt); /* Seraph's Fix: changed 'inc_global_var' to inc_global_var_amt */\
                                        if (global_var(GVAR_DUDE_STOMACH) < 0) then                         \
                                           set_global_var(GVAR_DUDE_STOMACH,0);                             \
                                        else if (global_var(GVAR_DUDE_STOMACH) > max_stomach_size) then     \
@@ -951,12 +971,14 @@ variable removed_qty;
 #define self_sex_rating          obj_sex_rating(self_obj)
 #define up_sex_status_amt(x)     inc_global_var_amt(GVAR_PLAYER_SEX_LEVEL, dude_sex_rating * x);   \
                                  if (global_var(GVAR_SEX_COUNTER) >= 9) then begin                 \
-                                    set_global_var(GVAR_SEXPERT, 1);                               \
-                                 end                                                               \
-                                 if (dude_sex_rating >= sex_rating_great) then begin               \
                                     set_global_var(GVAR_GIGALO, 1);                                \
                                  end                                                               \
-                                 inc_global_var_amt(GVAR_SEX_COUNTER, x)
+                                 if (dude_sex_rating >= sex_rating_great) then begin               \
+                                    set_global_var(GVAR_SEXPERT, 1);                               \
+                                 end                                                               \
+                                 if (global_var(GVAR_DUDE_VIRGIN) == 1) then			   \
+				    set_global_var(GVAR_DUDE_VIRGIN,0);				   \
+				 inc_global_var_amt(GVAR_SEX_COUNTER, x)
 #define up_sex_status            up_sex_status_amt(1)
 #define do_default_sex           advance_sex_time;    \
                                  up_sex_status
@@ -1184,6 +1206,10 @@ variable removed_qty;
 #define raiders_bonenose_bit                          bit_4
 #define raiders_alarm_bit                             bit_5
 #define know_raiders_trap_bit                         bit_6
+//begin added by killap
+#define raiders_scout_left_bit                        bit_7
+//end added by killap
+
 
 #define raiders_dead                                  gvar_bit(GVAR_RAIDERS_FLAGS, raiders_dead_bit)
 #define set_raiders_dead                              set_gvar_bit_on(GVAR_RAIDERS_FLAGS, raiders_dead_bit)
@@ -1199,6 +1225,10 @@ variable removed_qty;
 #define know_raiders_trap                             gvar_bit(GVAR_RAIDERS_FLAGS, know_raiders_trap_bit)
 #define set_know_raiders_trap                         set_gvar_bit_on(GVAR_RAIDERS_FLAGS, know_raiders_trap_bit)
 #define off_know_raiders_trap                         set_gvar_bit_off(GVAR_RAIDERS_FLAGS, know_raiders_trap_bit)
+//added by killap
+#define raiders_scout_left                            gvar_bit(GVAR_RAIDERS_FLAGS, raiders_scout_left_bit)
+#define set_raiders_scout_left                        set_gvar_bit_on(GVAR_RAIDERS_FLAGS, raiders_scout_left_bit)
+//end added by killap
 // raiders macros end
 
 #endif // COMMAND_H

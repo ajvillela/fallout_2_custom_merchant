@@ -266,7 +266,8 @@ procedure Node003 begin
    NOption(120,Node004,004);
    NOption(121,Node005,004);
    NOption(122,Node012,004);
-   NOption(123,Node011,004);
+   if (not(dude_found_geck)) then //added by killap
+      NOption(123,Node011,004);
    NOption(124,Node999,004);
 end
 

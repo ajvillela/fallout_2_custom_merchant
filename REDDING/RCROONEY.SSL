@@ -210,8 +210,10 @@ procedure destroy_p_proc begin
 
 /* Increment the aligned critter counter*/
    inc_good_critter
-   if (source_obj == dude_obj) then
+   if (source_obj == dude_obj) then begin
        set_map_var(MVAR_Widow_Rooney,WIDOW_KILLED);
+       set_global_var(GVAR_WIDOW_ROONEY,WIDOW_KILLED); //added by killap
+   end
    set_global_var(GVAR_ENEMY_REDDING,1);
 
 /* Set global_variable for Enemy status*/
@@ -354,6 +356,8 @@ procedure Node010a begin
    set_map_var(MVAR_Widow_Rooney,WIDOW_KICKED_OUT);
    display_msg(g_mstr(1008));
    give_xp(EXP_EVICTED_ROONEY);
+   set_global_var(GVAR_WIDOW_ROONEY,WIDOW_KICKED_OUT); //added by killap
+   inc_global_var_amt(GVAR_TOWN_REP_REDDING, -5); //added by killap
 end
 
 procedure Node011 begin
@@ -380,7 +384,9 @@ procedure Node012a begin
    else begin
        item_caps_adjust(dude_obj,-120);
        set_map_var(MVAR_Widow_Rooney,WIDOW_PAID);
+       set_global_var(GVAR_WIDOW_ROONEY,WIDOW_PAID); //added by killap
        inc_general_rep(REP_BONUS_HELPED_ROONEY);
+       inc_global_var_amt(GVAR_TOWN_REP_REDDING, 5); //added by killap
        display_msg(g_mstr(1008));
        give_xp(EXP_HELPED_ROONEY);
    end

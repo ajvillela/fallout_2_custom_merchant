@@ -51,7 +51,7 @@ procedure map_enter_p_proc begin
       end
       set_global_var(GVAR_LOAD_MAP_INDEX, 0);
 
-      if (car_at_chop_shop) then begin
+      if (get_stolen_car(stolen_car_stolen)) then begin //killap's fix: changed from (car_at_chop_shop)
          set_global_var(GVAR_CAR_PLACED_TILE, 0);
          Create_Car(CAR_NEW_RENO_CHOP_SHOP_HEX, CAR_NEW_RENO_ELEV)
          if (tile_contains_pid_obj(CAR_NEW_RENO_CHOP_SHOP_HEX, CAR_NEW_RENO_ELEV, PID_DRIVABLE_CAR) != 0) then begin

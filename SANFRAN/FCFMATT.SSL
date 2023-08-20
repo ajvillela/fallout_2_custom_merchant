@@ -161,7 +161,7 @@ procedure critter_p_proc begin
        //Macro made by Tom to keep the critter fleeing.
    end
 
-   if (local_var(LVAR_Vignette_Time) != 0) then begin
+   if ((local_var(LVAR_Vignette_Time) != 0) and (not obj_on_screen(self_obj))) then begin //added elevation statement to prevent matt dissapearing infront of the player - killap
       if (game_time > local_var(LVAR_Vignette_Time)) then begin
          ON_BOS_SEQ;
          destroy_object(self_obj);
@@ -327,15 +327,17 @@ procedure Node002 begin
    end else begin
       Reply(110);
    end
-
-   NLowOption(111, Node003a);
+   
+   if ( global_var(GVAR_SAN_FRAN_BOS_QUEST) < BOS_KNOW ) then //added check by killap
+      NLowOption(111, Node003a);
    NLowOption(112, Node013a);
    NLowOption(113, Node014a);
    NLowOption(114, Node999);
    NLowOption(211, Node030);
 
    NOption(210, Node030, 4);
-   NOption(115, Node003a, 4);
+   if ( global_var(GVAR_SAN_FRAN_BOS_QUEST) < BOS_KNOW ) then //added check by killap
+      NOption(115, Node003a, 4);
    NOption(116, Node013a, 4);
    NOption(117, Node014a, 4);
    NOption(118, Node999, 4);
@@ -434,7 +436,7 @@ end
 procedure Node012 begin
    Reply(mstr(160) + " " + dude_name + mstr(161));
    NLowOption(162, Node999);
-   NLowOption(163, Node002, 4);
+   NLowOption(163, Node002);  // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
    NOption(164, Node999, 4);
    NOption(165, Node002, 4);
 end
@@ -491,7 +493,7 @@ end
 
 procedure Node020 begin
    if (not bos_state(BOS_COMPLETE)) then begin
-      COMP_QUEST(REP_BONUS_SAN_FRAN_BOS_QUEST, REP_HERO_SAN_FRAN_BOS_QUEST, EXP_BOS_QUEST);
+      COMP_QUEST(REP_BONUS_SAN_FRAN_BOS_QUEST, REP_HERO_SAN_FRAN_BOS_QUEST, EXP_BOS_QUEST)
       unset_san_fran_flag(SF_BROTHER_PLANS);
       set_local_var(LVAR_Vignette_Time, game_time + (ONE_GAME_DAY * 2));
    end
@@ -557,7 +559,7 @@ end
 
 procedure Node028 begin
    if (not bos_state(BOS_COMPLETE)) then begin
-      COMP_QUEST(REP_BONUS_SAN_FRAN_BOS_QUEST, REP_HERO_SAN_FRAN_BOS_QUEST, EXP_BOS_QUEST);
+      COMP_QUEST(REP_BONUS_SAN_FRAN_BOS_QUEST, REP_HERO_SAN_FRAN_BOS_QUEST, EXP_BOS_QUEST)
       unset_san_fran_flag(SF_BROTHER_PLANS);
       set_local_var(LVAR_Vignette_Time, game_time + (ONE_GAME_DAY * 2));
    end
@@ -567,6 +569,7 @@ procedure Node028 begin
    SET_BOS;
    set_tanker_flag(TANK_NAVCOMP);
    COMPLETE_TANKER_FUEL;
+   set_sub_flag(SHI_SUB_DISABLED); //added by killap - expansion
 
    Reply(215);
    NOption(216, Node999, 1);

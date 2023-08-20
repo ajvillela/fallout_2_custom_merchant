@@ -67,7 +67,8 @@ end
 procedure map_enter_p_proc begin
    Only_Once:=0;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_RND_HIGHWAYMEN);
-   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_BERSERKER);
+   //critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_BERSERKER); //comment out by killap
+   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_GUARD); //added by killap
 end
 
 

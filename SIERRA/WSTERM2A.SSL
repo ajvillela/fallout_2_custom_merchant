@@ -83,8 +83,8 @@ procedure Node017;
 #define LVAR_Diagnostic                 (0)
 #define LVAR_Gave_Xp                    (1)
 #define LVAR_Last_Used                  (2)
-#define LVAR_Hack_Security              (3)
-#define LVAR_Disable_Alarm              (4)
+#define LVAR_Hack_Security              (3) // Seraph's Code
+#define LVAR_Disable_Alarm              (4) // Seraph's Code
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -115,7 +115,7 @@ procedure use_p_proc begin
    else if (global_var(GVAR_SIERRA_BASE_ENEMY) == 1) then begin
        Damage:=random(LOW_DAMAGE,HIGH_DAMAGE);
        critter_damage(source_obj,Damage);
-       display_msg(message_str(SCRIPT_WSTERM1B,300));
+       display_msg(message_str(SCRIPT_WSTERM1A,300)); //was SCRIPT_WSTERM1B - killap
    end
 
    else if (get_critter_stat(source_obj,STAT_iq) < 4) then begin
@@ -144,7 +144,9 @@ procedure talk_p_proc begin
        end_dialogue;
    end
 
-   else if (global_var(GVAR_SIERRA_LOCKOUT) == 1) then begin
+   //else if (global_var(GVAR_SIERRA_LOCKOUT) == 1) then begin
+   //edit by killap
+   else if ((global_var(GVAR_SIERRA_LOCKOUT) == 2) or (global_var(GVAR_SIERRA_LOCKOUT) == 3)) then begin 
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node003;
@@ -209,16 +211,17 @@ procedure Node001 begin
    NOption(106,Node016,006);
    if (dude_perception > 6) then
        NOption(107,Node011,004);
-   if (local_var(LVAR_Hack_Security) == 0) then
+   if (local_var(LVAR_Hack_Security) == 0) then // Seraph's Code
        NOption(108,Node001a,008);
-   if (local_var(LVAR_Disable_Alarm) == 0) then
+   if (local_var(LVAR_Disable_Alarm) == 0) then // Seraph's Code
        NOption(109,Node001b,004);
    NOption(110,Node999,004);
    NOption(111,Node999,004);
 end
 
 procedure Node001a begin
-   set_local_var(LVAR_Hack_Security,1);
+   set_local_var(LVAR_Hack_Security,1); // Seraph's Code
+   set_local_var(LVAR_Disable_Alarm,1); // Seraph's Code
 
    if (has_skill(dude_obj,SKILL_SCIENCE) > 90) then begin
        display_msg(message_str(SCRIPT_GENERIC,1004));
@@ -236,7 +239,8 @@ procedure Node001a begin
 end
 
 procedure Node001b begin
-   set_local_var(LVAR_Disable_Alarm,1);
+   set_local_var(LVAR_Hack_Security,1); // Seraph's Code
+   set_local_var(LVAR_Disable_Alarm,1); // Seraph's Code
 
    if (has_skill(dude_obj,SKILL_SCIENCE) > 105) then begin
        display_msg(message_str(SCRIPT_GENERIC,1004));
@@ -259,7 +263,8 @@ procedure Node002 begin
    variable days_ago;
    variable more_than_one;
    variable security_breach;
-
+   variable extra_spaces := "";  //added by killap
+   
    if (local_var(LVAR_Last_Used) == 0) then begin
        set_local_var(LVAR_Last_Used,GAME_TIME_IN_DAYS);
        date:=305;               // message_str number
@@ -280,28 +285,32 @@ procedure Node002 begin
    if (map_var(MVAR_Security_Level_1) == 1) then begin
        security_breach:="1";
        more_than_one:=1;
+       extra_spaces := " "; //1 space - added by killap
    end
 
    if (map_var(MVAR_Security_Level_2) == 1) then begin
-       if (more_than_one == 1) then
-           security_breach+=", 2";
-       else
-           security_breach+="2";
-       more_than_one:=1;
+      if (more_than_one == 1) then begin
+         security_breach+=", 2";
+         extra_spaces := "   ";  //3 spaces - added by killap
+      end else begin
+         security_breach+="2";
+      end
+      more_than_one:=1;
    end
 
    if (map_var(MVAR_Security_Level_3) == 1) then begin
-       if (more_than_one == 1) then
-           security_breach+=", 3";
-       else
-           security_breach+="3";
-       more_than_one:=1;
+      if (more_than_one == 1) then begin
+         security_breach+=", 3";
+      end else begin
+         security_breach+="3";
+      end
+      more_than_one:=1;
    end
 
    if (security_breach) then
        security_breach+=".";
 
-   if (days_ago == 0) then
+   /*if (days_ago == 0) then
        if (more_than_one) then
            Reply(mstr(113)+mstr(who)+mstr(301)+mstr(date)+mstr(307));
        else
@@ -309,7 +318,29 @@ procedure Node002 begin
    else if (more_than_one) then
        Reply(mstr(113)+mstr(who)+mstr(301)+date+mstr(306)+mstr(307));
    else
-       Reply(mstr(113)+mstr(who)+mstr(301)+date+mstr(306)+mstr(114));
+       Reply(mstr(113)+mstr(who)+mstr(301)+date+mstr(306)+mstr(114));*/
+
+   //edit by killap      
+   if (days_ago == 0) then begin
+      if (security_breach) then begin
+         if (more_than_one) then
+            Reply(mstr(113)+mstr(308)+security_breach+extra_spaces+mstr(311)+mstr(114)+mstr(300)+mstr(who)+mstr(301)+mstr(date));
+         else
+            Reply(mstr(113)+mstr(307)+security_breach+extra_spaces+mstr(309)+mstr(114)+mstr(300)+mstr(who)+mstr(301)+mstr(date));
+      end else begin
+         Reply(mstr(113)+mstr(310)+mstr(114)+mstr(300)+mstr(who)+mstr(301)+mstr(date));
+      end
+   end else begin
+      if (security_breach) then begin
+         if (more_than_one) then
+            Reply(mstr(113)+mstr(308)+security_breach+extra_spaces+mstr(311)+mstr(114)+mstr(300)+mstr(who)+mstr(301)+date+mstr(306));
+         else
+            Reply(mstr(113)+mstr(307)+security_breach+extra_spaces+mstr(309)+mstr(114)+mstr(300)+mstr(who)+mstr(301)+date+mstr(306));
+      end else begin
+         Reply(mstr(113)+mstr(310)+mstr(114)+mstr(300)+mstr(who)+mstr(301)+date+mstr(306));
+      end
+   end
+   //end edit
 
    NOption(115,Node002a,004);
    NOption(116,Node012,004);
@@ -381,16 +412,18 @@ procedure Node014 begin
 end
 
 procedure Node015 begin
-   set_global_var(GVAR_SIERRA_LOCKOUT,1);
-
+   //set_global_var(GVAR_SIERRA_LOCKOUT,1);
+   set_global_var(GVAR_SIERRA_LOCKOUT,global_var(GVAR_SIERRA_LOCKOUT)+2); //edit by killap
+   
    Reply(142);
 
    NOption(143,Node999,004);
 end
 
 procedure Node016 begin
-   set_global_var(GVAR_SIERRA_LOCKOUT,1);
-
+   //set_global_var(GVAR_SIERRA_LOCKOUT,1);
+   set_global_var(GVAR_SIERRA_LOCKOUT,global_var(GVAR_SIERRA_LOCKOUT)+2); //edit by killap
+   
    Reply(144);
 
    NOption(145,Node999,004);

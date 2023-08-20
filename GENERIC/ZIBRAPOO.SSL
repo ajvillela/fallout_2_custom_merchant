@@ -23,6 +23,13 @@
 procedure start;
 procedure map_enter_p_proc;
 procedure use_obj_on_p_proc;
+procedure map_exit_p_proc; //added by killap
+
+//added by killap
+procedure map_exit_p_proc begin
+   destroy_object(self_obj);
+end
+//end added
 
 procedure start begin
 end

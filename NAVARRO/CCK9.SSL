@@ -152,24 +152,43 @@ procedure map_enter_p_proc begin
    end
 end
 
+//added by killap - expansion
+procedure timed_event_p_proc begin
+   if (fixed_param == 40893) then begin
+      set_party_waiting;
+      critter_attempt_placement( self_obj, 15698, 0 );
+   end
+end
+//end added
+
 procedure critter_p_proc begin
 
    if (local_var(LVAR_k9_rep) == 0) then begin
-      set_local_var(LVAR_k9_rep,1);
-      k9_joins_party;
+      if (global_var(GVAR_PLAYER_REPUTATION) < K9_BAD_KARMA) then begin
+         set_local_var(LVAR_k9_rep,1);
+         call Node080;
+      end
+      else if (has_rep_childkiller) then begin
+         set_local_var(LVAR_k9_rep,1);
+         call Node090;
+      end else begin
+         set_local_var(LVAR_k9_rep,1);
+         floater(154);
+         k9_joins_party;
+      end
    end
    else if ((local_var(LVAR_Hostile) == 2) and (obj_can_see_obj(self_obj,dude_obj))) then begin
        set_local_var(LVAR_Hostile,1);
        attack(dude_obj);
    end
    else if (K9_In_Party) then begin
-      if (global_var(GVAR_PLAYER_REPUTATION) < K9_BAD_KARMA) then begin
+      /*if (global_var(GVAR_PLAYER_REPUTATION) < K9_BAD_KARMA) then begin
          call Node080;
       end
       else if (has_rep_childkiller) then begin
          call Node090;
       end
-      else if ((K9_In_Party) and (party_is_waiting == false)) then begin
+      else*/ if ((K9_In_Party) and (party_is_waiting == false)) then begin
          party_member_follow_dude
       end
    end
@@ -191,7 +210,9 @@ end
    will be remembered. */
 procedure pickup_p_proc begin
    if (source_obj == dude_obj) then begin
-      set_local_var(LVAR_Hostile,2);
+      if (K9_In_Party == false) then begin //added by killap
+         set_local_var(LVAR_Hostile,2);
+      end
    end
 end
 
@@ -296,6 +317,15 @@ procedure use_skill_on_p_proc begin
       //end
    //end
 end
+
+//added by killap
+procedure use_obj_on_p_proc begin
+   if ( (obj_pid(obj_being_used_with) == PID_MICRO_FUSION_CELL) or (obj_pid(obj_being_used_with) == PID_SMALL_ENERGY_CELL) ) then begin
+      script_overrides;
+      display_msg(g_mstr(20000));
+   end
+end
+//end added
 
 procedure Node001 begin
    Reply(103);
@@ -499,7 +529,7 @@ procedure Node800 begin
       //inc_general_rep(REP_BONUS_GC_LENNY_JOINS);
       //GC_REP_ADJUST(10)
    end
-   k9_joins_party;
+   //k9_joins_party; - comment out by killap
 end
 
 procedure Node1000 begin

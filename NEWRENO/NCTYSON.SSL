@@ -117,7 +117,7 @@ end
 
 procedure description_p_proc begin
    script_overrides;
-   display_mstr_rand(150,157);
+   display_mstr_rand(150,154);
 end
 
 procedure use_skill_on_p_proc begin

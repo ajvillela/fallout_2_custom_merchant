@@ -175,8 +175,13 @@ procedure timed_event_p_proc begin
          add_timer_event(self_obj, game_ticks(1), TIMER_WALK_ON);
       end else if (self_tile != CHIP_LOAD_TILE and anim_busy(self_obj)) then begin
          add_timer_event(self_obj, game_ticks(1), TIMER_WALK_ON);
+      //added by killap
+      end else if (self_tile == CHIP_LOAD_TILE) then begin
+         animate_rotation(3);
       end
-   end
+      //end added
+   end 
+   
 end
 
 /* This procedure will get called each time that the map is first entered. It will
@@ -207,8 +212,9 @@ procedure critter_p_proc begin
    end
 
    if (global_var(GVAR_SAN_FRAN_SPLEEN_TIME)) then begin
-      if (spleen_elapse >= ONE_GAME_DAY * 5) then
+      if (spleen_elapse >= ONE_GAME_DAY * 5) then begin
          destroy_object(self_obj);
+      end
    end
 
 end
@@ -247,6 +253,8 @@ procedure talk_p_proc begin
    CheckKarma;
 
    GetReaction;
+   
+   ReactToLevel; //added by killap
 
    if (san_fran_flag(SF_PUNKS_ENEMY)) then begin
       call Node026;
@@ -372,10 +380,11 @@ procedure Node004a begin
 end
 
 procedure NodeWalk begin
+   set_spleen_flag(SP_CHIPTOLD); //added by killap
    set_local_var(LVAR_Return_Time, game_time + ONE_GAME_DAY);
    add_timer_event(self_obj, 0, TIMER_WALK_OFF);
    UpReactMinor;
-   call Node009;
+   call Node999; // Seraph's Fix: changed 'Node009' to 'Node999'
 end
 
 procedure Node001 begin
@@ -384,7 +393,9 @@ procedure Node001 begin
    NLowOption(105, Node002);
    NOption(106, Node003, 4);
    NOption(108, Node008, 4);
-   NOption(109, Node009, 4);
+   //if (Fallout2_tribe_kidnapped) then //added by killap
+   if ((f2_flag_any >= f2_state_tribe_kidnapped) and (f2_flag_any < f2_state_enclave_destroyed)) then //edit by killap
+      NOption(109, Node009, 4);
 end
 
 procedure Node002 begin
@@ -469,7 +480,7 @@ end
 procedure Node011a begin
    if (not xp_status(DID_DEAD_WONG)) then begin
       set_xp_status(DID_DEAD_WONG);
-      COMP_QUEST(REP_BONUS_SAN_FRAN_SPLEEN_DEADWONG, REP_HERO_SAN_FRAN_SPLEEN_DEADWONG, EXP_SPLEEN_DEADWONG);
+      COMP_QUEST(REP_BONUS_SAN_FRAN_SPLEEN_DEADWONG, REP_HERO_SAN_FRAN_SPLEEN_DEADWONG, EXP_SPLEEN_DEADWONG)
    end
    call Node011;
 end
@@ -501,6 +512,10 @@ procedure Node011 begin
 end
 
 procedure Node012 begin
+   //added by killap
+   if (spleen_flag(SP_NOFUNG)) then
+      set_spleen_flag(SP_FOUND);
+   //end added
    Reply(147);
    NOption(148, Node999, 4);
 end
@@ -592,7 +607,9 @@ end
 procedure Node021 begin
    Reply(173);
    NOption(174, Node022, 4);
-   NOption(175, Node023, 4);
+   //if (Fallout2_tribe_kidnapped) then //added by killap
+   if ((f2_flag_any >= f2_state_tribe_kidnapped) and (f2_flag_any < f2_state_enclave_destroyed)) then //edit by killap
+      NOption(175, Node023, 4);
    if (tanker_flag(TANK_KNOWN) or shi_whirly(SH_WH_STEALELE) or elron_whirly(SH_WH_STEALELE)) then
       NOption(176, Node2524, 4);
    NOption(177, Node999, 4);
@@ -633,7 +650,7 @@ procedure Node027 begin
 end
 
 
-procedure CheckLoad begin
+/*procedure CheckLoad begin
    debug_msg("FCCHIP: CHECKLOAD lvar_return_time: " + local_var(LVAR_Return_Time));
    if (local_var(LVAR_Return_Time)) then begin
       if (game_time >= local_var(LVAR_Return_Time) and not spleen_flag(SP_REINSERTED)) then begin
@@ -647,7 +664,26 @@ procedure CheckLoad begin
          add_timer_event(self_obj, game_ticks(60), TIMER_CHECK_LOAD);
       end
    end
-end
+end*/
+
+//new code by killap
+procedure CheckLoad begin
+   debug_msg("FCCHIP: CHECKLOAD lvar_return_time: " + local_var(LVAR_Return_Time));
+   if (local_var(LVAR_Return_Time)) then begin
+      if (game_time >= local_var(LVAR_Return_Time) and not spleen_flag(SP_REINSERTED)) then begin
+         set_global_var(GVAR_SAN_FRAN_SPLEEN_TIME, 0);
+         set_obj_visibility(self_obj, OBJ_VIS);
+         set_spleen_flag(SP_REINSERTED);
+         COMP_QUEST(REP_BONUS_SAN_FRAN_SPLEEN_REINSERTED, REP_HERO_SAN_FRAN_SPLEEN_REINSTERTED, EXP_SPLEEN_REINSTERTED)
+         add_timer_event(self_obj, 0, TIMER_WALK_ON);
+      end else if (not spleen_flag(SP_REINSERTED)) then begin
+         set_obj_visibility(self_obj, OBJ_INVIS);
+         debug_msg("FCCHIP: invis 2");
+         add_timer_event(self_obj, game_ticks(60), TIMER_CHECK_LOAD);
+      end
+   end
+end 
+//end
 
 procedure GoGetSpleen begin
    set_spleen_flag(SP_CHIPTOLD);

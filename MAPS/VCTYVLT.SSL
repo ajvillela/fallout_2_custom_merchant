@@ -37,6 +37,7 @@ procedure start;
 procedure map_enter_p_proc;
 procedure map_update_p_proc;
 
+export variable vault_city_martin_obj; // Seraph's Code
 
 procedure start begin
 end

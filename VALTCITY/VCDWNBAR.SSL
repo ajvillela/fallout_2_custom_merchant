@@ -132,11 +132,13 @@ variable KickOutTemp                   :=0;
                                     if( DayPass_KickOutCount > 0 ) then begin\
                                        DayPass_KickOutObj := obj_carrying_pid_obj(dude_obj, PID_DAY_PASS);\
                                        KickOutTemp := rm_mult_objs_from_inven(dude_obj, DayPass_KickOutObj, DayPass_KickOutCount );\
+                                       destroy_object(DayPass_KickOutObj); \
                                     end\
                                     CitizenPapers_KickOutCount := obj_is_carrying_obj_pid(dude_obj, PID_FAKE_CITIZENSHIP);\
                                     if( CitizenPapers_KickOutCount > 0 ) then begin\
                                        CitizenPapers_KickOutObj := obj_carrying_pid_obj(dude_obj, PID_FAKE_CITIZENSHIP);\
                                        KickOutTemp := rm_mult_objs_from_inven(dude_obj, CitizenPapers_KickOutObj, CitizenPapers_KickOutCount );\
+                                       destroy_object(CitizenPapers_KickOutObj); \
                                     end\
                                     set_global_var( GVAR_TOWN_REP_VAULT_CITY, (global_var(GVAR_TOWN_REP_VAULT_CITY) + REP_TOWN_KICKED_OUT ) ); \
                                     load_map( MAP_VAULTCITY_COURTYARD, 0 );\
@@ -167,7 +169,7 @@ procedure map_enter_p_proc begin
          // I'm WORKING!!!!
          move_to( self_obj, 26306, 0 );
          critter_attempt_placement( self_obj, 26306, 0 );
-         animate_rotation( 2 );
+         animate_rotation( 5 );
          add_timer_event( self_obj, game_ticks(random(30,40)), 1 );
       end
    end
@@ -250,17 +252,21 @@ procedure talk_p_proc begin
    From_15 := 0;
    From_33 := 0;
 
-   if( ( game_time_hour > 200 ) and ( game_time_hour < 700 ) ) then
+   if( ( game_time_hour > 200 ) and ( game_time_hour < 700 ) ) then begin
       floater(258);
-   else if ( Fallout2_enclave_destroyed ) then
-      call Node008;
-   else if( ( Marcus_Ptr != 0 ) and ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_CAPTAIN_GUARD ) ) then
+   end else if ( Fallout2_enclave_destroyed ) then begin
+       start_gdialog(NAME,self_obj,4,-1,-1);
+       gSay_Start;
+           call Node008;
+       gSay_End;
+       end_dialogue;
+   end else if( ( Marcus_Ptr != 0 ) and ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_CAPTAIN_GUARD ) ) then begin
       call Node005;
-   else if( ( Lenny_Ptr != 0 ) and ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_CAPTAIN_GUARD ) ) then
+   end else if( ( Lenny_Ptr != 0 ) and ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_CAPTAIN_GUARD ) ) then begin
       call Node006;
-   else if( night ) then
+   end else if( night ) then begin
       call Node007;
-   else begin
+   end else begin
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node012;
@@ -322,15 +328,15 @@ procedure Node001 begin
 end
 
 procedure Node002 begin
-   floater(104, 107);
+   floater_rand(104, 107); // Seraph's Fix: floater only takes 1 arg; changed to floater_rand. Thanks Rob!
 end
 
 procedure Node003 begin
-   floater(108, 109);
+   floater_rand(108, 109); // Seraph's Fix: floater only takes 1 arg; changed to floater_rand. Thanks Rob!
 end
 
 procedure Node004 begin
-   floater(110, 111);
+   floater_rand(110, 111); // Seraph's Fix: floater only takes 1 arg; changed to floater_rand. Thanks Rob!
 end
 
 procedure Node005 begin
@@ -346,7 +352,7 @@ procedure Node006 begin
 end
 
 procedure Node007 begin
-   floater(114, 116);
+   floater_rand(114, 116); // Seraph's Fix: floater only takes 1 arg; changed to floater_rand. Thanks Rob!
 end
 
 procedure Node008 begin

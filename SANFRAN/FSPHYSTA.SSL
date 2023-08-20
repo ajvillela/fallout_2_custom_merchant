@@ -48,9 +48,9 @@ procedure map_enter_p_proc;
 procedure use_p_proc;
 procedure timed_event_p_proc;
 
+
 /* Script Specific Procedure Calls */
 procedure Node999;                                      // This Node is Always Ending
-
 
 // The next lines are added in by the Designer Tool.
 // Do NOT add in any lines here.
@@ -66,6 +66,7 @@ procedure Node007;
 procedure Node008;
 procedure Node009;
 procedure Node010;
+procedure doCallGuards; // added by killap
 
 #define PASSWORD_PAPERS_PID PID_PASSWORD_PAPER
 
@@ -80,6 +81,7 @@ procedure Node010;
 #define LVAR_Hostile                    (5)
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Denied                     (7)
+//#define LVAR_downloaded_plans           (8)  //added by killap
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -103,7 +105,6 @@ procedure use_p_proc begin
    else
       display_msg(mstr(130));
 end
-
 
 /* This procedure will get called each time that the map is first entered. It will
    set up the Team number and AI packet for this critter. This will override the
@@ -150,6 +151,14 @@ procedure talk_p_proc begin
    end
 
    set_local_var(LVAR_Herebefore, 1);
+
+   // added by killap
+   if (callGuards) then begin
+      callGuards := 0;
+      call doCallGuards;
+   end   
+   // end added   
+
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -187,7 +196,6 @@ end
 procedure Node999 begin
 end
 
-
 // Not lines are allowed to be added below here
 // The Following lines are from the Design Tool
 //~~~~~~~~~~~~~~~~ DESIGN TOOL STARTS HERE
@@ -195,7 +203,7 @@ end
 procedure NodeHack begin
    if (skill_success(dude_obj, SKILL_SCIENCE, -110)) then begin
       call Node002;
-   end else if (skill_success(dude_obj, SKILL_SCIENCE, 100)) then begin
+   end else if (skill_success(dude_obj, SKILL_SCIENCE, -100)) then begin //edit by killap - was 100
       set_shihacked_flag(SHI_TRUE);
       call Node002;
    end else begin
@@ -210,7 +218,7 @@ procedure NodeGuess begin
       call Node003;
 end
 
-procedure Node001 begin
+/*procedure Node001 begin
    Reply(103);
    NLowOption(104, Node999);
 
@@ -220,7 +228,27 @@ procedure Node001 begin
    end
    NOption(107, NodeHack, 4);
    NOption(108, Node999, 4);
-end
+end*/
+
+//new code by killap
+procedure Node001 begin
+   set_san_fran_flag(SF_EMP_ROOM_PHY);
+   Reply(103);
+   NLowOption(104, Node999);
+
+   NOption(105, NodeGuess, 4);
+   if (dude_item(PASSWORD_PAPERS_PID)) then begin
+      NOption(106, Node002, 4);
+   end
+   NOption(107, NodeHack, 4);
+   NOption(108, Node999, 4);
+end 
+
+
+procedure Node008a begin
+   unset_san_fran_flag(SF_EMP_ROOM_PHY);
+   call Node008;
+end 
 
 procedure Node56 begin
    if (shi_whirly(SH_WH_GIVEN)) then
@@ -233,8 +261,18 @@ procedure Node002 begin
    Reply(109);
    NOption(110, Node56, 4);
    NOption(111, Node007, 4);
+   NOption(112, Node008a, 4);
+   NOption(108, Node999, 4);
+end 
+//end
+
+
+/*procedure Node002 begin
+   Reply(109);
+   NOption(110, Node56, 4);
+   NOption(111, Node007, 4);
    NOption(112, Node008, 4);
-end
+end*/
 
 procedure Node003 begin
   Reply(113);
@@ -245,19 +283,28 @@ end
 procedure Node004 begin
    set_local_var(LVAR_Denied, 1);
    set_shihacked_flag(SHI_TRUE);
+   callGuards := 1; // added by killap
    Reply(116);
    NOption(117, Node999, 4);
 end
 
 procedure NodePlans begin
-   add_obj_to_inven(self_obj, create_object(WHIRLY_PLANS_PID, self_tile, elevation(self_obj)));
-   call Node010;
+   //added by killap
+   variable plans;
+   plans:=create_object(WHIRLY_PLANS_PID,0,0);
+   add_obj_to_inven( dude_obj, plans );
+   //end added
+   
+   //set_local_var(LVAR_downloaded_plans, 1);
+   
+   //add_obj_to_inven(dude_obj, create_object(WHIRLY_PLANS_PID, self_tile, elevation(dude_obj))); //killap's fix: changed to dude_obj - commented out and using new code above
+   call Node010;                                                                               
 end
 
 procedure Node005 begin
    Reply(118);
-   if (elron_whirly(EL_WH_STEALSHI) or san_fran_flag(SF_BROTHER_PLANS)) then
-      NOption(119, NodePlans, 4);
+   if ((elron_whirly(EL_WH_STEALSHI) or san_fran_flag(SF_BROTHER_PLANS))) then
+      NOption(119, NodePlans, 4);                                                         
    NOption(120, Node002, 4);
 end
 
@@ -267,13 +314,14 @@ procedure Node006 begin
 end
 
 procedure Node007 begin
+   game_time_advance(ONE_GAME_MINUTE * 20); //added by killap
    Reply(123);
    NOption(124, Node002, 4);
 end
 
 procedure Node008 begin
    Reply(125);
-//   NOption(126, Node001, 4);
+   NOption(126, Node001, 4);
    NOption(127, Node999, 4);
 end
 
@@ -287,3 +335,9 @@ procedure Node010 begin
    Reply(132);
    NOption(117, Node999, 1);
 end
+
+//added by killap
+procedure doCallGuards begin
+   set_san_fran_flag(SF_SHI_ENEMY);
+end
+//end added

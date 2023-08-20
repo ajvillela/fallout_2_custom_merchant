@@ -47,7 +47,7 @@ procedure start begin
 end
 
 procedure Node001 begin
-   floater(200, 203);
+   floater_rand(200, 203); // Seraph's Fix: floater only takes 1 arg; changed to floater_rand. Thanks Rob!
 end
 
 procedure timed_event_p_proc begin

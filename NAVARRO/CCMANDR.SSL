@@ -51,6 +51,22 @@ procedure Node006;
 procedure Node007;
 procedure Node008;
 
+//added by killap - expansion
+procedure Node009;
+procedure Node010;
+procedure Node011;
+procedure Node012;
+procedure Node013;
+procedure Node014;
+procedure Node015;
+procedure Node016;
+procedure Node017;
+procedure Node018;
+procedure Node019;
+procedure Node020;
+procedure Node021;
+procedure Node022;
+
 /* Script Specific Procedure Calls */
 procedure Node998;                                      // This Node is Always Combat
 procedure Node999;                                      // This Node is Always Ending
@@ -96,10 +112,18 @@ end
 
 procedure critter_p_proc begin
    if (obj_can_see_obj(self_obj,dude_obj)) then begin
+
       if (local_var(LVAR_Hostile) == 2) then begin
          set_local_var(LVAR_Hostile,1);
          attack(dude_obj);
       end
+      //added by killap - expansion
+      else if (global_var(GVAR_CAME_ON_VERTIBIRD) == 2) then begin
+         tile_set_center(dude_tile);
+         set_global_var(GVAR_CAME_ON_VERTIBIRD,3);
+         dialogue_system_enter;
+      end
+      //end added
       else if ( ( global_var(GVAR_NAVARRO_BASE_ALERT) > 0 ) and
                 ( local_var( LVAR_Said_Intruder ) == 0 ) ) then begin
          // Instead of attacking directly, this guy asks you what the
@@ -135,14 +159,18 @@ procedure talk_p_proc begin
 
    start_gdialog(NAME,self_obj,4,-1,-1);
    gSay_Start;
-   if (global_var(GVAR_NAVARRO_BASE_ALERT) > 0) then begin
-     call Node006;
+   // added by killap - expansion
+   if (global_var(GVAR_CAME_ON_VERTIBIRD) == 3) then begin
+      tile_set_center(dude_tile);
+      call Node009;
+   end else if (global_var(GVAR_NAVARRO_BASE_ALERT) > 0) then begin
+      call Node006;
    end
    else if (map_var(MVAR_Clean) == 1) then begin
-     call Node004;
+      call Node004;
    end
    else if (map_var(MVAR_Secure) == 1) then begin
-     call Node003;
+      call Node003;
    end
    else begin
       if (local_var(LVAR_Herebefore) == 0) then begin
@@ -163,6 +191,7 @@ end
 procedure destroy_p_proc begin
 /* Increment the aligned critter counter*/
    inc_evil_critter
+   commander_ptr := 0; //added by killap
 end
 
 /* Look_at_p_proc gets called any time that the player passes the cursor over any object.
@@ -260,6 +289,104 @@ end
 procedure Node008 begin
 //random floats
 end
+
+//added by killap - RP
+procedure Node009 begin
+   Reply(200);
+
+   BOption(201,Node010,004);
+   NOption(202,Node011,004);
+   NOption(203,Node014,004);
+   NOption(204,Node014,004);
+   NOption(205,Node017,004);
+end
+
+procedure Node010 begin
+   Reply(210);
+   NOption((g_mstr(350)),Node998,004);
+end
+
+procedure Node011 begin
+   Reply(220);
+   NOption(221,Node012,004);
+   NOption(222,Node012,004);
+   NOption(223,Node013,004);
+end
+
+procedure Node012 begin
+   Reply(230);
+   NOption((g_mstr(350)),Node998,004);
+end
+
+procedure Node013 begin
+   Reply(240);
+   NOption((g_mstr(350)),Node998,004);
+end
+
+procedure Node014 begin
+   Reply(250);
+   NOption(251,Node015,004);
+   NOption(252,Node016,004);
+   NOption(253,Node016,004);
+   NOption(254,Node017,004);
+end
+
+procedure Node015 begin
+   Reply(260);
+   NOption((g_mstr(350)),Node998,004);
+end
+
+procedure Node016 begin
+   Reply(270);
+   NOption((g_mstr(350)),Node998,004);
+end
+
+procedure Node017 begin
+   Reply(280);
+   NOption(281,Node018,004);
+   NOption(282,Node019,004);
+   NOption(283,Node020,004);
+   NOption(284,Node021,004);
+   NOption(285,Node022,004);
+end
+
+procedure Node018 begin
+   Reply(290);
+   NOption(282,Node019,004);
+   NOption(283,Node020,004);
+   NOption(284,Node021,004);
+   NOption(285,Node022,004);
+end
+
+procedure Node019 begin
+   Reply(300);
+   NOption(281,Node018,004);
+   NOption(283,Node020,004);
+   NOption(284,Node021,004);
+   NOption(285,Node022,004);
+end
+
+procedure Node020 begin
+   Reply(310);
+   NOption(281,Node018,004);
+   NOption(282,Node019,004);
+   NOption(284,Node021,004);
+   NOption(285,Node022,004);
+end
+
+procedure Node021 begin
+   Reply(320);
+   NOption(281,Node018,004);
+   NOption(282,Node019,004);
+   NOption(283,Node020,004);
+   NOption(285,Node022,004);
+end
+
+procedure Node022 begin
+   Reply(330);
+   NOption((g_mstr(350)),Node998,004);
+end
+//end added
 
 procedure Node998 begin
    set_local_var(LVAR_Hostile,2);

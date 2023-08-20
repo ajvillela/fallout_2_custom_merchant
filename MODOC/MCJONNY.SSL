@@ -222,7 +222,7 @@ end
 
 procedure destroy_p_proc begin
    inc_good_critter
-   inc_childkiller
+   //inc_childkiller - redundant and makes it seem you killed two children when only was was killed  - killap
    jonny_obj := 0;
    set_jonny_dead;
 end
@@ -247,7 +247,7 @@ procedure Node998 begin
    set_hostile;
 end
 procedure Node996 begin
-   inc_global_var(GVAR_TOWN_REP_MODOC, REP_TOWN_GAVE_ROSE_DOG);
+   inc_global_var_amt(GVAR_TOWN_REP_MODOC, REP_TOWN_GAVE_ROSE_DOG); // Seraph's Fix: changed 'inc_global_var' to 'inc_global_var_amt'. Thanks Rob!
    call Node024;
 end
 procedure Node995 begin
@@ -375,6 +375,11 @@ procedure Node019 begin
    NOption(g_mstr(350),Node999,004);
 end
 procedure Node020 begin
+   //added by killap
+   set_jonny_known;
+   set_jonny_name_known;
+   //end added by killap
+   
    Reply(197);
    if (jonny_seed_active) then begin
       NOption(166,Node014,004);

@@ -94,7 +94,12 @@ procedure map_enter_p_proc begin
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_CITIZEN);
 
    if( not( is_loading_game ) ) then begin
-      add_timer_event( self_obj, game_ticks( random( 10, 20 ) ), 0 );
+      if( ( global_var( GVAR_BH_CONSPIRACY ) == CONSPIRACY_SUCCESSFUL ) or ( global_var( GVAR_BH_FTM ) == FTM_SUCCESSFUL ) ) then //added check by killap
+         set_obj_visibility( self_obj, true ); //invis
+      else begin
+         set_obj_visibility( self_obj, false );
+         add_timer_event( self_obj, game_ticks( random( 10, 20 ) ), 0 );
+      end
    end
 end
 

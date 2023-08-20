@@ -27,7 +27,9 @@
 */
 #include "..\headers\define.h"
 //#include "..\headers\<TownName.h>"
-
+#include "..\headers\depolva.h"
+#include "..\headers\depolvb.h"
+#include "..\headers\NEWR1.h" //added by killap
 #define NAME                    SCRIPT_WCBRNBOT
 
 #include "..\headers\command.h"
@@ -100,19 +102,19 @@ procedure Kill_The_Party;
 
 /* Local Variables which are saved. All Local Variables need to be
    prepended by LVAR_ */
-#define LVAR_Herebefore                 (0)
-#define LVAR_Hostile                    (1)
-#define LVAR_Personal_Enemy             (2)
-#define LVAR_Travel_Distance            (3)
-#define LVAR_Wait                       (4)
-#define LVAR_Alarm_1                    (5)
-#define LVAR_Alarm_2                    (6)
-#define LVAR_Alarm_3                    (7)
-#define LVAR_In_Party                   (8)
-#define LVAR_Freed                      (9)
-#define LVAR_Party_Target               (10)
-#define LVAR_FOLLOW_DISTANCE            (11)
-#define LVAR_WAITING                    (12)
+#define LVAR_Herebefore                 (4)
+#define LVAR_Hostile                    (5)
+#define LVAR_Personal_Enemy             (6)
+#define LVAR_Travel_Distance            (7)
+#define LVAR_Wait                       (8)
+#define LVAR_Alarm_1                    (9)
+#define LVAR_Alarm_2                    (10)
+#define LVAR_Alarm_3                    (11)
+#define LVAR_In_Party                   (12)
+#define LVAR_Freed                      (13)
+#define LVAR_Party_Target               (14)
+#define LVAR_FOLLOW_DISTANCE            (15)
+#define LVAR_WAITING                    (16)
 
 #define Dist_Short                      (0)
 #define Dist_Med                        (1)
@@ -125,6 +127,7 @@ procedure Kill_The_Party;
 
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
+variable waiting := 0; //added by killap
 
 procedure start begin
 end
@@ -169,18 +172,32 @@ procedure map_update_p_proc begin
       end
       critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_PLAYER);
    end
+   
+   if (waiting == 1) then begin
+      waiting := 0;
+   end    
 end
 
 
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from
    Movement to attacking the player on sight can be placed in here.*/
 procedure critter_p_proc begin
-
+   variable stat;
 /* If the critter is mad at the player for any reason, it will attack and remember to attack
    the player should the game be saved and loaded repeatedly. Additionally, if any special
    actions need to be taken by the critter based on previous combat, the critter will remember
    this as well. */
-
+   
+   //added by killap
+   if ((cur_map_index == MAP_NEW_RENO_1) and (self_obj == party_member_obj(PID_VIC)) and (map_var(MVAR_Kitty_Drug) == party_member_obj(PID_VIC))) then begin 
+      set_map_var(MVAR_Kitty_Drug, 0);
+      waiting := 1;
+      if (get_critter_stat(self_obj, STAT_st) < 10) then begin
+         use_obj_on_obj(create_object_sid(PID_KITTY_SEX_DRUG_STRENGTH, 0, 0, -1), self_obj);
+      end
+   end 
+   //end added
+   
    if ((cur_map_index == MAP_SIERRA_BATTLE) and (global_var(GVAR_SIERRA_BASE_ENEMY) == 1) and (local_var(LVAR_Hostile) == 0)) then begin
        if (local_var(LVAR_Freed) == 0) then begin
            inc_local_var(LVAR_Freed);
@@ -197,32 +214,49 @@ procedure critter_p_proc begin
        animate_move_to_tile(tile_num_in_direction(tile_num(dude_obj),random(0,5),random(1,4)));
    end
 
-   if ((cur_map_index == MAP_SIERRA_123) and ((local_var(LVAR_Alarm_1) == 0) or (local_var(LVAR_Alarm_2) == 0) or (local_var(LVAR_Alarm_3) == 0))) then begin
+   /*if ((cur_map_index == MAP_SIERRA_123) and ((local_var(LVAR_Alarm_1) == 0) or (local_var(LVAR_Alarm_2) == 0) or (local_var(LVAR_Alarm_3) == 0))) then begin
        call Node024;
-   end
+   end*/
+   
+   //added by killap
+   if ( ((cur_map_index == MAP_SIERRA_123) and ((map_var(MVAR_Security_Level_1) == 1) or (map_var(MVAR_Security_Level_2) == 1) or (map_var(MVAR_Security_Level_3) == 1))) or (cur_map_index == MAP_SIERRA_4) and (map_var(MVAR_Security_Level_4) == 1) ) then begin
+       call Node024;
+   end 
+   //end added
 
-
-   if ((local_var(LVAR_In_Party) == 1) and (not(party_no_follow))) then begin
-       if (tile_distance_objs(self_obj,dude_obj) > (2*FOLLOW_DISTANCE_MEDIUM)) then
-           animate_run_to_tile(tile_num_in_direction(tile_num(dude_obj),random(0,5),FOLLOW_DISTANCE_CLOSE));
-       else if (tile_distance_objs(self_obj,dude_obj) > FOLLOW_DISTANCE_MEDIUM) then
-           animate_run_to_tile(tile_num_in_direction(tile_num(dude_obj),random(0,5),FOLLOW_DISTANCE_MEDIUM));
+   if (waiting != 1) then begin //check added by killap - needed for "hacky fix" for kitty drug... :(
+      if ((local_var(LVAR_In_Party) == 1) and (not(party_no_follow))) then begin
+          if (tile_distance_objs(self_obj,dude_obj) > (2*FOLLOW_DISTANCE_MEDIUM)) then
+              animate_run_to_tile(tile_num_in_direction(tile_num(dude_obj),random(0,5),FOLLOW_DISTANCE_CLOSE));
+          else if (tile_distance_objs(self_obj,dude_obj) > FOLLOW_DISTANCE_MEDIUM) then
+              animate_run_to_tile(tile_num_in_direction(tile_num(dude_obj),random(0,5),FOLLOW_DISTANCE_MEDIUM));
+      end
    end
 
 end
 
 procedure timed_event_p_proc begin
-   if (fixed_param == 1) then begin
+   /*if (fixed_param == 1) then begin - comment out by killap
        call Node015;
-   end
+   end*/
 
-   else if (fixed_param == 2) then begin
+   if (fixed_param == 2) then begin
        call Kill_The_Party;
    end
-
-   else if (fixed_param == 3) then begin
-       set_local_var(LVAR_Hostile,2);
+   
+   //added by killap - expansion
+   if (fixed_param == 40893) then begin
+      set_local_var(LVAR_In_Party,0);
+      set_local_var(LVAR_Wait,1);
+      party_remove(self_obj);
+      move_to(self_obj, 20687, self_elevation);
+      critter_attempt_placement( self_obj, 15698, 0 );
    end
+   //end added
+   
+   /*else if (fixed_param == 3) then begin - comment out by killap
+       set_local_var(LVAR_Hostile,2);
+   end*/
 end
 
 /* Whenever the critter takes damage of any type, this procedure will be called. Things
@@ -257,7 +291,9 @@ end
    will be remembered. */
 procedure pickup_p_proc begin
    if (source_obj == dude_obj) then begin
-       set_local_var(LVAR_Hostile,2);
+      if not(local_var(LVAR_In_Party)) then begin //added by killap
+         set_local_var(LVAR_Hostile,2);
+      end
    end
 end
 
@@ -363,6 +399,15 @@ end
 procedure use_skill_on_p_proc begin
 end
 
+//added by killap
+procedure use_obj_on_p_proc begin
+   if ( (obj_pid(obj_being_used_with) == PID_MICRO_FUSION_CELL) or (obj_pid(obj_being_used_with) == PID_SMALL_ENERGY_CELL) ) then begin
+      script_overrides;
+      display_msg(g_mstr(20000));
+   end
+end
+//end added
+
 /* Should the Player ever cause the NPC too much discomfort that he desires to attack the player,
    this call will be made. Essentially, it stores the Hostile vaule so that the critter remembers
    he was once hostile towards the player.*/
@@ -448,7 +493,7 @@ end
 procedure Node006 begin
    Reply(134);
 
-   NOption(135,Node018,004);
+   //NOption(135,Node018,004); - No need for this since we have the push command - killap
    NOption(136,Node021,004);
    NOption(137,Node022,004);
    NOption(138,Node017,004);
@@ -456,7 +501,7 @@ procedure Node006 begin
    NOption(141,Node020,004);
    NOption(142,Node019,004);
    NOption(143,Node999,004);
-   NLowOption(144,Node999,004);
+   NLowOption(144,Node999); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
 end
 
 procedure Node006a begin
@@ -481,7 +526,7 @@ procedure Node007 begin
 
    NOption(148,Node010,004);
    NOption(149,Node021,004);
-   NLowOption(144,Node999,004);
+   NLowOption(144,Node999); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
 end
 
 procedure Node008 begin
@@ -492,7 +537,7 @@ procedure Node008 begin
 
    NOption(152,Node008a,004);
    NOption(153,Node999,004);
-   NLowOption(144,Node999,004);
+   NLowOption(144,Node999); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
 end
 
 procedure Node008a begin
@@ -514,7 +559,7 @@ procedure Node010 begin
        Reply(156);
 
    NOption(157,Node999,004);
-   NLowOption(144,Node999,004);
+   NLowOption(144,Node999); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
 end
 
 procedure Node011 begin
@@ -671,7 +716,7 @@ procedure Node023 begin
    NOption(203,Node999,004);
 end
 
-procedure Node024 begin
+/*procedure Node024 begin
 
    if ((local_var(LVAR_Alarm_1) == 0) and (elevation(self_obj) == 0)) then begin
        set_global_var(GVAR_SIERRA_BASE_ALERT,0);
@@ -691,13 +736,47 @@ procedure Node024 begin
        floater(206);
        set_local_var(LVAR_Alarm_3,1);
    end
-end
+end*/
+
+//edit by killap
+procedure Node024 begin
+
+   if (cur_map_index == MAP_SIERRA_123) then begin
+      if ((map_var(MVAR_Security_Level_1) == 1) and (elevation(self_obj) == 0)) then begin
+          set_global_var(GVAR_SIERRA_BASE_ALERT,0);
+          set_global_var(GVAR_SIERRA_BASE_SECURITY,0);
+          floater(204);
+          set_map_var(MVAR_Security_Level_1,0);
+      end
+      else if ((map_var(MVAR_Security_Level_2) == 1) and (elevation(self_obj) == 1)) then begin
+          set_global_var(GVAR_SIERRA_BASE_ALERT,0);
+          set_global_var(GVAR_SIERRA_BASE_SECURITY,0);
+          floater(205);
+          set_map_var(MVAR_Security_Level_2,0);
+      end
+      else if ((map_var(MVAR_Security_Level_3) == 1) and (elevation(self_obj) == 2)) then begin
+          set_global_var(GVAR_SIERRA_BASE_ALERT,0);
+          set_global_var(GVAR_SIERRA_BASE_SECURITY,0);
+          floater(206);
+          set_map_var(MVAR_Security_Level_3,0);
+      end
+   end
+   else if (cur_map_index == MAP_SIERRA_4) then begin
+      if (map_var(MVAR_Security_Level_4) == 1) then begin
+          set_global_var(GVAR_SIERRA_BASE_ALERT,0);
+          set_global_var(GVAR_SIERRA_BASE_SECURITY,0);
+          floater(207);
+          set_map_var(MVAR_Security_Level_4,0);
+      end
+   end
+end 
+//end edit
 
 procedure Kill_The_Party begin
    if (Vic_Ptr != 0) then begin
        if (tile_distance_objs(self_obj,Vic_Ptr) < 2) then begin
            critter_dmg(Vic_Ptr,1000,DMG_explosion);
-           call Node015;
+           //call Node015; --comment out by killap
        end
        else begin
            animate_run_to_tile(tile_num_in_direction(tile_num(Vic_Ptr),random(0,5),1));
@@ -709,7 +788,7 @@ procedure Kill_The_Party begin
    else if (Myron_Ptr != 0) then begin
        if (tile_distance_objs(self_obj,Myron_Ptr) < 2) then begin
            critter_dmg(Myron_Ptr,1000,DMG_explosion);
-           call Node015;
+           //call Node015; --comment out by killap
        end
        else begin
            animate_run_to_tile(tile_num_in_direction(tile_num(Myron_Ptr),random(0,5),1));
@@ -721,7 +800,7 @@ procedure Kill_The_Party begin
    else if (Sulik_Ptr != 0) then begin
        if (tile_distance_objs(self_obj,Sulik_Ptr) < 2) then begin
            critter_dmg(Sulik_Ptr,1000,DMG_explosion);
-           call Node015;
+           //call Node015; --comment out by killap
        end
        else begin
            animate_run_to_tile(tile_num_in_direction(tile_num(Sulik_Ptr),random(0,5),1));
@@ -733,7 +812,7 @@ procedure Kill_The_Party begin
    else if (Lenny_Ptr != 0) then begin
        if (tile_distance_objs(self_obj,Lenny_Ptr) < 2) then begin
            critter_dmg(Lenny_Ptr,1000,DMG_explosion);
-           call Node015;
+           //call Node015; --comment out by killap
        end
        else begin
            animate_run_to_tile(tile_num_in_direction(tile_num(Lenny_Ptr),random(0,5),1));
@@ -745,7 +824,7 @@ procedure Kill_The_Party begin
    else if (MacRae_Ptr != 0) then begin
        if (tile_distance_objs(self_obj,MacRae_Ptr) < 2) then begin
            critter_dmg(MacRae_Ptr,1000,DMG_explosion);
-           call Node015;
+           //call Node015; --comment out by killap
        end
        else begin
            animate_run_to_tile(tile_num_in_direction(tile_num(MacRae_Ptr),random(0,5),1));
@@ -757,7 +836,7 @@ procedure Kill_The_Party begin
    else if (Davin_Ptr != 0) then begin
        if (tile_distance_objs(self_obj,Davin_Ptr) < 2) then begin
            critter_dmg(Davin_Ptr,1000,DMG_explosion);
-           call Node015;
+           //call Node015; --comment out by killap
        end
        else begin
            animate_run_to_tile(tile_num_in_direction(tile_num(Davin_Ptr),random(0,5),1));
@@ -769,7 +848,7 @@ procedure Kill_The_Party begin
    else if (Miria_Ptr != 0) then begin
        if (tile_distance_objs(self_obj,Miria_Ptr) < 2) then begin
            critter_dmg(Miria_Ptr,1000,DMG_explosion);
-           call Node015;
+           //call Node015; --comment out by killap
        end
        else begin
            animate_run_to_tile(tile_num_in_direction(tile_num(Miria_Ptr),random(0,5),1));
@@ -777,6 +856,42 @@ procedure Kill_The_Party begin
            add_timer_event(self_obj,game_ticks(3),2);
        end
    end
+   
+   else if (Kitsune_Ptr != 0) then begin
+       if (tile_distance_objs(self_obj,Kitsune_Ptr) < 2) then begin
+           critter_dmg(Kitsune_Ptr,1000,DMG_explosion);
+           //call Node015; --comment out by killap
+       end
+       else begin
+           animate_run_to_tile(tile_num_in_direction(tile_num(Kitsune_Ptr),random(0,5),1));
+           set_local_var(LVAR_Party_Target,7);
+           add_timer_event(self_obj,game_ticks(3),2);
+       end
+   end   
+
+   else if (Cat_Jules_Ptr != 0) then begin
+       if (tile_distance_objs(self_obj,Cat_Jules_Ptr) < 2) then begin
+           critter_dmg(Cat_Jules_Ptr,1000,DMG_explosion);
+           //call Node015; --comment out by killap
+       end
+       else begin
+           animate_run_to_tile(tile_num_in_direction(tile_num(Cat_Jules_Ptr),random(0,5),1));
+           set_local_var(LVAR_Party_Target,7);
+           add_timer_event(self_obj,game_ticks(3),2);
+       end
+   end   
+   
+   else if (Dex_Ptr != 0) then begin
+       if (tile_distance_objs(self_obj,Dex_Ptr) < 2) then begin
+           critter_dmg(Dex_Ptr,1000,DMG_explosion);
+           //call Node015; --comment out by killap
+       end
+       else begin
+           animate_run_to_tile(tile_num_in_direction(tile_num(Dex_Ptr),random(0,5),1));
+           set_local_var(LVAR_Party_Target,7);
+           add_timer_event(self_obj,game_ticks(3),2);
+       end
+   end   
 
    else if (tile_distance_objs(self_obj,dude_obj) < 2) then begin
        call Node015;

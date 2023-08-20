@@ -323,7 +323,11 @@ procedure Node1718 begin
 end
 
 procedure Node011 begin
-   if (elron_whirly(EL_WH_GIVEN)) then
+   //added by killap -added in the event you give the plans and gas, but decide to siphon the gas to the Tanker
+   if ( (elron_whirly(EL_WH_GIVEN)) and GASDONE ) then
+      Reply(300);
+   //end added
+   else if (elron_whirly(EL_WH_GIVEN)) then
       Reply(171);
    else
       Reply(170);
@@ -379,7 +383,7 @@ procedure Node014 begin
 
    set_elron_whirly(EL_WH_GIVEN);
 
-   COMP_QUEST(REP_BONUS_SAN_FRAN_ELRON_VIRTIBIRD, REP_HERO_SAN_FRAN_ELRON_VERTIBIRD, EXP_ELRON_GET_VERTIBIRD);
+   COMP_QUEST(REP_BONUS_SAN_FRAN_ELRON_VIRTIBIRD, REP_HERO_SAN_FRAN_ELRON_VERTIBIRD, EXP_ELRON_GET_VERTIBIRD)
    Reply(185);
    NOption(186, NodeEndTake, 4);
 end

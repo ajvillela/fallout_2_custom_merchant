@@ -137,10 +137,12 @@ end
 ***************************************************************************************/
 
 procedure map_enter_p_proc begin
-   if (has_rep_childkiller or check_general_rep < -499) then
-      set_obj_visibility(self_obj, OBJ_VIS);
-   else
-      set_obj_visibility(self_obj, OBJ_INVIS);
+   if (is_loading_game == false) then begin // Seraph's Code
+      if (has_rep_childkiller or check_general_rep < -499) then
+         set_obj_visibility(self_obj, OBJ_VIS);
+      else
+         set_obj_visibility(self_obj, OBJ_INVIS);
+   end // Seraph's Code
 end
 
 

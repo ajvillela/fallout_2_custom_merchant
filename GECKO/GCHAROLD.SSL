@@ -143,7 +143,7 @@ procedure Node054;
 
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
-variable k;
+//variable k; //comment out by killap - no longer needed
 variable coolant;
 variable item;
 variable from_2;
@@ -158,6 +158,12 @@ procedure map_enter_p_proc begin
    Only_Once:=0;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_GECKO);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_CITIZEN);
+//begin killap code      
+   if( map_first_run ) then begin
+      if (global_var(GVAR_GECKO_DESCENDANT_KNOWN) != 0) then
+         set_global_var(GVAR_GECKO_DESCENDANT_KNOWN,0); //(this should already be 0, but it seems to act like it is not, so we set it here)
+   end
+//end killap code
 end
 
 
@@ -170,7 +176,7 @@ procedure critter_p_proc begin
    actions need to be taken by the critter based on previous combat, the critter will remember
    this as well. */
 
-   if ( (global_var(GVAR_GECKO_MELTDOWN) == 1) and (obj_can_see_obj(self_obj,dude_obj))) then begin
+   if ( ((global_var(GVAR_GECKO_MELTDOWN) == 1) or (global_var(GVAR_ENEMY_GECKO)) ) and (obj_can_see_obj(self_obj,dude_obj))) then begin //edit by killap - added (global_var(GVAR_ENEMY_GECKO))
       set_local_var(LVAR_Hostile,1);
       attack(dude_obj);
    end
@@ -208,13 +214,22 @@ end
    written by designers are placed in here. Additionally, Reactions are generated and
    stored which affects player interactions. */
 procedure talk_p_proc begin
+   CheckKarma; //added by killap
+
    GetReaction;
 
-   from_2 := 0;
+   ReactToLevel; //added by killap
+   
+// Begin Seraph Code - expansion
+   if (global_var(GVAR_ENDGAME_MOVIE_HAROLD) != 1) then
+      set_global_var(GVAR_ENDGAME_MOVIE_HAROLD,1);
+// End Seraph Code
+
+   from_2 := 0;   
    if (local_var(LVAR_Personal_Enemy) == 1) then begin
        call Node998;
    end
-   else if (LVAR_reaction_level < -75) then begin
+   else if (local_var(LVAR_reaction_level) <= REACTION_LEVEL_ABYSMAL) then begin //killap's fix: changed from LVAR_reaction_level < -75
       call Node021; //change to 21 when Mark O'Green writes Node021
    end
    else if ((get_critter_stat(dude_obj,STAT_iq) <= 3)) then begin
@@ -225,7 +240,7 @@ procedure talk_p_proc begin
        //gSay_End;
        //end_dialogue;
    end
-   else if (LVAR_reaction_level < -50) then begin
+   else if (local_var(LVAR_reaction_level) <= REACTION_LEVEL_HORRIBLE) then begin //killap's fix: changed from LVAR_reaction_level < -50
        start_gdialog(NAME,self_obj,4,HEAD_HAROLD,BACKGROUND_HUB);
        //start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
@@ -237,7 +252,7 @@ procedure talk_p_proc begin
        start_gdialog(NAME,self_obj,4,HEAD_HAROLD,BACKGROUND_HUB);
        //start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
-           call Node002;
+         call Node002; 
        gSay_End;
        end_dialogue;
    end
@@ -266,6 +281,11 @@ end
    incrementing the death count for reputation purposes and Enemy Counters are placed
    in here. */
 procedure destroy_p_proc begin
+
+// Begin Seraph's Code - expansion
+   if (global_var(GVAR_ENDGAME_MOVIE_HAROLD) != 0) then
+      set_global_var(GVAR_ENDGAME_MOVIE_HAROLD,0);
+// End Seraph's Code
 
 /* Increment the aligned critter counter*/
    inc_good_critter
@@ -303,6 +323,7 @@ end
 procedure Node920 begin
   coolant:=obj_carrying_pid_obj(dude_obj, PID_COOLANT_REPORT);
   rm_obj_from_inven(dude_obj, coolant);
+  destroy_object(coolant); //added by killap
 end
 
 procedure Node995 begin
@@ -315,7 +336,8 @@ procedure Node995 begin
 end
 
 procedure Node996 begin
-   BottomReact;
+//   BottomReact;
+     DownReactHuge;
 end
 
 procedure Node997 begin
@@ -341,14 +363,15 @@ end
 // The Following lines are from the Design Tool
 //~~~~~~~~~~~~~~~~ DESIGN TOOL STARTS HERE
 procedure Node001 begin
-   floater(random(103,105));
+   //floater(random(103,105));
+   float_msg(self_obj, message_str(NAME,random(103,105)),FLOAT_MSG_NORMAL); //edit by killap
 end
 
 procedure Node002 begin
    if (local_var(LVAR_02_before) == 0) then begin
       set_local_var(LVAR_02_before, 1);
       if ((global_var(GVAR_VAULT_PLANT_STATUS) == PLANT_REPAIRED) or (global_var(GVAR_VAULT_PLANT_STATUS) == PLANT_OPTIMIZED) ) then begin
-         set_local_var(LVAR_Thanx,1);
+//         set_local_var(LVAR_Thanx,1); killap's fix: not needed here.
          Reply(108);
          NOption(112,Node014,004);
       end
@@ -358,16 +381,16 @@ procedure Node002 begin
       end
    end
    else begin //NEXT TIMES
-      if (local_var(LVAR_3032_visited) == 1) then begin
+     if (local_var(LVAR_3032_visited) == 1) then begin
          Reply(107);
-         NOption(112,Node014,004);
-      end
+//         NOption(112,Node014,004); killap's fix: not needed
+     end
       else if (local_var(LVAR_Thanx) == 0) then begin
          if (global_var(GVAR_GECKO_DESCENDANT_KNOWN) == 0) then begin
             if ((global_var(GVAR_VAULT_PLANT_STATUS) == PLANT_REPAIRED) or (global_var(GVAR_VAULT_PLANT_STATUS) == PLANT_OPTIMIZED) ) then begin
                set_local_var(LVAR_Thanx,1);
                Reply(109);
-               NOption(112,Node014,004);
+ //              NOption(112,Node014,004); killap's fix: not needed
             end
             else begin
               Reply(107);
@@ -377,7 +400,8 @@ procedure Node002 begin
             if ((global_var(GVAR_VAULT_PLANT_STATUS) == PLANT_REPAIRED) or (global_var(GVAR_VAULT_PLANT_STATUS) == PLANT_OPTIMIZED) ) then begin
                set_local_var(LVAR_Thanx,1);
                Reply(110);
-               NOption(113,Node012,004);
+               //NOption(113,Node012,004); // Commented out by Seraph
+              // NOption(226,Node039,004); // Seraph's Code - commented out by killap (makes no sense here)
             end
             else begin
                Reply(107);
@@ -388,8 +412,8 @@ procedure Node002 begin
          Reply(107);
       end
    end
-   if ((message_str(SCRIPT_NCPERSON, 100) == "You see one of the Reno townsfolk.") and obj_is_carrying_obj_pid(dude_obj, PID_HY_MAG_PART)) then
-      NOption(321,Node38c,004);
+   if (obj_is_carrying_obj_pid(dude_obj, PID_HY_MAG_PART)) then
+     NOption(321,Node38c,004);
    NOption(114,Node003,004);
    NOption(115,Node033,004);
    NOption(116,Node034,004);
@@ -419,17 +443,17 @@ procedure Node03a begin
 end
 
 procedure Node004 begin
-   if (global_var(GVAR_VAULT_PLANT_STATUS) >= PLANT_OPTIMIZED) then begin
-      Reply(129);
-      NOption(134,Node009,004);
-      if (global_var(GVAR_GECKO_ECON_DISK) == ECON_DISK_GIVEN) then
-         NOption(133,Node026,004);
-   end
-   else if (global_var(GVAR_VAULT_PLANT_STATUS) >= PLANT_REPAIRED) then begin
+   if (global_var(GVAR_VAULT_PLANT_STATUS) == PLANT_REPAIRED) then begin
       Reply(128);
       NOption(131,Node011,004);
       if (global_var(GVAR_GECKO_ECON_DISK) == ECON_DISK_GIVEN) then
          NOption(132,Node026,004);
+   end
+   else if (global_var(GVAR_VAULT_PLANT_STATUS) == PLANT_OPTIMIZED) then begin //killap's fix: added 'else'
+      Reply(129);
+      NOption(134,Node009,004);
+      if (global_var(GVAR_GECKO_ECON_DISK) == ECON_DISK_GIVEN) then
+         NOption(133,Node026,004);
    end
    else begin //reactor untouched
       Reply(127);
@@ -478,23 +502,24 @@ procedure Node011 begin
    if (global_var(GVAR_GECKO_DESCENDANT_KNOWN) == 0) then begin
       Reply(150);
       NOption(152,Node037,004);
-      NOption(154,Node002,004);
+ //     NOption(154,Node002,004); moved below - killap
    end
    else begin
       Reply(151);
       NOption(153,Node002,004);
    end
-
-   NOption(157,Node999,004);
+   NOption(154,Node002,004); //killap's fix: moved from above
+   NOption(155,Node999,004); //killap's fix: changed from 157
+   
 end
 
-procedure Node012 begin
-   Reply(156);
+procedure Node012 begin //not being used
+   Reply(156); // Seraph's Fix: changed '158' to '156'. Thanks Rob!
    BOption(159,Node013,004); //minor reaction down
    NOption(160,Node002,004);
 end
 
-procedure Node013 begin
+procedure Node013 begin //not being used
    Reply(161);
    NOption(162,Node002,004);
    NOption(163,Node999,004);
@@ -539,22 +564,25 @@ procedure Node019 begin
 end
 
 procedure Node020 begin
-   if (LVAR_reaction_level >= 0) then
+   if (local_var(LVAR_reaction_level) >= REACTION_LEVEL_NEUTRAL) then begin//killap's fix: changed from LVAR_reaction_level >= 0
       Reply(176);
-   else
+      NOption(178,Node002,004);
+   end else begin
       Reply(177);
-
-   NOption(178,Node002,004);
-   NOption(179,Node999,004);
+      NOption(179,Node999,004);
+   end 
 end
 
 procedure Node021 begin
-   k:=random(1,5);
+   floater(random(180,184));  //added by killap
+//begin killap comment out
+/*   k:=random(1,5);
    if (k == 1) then floater(180);
    else if (k == 2) then floater(181);
    else if (k == 3) then floater(182);
    else if (k == 4) then floater(183);
    else if (k == 5) then floater(184);
+end comment out by killap - this all can be done in one line*/
 end
 
 procedure Node026 begin
@@ -570,14 +598,14 @@ procedure Node027 begin
    Reply(190);
 
    BOption(191,Node030,004); //reaction minor
-   NOption(192,Node999,004); //
+   NOption(192,Node031,004); //killap's fix: changed from 999
 end
 
 procedure Node028 begin
    Reply(193);
 
+   NOption(195,Node38b,004); //killap's fix: changed from 999
    NOption(194,Node999,004);
-   NOption(195,Node999,004);
 end
 
 procedure Node029 begin
@@ -600,14 +628,14 @@ procedure Node031 begin
 
    NOption(203,Node032,004);
    NOption(204,Node002,004);
-   NOption(205,Node999,004); //reaction down minor
+   BOption(205,Node999,004); //reaction down minor --edit by killap - was NOption
 end
 
 procedure Node032 begin
    set_local_var(LVAR_3032_visited, 1);
    Reply(206);
 
-   BOption(207,Node999,004); //reaction major
+   BOption(207,Node996,004); //reaction major //killap's fix: changed from 999
    NOption(208,Node999,004);
 end
 
@@ -661,18 +689,19 @@ end
 
 procedure Node38b begin
    Reply(228);
-   if ((message_str(SCRIPT_NCPERSON, 100) == "You see one of the Reno townsfolk.") and from_2) then
-      NOption(320,Node999,004);
+   if (from_2) then
+     NOption(320,Node999,004);
    NOption(229,Node039,004);
-   NOption(228,Node039,004);
+   NOption(230,Node039,004); //killap's fix: changed from 228
 end
 
 procedure Node38c begin
    from_2 := 1;
+   call Node999; // Seraph's Code
 end
 
 procedure Node039 begin
-set_global_var(GVAR_GECKO_DESCENDANT_KNOWN,1);
+   set_global_var(GVAR_GECKO_DESCENDANT_KNOWN,1);
 //set ancestor known
    Reply(231);
 
@@ -775,7 +804,11 @@ procedure Node048 begin
       NOption(257,Node050,004);
    NOption(258,Node051,004);
    NOption(259,Node002,004);
-   NOption(260,Node999,004);
+   //begin killap code
+   if ((local_var(LVAR_50_before) != 0) and (local_var(LVAR_49_before) != 0)) then
+      NOption(273,Node999,004);
+   //end killap code
+   NOption(260,Node999,004);  
 end
 
 procedure Node049 begin
@@ -795,10 +828,17 @@ end
 
 procedure Node051 begin
    Reply(266);
-
-   NOption(267,Node049,004);
-   NOption(268,Node050,004);
-   NOption(269,Node999,004);
+//begin major edit by killap
+   if ((local_var(LVAR_50_before) == 0) or (local_var(LVAR_49_before) == 0)) then begin
+      NOption(267,Node049,004);
+      NOption(268,Node050,004);
+      NOption(269,Node999,004);
+   end
+   if ((local_var(LVAR_50_before) != 0) and (local_var(LVAR_49_before) != 0)) then begin
+      NOption(252,Node002,004);
+      NOption(253,Node999,004);
+   end
+//end major edit by killap
 end
 
 procedure Node052 begin

@@ -54,6 +54,7 @@ procedure push_p_proc;
 
 /* Script Specific Procedure Calls */
 procedure slimbarter;
+procedure Node900;                                       //added by killap
 procedure Node920;
 procedure Node950;
 procedure Node960;
@@ -270,6 +271,8 @@ end
 procedure use_skill_on_p_proc begin
 end
 
+
+   
 /*
 procedure garl18 begin
    tandi_pid_ptr := create_object(212,0,0); //TANDI_ITEM=212
@@ -313,7 +316,7 @@ procedure slimbarter begin
 end
 
 procedure Node920 begin
-   if (TOWN_REPUTATION > 4) then
+   if (TOWN_REPUTATION > 4 or (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then // edit by killap - added (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       call Node011;
    else begin
       if (is_success(roll_vs_skill(self_obj,SKILL_CONVERSANT,0))) then
@@ -325,14 +328,14 @@ end
 
 procedure Node950 begin
    if (local_var(LVAR_tried_talk) == 1) then begin
-      call Node012;
+      call Node011;     //killap's fix: changed from Node012
    end
    else begin
       set_local_var(LVAR_tried_talk, 1);
       if (is_success(roll_vs_skill(self_obj,SKILL_CONVERSANT,0))) then
-         call Node012;
+         call Node011;  //killap's fix: changed from Node012
       else
-         call Node011;
+         call Node900;  //killap's fix: changed from Node011
    end
 end
 
@@ -353,17 +356,21 @@ procedure Node970 begin
 end
 
 procedure Node980 begin
+   from_25:=1;   //killap's fix: moved from Node025
    gfade_out(ONE_GAME_MINUTE);
+   up_sex_status; //added by killap
    game_time_advance(4*ONE_GAME_HOUR);//4 hours
    gfade_in(ONE_GAME_MINUTE);
    call Node011;
 end
 
 procedure Node990 begin
-   if (TOWN_REPUTATION < 7) then
-      item_caps_adjust(dude_obj, 100);
+   set_local_var(LVAR_26_before, 1); //moved from 026
+
+   if (TOWN_REPUTATION < 7 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then // edit by killap - added not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
+      item_caps_adjust(dude_obj, -100); // Seraph's Fix: changed from '50' to '-100'
    else
-      item_caps_adjust(dude_obj, 50);
+      item_caps_adjust(dude_obj, -50);  // Seraph's Fix: changed from '50' to '-50'
    learn:= 2*(get_critter_stat(dude_obj,STAT_iq));
    if (learn < 7) then learn:=7;
    critter_mod_skill(dude_obj,SKILL_OUTDOORSMAN,learn);
@@ -433,7 +440,7 @@ procedure Node003 begin
 end
 
 procedure Node004 begin
-   if (TOWN_REPUTATION < 5) then
+   if (TOWN_REPUTATION < 5 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then // edit by killap - added not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       Reply(140);
    else
       Reply(141);
@@ -468,7 +475,7 @@ procedure Node06a begin
 end
 
 procedure Node007 begin
-   if (TOWN_REPUTATION < 5) then
+   if (TOWN_REPUTATION < 5 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then // edit by killap - added not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       Reply(170);
    else
       Reply(171);
@@ -540,10 +547,16 @@ procedure Node11a begin
    if (obj_is_carrying_obj_pid(self_obj,RAT_KEY)) then begin
       mykey:=obj_carrying_pid_obj(self_obj,RAT_KEY);
       rm_obj_from_inven(self_obj,mykey);
-      item:=create_object(RAT_KEY,0,0); //NEED RAT KEY DEFINED..until then give spear
-      add_obj_to_inven(dude_obj,item);
+      //destroy_object(mykey); //added by killap
+      //item:=create_object(RAT_KEY,0,0); //NEED RAT KEY DEFINED..until then give spear
+      add_obj_to_inven(dude_obj,mykey);
    end
    set_map_var(MVAR_Rat_Key_Given, 1);
+   //added by killap
+   if (global_var(GVAR_QUEST_RAT_GOD) == 0) then begin
+      set_global_var(GVAR_QUEST_RAT_GOD, RAT_GOD_ACCEPT);
+   end
+   //end added
 end
 
 procedure Node012 begin
@@ -652,20 +665,19 @@ procedure Node24a begin
 end
 
 procedure Node025 begin
-   from_25:=1;
    if (get_critter_stat(dude_obj,STAT_ch) > 5) then
       Reply(351);
    else
       Reply(350);
 
-   NOption(353,Node980,004); //fade out, advance time
-   NOption(354,Node010,004);
-   NOption(355,Node999,004);
+   NOption(352,Node980,004);  //killap's fix: changed from 353; fade out, advance time
+   NOption(353,Node010,004);  //killap's fix: changed from 354
+   NOption(354,Node999,004);  //killap's fix: changed from 355
 end
 
 procedure Node026 begin
-   set_local_var(LVAR_26_before, 1);
-   if (TOWN_REPUTATION < 7) then begin
+   //set_local_var(LVAR_26_before, 1); moved to 990
+   if (TOWN_REPUTATION < 7 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then begin // edit by killap - added not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       Reply(360);
       if (item_caps_total(dude_obj) >= 100) then
          NOption(362,Node990,004); //fade out, add to players skill
@@ -695,4 +707,12 @@ end
 procedure Node050 begin
    floater(random(400,405));
 end
+
+//begin killap's code
+procedure Node900
+begin
+   Reply(406);
+   NOption(221,slimbarter,004);
+end
+//end killap's code
 //xxxxxxxxxxxxxxxxxxxx

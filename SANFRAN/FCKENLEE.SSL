@@ -105,6 +105,7 @@ procedure Node038;
 procedure Node039;
 procedure Node040;
 procedure Node041;
+procedure Node89; //edit by killap
 
 procedure doGuardsMessage;
 procedure doGuardsAttack;
@@ -202,7 +203,7 @@ procedure critter_p_proc begin
    actions need to be taken by the critter based on previous combat, the critter will remember
    this as well. */
 
-   if ((local_var(LVAR_Hostile) != 0) and (obj_can_see_obj(self_obj,dude_obj))) then begin
+   if (((local_var(LVAR_Hostile) != 0) or (san_fran_flag(SF_SHI_ENEMY))) and (obj_can_see_obj(self_obj,dude_obj))) then begin //edit by killap - added (san_fran_flag(SF_SHI_ENEMY))
        set_local_var(LVAR_Hostile,1);
        self_attack_dude;
    end
@@ -234,15 +235,23 @@ end
 /* The dialog system is setup and prepares the player to talk to this NPC. Where To Go
    written by designers are placed in here. Additionally, Reactions are generated and
    stored which affects player interactions. */
-procedure talk_p_proc begin
+/*procedure talk_p_proc begin
    Evil_Critter:=0;
    Slavery_Tolerant:=SLAVE_INTOLERANT;
    Karma_Perception:=KARMA_PERCEPTION4;
-
+   
+   //display_msg("blah "+ (local_var(LVAR_reaction_level)));
+   //display_msg("blah " + (local_var(LVAR_reaction)));
    CheckKarma;
-
+   //display_msg("blah "+ (local_var(LVAR_reaction_level)));
+   //display_msg("blah " + (local_var(LVAR_reaction)));
    GetReaction;
-
+   //display_msg("blah "+ (local_var(LVAR_reaction_level)));
+   //display_msg("blah " + (local_var(LVAR_reaction)));
+   ReactToLevel;
+   //display_msg("blah " + (local_var(LVAR_reaction_level)));
+   //display_msg("blah " + (local_var(LVAR_reaction)));
+      
    if (local_var(LVAR_Pissed) == 0) then begin
       if (san_fran_flag(SF_SHI_ENEMY)) then begin
          start_gdialog(NAME,self_obj,4,-1,-1);
@@ -313,7 +322,88 @@ procedure talk_p_proc begin
    end
 
    set_local_var(LVAR_Herebefore, 1);
-end
+end*/
+
+//new code by killap
+procedure talk_p_proc begin
+   Evil_Critter:=0;
+   Slavery_Tolerant:=SLAVE_INTOLERANT;
+   Karma_Perception:=KARMA_PERCEPTION4;
+
+   CheckKarma;
+
+   GetReaction;
+   
+   ReactToLevel;
+
+   if (local_var(LVAR_Pissed) == 0) then begin
+      if (san_fran_flag(SF_SHI_ENEMY)) then begin
+         call Node026;
+      end else if (local_var(LVAR_State) == STATE_INSULTED) then begin
+         call Node036;
+      end else if (local_var(LVAR_State) == STATE_NONAME) then begin
+         start_gdialog(NAME,self_obj,4,-1,-1);
+         gSay_Start;
+            call Node037;
+         gSay_End;
+         end_dialogue;
+      end else if (san_fran_flag(SF_OZ9_DEAD) and /*not san_fran_flag(SF_LEE_OK_FUEL_TANKER) and*/ not (SHI_WANT_PLANS) and dude_iq > 3) then begin
+         start_gdialog(NAME,self_obj,4,-1,-1);
+         gSay_Start;
+            call Node030;
+         gSay_End;
+         end_dialogue;
+      end else if (struggle_flag(STRUG_SHIRECRUIT)) then begin
+         call Node038;
+      end else if (elron_whirly(EL_WH_GIVEN) and shi_whirly(SH_WH_ACCEPTED)) then begin
+         start_gdialog(NAME,self_obj,4,-1,-1);
+         gSay_Start;
+            call Node033;
+         gSay_End;
+         end_dialogue;
+      end else if (shi_whirly(SH_WH_GIVEN)) then begin
+         start_gdialog(NAME,self_obj,4,-1,-1);
+         gSay_Start;
+            call Node034;
+         gSay_End;
+         end_dialogue;
+      end else if (shi_whirly(SH_WH_ACCEPTED) or shi_whirly(SH_WH_STEALELE)) then begin
+         start_gdialog(NAME,self_obj,4,-1,-1);
+         gSay_Start;
+            call Node035;
+         gSay_End;
+         end_dialogue;
+      end else if (shi_whirly(SH_WH_REJECTED)) then begin
+         start_gdialog(NAME,self_obj,4,-1,-1);
+         gSay_Start;
+            call Node018;
+         gSay_End;
+         end_dialogue;
+      end else begin
+         start_gdialog(NAME,self_obj,4,-1,-1);
+         gSay_Start;
+            call Node001;
+         gSay_End;
+         end_dialogue;
+      end
+   end else begin
+      call doGuardsMessage;
+   end
+
+   if (callGuards == 1) then begin
+      callGuards := 0;
+      set_local_var(LVAR_Pissed, 1);
+      add_timer_event(self_obj, 0, TIMER_CHECK_DIST);
+   end
+
+   if (turnFieldOff == 1) then begin
+      turnFieldOff := 0;
+      set_san_fran_flag(SF_EMPEROR_FIELD_OFF);
+   end
+
+   set_local_var(LVAR_Herebefore, 1);
+end 
+//end
 
 /* This procedure gets called only on the death of this NPC. Special things like
    incrementing the death count for reputation purposes and Enemy Counters are placed
@@ -384,7 +474,11 @@ procedure SpeechCheck begin
 end
 
 procedure Node2539 begin
-   if (san_fran_flag(SF_OZ9_DEAD)) then begin
+   //moved here by killap
+   if (san_fran_flag(SF_GAS_ELRONS)) then begin
+      call Node040;
+   //end move
+   end else if (san_fran_flag(SF_OZ9_DEAD)) then begin
       call Node025;
    end else if (SpeechCheck) then begin
       call Node025;
@@ -395,9 +489,10 @@ procedure Node2539 begin
 end
 
 procedure Node203108 begin
-   if (GASDONE) then
+   //if (GASDONE) then
+   /*if (san_fran_flag(SF_GAS_ELRONS)) then //edit by killap
       call Node040;
-   else if (shi_whirly(SH_WH_REJECTED)) then
+   else */if (shi_whirly(SH_WH_REJECTED)) then
       call Node018;
    else if (shi_whirly(SH_WH_ACCEPTED) or shi_whirly(SH_WH_STEALELE)) then
       call Node041;
@@ -406,10 +501,10 @@ procedure Node203108 begin
    else if (san_fran_flag(SF_OZ9_DEAD)) then
       call Node031;
    else
-      call Node008;
+      call Node89; //edit by killap - was Node008
 end
 
-procedure Node001 begin
+/*procedure Node001 begin
    if (good_critter_reaction) then begin
       Reply(103);
    end else if (neutral_critter_reaction) then begin
@@ -418,11 +513,12 @@ procedure Node001 begin
       Reply(104); // bad or horrible
    end
 
-   NLowOption(106, Node234, 4);
+   NLowOption(106, Node234); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
    if (local_var(LVAR_N5_cnt) == 0) then
       NOption(107, Node005, 4);
    NOption(108, Node006, 4);
-   if (Fallout2_tribe_kidnapped) then
+   //if (Fallout2_tribe_kidnapped) then
+   if ((f2_flag_any >= f2_state_tribe_kidnapped) and (f2_flag_any < f2_state_enclave_destroyed)) then //edit by killap
       NOption(109, Node019, 4);
    if (tanker_flag(TANK_KNOWN) and not local_var(LVAR_Speech_Failed)) then
       NOption(110, Node2539, 4);
@@ -431,27 +527,55 @@ procedure Node001 begin
    if (struggle_flag(STRUG_ELRECRUIT)) then
       NOption(112, Node027, 4);
    NOption(113, Node999, 4);
-end
+end*/
+
+//new code by killap
+procedure Node001 begin
+   if (good_critter_reaction) then begin
+      Reply(103);
+   end else if (neutral_critter_reaction) then begin
+      Reply(105);
+   end else begin
+      Reply(104); // bad or horrible
+   end
+   NLowOption(106, Node234, 4);
+   if (local_var(LVAR_N5_cnt) == 0 and not san_fran_flag(SF_LEE_OK_FUEL_TANKER)) then
+      NOption(107, Node005, 4);
+   NOption(108, Node006, 4);
+   if ((f2_flag_any >= f2_state_tribe_kidnapped) and (f2_flag_any < f2_state_enclave_destroyed)) then //edit by killap
+      NOption(109, Node019, 4);
+   if (tanker_flag(TANK_KNOWN) and not local_var(LVAR_Speech_Failed)) then
+      NOption(110, Node2539, 4);
+   if (local_var(LVAR_Herebefore) != 0 and not san_fran_flag(SF_LEE_OK_FUEL_TANKER)) then
+      NOption(111, Node203108, 4);
+   if (struggle_flag(STRUG_ELRECRUIT)) then
+      NOption(112, Node027, 4);
+   NOption(113, Node999, 4);
+end 
+//end
 
 procedure Node002 begin
    turnFieldOff := 1;
    set_san_fran_flag(SF_LEE_OK_FUEL_TANKER);
    Reply(114);
-   NOption(115, NOde999, 1);
+   NLowOption(115, Node999); //edit by killap
+   //NOption(115, NOde999, 1);
 end
 
 procedure Node003 begin
    Reply(116);
-   NOption(117, Node999, 1);
+   NLowOption(117, Node999); //edit by killap
+   //NOption(117, Node999, 1);
 end
 
 procedure Node004 begin
    Reply(118);
-   NOption(119, Node999, 1);
+   NLowOption(119, Node999); //edit by killap
+   //NOption(119, Node999, 1);
 end
 
 procedure Node89 begin
-   if ((neutral_critter_reaction or good_critter_reaction) and check_general_rep >= KARMA_BETRAYER) then
+   if ((neutral_critter_reaction or good_critter_reaction) and ( (check_general_rep >= KARMA_BETRAYER) or (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)) ) ) then //edit by killap - added (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       call Node008;
    else
       call Node009;
@@ -482,7 +606,7 @@ end
 
 procedure Node007 begin
    Reply(130);
-   NOption(mstr(131) +  " " + dude_name + mstr(212), Node008, 4);
+   NOption(mstr(131) +  " " + dude_name + mstr(212), Node89, 4); //edit by killap - was Node008
    if (dude_is_pornstar) then
       GOption(mstr(132) + " " + porn_star_name + mstr(212), Node014a, 4);
    NOption(133, Node015, 4);
@@ -513,7 +637,14 @@ procedure Node010 begin
 end
 
 procedure Node011 begin
-   Reply(143);
+   //added by killap
+   if (san_fran_flag(SF_OZ9_DEAD) /*or (shi_whirly(SH_WH_GIVEN)) */ or san_fran_flag(SF_LEE_OK_FUEL_TANKER)) then begin
+      Reply(1430);
+      NOption(198, Node032, 4);
+   //end
+   end else begin
+      Reply(143);
+   end
    NOption(144, Node001, 4);
    NOption(145, Node999, 4);
 end
@@ -538,7 +669,7 @@ end
 procedure Node014 begin
    Reply(152);
    BOption(153, Node016a, 4);
-   NOption(mstr(154) + " " + dude_name + mstr(212), Node008, 4);
+   NOption(mstr(154) + " " + dude_name + mstr(212), Node89, 4); //edit by killap - was Node008
    BOption(155, Node010, 4);
 end
 
@@ -550,7 +681,7 @@ end
 
 procedure Node016 begin
    Reply(158);
-   NOption(mstr(159) + " " + dude_name + mstr(212), Node008, 4);
+   NOption(mstr(159) + " " + dude_name + mstr(212), Node89, 4); //edit by killap - was Node008
    NOption(160, Node015, 4);
 end
 
@@ -633,8 +764,10 @@ procedure Node024 begin
 end
 
 procedure Node025 begin
+   turnFieldOff := 1; //added by killap
    set_san_fran_flag(SF_LEE_OK_FUEL_TANKER);
    Reply(183);
+   NOption(198, Node032, 4); //added by killap
    NOption(184, Node999, 4);
 end
 
@@ -666,13 +799,23 @@ procedure Node029 begin
    NOption(193, Node998, 4);
 end
 
-procedure Node030 begin
+/*procedure Node030 begin
    set_struggle_flag(STRUG_DONE);
    COMPLETE_KILL_OZ9_QST
    Reply(194);
    NOption(195, Node031, 4);
 //   NOption(196, Node001, 4);
-end
+end*/
+
+//new code by killap
+procedure Node030 begin
+   set_struggle_flag(STRUG_DONE);
+   COMPLETE_KILL_OZ9_QST
+   Reply(194);
+   NOption(195, Node031, 4);
+   NOption(196, Node001, 4); // Uncommented this line since Node001 is "fixed"
+end 
+//end
 
 procedure Node031 begin
    turnFieldOff := 1;
@@ -684,7 +827,11 @@ end
 
 procedure Node032 begin
    Reply(200);
-   NOption(201, Node999, 4);
+   //if (Fallout2_tribe_kidnapped) then //added by killap
+   if ((f2_flag_any >= f2_state_tribe_kidnapped) and (f2_flag_any < f2_state_enclave_destroyed)) then //edit by killap
+      NOption(2001, Node999, 4); //added by killap
+   else
+      NOption(201, Node999, 4);
 end
 
 procedure Node999b begin
@@ -729,7 +876,7 @@ end
 
 procedure Node008a begin
    set_local_var(LVAR_State, 0);
-   call Node008;
+   call Node89; //edit by killap - was Node008
 end
 
 procedure Node037 begin

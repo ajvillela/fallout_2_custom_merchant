@@ -103,7 +103,8 @@ procedure Set_Lockpick_Lock;
 procedure Set_Trap;
 procedure Pry_Door;
 procedure Damage_Critter;
-
+procedure Super_Lockpick_Lock; //added by killap
+procedure Super_Set_Lockpick_Lock; //added by killap
 
 /*****************************************************************
    Local Variables which are saved. All Local Variables need to be
@@ -279,15 +280,23 @@ procedure use_skill_on_p_proc begin
    Skill_Used:=action_being_used;
 
    if (Skill_Used == SKILL_LOCKPICK) then begin
+       script_overrides; //added by killap
        if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
-           call Unlock_Lock;
+            script_overrides;
+            display_msg(message_str(SCRIPT_DOOR, 503)); //added by killap
+            //display_msg(mstr(203));
+           //call Unlock_Lock; //comment out by killap
        end
        else begin
-           call Set_Lock;
+           //call Set_Lock;
+            script_overrides; //comment out by killap
+            display_msg(message_str(SCRIPT_DOOR, 503)); //added by killap
+            //display_msg(mstr(320));
        end
    end                                                          // End of Skill_Lockpick
 
    else if (Skill_Used == SKILL_TRAPS) then begin
+       script_overrides; //added by killap
        if (local_var(LVAR_Trapped) == STATE_ACTIVE) then begin
          display_msg(mstr(500));
        end
@@ -329,6 +338,24 @@ procedure use_obj_on_p_proc begin
       obj_open(self_obj);
       reg_anim_end();
    end
+   
+   else if (Tool == PID_ELECTRONIC_LOCKPICKS) then begin
+      script_overrides; //added by killap
+      if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
+         call Lockpick_Lock;
+      end else begin
+         call Set_Lockpick_Lock;
+      end
+   end else if (Tool == PID_ELEC_LOCKPICK_MKII) then begin
+      script_overrides; //added by killap
+      if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
+         call Super_Lockpick_Lock;
+      end
+      else begin
+         call Super_Set_Lockpick_Lock;
+      end
+   end
+   
 end
 
 
@@ -1223,8 +1250,16 @@ end
 
 procedure Lockpick_Door begin
    if (is_success(Locks_Roll)) then begin
-       set_local_var(LVAR_Locked, STATE_INACTIVE);              // Door is unlocked
-       obj_unlock(self_obj);                                    // engine unlock door
+       
+       //added by killap
+       obj_unlock(self_obj);
+       set_local_var(LVAR_Locked, STATE_INACTIVE);
+       set_local_var(LVAR_Trapped, STATE_INACTIVE);
+       orV15Status(V15_DOORS_UNLOCKED);
+       //end added
+       
+       //set_local_var(LVAR_Locked, STATE_INACTIVE);              // Door is unlocked
+       //obj_unlock(self_obj);                                    // engine unlock door
 
        if (source_obj == dude_obj) then begin
            display_msg(mstr(170));
@@ -1424,4 +1459,23 @@ procedure Damage_Critter begin
 /* The trap is now disarmed and should never go off again.                           */
 // Wrong not on this door.
 //   set_local_var(LVAR_Trapped, STATE_INACTIVE);
+end
+
+
+
+procedure Super_Lockpick_Lock begin
+/* Locks_Roll is a global variable to this script, defined at the beginning
+   of the script. */
+   Locks_Roll:=roll_vs_skill(source_obj,SKILL_LOCKPICK,Lockpick_Bonus);
+
+   call Lockpick_Door;
+end
+
+procedure Super_Set_Lockpick_Lock begin
+/* Locks_Roll is a global variable to this script, defined at the beginning
+   of the script. */
+
+   Locks_Roll:=roll_vs_skill(source_obj,SKILL_LOCKPICK,Lockpick_Bonus);
+
+   call Lock_Door;
 end

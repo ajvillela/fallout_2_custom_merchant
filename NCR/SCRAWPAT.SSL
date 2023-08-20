@@ -208,6 +208,8 @@ procedure talk_p_proc begin
    CheckKarma;
 
    GetReaction;
+   
+   ReactToLevel; //added by killap
 
    if (bad_critter_reaction) then
       call Node001; //Flipped them because the message content didn't really fit and these guys are bad

@@ -94,6 +94,7 @@
 #define NCR_GENERATOR_COUNT    bit_5
 #define NCR_SLAVES_FREE        bit_6
 #define NCR_CRAPS_KNOWN        bit_7
+#define NCR_OSWALD_DEAD        bit_8
 
 #define ncr_global_state(x)     (global_var(GVAR_NCR_GENERIC_STATE) bwand x)
 #define ncr_set_global_state(x) set_global_var(GVAR_NCR_GENERIC_STATE, global_var(GVAR_NCR_GENERIC_STATE) bwor x)
@@ -130,9 +131,10 @@
 #define set_elise_seed(x) set_global_var(GVAR_NCR_ELISE_SEED, x)
 
 //Karl stuff
-#define FRONT_OF_DOOR 15691
-#define HOME_POS      15897
-
+//#define FRONT_OF_DOOR 15691
+#define FRONT_OF_DOOR 16291
+//#define HOME_POS      15897
+#define HOME_POS      16697
 
 //Dusty and his bar stuff
 
@@ -176,6 +178,8 @@
 #define CATTLE_AVERAGE  bit_8
 #define CATTLE_SUCCESS  bit_9
 #define CATTLE_ON1      bit_10
+#define CATTLE_ABANDON  bit_11
+#define HAL_DEAD  bit_12
 
 #define cattle_drive(x) (gvar_bit(GVAR_NCR_CATTLE_DRIVE, x))
 #define set_cattle_drive(x) set_gvar_bit_on(GVAR_NCR_CATTLE_DRIVE, x)
@@ -312,11 +316,18 @@
 */
 
 //Mira
-#define MJOBTAKEN         1
+/*#define MJOBTAKEN         1
 #define MJOBJACKEDWHACKED 2
 #define MJOBDONE          3
 #define MJACKTALK         4
 #define MJACKDEAD         5
+#define HKP90C_PID        PID_HK_P90C*/
+
+#define MJACKTALK         1
+#define MJACKDEAD         2
+#define MJOBTAKEN         3
+#define MJOBJACKEDWHACKED 4
+#define MJOBDONE          5
 #define HKP90C_PID        PID_HK_P90C
 
 //Merk stuff
@@ -330,9 +341,13 @@
 #define MERK_BAZAAR_POS         22154
 #define MERK_CARLSON_POS        18551
 #define MERK_HOME_POS           16337
-#define MERK_ENTER_BAZAAR_MAP   29133
+//#define MERK_ENTER_BAZAAR_MAP   29133
+#define MERK_ENTER_BAZAAR_MAP   30134
 #define MERK_ENTER_COUNCIL_MAP  14096
 #define MERK_ENTER_COUNCIL_WAY1 19508
+#define MERK_ENTER_COUNCIL_WAY2 19518
+
+
 
 #define MERK_STATUS_DEAD         1
 #define MERK_STATUS_MET          2
@@ -374,13 +389,16 @@
 //Stuff for Votris
 #define VOR_ESCORT_OUT_TILE 11529
 
-#define VORTISOFFICEPLACE   10518
-#define VORTISBEDPLACE      10507
+#define VORTISOFFICEPLACE   10518 //edit by killap - was 10507
+#define VORTISBEDPLACE      10510 //edit by killap - was 10507
 #define VORTISBEDDIR        4
 #define VORTISOFFICEDIR     3
 
 #define VORTIS_QUEST_ACCEPTED 1
 #define VORTIS_QUEST_DONE     2
+
+#define VORTIS_QUEST2_ACCEPTED  3
+#define VORTIS_QUEST2_DONE      4
 
 #define VORTIS_GREP_THRESH   80
     //Used to define when vortis will think you are a goodie too shoes.

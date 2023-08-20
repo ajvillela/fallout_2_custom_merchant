@@ -87,6 +87,12 @@ procedure Node021;
 procedure Node022;
 procedure Node023;
 procedure Node024;
+//added by killap - expansion (K9 armor)
+procedure Node030;
+procedure Node031;
+procedure Node032;
+//end added
+
 
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
@@ -102,6 +108,7 @@ procedure Node024;
 #define LVAR_Down_React_2               (8)
 #define LVAR_Steal_Warning              (9)
 #define LVAR_Basement_Warning           (10)
+#define LVAR_Sold_K9_Armor              (11) //added by killap - expansion (k9 armor)
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -163,17 +170,31 @@ procedure critter_p_proc begin
        attack(dude_obj);
    end
 
+
+         
+         
+
    // Move Liz at the appropriate times.
    time := game_time_hour;
-   if( (time >= 800) and (time < 2000) and (tile_num(self_obj) != 12718) ) then begin
+   if( (time >= 800) and (time < 2000)) then begin
       // Go to work.
-      reg_anim_obj_move_to_tile( self_obj, 12718, -1 );
-      animate_rotation( 1 );
+      //added by killap
+      reg_anim_begin();
+         animate_move_to_tile(12718);
+      reg_anim_end();
+      //end added by killap
+      //reg_anim_obj_move_to_tile( self_obj, 12718, -1 );
+      //animate_rotation( 1 );
    end
-   else if(tile_num(self_obj) != 11316) then begin
+   else begin
       // Go to bed.
-      reg_anim_obj_move_to_tile( self_obj, 11316, -1 );
-      animate_rotation( 3 );
+      //added by killap
+      reg_anim_begin();
+         animate_move_to_tile(11316);
+      reg_anim_end();
+      //end added by killap
+      //reg_anim_obj_move_to_tile( self_obj, 11316, -1 );
+      //animate_rotation( 3 );
    end
 
    if( map_var( MVAR_Stealing_From_Liz ) == 1 ) then begin
@@ -197,7 +218,7 @@ procedure critter_p_proc begin
 
    if( map_var(MVAR_Player_Tried_Basement) == 1 ) then begin
       set_map_var( MVAR_Player_Tried_Basement, 0 );
-      if( map_var( MVAR_Basement_Permission ) == 0 )then begin
+      if( ( map_var( MVAR_Basement_Permission ) == 0 ) or (map_var( MVAR_Basement_Permission ) == 2) )then begin //edit by killap - added or (map_var( MVAR_Basement_Permission ) == 2)
          if( local_var(LVAR_Basement_Warning) == 0 ) then begin
             set_local_var(LVAR_Basement_Warning, 1);
             floater(179);
@@ -248,12 +269,13 @@ procedure talk_p_proc begin
    From_WTG := 1;
 
    GetReaction;
-
-   if ( not(bad_critter_reaction) ) then begin
+   ReactToLevel; //added by killap
+   
+   //if ( not(bad_critter_reaction) ) then begin -- comment out by killap
       do_replace := 1;
       move_inven_to_temp_box
       move_inven_from_box
-   end
+   //end
 
    if (local_var(LVAR_Personal_Enemy) == 1) then begin
        call Node998;
@@ -303,7 +325,7 @@ end
 procedure destroy_p_proc begin
 
 /* Increment the aligned critter counter*/
-   move_obj_inven_to_obj(broken_hills_liz_box,self_obj);
+   //move_obj_inven_to_obj(broken_hills_liz_box,self_obj); --comment out by killap
    set_map_var( MVAR_Liz_Dead, 1 );
 
    inc_good_critter
@@ -374,7 +396,7 @@ end
    he was once hostile towards the player.*/
 procedure Node998 begin
    set_local_var(LVAR_Hostile,2);
-   attack( dude_obj );
+   // attack( dude_obj ); // Commented out by Seraph
 end
 
 /* Anytime that there is a need for an ending to dialog, this node is to be called. It will just
@@ -386,7 +408,7 @@ end
 // The Following lines are from the Design Tool
 //~~~~~~~~~~~~~~~~ DESIGN TOOL STARTS HERE
 
-procedure Node001 begin
+/*procedure Node001 begin
    if( (From_WTG == 1) and (local_var(LVAR_Herebefore) == 1) ) then begin
       // Only display this Reply if we have already met Liz.
       From_WTG := 0;
@@ -405,16 +427,56 @@ procedure Node001 begin
       NOption(106,Node003,002);
    NOption(107,Node007,004);
    NOption(108,Node008,004);
+   if (check_general_rep <= -250) then
+      NOption(109,Node009,004);
+   if ( ( map_var(MVAR_Know_Liz_Guns) == 1 ) and ( map_var( MVAR_Basement_Permission ) == 0 ) ) then
+      NOption(110,Node010,004);
+   //if (global_var(GVAR_BH_JAIL) == JAIL_ENLISTED) then
+//      NOption(111,Node010,004);
+
+   //added by killap - expansion (k9 armor)
+   if (local_var(LVAR_Sold_K9_Armor) == 0) then
+      NOption(200,Node030,004);
+   //end
+
+   NOption(112,Node999,004);
+end*/
+
+
+
+procedure Node001 begin
+   if( local_var(LVAR_Herebefore) == 1 ) then begin
+      // Only display this Reply if we have already met Liz.
+      Reply(104);
+   end
+   else begin
+      set_local_var( LVAR_Herebefore, 1 );
+      Reply(103);
+   end
+
+   if( dude_iq == 1 ) then
+      NOption(105, Node002, 001);
+   if( ( dude_iq == 2 ) or ( dude_iq == 3 ) ) then
+      NOption(106,Node003,002);
+   NOption(107,Node007,004);
+   NOption(108,Node008,004);
    if ( check_general_rep <= -250) then
       NOption(109,Node009,004);
    if ( ( map_var(MVAR_Know_Liz_Guns) == 1 ) and ( map_var( MVAR_Basement_Permission ) == 0 ) ) then
       NOption(110,Node010,004);
    //if (global_var(GVAR_BH_JAIL) == JAIL_ENLISTED) then
 //      NOption(111,Node010,004);
+
+   //added by killap - expansion (k9 armor)
+   if (local_var(LVAR_Sold_K9_Armor) == 0) then
+      NOption(200,Node030,004);
+   //end
+
    NOption(112,Node999,004);
 end
 
 procedure Node002 begin
+   move_obj_inven_to_obj(self_obj, broken_hills_liz_box); //added by killap
    Reply(113);
    NLowOption(114,Node999);
 end
@@ -552,8 +614,12 @@ procedure Node014 begin
 end
 
 procedure Node015 begin
+   /* Commented out by Seraph
    NMessage(155);
-   call Node998;
+   call Node998; */
+   move_obj_inven_to_obj(self_obj, broken_hills_liz_box); //added by killap
+   Reply(155);               // Seraph's Code
+   BOption(156,Node998,004); // Seraph's Code
 end
 
 procedure Node016 begin
@@ -562,6 +628,7 @@ procedure Node016 begin
 end
 
 procedure Node016a begin
+   move_obj_inven_to_obj(self_obj, broken_hills_liz_box); //added by killap
    if( local_var(LVAR_Down_React_2) == 0 ) then begin
       set_local_var( LVAR_Down_React_2, 1 );
       DownReactMinor;
@@ -599,6 +666,7 @@ procedure Node021 begin
 end
 
 procedure Node022 begin
+   move_obj_inven_to_obj(self_obj, broken_hills_liz_box); //added by killap
    From_WTG := 0;
 
    BMessage(171);
@@ -610,9 +678,52 @@ procedure Node023 begin
 end
 
 procedure Node024 begin
+   move_obj_inven_to_obj(self_obj, broken_hills_liz_box); //added by killap
    set_map_var(MVAR_Basement_Permission, 2);
    BMessage(178);
    call Node998;
 end
 
+//added by killap - expansion (k9 armor)
+procedure Node030 begin
+  if (Dogmeat_In_Party) then begin
+    Reply(201);
+    //op_gsay_reply(597, 201);
+    NOption(202,Node031,004);
+    NOption(203,Node007,004);
+    //op_giq_option(4, 597, 202, @Node031, 50);
+    //op_giq_option(4, 597, 203, @Node007, 50);
+  end else begin
+    //op_gsay_reply(597, 204);
+    Reply(204);
+    NOption(205,Node007,004);
+    //op_giq_option(4, 597, 205, @Node007, 50);
+  end
+end
+
+procedure Node031 begin
+   variable armor;
+   if (dude_caps > 1999) then begin
+    set_local_var(LVAR_Sold_K9_Armor,1);
+    item_caps_adjust(dude_obj, -2000);
+    //op_item_caps_adjust(op_dude_obj(), -2000);
+    //op_item_caps_adjust(op_self_obj(), 2000);
+    armor:=create_object(PID_K9_KEVLAR,0,0);
+    add_obj_to_inven(dude_obj,armor);
+    //op_add_obj_to_inven(op_dude_obj(), op_create_object(571, op_tile_num(op_dude_obj()), 0, -1));
+    call Node999;
+   end else begin
+    call Node032;
+   end
+end
+
+procedure Node032 begin
+  Reply(206);
+  //op_gsay_reply(597, 206);
+  NOption(207,Node006,004);
+  NOption(208,Node999,004);
+  //op_giq_option(4, 597, 207, @Node006, 50);
+  //op_giq_option(4, 597, 208, @Node999, 50);
+end
+//end
 //xxxxxxxxxxxxxxxxxxxx

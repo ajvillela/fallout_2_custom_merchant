@@ -352,6 +352,7 @@ procedure Node005 begin
 end
 
 procedure Node006 begin
+   set_global_var(GVAR_V13_GORIS_QST, 1);  //added by killap
    Reply(139);
    NLowOption(140, Node003);
    NLowOption(141, Node999);

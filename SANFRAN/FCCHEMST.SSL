@@ -79,6 +79,7 @@ procedure Node019;
 procedure Node020;
 procedure Node021;
 procedure Node022;
+procedure doCallGuards; // added by killap
 
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
@@ -125,7 +126,11 @@ procedure critter_p_proc begin
    actions need to be taken by the critter based on previous combat, the critter will remember
    this as well. */
 
-   if ((local_var(LVAR_Hostile) != 0) and (obj_can_see_obj(self_obj,dude_obj))) then begin
+   // added by killap
+   if ((san_fran_flag(SF_SHI_ENEMY)) and (local_var(LVAR_Hostile) == 0)) then begin
+      call Node017;
+   // end added
+   end else if ((local_var(LVAR_Hostile) != 0) and (obj_can_see_obj(self_obj,dude_obj))) then begin
        set_local_var(LVAR_Hostile,1);
        self_attack_dude;
    end
@@ -166,6 +171,8 @@ procedure talk_p_proc begin
    CheckKarma;
 
    GetReaction;
+   
+   ReactToLevel; //added by killap
 
    if (san_fran_flag(SF_SHI_ENEMY)) then begin
       call Node017;
@@ -175,12 +182,23 @@ procedure talk_p_proc begin
          call Node018;
       gSay_End;
       end_dialogue;
-   end else if ((armor_flag(ARMOR_KNOWN) or armor_flag(ARMOR_GOTTEN)) and dude_item(PID_HARDENED_POWER_ARMOR)) then begin
+   end else if ((armor_flag(ARMOR_KNOWN) or armor_flag(ARMOR_GOTTEN) or armor_flag(ARMOR_GOTTENPAID)) and dude_item(PID_HARDENED_POWER_ARMOR)) then begin //edit by killap - added ARMOR_GOTTENPAID
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
          call Node013;
       gSay_End;
       end_dialogue;
+   
+   //addded by killap   
+   end else if ( (armor_flag(ARMOR_GOTTEN)) or armor_flag(ARMOR_GOTTENPAID)) then begin
+      start_gdialog(NAME,self_obj,4,-1,-1);
+      gSay_Start;
+         call Node018;
+      gSay_End;
+      end_dialogue;
+   //end added
+      
+      
    end else if (armor_flag(ARMOR_SOLDFUELELRON) or armor_flag(ARMOR_SOLDFUELTANKER)) then begin
       call Node021;
    end else if (armor_flag(ARMOR_SOLDMONEY)) then begin
@@ -199,6 +217,13 @@ procedure talk_p_proc begin
       end_dialogue;
    end
    set_local_var(LVAR_Herebefore, 1);
+   
+   // added by killap
+   if (callGuards) then begin
+      callGuards := 0;
+      call doCallGuards;
+   end   
+   // end added
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -282,7 +307,7 @@ end
 
 procedure NodeGuards begin
    callGuards := 1;
-   call Node999;
+   call Node998; //edit by killap - was 999
 end
 
 procedure Node003 begin
@@ -390,7 +415,8 @@ procedure Node1014 begin
       set_armor_flag(ARMOR_SOLDFUELELRON);
       obj := dude_item(PID_HARDENED_POWER_ARMOR);
       rm_obj_from_inven(dude_obj, obj);
-      add_obj_to_inven(self_obj, obj);
+      //add_obj_to_inven(self_obj, obj);
+      destroy_object(obj); //added by killap
       call Node014;
    end
 end
@@ -418,7 +444,8 @@ procedure Node015a begin
    set_armor_flag(ARMOR_SOLDMONEY);
    obj := dude_item(PID_HARDENED_POWER_ARMOR);
    rm_obj_from_inven(dude_obj, obj);
-   add_obj_to_inven(self_obj, obj);
+   //add_obj_to_inven(self_obj, obj);
+   destroy_object(obj); //added by killap
    item_caps_adjust(dude_obj, 20000);
    call Node015;
 end
@@ -494,5 +521,11 @@ end
 procedure Node022 begin
    float_msg(self_obj, mstr(174), FLOAT_MSG_NORMAL);
 end
+
+//added by killap
+procedure doCallGuards begin
+   set_san_fran_flag(SF_SHI_ENEMY);
+end
+//end added
 
 //xxxxxxxxxxxxxxxxxxxx

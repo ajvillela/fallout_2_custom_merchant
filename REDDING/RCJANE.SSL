@@ -35,7 +35,7 @@
 #include "..\headers\ModReact.h"
 
 #define FIGHTER1_HEX            (21940)
-#define FIGHTER2_HEX            (21727)
+#define FIGHTER2_HEX            (21728) //edit by killap (expansion) - was 21727
 
 #define CAGE1_HEX               (21357)
 #define CAGE2_HEX               (22557)
@@ -127,6 +127,12 @@ procedure CheckNum(variable Rat_Fighter);
 #define LVAR_Rat_Name5                  (20)
 #define LVAR_Rat_Name6                  (21)
 #define LVAR_Line_Multiply              (22)
+#define LVAR_Tmp_Rat1                   (23)
+#define LVAR_Tmp_Rat2                   (24)
+#define LVAR_Tmp_Rat3                   (25)
+#define LVAR_Tmp_Rat4                   (26)
+#define LVAR_Tmp_Rat5                   (27)
+#define LVAR_Tmp_Rat6                   (28)
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -480,7 +486,7 @@ procedure Node016 begin
    if (item_caps_total(dude_obj) >= 100) then
        NOption(mstr(195)+mstr(Fighter2)+mstr(196),Node016b,004);
    BOption(197,Node016c,004);
-   NOption(198,Node016d,004);
+   NOption(198,Node999,004); //edit by killap - was 016d
 end
 
 procedure Node016a begin
@@ -493,31 +499,131 @@ procedure Node016a begin
    set_local_var(LVAR_Bet_On_Rat,map_var(MVAR_Rat_Fighter1));
    item_caps_adjust(dude_obj,-100);
 
-   if (map_var(MVAR_Rat_Fighter1) == 1) then
-       move_to(Molerat_Ptr1,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 2) then
-       move_to(Molerat_Ptr2,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 3) then
-       move_to(Molerat_Ptr3,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 4) then
-       move_to(Molerat_Ptr4,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 5) then
-       move_to(Molerat_Ptr5,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 6) then
-       move_to(Molerat_Ptr6,FIGHTER1_HEX,0);
-
-   if (map_var(MVAR_Rat_Fighter2) == 1) then
-       move_to(Molerat_Ptr1,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 2) then
-       move_to(Molerat_Ptr2,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 3) then
-       move_to(Molerat_Ptr3,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 4) then
-       move_to(Molerat_Ptr4,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 5) then
-       move_to(Molerat_Ptr5,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 6) then
-       move_to(Molerat_Ptr6,FIGHTER2_HEX,0);
+   if (map_var(MVAR_Rat_Fighter1) == 1) then begin
+       if ( tile_num( Molerat_Ptr1 ) != CAGE1_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat1,1);
+         Molerat_Ptr1:=create_object_sid(PID_FIGHTING_MOLERAT_1,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr1,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr1,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr1,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr1,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 2) then begin
+       if ( tile_num( Molerat_Ptr2 ) != CAGE2_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat2,1);
+         Molerat_Ptr2:=create_object_sid(PID_FIGHTING_MOLERAT_2,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr2,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr2,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr2,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr2,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 3) then begin
+       if ( tile_num( Molerat_Ptr3 ) != CAGE3_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat3,1);
+         Molerat_Ptr3:=create_object_sid(PID_FIGHTING_MOLERAT_3,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr3,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr3,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr3,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr3,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 4) then begin
+       if ( tile_num( Molerat_Ptr4 ) != CAGE4_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat4,1);
+         Molerat_Ptr4:=create_object_sid(PID_FIGHTING_MOLERAT_4,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr4,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr4,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr4,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr4,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 5) then begin
+       if ( tile_num( Molerat_Ptr5 ) != CAGE5_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat5,1);
+         Molerat_Ptr5:=create_object_sid(PID_FIGHTING_MOLERAT_5,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr5,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr5,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr5,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr5,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 6) then begin
+       if ( tile_num( Molerat_Ptr6 ) != CAGE6_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat6,1);
+         Molerat_Ptr6:=create_object_sid(PID_FIGHTING_MOLERAT_6,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr6,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr6,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr6,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr6,FIGHTER1_HEX,0);
+   end
+   
+   
+   if (map_var(MVAR_Rat_Fighter2) == 1) then begin
+       if ( tile_num( Molerat_Ptr1 ) != CAGE1_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat1,1);
+         Molerat_Ptr1:=create_object_sid(PID_FIGHTING_MOLERAT_1,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr1,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr1,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr1,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr1,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 2) then begin
+       if ( tile_num( Molerat_Ptr2 ) != CAGE2_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat2,1);
+         Molerat_Ptr2:=create_object_sid(PID_FIGHTING_MOLERAT_2,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr2,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr2,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr2,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr2,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 3) then begin
+       if ( tile_num( Molerat_Ptr3 ) != CAGE3_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat3,1);
+         Molerat_Ptr3:=create_object_sid(PID_FIGHTING_MOLERAT_3,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr3,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr3,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr3,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr3,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 4) then begin
+       if ( tile_num( Molerat_Ptr4 ) != CAGE4_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat4,1);
+         Molerat_Ptr4:=create_object_sid(PID_FIGHTING_MOLERAT_4,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr4,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr4,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr4,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr4,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 5) then begin
+       if ( tile_num( Molerat_Ptr5 ) != CAGE5_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat5,1);
+         Molerat_Ptr5:=create_object_sid(PID_FIGHTING_MOLERAT_5,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr5,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr5,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr5,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr5,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 6) then begin
+       if ( tile_num( Molerat_Ptr6 ) != CAGE6_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat6,1);
+         Molerat_Ptr6:=create_object_sid(PID_FIGHTING_MOLERAT_6,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr6,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr6,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr6,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr6,FIGHTER2_HEX,0);
+   end
+   
 end
 
 procedure Node016b begin
@@ -529,31 +635,130 @@ procedure Node016b begin
    set_local_var(LVAR_Bet_On_Rat,map_var(MVAR_Rat_Fighter2));
    item_caps_adjust(dude_obj,-100);
 
-   if (map_var(MVAR_Rat_Fighter1) == 1) then
-       move_to(Molerat_Ptr1,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 2) then
-       move_to(Molerat_Ptr2,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 3) then
-       move_to(Molerat_Ptr3,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 4) then
-       move_to(Molerat_Ptr4,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 5) then
-       move_to(Molerat_Ptr5,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 6) then
-       move_to(Molerat_Ptr6,FIGHTER1_HEX,0);
-
-   if (map_var(MVAR_Rat_Fighter2) == 1) then
-       move_to(Molerat_Ptr1,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 2) then
-       move_to(Molerat_Ptr2,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 3) then
-       move_to(Molerat_Ptr3,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 4) then
-       move_to(Molerat_Ptr4,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 5) then
-       move_to(Molerat_Ptr5,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 6) then
-       move_to(Molerat_Ptr6,FIGHTER2_HEX,0);
+   if (map_var(MVAR_Rat_Fighter1) == 1) then begin
+       if ( tile_num( Molerat_Ptr1 ) != CAGE1_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat1,1);
+         Molerat_Ptr1:=create_object_sid(PID_FIGHTING_MOLERAT_1,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr1,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr1,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr1,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr1,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 2) then begin
+       if ( tile_num( Molerat_Ptr2 ) != CAGE2_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat2,1);
+         Molerat_Ptr2:=create_object_sid(PID_FIGHTING_MOLERAT_2,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr2,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr2,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr2,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr2,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 3) then begin
+       if ( tile_num( Molerat_Ptr3 ) != CAGE3_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat3,1);
+         Molerat_Ptr3:=create_object_sid(PID_FIGHTING_MOLERAT_3,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr3,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr3,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr3,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr3,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 4) then begin
+       if ( tile_num( Molerat_Ptr4 ) != CAGE4_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat4,1);
+         Molerat_Ptr4:=create_object_sid(PID_FIGHTING_MOLERAT_4,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr4,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr4,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr4,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr4,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 5) then begin
+       if ( tile_num( Molerat_Ptr5 ) != CAGE5_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat5,1);
+         Molerat_Ptr5:=create_object_sid(PID_FIGHTING_MOLERAT_5,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr5,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr5,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr5,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr5,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 6) then begin
+       if ( tile_num( Molerat_Ptr6 ) != CAGE6_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat6,1);
+         Molerat_Ptr6:=create_object_sid(PID_FIGHTING_MOLERAT_6,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr6,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr6,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr6,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr6,FIGHTER1_HEX,0);
+   end
+   
+   
+   if (map_var(MVAR_Rat_Fighter2) == 1) then begin
+       if ( tile_num( Molerat_Ptr1 ) != CAGE1_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat1,1);
+         Molerat_Ptr1:=create_object_sid(PID_FIGHTING_MOLERAT_1,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr1,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr1,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr1,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr1,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 2) then begin
+       if ( tile_num( Molerat_Ptr2 ) != CAGE2_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat2,1);
+         Molerat_Ptr2:=create_object_sid(PID_FIGHTING_MOLERAT_2,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr2,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr2,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr2,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr2,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 3) then begin
+       if ( tile_num( Molerat_Ptr3 ) != CAGE3_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat3,1);
+         Molerat_Ptr3:=create_object_sid(PID_FIGHTING_MOLERAT_3,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr3,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr3,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr3,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr3,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 4) then begin
+       if ( tile_num( Molerat_Ptr4 ) != CAGE4_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat4,1);
+         Molerat_Ptr4:=create_object_sid(PID_FIGHTING_MOLERAT_4,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr4,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr4,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr4,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr4,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 5) then begin
+       if ( tile_num( Molerat_Ptr5 ) != CAGE5_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat5,1);
+         Molerat_Ptr5:=create_object_sid(PID_FIGHTING_MOLERAT_5,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr5,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr5,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr5,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr5,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 6) then begin
+       if ( tile_num( Molerat_Ptr6 ) != CAGE6_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat6,1);
+         Molerat_Ptr6:=create_object_sid(PID_FIGHTING_MOLERAT_6,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr6,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr6,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr6,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr6,FIGHTER2_HEX,0);
+   end
 end
 
 procedure Node016c begin
@@ -563,31 +768,130 @@ procedure Node016c begin
    game_time_advance(30*ONE_GAME_MINUTE);
    inc_local_var(LVAR_Current_Fight);
 
-   if (map_var(MVAR_Rat_Fighter1) == 1) then
-       move_to(Molerat_Ptr1,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 2) then
-       move_to(Molerat_Ptr2,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 3) then
-       move_to(Molerat_Ptr3,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 4) then
-       move_to(Molerat_Ptr4,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 5) then
-       move_to(Molerat_Ptr5,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 6) then
-       move_to(Molerat_Ptr6,FIGHTER1_HEX,0);
-
-   if (map_var(MVAR_Rat_Fighter2) == 1) then
-       move_to(Molerat_Ptr1,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 2) then
-       move_to(Molerat_Ptr2,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 3) then
-       move_to(Molerat_Ptr3,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 4) then
-       move_to(Molerat_Ptr4,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 5) then
-       move_to(Molerat_Ptr5,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 6) then
-       move_to(Molerat_Ptr6,FIGHTER2_HEX,0);
+   if (map_var(MVAR_Rat_Fighter1) == 1) then begin
+       if ( tile_num( Molerat_Ptr1 ) != CAGE1_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat1,1);
+         Molerat_Ptr1:=create_object_sid(PID_FIGHTING_MOLERAT_1,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr1,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr1,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr1,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr1,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 2) then begin
+       if ( tile_num( Molerat_Ptr2 ) != CAGE2_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat2,1);
+         Molerat_Ptr2:=create_object_sid(PID_FIGHTING_MOLERAT_2,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr2,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr2,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr2,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr2,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 3) then begin
+       if ( tile_num( Molerat_Ptr3 ) != CAGE3_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat3,1);
+         Molerat_Ptr3:=create_object_sid(PID_FIGHTING_MOLERAT_3,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr3,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr3,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr3,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr3,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 4) then begin
+       if ( tile_num( Molerat_Ptr4 ) != CAGE4_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat4,1);
+         Molerat_Ptr4:=create_object_sid(PID_FIGHTING_MOLERAT_4,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr4,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr4,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr4,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr4,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 5) then begin
+       if ( tile_num( Molerat_Ptr5 ) != CAGE5_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat5,1);
+         Molerat_Ptr5:=create_object_sid(PID_FIGHTING_MOLERAT_5,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr5,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr5,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr5,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr5,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 6) then begin
+       if ( tile_num( Molerat_Ptr6 ) != CAGE6_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat6,1);
+         Molerat_Ptr6:=create_object_sid(PID_FIGHTING_MOLERAT_6,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr6,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr6,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr6,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr6,FIGHTER1_HEX,0);
+   end
+   
+   
+   if (map_var(MVAR_Rat_Fighter2) == 1) then begin
+       if ( tile_num( Molerat_Ptr1 ) != CAGE1_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat1,1);
+         Molerat_Ptr1:=create_object_sid(PID_FIGHTING_MOLERAT_1,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr1,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr1,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr1,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr1,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 2) then begin
+       if ( tile_num( Molerat_Ptr2 ) != CAGE2_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat2,1);
+         Molerat_Ptr2:=create_object_sid(PID_FIGHTING_MOLERAT_2,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr2,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr2,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr2,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr2,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 3) then begin
+       if ( tile_num( Molerat_Ptr3 ) != CAGE3_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat3,1);
+         Molerat_Ptr3:=create_object_sid(PID_FIGHTING_MOLERAT_3,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr3,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr3,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr3,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr3,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 4) then begin
+       if ( tile_num( Molerat_Ptr4 ) != CAGE4_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat4,1);
+         Molerat_Ptr4:=create_object_sid(PID_FIGHTING_MOLERAT_4,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr4,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr4,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr4,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr4,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 5) then begin
+       if ( tile_num( Molerat_Ptr5 ) != CAGE5_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat5,1);
+         Molerat_Ptr5:=create_object_sid(PID_FIGHTING_MOLERAT_5,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr5,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr5,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr5,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr5,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 6) then begin
+       if ( tile_num( Molerat_Ptr6 ) != CAGE6_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat6,1);
+         Molerat_Ptr6:=create_object_sid(PID_FIGHTING_MOLERAT_6,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr6,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr6,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr6,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr6,FIGHTER2_HEX,0);
+   end
 end
 
 procedure Node016d begin
@@ -597,31 +901,130 @@ procedure Node016d begin
    game_time_advance(30*ONE_GAME_MINUTE);
    inc_local_var(LVAR_Current_Fight);
 
-   if (map_var(MVAR_Rat_Fighter1) == 1) then
-       move_to(Molerat_Ptr1,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 2) then
-       move_to(Molerat_Ptr2,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 3) then
-       move_to(Molerat_Ptr3,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 4) then
-       move_to(Molerat_Ptr4,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 5) then
-       move_to(Molerat_Ptr5,FIGHTER1_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter1) == 6) then
-       move_to(Molerat_Ptr6,FIGHTER1_HEX,0);
-
-   if (map_var(MVAR_Rat_Fighter2) == 1) then
-       move_to(Molerat_Ptr1,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 2) then
-       move_to(Molerat_Ptr2,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 3) then
-       move_to(Molerat_Ptr3,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 4) then
-       move_to(Molerat_Ptr4,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 5) then
-       move_to(Molerat_Ptr5,FIGHTER2_HEX,0);
-   else if (map_var(MVAR_Rat_Fighter2) == 6) then
-       move_to(Molerat_Ptr6,FIGHTER2_HEX,0);
+   if (map_var(MVAR_Rat_Fighter1) == 1) then begin
+       if ( tile_num( Molerat_Ptr1 ) != CAGE1_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat1,1);
+         Molerat_Ptr1:=create_object_sid(PID_FIGHTING_MOLERAT_1,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr1,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr1,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr1,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr1,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 2) then begin
+       if ( tile_num( Molerat_Ptr2 ) != CAGE2_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat2,1);
+         Molerat_Ptr2:=create_object_sid(PID_FIGHTING_MOLERAT_2,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr2,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr2,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr2,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr2,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 3) then begin
+       if ( tile_num( Molerat_Ptr3 ) != CAGE3_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat3,1);
+         Molerat_Ptr3:=create_object_sid(PID_FIGHTING_MOLERAT_3,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr3,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr3,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr3,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr3,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 4) then begin
+       if ( tile_num( Molerat_Ptr4 ) != CAGE4_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat4,1);
+         Molerat_Ptr4:=create_object_sid(PID_FIGHTING_MOLERAT_4,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr4,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr4,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr4,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr4,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 5) then begin
+       if ( tile_num( Molerat_Ptr5 ) != CAGE5_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat5,1);
+         Molerat_Ptr5:=create_object_sid(PID_FIGHTING_MOLERAT_5,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr5,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr5,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr5,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr5,FIGHTER1_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter1) == 6) then begin
+       if ( tile_num( Molerat_Ptr6 ) != CAGE6_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat6,1);
+         Molerat_Ptr6:=create_object_sid(PID_FIGHTING_MOLERAT_6,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr6,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr6,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr6,FIGHTER1_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr6,FIGHTER1_HEX,0);
+   end
+   
+   
+   if (map_var(MVAR_Rat_Fighter2) == 1) then begin
+       if ( tile_num( Molerat_Ptr1 ) != CAGE1_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat1,1);
+         Molerat_Ptr1:=create_object_sid(PID_FIGHTING_MOLERAT_1,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr1,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr1,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr1,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr1,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 2) then begin
+       if ( tile_num( Molerat_Ptr2 ) != CAGE2_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat2,1);
+         Molerat_Ptr2:=create_object_sid(PID_FIGHTING_MOLERAT_2,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr2,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr2,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr2,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr2,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 3) then begin
+       if ( tile_num( Molerat_Ptr3 ) != CAGE3_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat3,1);
+         Molerat_Ptr3:=create_object_sid(PID_FIGHTING_MOLERAT_3,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr3,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr3,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr3,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr3,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 4) then begin
+       if ( tile_num( Molerat_Ptr4 ) != CAGE4_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat4,1);
+         Molerat_Ptr4:=create_object_sid(PID_FIGHTING_MOLERAT_4,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr4,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr4,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr4,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr4,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 5) then begin
+       if ( tile_num( Molerat_Ptr5 ) != CAGE5_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat5,1);
+         Molerat_Ptr5:=create_object_sid(PID_FIGHTING_MOLERAT_5,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr5,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr5,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr5,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr5,FIGHTER2_HEX,0);
+   end else if (map_var(MVAR_Rat_Fighter2) == 6) then begin
+       if ( tile_num( Molerat_Ptr6 ) != CAGE6_HEX ) then begin
+         set_local_var(LVAR_Tmp_Rat6,1);
+         Molerat_Ptr6:=create_object_sid(PID_FIGHTING_MOLERAT_6,0,0,SCRIPT_RCFITRAT);
+         critter_add_trait(Molerat_Ptr6,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER);
+         critter_add_trait(Molerat_Ptr6,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_RAT);
+         move_to(Molerat_Ptr6,FIGHTER2_HEX,0);
+       end
+       else
+         move_to(Molerat_Ptr6,FIGHTER2_HEX,0);
+   end
 end
 
 procedure Node017 begin
@@ -651,7 +1054,9 @@ procedure Node019 begin
    Line:=random(1,6);
 
    debug_msg("Player bet on Rat "+local_var(LVAR_Bet_On_Rat));
-
+   
+//killa  
+if (local_var(LVAR_Tmp_Rat1) != 1) or (local_var(LVAR_Tmp_Rat2) != 1) or (local_var(LVAR_Tmp_Rat3) != 1) or (local_var(LVAR_Tmp_Rat4) != 1) or (local_var(LVAR_Tmp_Rat5) != 1) or (local_var(LVAR_Tmp_Rat6) != 1) then begin
    if (map_var(MVAR_Rat_Fighter1) != 0) then begin
        Fighter1:=300 + (10 * (map_var(MVAR_Rat_Fighter1)-1)) + local_var((map_var(MVAR_Rat_Fighter1)-1)+LVAR_Rat_Name1);
 //       Fighter1:=map_var(MVAR_Rat_Fighter1)+300;
@@ -664,7 +1069,8 @@ procedure Node019 begin
        call Move_Rat(MVAR_Rat_Fighter2);
        call Create_Rat(LVAR_Fighter1);
    end
-
+end
+//killa
 
    if (Line == 1) then
        Reply(mstr(208)+mstr(Fighter1)+mstr(209));
@@ -714,28 +1120,52 @@ end
 
 procedure Move_Rat(variable Combat1) begin
    if (map_var(Combat1) == 1) then begin
-       move_to(Molerat_Ptr1,CAGE1_HEX,0);
-       debug_msg("Move Rats Back");
+      if (local_var(LVAR_Tmp_Rat1) != 1) then begin
+         move_to(Molerat_Ptr1,CAGE1_HEX,0);
+         debug_msg("Move Rats Back");
+      end
+      else
+         destroy_object(Molerat_Ptr1);
    end
    else if (map_var(Combat1) == 2) then begin
+      if (local_var(LVAR_Tmp_Rat2) != 1) then begin
        move_to(Molerat_Ptr2,CAGE2_HEX,0);
        debug_msg("Move Rats Back");
+      end
+      else
+         destroy_object(Molerat_Ptr2);
    end
    else if (map_var(Combat1) == 3) then begin
-       move_to(Molerat_Ptr3,CAGE3_HEX,0);
-       debug_msg("Move Rats Back");
+      if (local_var(LVAR_Tmp_Rat3) != 1) then begin
+         move_to(Molerat_Ptr3,CAGE3_HEX,0);
+         debug_msg("Move Rats Back");
+      end
+      else
+         destroy_object(Molerat_Ptr3);
    end
    else if (map_var(Combat1) == 4) then begin
-       move_to(Molerat_Ptr4,CAGE4_HEX,0);
-       debug_msg("Move Rats Back");
+      if (local_var(LVAR_Tmp_Rat4) != 1) then begin
+         move_to(Molerat_Ptr4,CAGE4_HEX,0);
+         debug_msg("Move Rats Back");
+      end
+      else
+         destroy_object(Molerat_Ptr4);
    end
    else if (map_var(Combat1) == 5) then begin
-       move_to(Molerat_Ptr5,CAGE5_HEX,0);
-       debug_msg("Move Rats Back");
+      if (local_var(LVAR_Tmp_Rat5) != 1) then begin
+         move_to(Molerat_Ptr5,CAGE5_HEX,0);
+         debug_msg("Move Rats Back");
+      end
+      else
+         destroy_object(Molerat_Ptr5);
    end
    else if (map_var(Combat1) == 6) then begin
-       move_to(Molerat_Ptr6,CAGE6_HEX,0);
-       debug_msg("Move Rats Back");
+      if (local_var(LVAR_Tmp_Rat6) != 1) then begin
+         move_to(Molerat_Ptr6,CAGE6_HEX,0);
+         debug_msg("Move Rats Back");
+      end
+      else
+         destroy_object(Molerat_Ptr6);
    end
 end
 

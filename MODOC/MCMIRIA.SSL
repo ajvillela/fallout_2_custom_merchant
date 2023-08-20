@@ -23,6 +23,7 @@
 #define def_far_msg                          mstr(1006)
 
 #include "..\headers\define.h"
+#include "..\headers\NEWR1.h" //added by killap
 
 #define NAME                        SCRIPT_MCMIRIA
 #define TOWN_REP_VAR                GVAR_TOWN_REP_MODOC
@@ -110,10 +111,15 @@ procedure Node995;
 
 #define PARTY_NODE_X                      Node100
 
+// Begin Seraph's Code
+variable biff;
+variable gun;
+// End Seraph's Code
 variable did_node_11;
 variable did_node_12;
 variable did_node_14;
 import variable modoc_jo_obj;
+variable waiting := 0;
 
 procedure start begin
 end
@@ -143,7 +149,21 @@ procedure combat_p_proc begin
 end
 
 procedure timed_event_p_proc begin
-   if (fixed_param == param_clear_float) then begin
+   //added by killap
+   if (fixed_param == 900) then begin
+      if (self_visible) then begin
+         if (Miria_In_Party) then begin
+            if (Is_Crippled(self_obj)) then
+               floater(2000);
+            else if (get_critter_stat(self_obj, STAT_current_rad)) then 
+               floater(2001);
+            else if (get_poison(self_obj)) then
+               floater(2002);
+         end
+      end
+      add_timer_event(self_obj, random(25, 40), 900);
+   //end added by killap
+   end else if (fixed_param == param_clear_float) then begin
       float_msg(self_obj, " ", FLOAT_COLOR_NORMAL);
       float_msg(dude_obj, " ", FLOAT_COLOR_NORMAL);
       float_msg_clear(self_obj);
@@ -179,24 +199,48 @@ procedure map_update_p_proc begin
          end
       end
    end
+   //added by killap - needed for "hacky fix" for kitty drug... :(
+   if (waiting == 1) then begin
+      waiting := 0;
+   end
+   //end added  
 end
 
 procedure map_enter_p_proc begin
    party_member_map_enter;
-   if (local_var(LVAR_Home_Tile) == 0) then begin
-      set_local_var(LVAR_Home_Tile, self_tile);
-      critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_MODOC);
-   end else if (Miria_In_Party == false) then begin
+//   if (local_var(LVAR_Home_Tile) == 0) then begin   -comment out by killap
+//      set_local_var(LVAR_Home_Tile, self_tile);  -comment out by killap
+   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_MODOC);
+   /*end else */  //  -comment out by killap
+   //if (Miria_In_Party == false) then begin
+   if not(married_to_miria) then begin // edit by killap - party check doesn't always work when map loads
       if (cur_map_index == MAP_MODOC_MAINSTREET) then begin
-        critter_attempt_placement(self_obj, local_var(LVAR_Home_Tile), dude_elevation);
+         if (map_first_run) then
+            set_local_var(LVAR_Home_Tile, self_tile); //added by killap - moved from above
+         critter_attempt_placement(self_obj, local_var(LVAR_Home_Tile), dude_elevation);
       end
    end
+   
+   //added by killap
+   add_timer_event(self_obj, random(25, 40), 900);
 end
 
 procedure critter_p_proc begin
+   //added by killap
+   if ((cur_map_index == MAP_NEW_RENO_1) and (self_obj == party_member_obj(PID_MIRIA)) and (map_var(MVAR_Kitty_Drug) == party_member_obj(PID_MIRIA))) then begin 
+      set_map_var(MVAR_Kitty_Drug, 0);
+      waiting := 1;
+      if (get_critter_stat(self_obj, STAT_st) < 10) then begin
+         use_obj_on_obj(create_object_sid(PID_KITTY_SEX_DRUG_STRENGTH, 0, 0, -1), self_obj);
+      end
+   end 
+   //end added
+   
    if (Miria_In_Party) then begin
       if (dude_enemy_modoc == false) then begin
-         party_member_follow_dude
+         if (waiting != 1) then begin //check added by killap - needed for "hacky fix" for kitty drug... :(
+            party_member_follow_dude
+         end
       end else begin
          set_self_abandon_party;
       end
@@ -213,7 +257,7 @@ procedure critter_p_proc begin
             end
          end else if (stage_time_ready) then begin
             if (get_sub_stage == wedding_stage_what_response) then begin
-               floater_afraid(400);
+               floater_afraid(400 + (20*grisham_dead)); // Seraph's Fix: added (20*grisham_dead)
                dude_floater(401);
                set_next_stage_time(quick_stage_time)
                set_sub_stage(wedding_stage_grisham_response)
@@ -242,13 +286,14 @@ procedure critter_p_proc begin
       end
    end else if (is_staging_rape) then begin
       if (self_can_see_dude) then begin
-         if (stage_time_ready) then begin
+//         if (stage_time_ready) then begin  //comment out by killap
             if (get_sub_stage == rape_stage_help) then begin
-               floater_afraid(250 + (10*dude_is_female));
+               gfade_in(1);   //added by killap 
+               floater_afraid(250 + (10*dude_is_female) + (20*grisham_dead)); // Seraph's Fix: added (20*grisham_dead)
                set_next_stage_time(quick_stage_time)
                set_sub_stage(rape_stage_confront)
             end
-         end
+//         end //comment out by killap
       end
    end else begin
       if (self_can_see_dude) then begin
@@ -287,10 +332,11 @@ procedure pickup_p_proc begin
 end
 
 procedure talk_p_proc begin
+
    if (dude_enemy_modoc == false) then begin
       if (is_staging_wedding) then begin
          if (get_sub_stage == wedding_stage_grisham_response) then begin
-            floater_afraid(450);
+            floater_afraid(450 + (20*grisham_dead)); // Seraph's Fix: added (20*grisham_dead)
          end
       end else if (is_staging_rape) then begin
          floater_afraid(251);
@@ -323,6 +369,7 @@ procedure talk_p_proc begin
       call Node998;
       self_attack_dude;
    end
+
 end
 
 procedure destroy_p_proc begin
@@ -347,6 +394,15 @@ end
 procedure use_skill_on_p_proc begin
 end
 
+//added by killap
+procedure use_obj_on_p_proc begin
+   if ( (obj_pid(obj_being_used_with) == PID_MICRO_FUSION_CELL) or (obj_pid(obj_being_used_with) == PID_SMALL_ENERGY_CELL) ) then begin
+      script_overrides;
+      display_msg(g_mstr(20000));
+   end
+end
+//end added
+
 // dialog action functions
 procedure Node999 begin
   // do absolutely everything that pertains to nothing
@@ -355,10 +411,30 @@ procedure Node998 begin
    set_local_var(LVAR_Hostile,2);
 end
 procedure Node996 begin
-   setup_rape_stage
+// Begin Seraph's Code
+   if (grisham_dead) then begin
+      biff := create_object_sid(PID_GRISHAM, 28512, elevation(self_obj), SCRIPT_MCGRISHA);
+      gun := create_object(PID_SAWED_OFF_SHOTGUN, 0, 0);
+
+      add_obj_to_inven(biff, gun);
+      add_mult_objs_to_inven(biff, create_object(PID_SHOTGUN_SHELLS, 0, 0), 4);
+      wield_obj_critter(biff, gun);
+   end
+// End Seraph's Code */
+   setup_rape_stage;
    set_local_var(LVAR_Mode,mode_rape);
 end
 procedure Node995 begin
+// Begin Seraph's Code
+   if (grisham_dead) then begin
+      biff := create_object_sid(PID_GRISHAM, 28512, elevation(self_obj), SCRIPT_MCGRISHA);
+      gun := create_object(PID_SAWED_OFF_SHOTGUN, 0, 0);
+
+      add_obj_to_inven(biff, gun);
+      add_mult_objs_to_inven(biff, create_object(PID_SHOTGUN_SHELLS, 0, 0), 4);
+      wield_obj_critter(biff, gun);
+   end
+// End Seraph's Code */
    do_default_sex;
    setup_wedding_stage
 end

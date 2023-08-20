@@ -50,6 +50,7 @@ procedure map_enter_p_proc begin
        Dest_Car(CAR_GECKO_HEX,CAR_GECKO_ELEV)
    end
 */
+
    if (global_var(GVAR_GECKO_MELTDOWN) == 2) then begin
       if ( (GAME_TIME_IN_HOURS - global_var(GVAR_GECKO_TIMER_MELTDOWN))  > 24) then begin
          call ghost_town;
@@ -72,6 +73,9 @@ procedure ghost_town begin
       kill_critter_type(PID_BRAHMIN,KILL_DONT_LEAVE_BODY);
       kill_critter_type(PID_WEAK_BRAHMIN,KILL_DONT_LEAVE_BODY);
       kill_critter_type(PID_WILD_BRAHMIN,KILL_DONT_LEAVE_BODY);
+      kill_critter_type(PID_LUMPY,KILL_DONT_LEAVE_BODY); //added by killap
+      kill_critter_type(PID_DOG,KILL_DONT_LEAVE_BODY); //added by killap
+       
       if Lenny_In_Party then begin
          //do nothing
       end

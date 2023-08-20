@@ -83,11 +83,21 @@ procedure Node037;
 procedure Node038;
 procedure Node039;
 
+//added by killap - expansion
+procedure Node040;
+procedure Node041;
+procedure Node042;
+procedure Node043;
+procedure Node044;
+procedure Node045;
+//end added
+
 /* Local Variables which are saved. All Local Variables need to be
    prepended by LVAR_ */
 #define LVAR_Flags                        (4)
 #define LVAR_Home_Tile                    (5)
 #define LVAR_Home_Rotation                (6)
+#define LVAR_Attack_Tyler_Wait            (7) //added by killap - expansion
 
 #define node_1_bit                        bit_10
 #define node_2_bit                        bit_11
@@ -181,6 +191,39 @@ end
 procedure map_enter_p_proc begin
    gang_member_map_enter
    flush_add_timer_event_sec(self_obj, 1, timed_event_float);
+
+   if (cur_map_index == MAP_DEN_BUSINESS and gangwar(state_gangwar_in_fight)) then begin
+      call Node039;
+   end
+
+   //added by killap - expansion
+   if (cur_map_index == MAP_DEN_ENTRANCE) then begin 
+      if (gangwar(state_gangwar_in_fight)) then begin
+         set_obj_visibility(self_obj, true);
+      end else begin
+         set_obj_visibility(self_obj, false);
+      end    
+   end else if (cur_map_index == MAP_DEN_BUSINESS and at_party_fight) then begin
+      set_obj_visibility(self_obj, true);
+   end else begin
+      if ((gangwar(state_gangwar_2won)) or (gangwar(state_gangwar_in_fight))) then begin
+         set_obj_visibility(self_obj, false);
+      end else begin
+         set_obj_visibility(self_obj, true);
+      end  
+   end
+   
+   if ( (cur_map_index == MAP_DEN_RESIDENTIAL) and (gangwar(state_gangwar_2won)) ) then
+      destroy_object(self_obj);
+      
+   //added by killap --expansion
+   if (lara_dead) then
+      destroy_object(self_obj);
+   //end added 
+   
+   debug_msg("tyler count" + global_var(GVAR_DEN_GANG_1_COUNT));
+   debug_msg("lara count" + global_var(GVAR_DEN_GANG_2_COUNT));
+   
 end
 
 procedure map_exit_p_proc begin
@@ -192,6 +235,47 @@ end
 
 procedure critter_p_proc begin
    gang_critter_p_proc
+
+   //display_msg("lara gang count: " + (global_var(GVAR_DEN_GANG_2_COUNT)));
+  // display_msg("tyler gang count: " + (global_var(GVAR_DEN_GANG_1_COUNT)));
+   
+   //added by killap
+   if (cur_map_index == MAP_DEN_BUSINESS) then begin
+      if (gangwar(state_gangwar_in_fight)) then begin
+         // Player double crosses Lara and then double crosses Tyler - killap
+         if (tyler_dead) then begin
+            off_hostile;
+            set_den_flag_off(gang_2_hostile_bit, 3);
+            set_global_var(GVAR_DEN_GANG_TRAP, 0);
+            set_gangwar(state_gangwar_2won);        
+         end
+         // end added
+         else if (church_cleared_speech == false) then begin
+            if (global_var(gang_1) <= 4) then begin
+               if (not combat_is_initialized) then begin
+                  terminate_combat;
+               end
+               start_dialog_at_node(Node040);
+            end
+         end else if ( (self_distance_from_dude > 8) and (returned_to_church == false) and (gang_war_dude_stray_message == false) ) then begin
+            start_dialog_at_node(Node044);
+         end
+      end
+   end
+   
+   if (gangwar(state_gangwar_2won)) then begin
+      if (self_team == TEAM_PLAYER) then begin
+         critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_DEN_GANG_2);
+      end
+   end
+
+   if ( (gangwar(state_gangwar_2won)) and (cur_map_index == MAP_DEN_RESIDENTIAL) ) then begin
+      if (returned_to_church) then begin
+         destroy_object(self_obj);
+      end
+   end
+   //end added
+
 end
 
 procedure damage_p_proc begin
@@ -214,10 +298,22 @@ procedure talk_p_proc begin
    end else if (metzger_dead) then begin
       call Node033;
    end else if (gangwar(state_gangwar_in_fight)) then begin
-      call Node039;
+      //added by killap - expansion
+      if (local_var(LVAR_Attack_Tyler_Wait)) then begin
+         start_dialog_at_node(Node043);  //end added by killap - expansion
+      end else if ((global_var(gang_1) < 7) and (church_cleared_speech == false)) then begin
+         start_dialog_at_node(Node040);
+      //end added
+      end else begin
+         call Node039;
+      end
    end else if (gangwar(state_gangwar_2won)) then begin
       if (gang_trap(state_gang_trap_no) == false) then begin
          call Node034;
+      //added by killap - expansion
+      end else if ( (cur_map_index == MAP_DEN_RESIDENTIAL) and (returned_to_church == false) ) then begin
+         start_dialog_at_node(Node045);
+      //end added
       end else if (gave_money) then begin
          call Node032;
       end else begin
@@ -227,7 +323,7 @@ procedure talk_p_proc begin
       call Node031;
    end else if (gangwar(state_gangwar_coward)) then begin
       start_dialog_at_node(Node030);
-   end else if (gang_1_dead) then begin
+   end else if (gang_1_dead or tyler_dead) then begin //edit by killap - added tyler_dead
       if (node_36) then begin
          call Node038;
       end else begin
@@ -287,7 +383,8 @@ procedure Node001 begin
    set_node_1;
    NOption(202, Node006, 004);
    NOption(203, Node004, 004);
-   if ((vic_known(state_vic_known_name) == false) and (vic_free == false)) then begin
+   //if ((vic_known(state_vic_known_name) == false) and (vic_free == false)) then begin
+   if (vic_free == false) then begin //edit by killap
       NOption(204, Node003, 004);
    end
    NOption(205, Node002, -003);
@@ -474,8 +571,9 @@ procedure Node033 begin
    floater_rand(540, 544);
 end
 procedure Node034 begin
-   floater(550 + self_is_female);
-   self_attack_dude;
+   floater(550 + dude_is_female); // Seraph: changed "self_is_female" to "dude_is_female". Part of Haenlomal's gang fixes.
+   //self_attack_dude;
+   set_hostile; // replaced the above with this since the script crashes if we attack from dialogue. -killap
 end
 procedure Node035 begin
    set_gave_money(dude_obj);
@@ -493,6 +591,7 @@ procedure Node036 begin
       BOption(576, Node037, -003);
    end
    BOption(574, Node998, 004);
+   set_node_36; //added by killap
 end
 procedure Node037 begin
    if (gangwar(state_gangwar_fight)) then begin
@@ -520,3 +619,42 @@ end
 procedure Node039 begin
    floater(650);
 end
+
+//added by killap - expansion
+procedure Node040 begin
+   set_church_cleared_speech;
+   Reply(700);
+   NOption(701, Node044, 004);
+   NOption(702, Node042, 004);
+end
+
+procedure Node041 begin
+   set_local_var(LVAR_Attack_Tyler_Wait,1);
+   //flush_add_timer_event_sec(self_obj, 8, 2);
+end
+
+procedure Node042 begin
+   set_local_var(LVAR_Attack_Tyler_Wait,0);
+   set_at_party_fight;
+   load_map(MAP_DEN_RESIDENTIAL, 555);
+end
+
+procedure Node043 begin
+   Reply(710);
+   NOption(701, Node041, 004);
+   NOption(702, Node042, 004);
+end
+
+procedure Node044 begin
+   set_gang_war_dude_stray_message;
+   Reply(720);
+   NOption(721, Node041, 004);
+   NOption(722, Node042, 004);
+end
+
+procedure Node045 begin
+   GMessage(730);
+   clear_at_party_fight;
+   set_returned_to_church;
+end
+//end added

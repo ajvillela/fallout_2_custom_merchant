@@ -470,9 +470,8 @@ end
 
 procedure warp_proc begin
    fadeout(1);
-   if (tile_contains_pid_obj(14085, 0, PID_LOCKER_RUSTY_RIGHT)) then
-      move_obj_inven_to_obj(self_obj, tile_contains_pid_obj(14085, 0, PID_LOCKER_RUSTY_RIGHT));
-
+   if (tile_contains_pid_obj(14485, 0, PID_LOCKER_CLEAN_LEFT)) then //was 14085 and PID_LOCKER_RUSTY_RIGHT - killap
+      move_obj_inven_to_obj(self_obj, tile_contains_pid_obj(14485, 0, PID_LOCKER_CLEAN_LEFT)); //was 14085 and PID_LOCKER_RUSTY_RIGHT - killap
    move_to(self_obj, JACK_JAIL_TILE, 0);
    fadein(1);
 end
@@ -582,7 +581,7 @@ end
 
 procedure goCrazy begin
    move_to(self_obj, JACK_CRAZY_TILE, 0);
-   animate_rotation(self_obj, 3);
+   animate_rotation(3); // Seraph's Fix: animate_rotation always affects self_obj and only takes 1 arg. Thanks Rob!
    set_jack_state(JACK_ALARM);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NCR_CRAZY_JACK);
    add_timer_event(self_obj, 0, CHECK_STATE);
@@ -597,7 +596,7 @@ procedure KillJack begin
    reg_anim_play_sfx(self_obj, sound, 0);
    reg_anim_end();
    set_local_var(LVAR_Jack_Dieing, 1);
-   add_timer_event(self_obj, game_ticks(3), TIMER_DESTROY_ME);
+   add_timer_event(self_obj, game_ticks(2), TIMER_DESTROY_ME);
 end
 
 

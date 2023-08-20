@@ -325,7 +325,7 @@ procedure Node003 begin
       NOption(128, NodeRand, 4);
    if (Fallout2_tribe_kidnapped) then
       NOption(129, NodeRand, 4);
-   if (Fallout2_fix_tanker) then
+   if (Fallout2_fix_tanker) or (Fallout2_tanker_known) then //edit by killap  - added Fallout2_tanker_known
       NOption(130, NodeRand, 4);
    NOption(131, Node009, 4);
    NOption(132, Node999, 4);
@@ -336,11 +336,11 @@ procedure Node004 begin
       Reply(133);
    else
       Reply(134);
-   NLowOption(135, Node007);
+   NLowOption(135, Node008); //edit by killap - was 007
    NLowOption(136, Node009);
    NLowOption(137, Node999);
    NOption(138, Node009, 4);
-   NOption(139, Node009, 4);
+   NOption(139, Node007, 4); //edit by killap - was 009 but since Ian is in the RP, this needs to be valid
    NOption(140, Node007, 4);
    NOption(141, Node007, 4);
    NOption(142, Node009, 4);
@@ -398,7 +398,7 @@ procedure Node010 begin
 end
 
 procedure Node011 begin
-   float_msg(dude_obj, mstr(171), FLOAT_MSG_NORMAL);
+   float_msg(dude_obj, mstr(171 + (1000*(dude_is_stupid))), FLOAT_MSG_NORMAL); //edit by killap - added (10*(dude_is_stupid))
 end
 
 procedure killPlayer begin

@@ -148,6 +148,8 @@ procedure talk_p_proc begin
 
    GetReaction;
 
+   gdialog_set_barter_mod(-30+global_var(TOWN_REP_VAR)); //added by killap
+   
    move_obj_inven_to_obj(CashBox_Ptr,self_obj);
 
    start_gdialog(NAME,self_obj,4,-1,-1);
@@ -214,8 +216,8 @@ procedure Node001 begin
 
    NOption(103,Node002,004);
    NOption(104,Node999,004);
-   NLowOption(105,Node002,004);
-   NLowOption(106,Node999,004);
+   NLowOption(105,Node002); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
+   NLowOption(106,Node999); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
 end
 
 procedure Node002 begin
@@ -225,8 +227,8 @@ procedure Node002 begin
 
    NOption(108,Node002,004);
    NOption(104,Node999,004);
-   NLowOption(109,Node002,004);
-   NLowOption(106,Node999,004);
+   NLowOption(109,Node002); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
+   NLowOption(106,Node999); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
 end
 
 //xxxxxxxxxxxxxxxxxxxx

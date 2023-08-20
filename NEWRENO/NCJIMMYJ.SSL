@@ -123,7 +123,7 @@ procedure Node045;
 
 #define pissed                            lvar_bit(LVAR_Flags, pissed_bit)
 #define set_pissed                        if (pissed == false) then begin                 \
-                                             adjust_barter(-20);                          \
+                                             adjust_barter(20);                          \
                                           end                                             \
                                           set_lvar_bit_on(LVAR_Flags, pissed_bit)
 
@@ -139,6 +139,8 @@ procedure Node045;
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
    Needs to be saved, make it a map variable (MVAR_) */
+import variable new_reno_jimmy_j_box;
+import variable new_reno_temp_box;
 
 /* Local variables which do not need to be saved between map changes. */
 variable return_node;
@@ -201,6 +203,10 @@ procedure pickup_p_proc begin
 end
 
 procedure talk_p_proc begin
+   //added by killap
+   if ( (jjj_slander) or (pissed) ) then
+     gdialog_set_barter_mod(20);
+   
    if (know_jjj) then begin
       start_dialog_at_node(Node007);
    end else begin
@@ -208,8 +214,9 @@ procedure talk_p_proc begin
    end
    if (temp_barter_bonus) then begin
       temp_barter_bonus := false;
-      adjust_barter(-20);
+      adjust_barter(20); //killap's fix: was -20
    end
+
    set_herebefore;
    nr_add_timer_event_rand(self_obj, 25, 35, float_param);
 end
@@ -283,7 +290,16 @@ procedure Node985 begin
    end
 end
 procedure Node984 begin
-   gdialog_barter;
+   
+   //added by killap
+   if ( (jjj_slander) or (pissed) ) then
+      gdialog_mod_barter(20);
+   else if (temp_barter_bonus) then
+      gdialog_mod_barter(-20);
+   else
+   //added by killap 
+      gdialog_barter;
+  
    call return_node;
 end
 procedure Node983 begin
@@ -292,7 +308,7 @@ procedure Node983 begin
 end
 procedure Node982 begin
    if (temp_barter_bonus == false) then begin
-      adjust_barter(20);
+      adjust_barter(-20); //killap's fix: was 20
    end
    temp_barter_bonus := true;
    call Node016;
@@ -408,7 +424,7 @@ procedure Node009 begin
       NOption(335, Node010, -003);
       NOption(mstr(341) + dude_family_name + mstr(5341), Node010, 004);
    end
-   NOption(336, Node011, -003);
+   NOption(336, Node011, 004); // edit by killap - was -003
    NOption(337, Node999, -003);
    NOption(342, Node984, 004);
    NOption(343, Node009, 004);
@@ -520,8 +536,10 @@ procedure Node019 begin
    prev_node := 19;
 end
 procedure Node020 begin
-   set_freebie;
-   give_pid_qty(dude_obj, PID_JET, 1)
+   if (not(freebie)) then begin
+      set_freebie;
+      give_pid_qty(dude_obj, PID_JET, 1)
+   end
    return_node := "Node020";
    Reply(480);
    GOption(481, Node984, 004);

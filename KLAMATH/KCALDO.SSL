@@ -28,6 +28,7 @@
 #include "..\headers\define.h"
 #include "..\headers\klamath.h"
 #include "..\headers\kladwtn.h"
+#include "..\headers\den.h" //added by killap
 
 #define NAME                    SCRIPT_KCALDO
 #define TOWN_REP_VAR            (GVAR_TOWN_REP_KLAMATH)
@@ -53,6 +54,7 @@ procedure push_p_proc;
 
 /* Script Specific Procedure Calls */
 procedure Node910;
+procedure Node911;
 //procedure Node920;
 procedure Node995;
 procedure Node996;
@@ -87,6 +89,7 @@ procedure Node019;
 procedure Node020;
 procedure Node021;
 procedure Node022;
+procedure Node023;
 
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
@@ -177,7 +180,11 @@ procedure talk_p_proc begin
    else if ((get_critter_stat(dude_obj,STAT_iq) <= (0-LOW_IQ))) then begin
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
-           call Node018;
+           //added by killap
+           if (local_var(LVAR_Give) == 1) then
+             call Node023;
+           else
+             call Node018;
        gSay_End;
        end_dialogue;
    end
@@ -258,6 +265,26 @@ procedure Node910 begin
    end
 end
 
+//added by killap
+procedure Node911 begin
+//if player money < 5 goto 13 and set nogive
+//else goto 23 subtract 20 coins and set give
+   if (item_caps_total(dude_obj) > 4) then begin
+      if (local_var(LVAR_maxtr) < 3) then begin
+         set_local_var(LVAR_maxtr, local_var(LVAR_maxtr) + 1);
+         KC_REP_ADJUST(1)
+      end
+      item_caps_adjust(dude_obj,-20); //subtract 20 coins
+      set_local_var(LVAR_Give, 1);
+      call Node014;
+   end
+   else begin
+      //set_local_var(LVAR_Nogive,1);
+      call Node013;
+   end
+end
+//end added
+
 procedure Node995 begin
    if (get_critter_stat(dude_obj,STAT_ch) >= 7) then begin
        TopReact;
@@ -334,7 +361,8 @@ procedure Node005 begin
    Reply(450);
    NOption(451,Node014,004);
    NOption(452,Node006,004);
-   if (Vic_In_Party) then begin
+   //if (Vic_In_Party) then begin
+   if (vic_free) then begin //edit by killap
    //do nothing
    end
    else begin
@@ -377,7 +405,7 @@ end
 
 procedure Node011 begin
    Reply(750);
-   NOption(751,Node005,004);
+   NOption(751,Node910,004); //edit by killap - was 005 -killap
    NOption(752,Node910,004);
    NOption(753,Node015,004);
    NOption(754,Node013,004);
@@ -423,8 +451,9 @@ end
 
 procedure Node019 begin
    Reply(880);
-   NLowOption(881,Node013);
-   NLowOption(882,Node013);
+   NLowOption(881,Node911);
+   NLowOption(882,Node911);
+   NLowOption(922,Node013);
 end
 
 procedure Node020 begin
@@ -442,4 +471,11 @@ procedure Node022 begin
    NOption(911,Node006,004);
    NOption(912,Node014,004);
 end
+
+procedure Node023 begin
+   Reply(920);
+   NLowOption(921,Node911);
+   NLowOption(922,Node999);
+end
+
 //xxxxxxxxxxxxxxxxxxxx

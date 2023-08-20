@@ -290,6 +290,7 @@ procedure use_skill_on_p_proc begin
    Skill_Used:=action_being_used;
 
    if (Skill_Used == SKILL_LOCKPICK) then begin
+       script_overrides; //added by killap
        if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
            call Unlock_Lock;
        end
@@ -299,6 +300,7 @@ procedure use_skill_on_p_proc begin
    end                                                          // End of Skill_Lockpick
 
    else if (Skill_Used == SKILL_TRAPS) then begin
+       script_overrides; //added by killap
        if (local_var(LVAR_Trapped) == STATE_ACTIVE) then begin
            call Skill_Disarm_Traps;
        end
@@ -329,6 +331,7 @@ procedure use_obj_on_p_proc begin
 
    if (LOCK_STATUS == STATE_STANDARD_LOCK) then begin
        if (Tool == PID_LOCKPICKS) then begin
+           script_overrides; //added by killap
            if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
                call Lockpick_Lock;
            end
@@ -342,7 +345,9 @@ procedure use_obj_on_p_proc begin
              set_local_var(LVAR_Locked, STATE_INACTIVE);
              set_local_var(LVAR_Trapped, STATE_INACTIVE);
              display_msg(mstr(300));
+          end
        end else if (Tool == PID_EXP_LOCKPICK_SET) then begin
+          script_overrides; //added by killap
           if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
              call Super_Lockpick_Lock;
           end
@@ -350,14 +355,15 @@ procedure use_obj_on_p_proc begin
              call Super_Set_Lockpick_Lock;
           end
        end else begin
+          script_overrides; //added by killap
           obj_lock(self_obj);
           set_local_var(LVAR_Locked, STATE_ACTIVE);
           display_msg(mstr(189));
        end
-     end
    end
    else if (LOCK_STATUS == STATE_ELECTRIC_LOCK) then begin
        if (Tool == PID_ELECTRONIC_LOCKPICKS) then begin
+           script_overrides; //added by killap
            if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
                call Lockpick_Lock;
            end
@@ -366,6 +372,7 @@ procedure use_obj_on_p_proc begin
            end
        end
        else if (Tool == PID_ELEC_LOCKPICK_MKII) then begin
+           script_overrides; //added by killap
            if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
                call Super_Lockpick_Lock;
            end
@@ -376,10 +383,12 @@ procedure use_obj_on_p_proc begin
    end
 
    else if (Tool == PID_CROWBAR) then begin
+       script_overrides; //added by killap
        call Pry_Door;
    end
 
    else if ((Tool == PID_DYNAMITE) or (Tool == PID_PLASTIC_EXPLOSIVES)) then begin
+       script_overrides; //added by killap
        call Set_Trap;
    end
 

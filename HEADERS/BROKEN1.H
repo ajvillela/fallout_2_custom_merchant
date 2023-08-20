@@ -48,4 +48,6 @@
 #define MVAR_Female_Mutant_Dead					(29)
 #define MVAR_Dwarf_In_Well                   (30)
 
+#define MVAR_Chad_Draw                   (31)
+
 #endif // BROKEN1_H

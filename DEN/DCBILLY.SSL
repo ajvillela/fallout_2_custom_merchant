@@ -94,7 +94,8 @@ procedure Node992;
 
 #define billy_in_hole_time                ((game_time_hour >= 800) or (game_time_hour <= 300))
 
-#define billy_leave_map_tile              (13742)
+//#define billy_leave_map_tile              (13742)
+#define billy_leave_map_tile              (15136) //changed by killap
 
 variable sex_money;
 variable sex_partner;
@@ -153,7 +154,7 @@ procedure map_enter_p_proc begin
       set_local_var(LVAR_Jerkin_State, 0);
       off_said_jerkin;
       off_frankie_message;
-      set_local_var(LVAR_Home_Tile, self_tile);
+      //set_local_var(LVAR_Home_Tile, self_tile); --comment out by killap
    end
 end
 procedure critter_p_proc begin
@@ -167,7 +168,8 @@ procedure critter_p_proc begin
    end else if (local_var(LVAR_Jerkin_State) > 0) then begin
       off_said_jerkin;
    end else if (billy_in_hole_time == false) then begin
-      if (tile_distance(self_tile, billy_leave_map_tile) > 1) then begin
+      if (self_tile != billy_leave_map_tile) then begin //edit by killap
+      //if (tile_distance(self_tile, billy_leave_map_tile) > 1) then begin
          anim_move_to_point(billy_leave_map_tile) /*, 5)*/
       end else if (self_visible) then begin
          check_set_obj_visiblility(self_obj, true);

@@ -188,6 +188,7 @@ procedure use_skill_on_p_proc begin
    variable Skill_Used;
 
    if (global_var(GVAR_KLAMATH_GENERATOR) == 0) then begin
+      script_overrides; //added by killap
       display_msg(mstr(501));
    end
    else begin //generator working
@@ -195,6 +196,7 @@ procedure use_skill_on_p_proc begin
       Skill_Used:=action_being_used;
 
       if (Skill_Used == SKILL_LOCKPICK) then begin
+         script_overrides; //added by killap
          display_msg(mstr(503));
       end                                                          // End of Skill_Lockpick
 
@@ -214,6 +216,7 @@ procedure use_obj_on_p_proc begin
 
    script_overrides;
    if (global_var(GVAR_KLAMATH_GENERATOR) == 0) then begin
+      script_overrides; //added by killap
       display_msg(mstr(501));
    end
    else begin //generator working
@@ -222,6 +225,7 @@ procedure use_obj_on_p_proc begin
 
 
       if (Tool == PID_ELECTRONIC_LOCKPICKS) then begin
+          script_overrides; //added by killap
           if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
               call Lockpick_Lock;
           end
@@ -230,6 +234,7 @@ procedure use_obj_on_p_proc begin
           end
       end
       else if (Tool == PID_ELEC_LOCKPICK_MKII) then begin
+          script_overrides; //added by killap
           if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
               call Super_Lockpick_Lock;
           end
@@ -238,9 +243,11 @@ procedure use_obj_on_p_proc begin
           end
       end
       else if (Tool == PID_CROWBAR) then begin
+         script_overrides; //added by killap
          call Pry_Door;
       end
       else begin
+         script_overrides; //added by killap
          display_msg(mstr(503));
       end
 

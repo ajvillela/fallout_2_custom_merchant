@@ -163,6 +163,7 @@ import variable Jacob_Ptr;
 variable Only_Once:=0;
 variable From_WTG:=1;
 variable From_13:=0;
+variable made_trigger:=0; //added by killap
 
 procedure start begin
    Jacob_Ptr := self_obj;
@@ -225,10 +226,16 @@ end
    stored which affects player interactions. */
 procedure talk_p_proc begin
    GetReaction;
-
+   ReactToLevel; //added by killap
+   
    From_WTG := 1;
    From_13 := 0;
 
+   //added by killap
+   if ( not((dude_iq == 2)) or not((dude_iq == 3)) ) then
+       gdialog_set_barter_mod(-20);
+   //end added by killap
+   
    move_inven_to_temp_box
    move_inven_from_box
 
@@ -621,7 +628,7 @@ end
 
 procedure Node024 begin
    Reply(182);
-   NOption(183,Node998,004);
+   BOption(183,Node998,004); //edit by killap: was NOption
 end
 
 procedure Node025 begin
@@ -716,9 +723,12 @@ procedure Node049 begin
    end
    else begin
       // Give the explosive trigger to the player.
-      trigger := create_object( PID_EXPLOSIVE_SWITCH, 0, 0 );
-      add_obj_to_inven( dude_obj, trigger );
-      Reply( mstr(261) + " " + mstr(262) );
+      if (made_trigger == 0) then begin //added by killap
+         made_trigger := 1; //added by killap
+         trigger := create_object( PID_EXPLOSIVE_SWITCH, 0, 0 );
+         add_obj_to_inven( dude_obj, trigger );
+         Reply( mstr(261) + " " + mstr(262) );
+      end
    end
    NOption(263,Node049a,004);
    NOption(264,Node048a,004); //reaction down small
@@ -750,6 +760,7 @@ procedure Node051 begin
    if( triggerCount > 0 ) then begin
       trigger := obj_carrying_pid_obj( dude_obj, PID_EXPLOSIVE_SWITCH );
       dummy := rm_mult_objs_from_inven( dude_obj, trigger, triggerCount );
+      destroy_object(trigger); //added by killap
    end
 
    BMessage(268);

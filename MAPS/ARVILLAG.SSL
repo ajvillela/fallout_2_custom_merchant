@@ -40,6 +40,7 @@ procedure map_update_p_proc;
 procedure Initial_Inven;
 
 export variable Nagor_Tile;
+export variable Hakunin_Ptr; //added by killap - expansion
 
 procedure start begin
 end
@@ -66,11 +67,13 @@ procedure map_enter_p_proc begin
        else begin
            give_xp(EXP_ARROYO_TEMPLE);
        end
+       move_to(dude_obj, 21315, 0); //added by killap - expansion
    end
 
    Lighting;
 
    set_global_var(GVAR_LOAD_MAP_INDEX,0);
+   move_to(dude_obj, 21315, 0); //added by killap - expansion
 end
 
 procedure map_update_p_proc begin

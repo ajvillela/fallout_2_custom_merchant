@@ -191,7 +191,8 @@ procedure talk_p_proc begin
        end_dialogue;
    end
 
-   else if (map_var(MVAR_Bar_Brawl) != BRAWL_NONE) then begin
+   else if (global_var(GVAR_BAR_BRAWL) >= BRAWL_NEITHER_JAILED) then begin //edit by killap
+   //else if (map_var(MVAR_Bar_Brawl) != BRAWL_NONE) then begin
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node003;
@@ -295,15 +296,20 @@ procedure Node002 begin
 end
 
 procedure Node003 begin
-   if (map_var(MVAR_Bar_Brawl) == BRAWL_NEITHER_JAILED) then
+   //edits by killap - converted all map_vars into global vars. There was never a map_var being used, so the devs just forgot to update this...
+   //if (map_var(MVAR_Bar_Brawl) == BRAWL_NEITHER_JAILED) then
+   if ( (global_var(GVAR_BAR_BRAWL) == BRAWL_NEITHER_JAILED) or (global_var(GVAR_BAR_BRAWL) == BRAWL_TALKED_BOTH) ) then
        Reply(118);
-   else if (map_var(MVAR_Bar_Brawl) == BRAWL_MORNINGSTAR_JAILED) then
+   //else if (map_var(MVAR_Bar_Brawl) == BRAWL_MORNINGSTAR_JAILED) then
+   else if (global_var(GVAR_BAR_BRAWL) == BRAWL_MORNINGSTAR_JAILED) then
        Reply(119);
-   else if (map_var(MVAR_Bar_Brawl) == BRAWL_KOKOWEEF_JAILED) then
+   //else if (map_var(MVAR_Bar_Brawl) == BRAWL_KOKOWEEF_JAILED) then
+   else if (global_var(GVAR_BAR_BRAWL) == BRAWL_KOKOWEEF_JAILED) then
        Reply(120);
-   else if (map_var(MVAR_Bar_Brawl) == BRAWL_BOTH_JAILED) then
+   //else if (map_var(MVAR_Bar_Brawl) == BRAWL_BOTH_JAILED) then
+   else if (global_var(GVAR_BAR_BRAWL) == BRAWL_BOTH_JAILED) then
        Reply(121);
-   else if (map_var(MVAR_Bar_Brawl) == BRAWL_KILLED) then
+   else //if (map_var(MVAR_Bar_Brawl) == BRAWL_KILLED) then
        Reply(122);
 
    NOption(123,Node003a,004);

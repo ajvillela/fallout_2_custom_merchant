@@ -48,7 +48,7 @@ procedure description_p_proc;
 procedure use_skill_on_p_proc;
 procedure damage_p_proc;
 procedure map_enter_p_proc;
-procedure push_p_proc;
+//procedure push_p_proc; - comment out by killap
 procedure timed_event_p_proc;
 
 /* Script Specific Procedure Calls */
@@ -84,8 +84,8 @@ variable Only_Once:=0;
 procedure start begin
 end
 
-procedure push_p_proc begin
-end
+//procedure push_p_proc begin
+//end
 
 procedure timed_event_p_proc begin
 end

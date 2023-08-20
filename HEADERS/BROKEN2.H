@@ -40,6 +40,7 @@
 #define MVAR_Know_About_Professor               (22)
 #define MVAR_Came_From_Broken2                  (23)
 #define MVAR_Seymour_Status                     (24)
+#define MVAR_House_Encounter                    (25)
 
 #define SEYMOUR_UNKNOWN       (0)
 #define SEYMOUR_AGREED        (1)

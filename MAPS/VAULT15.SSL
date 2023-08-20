@@ -68,6 +68,13 @@ procedure map_enter_p_proc begin
    end else begin
       Full_Light;
    end
+   //added by killap
+   if (global_var(GVAR_LOAD_MAP_INDEX) == 0) then begin
+      override_map_start_hex(27303,0,4);
+      set_global_var(GVAR_LOAD_MAP_INDEX,2);
+   end
+   //added by killap
+   set_global_var(GVAR_LOAD_MAP_INDEX,2);
 end
 
 procedure map_update_p_proc begin
@@ -77,6 +84,12 @@ procedure map_update_p_proc begin
       Full_Light;
    end
 end
+
+//added by killap
+procedure map_exit_p_proc begin
+   set_global_var(GVAR_LOAD_MAP_INDEX,2);
+end
+//end added
 
 
 procedure Initial_Inven begin

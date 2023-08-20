@@ -103,6 +103,7 @@ procedure timer_proc;
 #define LVAR_Herebefore                 (4)
 #define LVAR_Hostile                    (5)
 #define LVAR_Personal_Enemy             (6)
+#define LVAR_Movement                   (7)
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -127,7 +128,7 @@ end
 procedure timed_event_p_proc begin
    if (fixed_param == TIMER_SCHEDUAL) then begin
       call timer_proc;
-      add_timer_event(self_obj, ONE_GAME_MINUTE, TIMER_SCHEDUAL);
+      add_timer_event(self_obj, 5, TIMER_SCHEDUAL);
    end
 end
 
@@ -139,7 +140,7 @@ procedure map_enter_p_proc begin
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NCR_VORTIS);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_GUARD);
 
-   add_timer_event(self_obj, ONE_GAME_MINUTE, TIMER_SCHEDUAL);
+   add_timer_event(self_obj, 5, TIMER_SCHEDUAL);
 end
 
 
@@ -156,6 +157,7 @@ procedure critter_p_proc begin
        self_attack_dude;
    end
    if ((game_time_hour > 400) and (game_time_hour < 1200) and canSeePlayer and not combat_is_initialized and not map_var(MVAR_Slavers_Attack)) then
+   //if ( ((local_var(LVAR_Movement) == OVR_TILE_8TO11) or (local_var(LVAR_Movement) == OVR_TILE_8TO11)) and canSeePlayer and not combat_is_initialized and not map_var(MVAR_Slavers_Attack) and (tile_distance(tile_num(dude_obj), 10501) < 6) ) then //edit by killap
       call talk_p_proc;
 
    do_self_anim_callback
@@ -204,7 +206,9 @@ procedure talk_p_proc begin
 //Node 1 -- 4:01 PM to 12:00 (noon)
 //Node 2 -- 12:01 to 4:00 PM
 
-   if (game_time_hour > 400 and game_time_hour < 1200) then begin
+   //if (game_time_hour > 400 and game_time_hour < 1200) then begin
+   //if ( ((local_var(LVAR_Movement) == OVR_TILE_8TO11) or (local_var(LVAR_Movement) == OVR_TILE_8TO11)) and (tile_distance(tile_num(dude_obj), 10501) < 6) ) then begin //edit by killap
+   if ((game_time_hour > 400) and (game_time_hour < 1200) and canSeePlayer and not combat_is_initialized and not map_var(MVAR_Slavers_Attack)) then begin //edit by killap
       call Node001;
       set_map_var(MVAR_Slavers_Attack, 1);
       successCount := 0;
@@ -224,7 +228,8 @@ end
 procedure destroy_p_proc begin
 
 /* Increment the aligned critter counter*/
-   inc_good_critter
+   //inc_good_critter
+   inc_evil_critter //edit by killap
 
 /* Set global_variable for Enemy status*/
 end
@@ -409,13 +414,17 @@ procedure go_tile(variable tile) begin
 end
 
 procedure anim_end_call begin
-   if (last_anim == OVR_TILE_8TO11) then begin
+   if (local_var(LVAR_Movement) == OVR_TILE_8TO11) then begin
+   //if (last_anim == OVR_TILE_8TO11) then begin
       animate_rotation(QUARTERS_DIR);
-   end else if (last_anim == OVR_TILE_12TO3) then begin
+   end else if (local_var(LVAR_Movement) == OVR_TILE_12TO3) then begin
+   //end else if (last_anim == OVR_TILE_12TO3) then begin
       animate_rotation(WORK_DIR);
-   end else if (last_anim == OVR_TILE_4TO11) then begin
+   end else if (local_var(LVAR_Movement) == OVR_TILE_4TO11) then begin
+   //end else if (last_anim == OVR_TILE_4TO11) then begin
       animate_rotation(WORK_DIR);
-   end else if (last_anim == OVR_TILE_12TO7) then begin
+   end else if (local_var(LVAR_Movement) == OVR_TILE_12TO7) then begin
+   //end else if (last_anim == OVR_TILE_12TO7) then begin
       animate_rotation(QUARTERS_DIR);
    end
 end
@@ -424,7 +433,8 @@ procedure check8to11pos begin
    if (self_tile != OVR_TILE_8TO11) then begin
       debug_msg("SLVOVR: going 8 to 11");
       call go_tile(OVR_TILE_8TO11);
-      last_anim := OVR_TILE_8TO11;
+      set_local_var(LVAR_Movement, OVR_TILE_8TO11);
+      //last_anim := OVR_TILE_8TO11;
    end
 end
 
@@ -432,7 +442,8 @@ procedure check12to3pos begin
    if (self_tile != OVR_TILE_12TO3) then begin
       debug_msg("SLVOVR: going 12 to 3");
       call go_tile(OVR_TILE_12TO3);
-      last_anim := OVR_TILE_12TO3;
+      set_local_var(LVAR_Movement, OVR_TILE_12TO3);
+      //last_anim := OVR_TILE_12TO3;
    end
 end
 
@@ -440,7 +451,8 @@ procedure check4to11pos begin
    if (self_tile != OVR_TILE_4TO11) then begin
       debug_msg("SLVOVR: going 4 to 11");
       call go_tile(OVR_TILE_4TO11);
-       last_anim := OVR_TILE_4TO11;
+      set_local_var(LVAR_Movement, OVR_TILE_4TO11);
+      //last_anim := OVR_TILE_4TO11;
    end
 end
 
@@ -448,7 +460,8 @@ procedure check12to7pos begin
    if (self_tile != OVR_TILE_12TO7) then begin
       debug_msg("SLVOVR: going 12 to 7");
       call go_tile(OVR_TILE_12TO7);
-      last_anim := OVR_TILE_12TO7;
+      set_local_var(LVAR_Movement, OVR_TILE_12TO7);
+      //last_anim := OVR_TILE_12TO7;
    end
 end
 

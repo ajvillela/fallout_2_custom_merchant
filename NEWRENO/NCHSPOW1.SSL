@@ -58,6 +58,10 @@ procedure timed_event_p_proc begin
    helicopter_script_timed_event_p_proc
 end
 
+procedure map_update_p_proc begin
+   power_armor_1_obj := self_obj;
+end
+
 procedure map_enter_p_proc begin
    power_armor_1_obj := self_obj;
    if (is_loading_game == false) then begin
@@ -110,7 +114,7 @@ procedure talk_p_proc begin
    if (get_guard_assignment(guard_assignment_none)) then begin
       call Node998;
    end else begin
-      display_msg(550);
+      display_msg(mstr(550)); //edit by killap - added mstr
    end
    set_herebefore;
 end

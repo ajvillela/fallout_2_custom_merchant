@@ -209,11 +209,12 @@ procedure Node998 begin
    if (hostile == false) then begin
       set_hostile;
    end
+   attack_family(self_family) //added by killap
 end
 procedure Node999 begin
 end
 procedure Node990 begin
-   if ((has_rep_berserker) or (has_rep_childkiller) or (check_general_rep < -100)) then begin
+   if ( (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) and ( (has_rep_berserker) or (has_rep_childkiller) or (check_general_rep < -100) ) ) then begin //edit by killap - added not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       call Node014;
    end else if (is_success(roll_vs_skill(dude_obj,SKILL_CONVERSANT,(-30 * has_rep_slaver)))) then begin
       call Node013;
@@ -299,7 +300,7 @@ procedure Node010 begin
    set_know_keith;
    Reply(310);
    NOption(258, Node990, 004);
-   if (chris_recommends) then begin
+   if ((chris_recommends) and not(get_mystery_flag(MYSTERY_STATE_ASSIGNED))) then begin //edit by killap - added not(get_mystery_flag(MYSTERY_STATE_ASSIGNED))
       GOption(312, Node012, 004);
    end
    if ((know_mrs_wright) and (mrs_wright_dead == false)) then begin

@@ -85,9 +85,10 @@ procedure destroy_p_proc begin
          debug_msg("setting ALL RATS KILLED");
          set_all_rats_killed;
          debug_msg("all_rats_killed == "+all_rats_killed);
+         modoc_display_mstr(502); //added by killap - expansion
          give_xp(EXP_MODOC_KILL_ALL_RATS);
          if (vermin_hunter_seed_active) then begin
-            modoc_dude_floater(500);
+            modoc_dude_floater(500 + (dude_is_stupid)); //edit by killap - dud_is_stupid
          end
       end
    end

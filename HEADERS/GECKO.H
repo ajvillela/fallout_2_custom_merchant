@@ -16,7 +16,9 @@
 #define HERD                19000
 
 //areas on settlement map
-#define TAVERN              21080
+#ifndef TAVERN
+   #define TAVERN           21080
+#endif
 #define BRAHMA_PEN_1        12088
 #define GARDEN_1            11708
 #define GARDEN_2            27898

@@ -113,7 +113,7 @@ procedure map_enter_p_proc begin
       if( ( car_current_town == AREA_BROKEN_HILLS ) and
           ( local_var( LVAR_Had_Accident ) == 0 ) and
           ( global_var( GVAR_ENEMY_BROKEN_HILLS ) == 0 ) and
-          ( map_var( MVAR_Came_From_Broken2 ) == 0 ) ) then begin
+          ( global_var( GVAR_CAME_FROM_BROKEN2 ) == 0 ) ) then begin
          set_local_var( LVAR_Had_Accident, 1 );
          if( not( self_visible ) ) then
             set_obj_visibility( self_obj, false );
@@ -141,7 +141,7 @@ procedure timed_event_p_proc begin
    end
    else if( fixed_param == 1 ) then begin
       // Player's response
-      float_msg( dude_obj, mstr(200), FLOAT_COLOR_AFRAID );
+      float_msg( dude_obj, mstr(200 + dude_is_stupid), FLOAT_COLOR_AFRAID ); //edit by killap - added dude_is_stupid
    end
    else if( fixed_param == 2 ) then begin
       animate_move_obj_to_tile( self_obj, 18367, -1 );

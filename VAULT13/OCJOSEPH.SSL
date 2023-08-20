@@ -272,7 +272,7 @@ end
 procedure NodeHealRadPoison begin
    fadeout(1);
    poison(dude_obj, -get_poison(dude_obj));
-   radiation_dec(dude_obj, -dude_is_irradiated);
+   radiation_dec(dude_obj, dude_is_irradiated); // Seraph's Fix. Original Code: radiation_dec(dude_obj, -dude_is_irradiated);
    game_time_advance(ONE_GAME_HOUR * 12);
    fadein(1);
 end

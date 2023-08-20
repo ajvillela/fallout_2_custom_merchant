@@ -92,6 +92,24 @@ procedure Node035;
 procedure Node036;
 procedure Node037;
 
+//added by killap - expansion
+procedure Node038;
+procedure Node039;
+procedure Node040;
+procedure Node041;
+procedure Node041b;
+procedure Node042;
+procedure Node043;
+procedure Node044;
+procedure Node045;
+procedure Node046;
+procedure Node047;
+procedure Node048;
+procedure Node049;
+procedure Node050;
+procedure Node051;
+//end added
+
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
 // seen by the design Tool
@@ -126,7 +144,7 @@ procedure critter_p_proc begin
       attack(dude_obj);
    end
 
-   if (REP_ENEMY_ARROYO) then begin
+   if ( (REP_ENEMY_ARROYO) and (obj_can_see_obj(self_obj,dude_obj)) ) then begin //added and (obj_can_see_obj(self_obj,dude_obj)) by killap
        attack(dude_obj);
    end
 
@@ -160,17 +178,18 @@ end
    stored which affects player interactions. */
 procedure talk_p_proc begin
    GetReaction;
-
-   if ((REP_ENEMY_ARROYO) or (local_var(LVAR_Personal_Enemy) == 1) or (local_var(LVAR_Hostile)>0)) then begin
-      call Node009;
-   end else begin
+   ReactToLevel; //added by killap
+   
+//   if ((REP_ENEMY_ARROYO) or (local_var(LVAR_Personal_Enemy) == 1) or (local_var(LVAR_Hostile)>0)) then begin
+//      call Node009;
+//   end else begin
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
          call Node000;
       gSay_End;
       end_dialogue;
       inc_local_var(LVAR_HereBefore);
-   end
+//   end
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -228,7 +247,14 @@ end
 procedure Node003 begin
    Reply(158);
    NOption(159,Node005,004);
-   NOption(160,Node006,004);
+   //added by killap - expansion
+   if (global_var(GVAR_RND_KAGA_STATE) < 1) then
+      NOption(600,Node038,004); 
+   if (kaga_met and not(kaga_bg)) then
+      NOption(640,Node041b,004);
+   //end added by killap - expansion
+   if (obj_is_carrying_obj_pid(dude_obj,PID_VIC_WATER_FLASK)) then //added by killap
+      NOption(160,Node006,004);
    NOption(161,Node999,004);
 end
 
@@ -279,6 +305,10 @@ procedure Node010 begin
    NOption(184,Node003,004);
    if ((global_var(GVAR_ARROYO_SPEAR) == QUEST_NONE) and (dude_perception > 5)) then
        NOption(314,Node020,004);
+   //added by killap - expansion
+   if (kaga_met and not(kaga_bg)) then
+      NOption(640,Node041b,004);
+   //end added
 end
 
 procedure Node011 begin
@@ -289,7 +319,7 @@ end
 
 procedure Node012 begin
    Reply(188);
-   NOption(189,Node014,004);
+   NOption(189,Node013,004); //edit by killap - was Node014
    NOption(190,Node014,004);
    NOption(191,Node999,004);
 end
@@ -303,12 +333,13 @@ end
 procedure Node014 begin
    Reply(195);
    NOption(196,Node999,004);
-   NOption(197,Node999,004);
+   NOption(197,Node996,004); //edit by killap - was Node999
 end
 
 procedure Node015 begin
    Reply(198);
-   NOption(199,Node012,004);
+   if (VAULT_KNOWN) then  //added by killap
+      NOption(199,Node012,004);
    NOption(200,Node013,004);
 end
 
@@ -387,7 +418,8 @@ procedure Node024 begin
    gfade_out(600);
    gfade_in(600);
 */
-   Reply(mstr(310));
+   //Reply(mstr(310)); //edit by killap
+   Reply(310);
 
    NOption(g_mstr(209),Node026,004);
 end
@@ -412,11 +444,13 @@ procedure Node026 begin
        debug_msg("Destroy Spear");
    end
 
-   item1:=obj_carrying_pid_obj(dude_obj,PID_FLINT);
-   JunkIt:=rm_mult_objs_from_inven(dude_obj,item1,1);
-   destroy_object(item1);
-   debug_msg("Destroy Flint");
-
+   if (obj_is_carrying_obj_pid(dude_obj,PID_FLINT)) then begin //added check by killap
+      item1:=obj_carrying_pid_obj(dude_obj,PID_FLINT);
+      JunkIt:=rm_mult_objs_from_inven(dude_obj,item1,1);
+      destroy_object(item1);
+      debug_msg("Destroy Flint");
+   end
+   
    item2:=create_object(PID_SHARP_SPEAR,0,0);
    add_mult_objs_to_inven(dude_obj,item2,1);
    debug_msg("Give Sharp Spear");
@@ -504,6 +538,107 @@ procedure Node037 begin
    NMessage(430);
 end
 
+//added by killap - expansion
+procedure Node038 begin
+   Reply(601);
+
+   NOption(602,Node039,004);
+end
+
+procedure Node039 begin
+   Reply(603);
+
+   NOption(604,Node040,004);
+end
+
+procedure Node040 begin
+   Reply(605);
+  
+   NOption(606,Node999,004);
+   NOption(607,Node041,004);
+end
+
+procedure Node041 begin
+   Reply(608);
+   NOption(609,Node999,004);
+   NOption(610,Node042,004);
+end
+
+procedure Node041b begin
+   Reply(641);
+   NOption(642,Node042,004);
+   NOption(643,Node999,004);
+end
+
+procedure Node042 begin
+   //display_msg("kaga var before: " + global_var(399));
+   set_kaga_bg;
+   //display_msg("kaga var after: " + global_var(399));
+   Reply(611);
+   NOption((g_mstr(353)),Node043,004);
+end
+
+procedure Node043 begin
+   Reply(612);
+   NOption(613,Node044,004);
+   NOption(614,Node044,004);
+end
+
+procedure Node044 begin
+   Reply(615);
+   NOption(616,Node045,004);
+   NOption(617,Node999,004);
+end
+
+procedure Node045 begin
+   Reply(618);
+   NOption(619,Node047,004);
+   NOption(620,Node046,004);
+end
+
+procedure Node046 begin
+   Reply(621);
+   NOption(622,Node047,004);
+   NOption(623,Node999,004);
+end
+
+procedure Node047 begin
+   Reply(624);
+   NOption((g_mstr(353)),Node048,004);
+end
+
+procedure Node048 begin
+   Reply(625);
+   NOption(626,Node049,004);
+   NOption(627,Node050,004);
+end
+
+procedure Node049 begin
+   Reply(628);
+   
+   if (kaga_met) and not(kaga_dead) then begin
+      NOption(650,Node050,004);
+   end else if (kaga_dead) then begin
+      NOption(651,Node051,004);
+   end else begin
+      NOption(629,Node050,004);
+      NOption(630,Node050,004);
+   end
+   
+end
+
+procedure Node050 begin
+   Reply(631);
+   NOption(632,Node999,004);
+   NOption(633,Node999,004);
+end
+
+procedure Node051 begin
+   Reply(660);
+   NOption(661,Node999,004);
+   BOption(662,Node999,004);
+end
+//end
 
 procedure Node995 begin
    if (dude_charisma>=7) then begin

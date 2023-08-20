@@ -80,11 +80,37 @@ procedure Node018;
 procedure Node019;
 procedure Node020;
 
+//added by killap - RP
+procedure Node021;
+procedure Node022;
+procedure Node022a;
+procedure Node023;
+procedure Node023a;
+procedure Node023b;
+procedure Node024;
+procedure Node025;
+procedure Node026;
+procedure Node027;
+procedure Node028;
+procedure Node029;
+procedure Node030;
+procedure Node031;
+procedure Node032;
+procedure Node033;
+procedure Node034;
+procedure Node035;
+procedure Node036;
+procedure Node900;
+//end added
+
 procedure check_pills;
 procedure check_poison;
 procedure checkItems;
 
 #define TIMER_CHECK_ITEMS 1
+#define CAUGHT_STEALING 1
+#define STEALING_SUCCESS 2
+
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
 // seen by the design Tool
@@ -97,6 +123,9 @@ procedure checkItems;
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Attacking                  (7)
 #define LVAR_Sold_Paint                 (8)
+#define LVAR_Westin_Pill_Pickup_Counter (9) //added by killap - RP
+#define LVAR_Stealing_Pills             (10) //added by killap - RP
+#define LVAR_Pill_Inquiry               (11) //added by killap - RP
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -122,6 +151,30 @@ procedure timed_event_p_proc begin
       call checkItems;
    end
 end
+
+// added by killap
+procedure map_update_p_proc begin
+  variable count;
+  variable tmp;
+  if (i_doc_shelf_obj != -1) then begin
+    count := obj_is_carrying_obj_pid(i_doc_shelf_obj, PID_FAKE_HEART_PILLS);
+    if (count and (local_var(LVAR_Westin_Pill_Pickup_Counter) - GAME_TIME_IN_DAYS) <= 0) then begin
+      tmp := obj_carrying_pid_obj(i_doc_shelf_obj, PID_FAKE_HEART_PILLS);
+      rm_obj_from_inven(i_doc_shelf_obj, tmp);
+      destroy_object(tmp);
+      set_westin_flag(WESTIN_DEAD);
+      set_westin_flag(WESTIN_HEART_PILLS_DEATH);
+      if (global_var(GVAR_NCR_ELMBISHOP_QST) == 1) then
+        set_global_var(GVAR_NCR_ELMBISHOP_QST, 3);
+      // fail the brahmin quest if it's active and Westin is killed
+      if (global_var(GVAR_NCR_BRAHMIN_QST) == 1) then begin
+        set_global_var(GVAR_NCR_BRAHMIN_QST, 2);
+        set_felix_seed(FELIX_CRITTERS_DONE);
+      end        
+    end
+  end
+end
+// end added
 
 /* This procedure will get called each time that the map is first entered. It will
    set up the Team number and AI packet for this critter. This will override the
@@ -155,6 +208,7 @@ procedure critter_p_proc begin
        attack(dude_obj);
    end
    if (i_doc_shelf_notify == 1) then begin
+
       i_doc_shelf_notify := 0;
       add_timer_event(self_obj, game_ticks(1), TIMER_CHECK_ITEMS);
    end
@@ -198,7 +252,13 @@ procedure talk_p_proc begin
    GetReaction;
 
    debug_msg("SCDOCJUB: LVAR_Sold_Paint: " + local_var(LVAR_Sold_Paint));
-   if (dude_max_hits != dude_cur_hits) then begin
+
+   if ((local_var(LVAR_Westin_Pill_Pickup_Counter) != -1) and (local_var(LVAR_Westin_Pill_Pickup_Counter) == 0) or ((local_var(LVAR_Westin_Pill_Pickup_Counter) - GAME_TIME_IN_DAYS) <= 0)) then
+      set_local_var(LVAR_Westin_Pill_Pickup_Counter, (GAME_TIME_IN_DAYS + 14));
+
+   //added by killap - expansion
+   check_forced_dialog
+   else if (dude_max_hits != dude_cur_hits) then begin
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node001;
@@ -357,11 +417,21 @@ end
 
 procedure Node008 begin
    Node8Count += 1;
-   if (Node8Count == 1) then
-      Reply(126);
-   else
-      Reply(127);
 
+   // added by killap - RP
+   if (get_westin_flag(WESTIN_HEART_PILLS_DEATH) and local_var(LVAR_Westin_Pill_Pickup_Counter) != -1) then begin
+     set_local_var(LVAR_Westin_Pill_Pickup_Counter, -1);
+     Reply(330);
+   end else if ( (local_var(LVAR_Stealing_Pills) == STEALING_SUCCESS) and (local_var(LVAR_Pill_Inquiry) == 0) ) then begin
+      set_westin_flag(WESTIN_PILLS_KNOW);
+      Reply(324);
+      NOption(325, Node022, 4);
+   end else if (Node8Count == 1) then begin
+      Reply(126);
+   end else begin
+      Reply(127);
+   end
+   
    if (not V13KNOWN) then
       NLowOption(128, Node011);
    NOption(129, Node011, 4);
@@ -370,8 +440,20 @@ procedure Node008 begin
    if (ncr_global_state(NCR_SALBOB_REF_DOCTOR)) then
       NOption(131, Node010, 4);
    NOption(132, Node016, 4);
+   
+   // added by killap - RP
+   if not(get_westin_flag(WESTIN_DEAD)) then begin
+     if (local_var(LVAR_Pill_Inquiry) == 1) then
+       NOption(310, Node022, 4);
+     else if (local_var(LVAR_Pill_Inquiry) == 2) then
+       NOption(311, Node036, 4);
+   end
+   // end added
+      
    if (ncr_rangers_known) then
       NOption(133, Node017, 4);
+
+   NOption(115, Node999, 1); //added by killap
 end
 
 procedure Node009 begin
@@ -396,14 +478,15 @@ procedure Node011 begin
    Reply(141);
    NOption(142, Node013, 1);
    NOption(143, Node012, 4);
-   NLowOption(144, NOde012);
+   NLowOption(144, Node012);
 end
 
 procedure Node012 begin
    Reply(145);
    NOption(146, Node015, 1);
-   NLowOption(147, Node999);
+   //NLowOption(147, Node999); //edit by killap - was Node999
    NOption(148, Node999, 4);
+   NLowOption(120, Node999); //added by killap
 end
 
 procedure Node013 begin
@@ -430,6 +513,9 @@ end
 
 procedure Node015 begin
    Reply(155);
+   
+   NLowOption(147, Node008); //added by killap
+   NLowOption(120, Node999); //added by killap
    NOption(156, Node008, 4);
    NOption(157, Node999, 4);
 end
@@ -453,7 +539,16 @@ procedure Node018 begin
 end
 
 procedure Node019 begin
-   float_msg(self_obj, mstr(167 + Random(0, 2)), FLOAT_MSG_RED);
+   // added by killap
+   if not(get_westin_flag(WESTIN_DEAD)) then begin
+     if (local_var(LVAR_Stealing_Pills) == 0) then begin
+       set_westin_flag(WESTIN_PILLS_KNOW);
+       set_local_var(LVAR_Stealing_Pills,CAUGHT_STEALING);
+       force_dialog_start("Node021");
+     end else if (local_var(LVAR_Stealing_Pills) == CAUGHT_STEALING) then begin
+       float_msg(self_obj, mstr(167 + Random(0, 2)), FLOAT_MSG_RED);
+     end
+   end
 end
 
 procedure Node020 begin
@@ -462,15 +557,143 @@ procedure Node020 begin
    NOption(160, Node999, 4);
 end
 
+// added by killap - RP
+procedure Node021 begin
+   Reply(mstr(200) + mstr(201+dude_is_female) + mstr(203));
+   NOption(204, Node022, 4);
+   NOption(205, Node023, 4);
+   NOption(206, Node024, 4);
+   BOption(207, Node998, 4);
+end
+
+procedure Node022 begin
+   set_local_var(LVAR_Stealing_Pills,3);
+   Reply(210);
+   if (MacRae_In_Party) then
+     NOption(211, Node025, 4);
+   NOption(212, Node022a, 4);
+   NOption(213, Node024, 4);
+end
+
+procedure Node022a begin
+   if (has_skill(dude_obj,SKILL_CONVERSANT) >= 65) then
+      call Node025;
+   else
+      call Node026;
+end
+
+procedure Node023 begin
+   Reply(220);
+   NOption(221, Node900, 4);
+   NOption(222, Node023a, 4);
+   NOption(223, Node023b, 4);
+end
+
+procedure Node023a begin
+   call Node900;
+   call Node008;
+end
+
+procedure Node023b begin
+   call Node900;
+   call Node027;
+end
+
+procedure Node024 begin
+   Reply(230);
+   if (get_westin_flag(WESTIN_DRUGS_KNOWN) or (MacRae_In_Party)) then begin
+     NOption(231, Node025, 4);
+   end else begin
+     NOption(g_mstr(350), Node900, 4);
+   end
+end
+
+procedure Node025 begin
+   Reply(mstr(240) + mstr(241 + dude_is_female) + mstr(243) + (local_var(LVAR_Westin_Pill_Pickup_Counter) - GAME_TIME_IN_DAYS) + mstr(244 + ((local_var(LVAR_Westin_Pill_Pickup_Counter) - GAME_TIME_IN_DAYS) == 1)) + mstr(246));
+   NOption(247, Node030, 4);
+   NOption(248, Node029, 4);
+end
+
+procedure Node026 begin
+   set_local_var(LVAR_Pill_Inquiry,2);
+   Reply(250);
+   NOption(g_mstr(350), Node999, 4);
+end
+
+procedure Node027 begin
+   Reply(mstr(260) + mstr(261 + dude_is_female) + mstr(263));
+   BOption(264, Node034, 4);
+   NOption(265, Node900, 4);
+end
+
+procedure Node028 begin
+   set_local_var(LVAR_Pill_Inquiry,2);
+   Reply(mstr(270) + (local_var(LVAR_Westin_Pill_Pickup_Counter) - GAME_TIME_IN_DAYS) + mstr(271 + ((local_var(LVAR_Westin_Pill_Pickup_Counter) - GAME_TIME_IN_DAYS) == 1)) + mstr(273));
+   NOption(274, Node999, 4);
+end
+
+procedure Node029 begin
+   Reply(280);
+   NOption(g_mstr(352), Node030, 4);
+end
+
+procedure Node030 begin
+   Reply(281);
+   NOption(g_mstr(352), Node031, 4);
+end
+
+procedure Node031 begin
+   Reply(282);
+   NOption(g_mstr(352), Node032, 4);
+end
+
+procedure Node032 begin
+   Reply(283);
+   if ((has_skill(dude_obj,SKILL_SCIENCE) >= 80) and get_westin_flag(WESTIN_LENNY_TALKED)) then
+     NOption(284, Node033, 4);
+   else
+     NOption(g_mstr(352), Node033, 4);
+end
+
+procedure Node033 begin
+   set_westin_flag(WESTIN_DOC_JUB_TALKED);
+   set_local_var(LVAR_Pill_Inquiry,2);
+   Reply(285);
+   NOption(286, Node999, 4);
+   NOption(287, Node999, 4);
+end
+
+procedure Node034 begin
+   Reply(mstr(290) + mstr(291 + dude_is_female) + mstr(293));
+   BOption(294, Node035, 4);
+   NOption(295, Node022, 4);
+   NOption(296, Node900, 4);
+end
+
+procedure Node035 begin
+   Reply(mstr(300) + mstr(301 + dude_is_female) + mstr(303));
+   BOption(304, Node998, 4);
+   NOption(305, Node900, 4);
+end
+
+procedure Node036 begin
+   Reply(mstr(320) + (local_var(LVAR_Westin_Pill_Pickup_Counter) - GAME_TIME_IN_DAYS) + mstr(321 + ((local_var(LVAR_Westin_Pill_Pickup_Counter) - GAME_TIME_IN_DAYS) == 1)) + mstr(323));
+   NOption(g_mstr(350), Node999, 4); //TODO
+end
+
+procedure Node900 begin
+  set_local_var(LVAR_Pill_Inquiry,1);
+end
+//end added
+
 procedure check_poison begin
    variable tmp;
    variable count;
 
-
    if (i_doc_shelf_obj != -1) then begin
       if (not skill_success(dude_obj, SKILL_STEAL, 0)) then begin
-         count := obj_is_carrying_obj_pid(dude_obj, POISON_PID);
-         if (count) then begin
+         count := obj_is_carrying_obj_pid(i_doc_shelf_obj, POISON_PID); //edit by killap - was dude_obj
+         if (count == 0) then begin
             tmp := obj_carrying_pid_obj(dude_obj, POISON_PID);
             rm_obj_from_inven(dude_obj, tmp);
             add_obj_to_inven(i_doc_shelf_obj, tmp);
@@ -486,14 +709,21 @@ procedure check_pills begin
    variable count;
 
    if (i_doc_shelf_obj != -1) then begin
+      count := obj_is_carrying_obj_pid(i_doc_shelf_obj, PILL_PID); //edit by killap - was dude_obj
       if (not skill_success(dude_obj, SKILL_STEAL, 0)) then begin
-         count := obj_is_carrying_obj_pid(dude_obj, PILL_PID);
-         if (count) then begin
+         if (count == 0) then begin
             tmp := obj_carrying_pid_obj(dude_obj, PILL_PID);
             rm_obj_from_inven(dude_obj, tmp);
             add_obj_to_inven(i_doc_shelf_obj, tmp);
             return 0;
          end
+      end else begin
+        if (count == 0) then begin
+          if (local_var(LVAR_Stealing_Pills) < STEALING_SUCCESS) then
+            set_local_var(LVAR_Stealing_Pills,STEALING_SUCCESS);
+        end else begin
+          set_local_var(LVAR_Stealing_Pills,0);
+        end     
       end
    end
    return 1;

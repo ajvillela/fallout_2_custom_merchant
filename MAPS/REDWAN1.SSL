@@ -28,7 +28,7 @@
 #include "..\headers\define.h"
 #include "..\headers\updatmap.h"
 
-#define NAME                    SCRIPT_ARCAVES
+#define NAME                    SCRIPT_REDWAN1
 
 #include "..\headers\command.h"
 

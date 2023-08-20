@@ -86,6 +86,55 @@ procedure Node026;
 procedure Node027;
 procedure Node028;
 
+//added by killap - expansion
+procedure Node029a;
+procedure Node029;
+procedure Node030;
+procedure Node031;
+procedure Node032;
+procedure Node033;
+procedure Node034;
+procedure Node035;
+procedure Node036;
+procedure Node037;
+procedure Node038;
+procedure Node039;
+procedure Node040;
+procedure Node040a;
+procedure Node040b;
+procedure Node040c;
+procedure Node041;
+procedure Node042;
+procedure Node043;
+procedure Node044;
+procedure Node045;
+procedure Node046;
+procedure Node047;
+procedure Node048;
+procedure Node049;
+procedure Node050;
+procedure Node051;
+procedure Node052;
+procedure Node053;
+procedure Node054;
+procedure Node055;
+procedure Node056;
+procedure Node057;
+procedure Node058;
+procedure Node059;
+procedure Node060;
+procedure Node061;
+procedure Node062;
+procedure Node063;
+procedure Node064;
+procedure Node065;
+procedure Node066;
+procedure Node067;
+procedure Node068;
+procedure Node069;
+procedure Node070;
+procedure Node071;
+
 procedure DoCallGuards;
 
 #define GUARD_TILE_1 17851
@@ -106,6 +155,8 @@ procedure DoCallGuards;
 #define LVAR_Denied                     (7)
 #define LVAR_Hack_Xp                    (8)
 
+#define LVAR_029_First_Use              (9) //added by killap
+#define LVAR_040_First_Use              (10) //added by killap
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
    Needs to be saved, make it a map variable (MVAR_) */
@@ -234,7 +285,7 @@ procedure NodeHack begin
          fromNode001 := 1;
          if (local_var(LVAR_Hack_Xp) == 0) then begin
             set_local_var(LVAR_Hack_Xp, 1);
-            COMP_QUEST(0, 0, EXP_SHI_HACK_UNKNOWN);
+            COMP_QUEST(0, 0, EXP_SHI_HACK_UNKNOWN)
          end
          call Node002;
       end else begin
@@ -242,7 +293,7 @@ procedure NodeHack begin
          set_san_fran_flag(SF_SHI_ENEMY);
          if (local_var(LVAR_Hack_Xp) == 0) then begin
             set_local_var(LVAR_Hack_Xp, 1);
-            COMP_QUEST(REP_BONUS_SAN_FRAN_SHI_HACKED_BAD, REP_HERO_SAN_FRAN_HACKED_SHI_BAD, EXP_SHI_HACK_KNOWN);
+            COMP_QUEST(REP_BONUS_SAN_FRAN_SHI_HACKED_BAD, REP_HERO_SAN_FRAN_HACKED_SHI_BAD, EXP_SHI_HACK_KNOWN)
          end
          fromNode001 := 1;
          call Node002;
@@ -274,9 +325,9 @@ procedure Node002 begin
       Reply(111);
    end
 
-   if (f2_state_tribe_kidnapped) then begin
+   //if (f2_state_tribe_kidnapped) then begin --worthless check... -killap
       NOption(220, Node027, 4);
-   end
+   //end
    NOption(112, Node005, 4);
    NOption(113, Node006, 4);
    NOption(114, Node007, 4);
@@ -317,7 +368,7 @@ procedure Node006 begin
       NOption(128, Node017, 4);
    if (san_fran_flag(SF_EMP_ROOM_PHY)) then
       NOption(129, Node022, 4);
-//   NOption(130, Node013, 4);
+   NOption(130, Node029a, 4); //unlocked/added by killap
    NOption(131, Node002, 4);
 end
 
@@ -428,6 +479,12 @@ end
 procedure Node012 begin
    set_san_fran_flag(SF_SHI_ENEMY);
    set_san_fran_flag(SF_EMPEROR_FORMATTED);
+   
+   //added by killap
+   if (global_var(GVAR_SAN_FRAN_KILL_OZ9_QST) == 1) then
+      set_global_var(GVAR_SAN_FRAN_KILL_OZ9_QST, 3); //set to failed - killap
+   //end added
+   
    callGuards := 1;
 
    Reply(167);
@@ -504,12 +561,13 @@ procedure Node018 begin
 end
 
 procedure Node019 begin
+   game_time_advance(ONE_GAME_MINUTE * 15);  //added by killap
    Reply(195);
    NOption(196, Node017, 4);
 end
 
 procedure Node020 begin
-   COMP_QUEST(REP_BONUS_SAN_FRAN_SHI_HACKED_BAD, REP_HERO_SAN_FRAN_HACKED_SHI_BAD, EXP_SHI_HACK_KNOWN);
+   //COMP_QUEST(REP_BONUS_SAN_FRAN_SHI_HACKED_BAD, REP_HERO_SAN_FRAN_HACKED_SHI_BAD, EXP_SHI_HACK_KNOWN) --comment out by killap - doesn't make sence to get xp twice for hacking in in the event you don't have permission from Ken Lee
    set_shihacked_flag(SHI_TRUE);
    Reply(197);
    NOption(198, Node999, 4);
@@ -536,7 +594,13 @@ procedure Node022 begin
 end
 
 procedure NodeCopy begin
-   add_obj_to_inven(self_obj, create_object(WHIRLY_PLANS_PID, self_tile, elevation(self_obj)));
+   //added by killap
+   variable plans;
+   plans:=create_object(WHIRLY_PLANS_PID,0,0);
+   add_obj_to_inven( dude_obj, plans );
+   //end added
+   
+   //add_obj_to_inven(self_obj, create_object(WHIRLY_PLANS_PID, self_tile, elevation(self_obj)));
    call Node022;
 end
 
@@ -553,6 +617,7 @@ procedure Node024 begin
 end
 
 procedure Node025 begin
+   game_time_advance(ONE_GAME_MINUTE * 20); //added by killap
    Reply(210);
    NOption(211, Node022, 4);
 end
@@ -564,7 +629,8 @@ end
 
 procedure Node027 begin
    Reply(221);
-   if (Fallout2_tribe_kidnapped) then
+   //if (Fallout2_tribe_kidnapped) then
+   if ((f2_flag_any >= f2_state_tribe_kidnapped) and (f2_flag_any < f2_state_enclave_destroyed)) then //edit by killap
       NOption(222, Node028, 4);
    NOption(213, Node002, 4);
 end
@@ -573,6 +639,306 @@ procedure Node028 begin
    Reply(223);
    NOption(213, Node002, 4);
 end
+
+//added by killap - RP
+
+procedure Node029a begin
+   if (local_var(LVAR_029_First_Use) == 0) then begin
+      set_local_var(LVAR_029_First_Use,1);
+      Reply(230);
+      NOption((g_mstr(353)), Node029, 4);
+   end else begin
+      call Node029;
+   end
+end
+
+procedure Node029 begin
+   Reply(231);
+   NOption(232, Node030, 4);
+   NOption(233, Node040a, 4);
+   NOption(234, Node050, 4);
+   NOption(235, Node051, 4);
+   NOption(236, Node006, 4);
+end
+
+procedure Node030 begin
+   Reply(240);
+   NOption(241, Node031, 4);
+end
+
+procedure Node031 begin
+   Reply(250);
+   NOption(251, Node032, 4);
+end
+
+procedure Node032 begin
+   Reply(260);
+   NOption(261, Node033, 4);
+   NOption(262, Node068, 4);
+   NOption(263, Node035, 4);
+   NOption(264, Node029, 4);
+end
+
+//combat patrols
+procedure Node033 begin
+   Reply(270);
+   NOption(271, Node034, 4);
+end
+
+procedure Node034 begin
+   Reply(275);
+   NOption(276, Node032, 4);
+end
+
+//defense sruct
+procedure Node035 begin
+   Reply(280);
+   if (global_var(GVAR_SAN_FRAN_SUB) < SHI_SUB_WITH_CREW) then
+      NOption(281, Node036, 4);
+   NOption(282, Node032, 4);
+end
+
+//maintenance crew info...
+procedure Node036 begin
+   Reply(290);
+   NOption((g_mstr(353)), Node037, 4);
+end
+
+procedure Node037 begin
+   Reply(291);
+   NOption(292, Node038, 4);
+   NOption(293, Node032, 4);
+end
+
+//add self to crew
+procedure Node038 begin
+   Reply(300);
+   NOption(301, Node039, 4);
+   //NOption(302, Node032, 4);
+end
+
+//download password
+procedure Node039 begin
+   Reply(310);
+   NOption(311, Node032, 4);
+   display_msg(mstr(320));
+   give_xp(1000);
+   
+   if (global_var(GVAR_SAN_FRAN_SUB) < SHI_SUB_WITH_CREW) then
+      set_sub_flag(SHI_SUB_WITH_CREW);
+end
+
+//intel network
+procedure Node040a begin
+   if (obj_is_carrying_obj_pid(dude_obj,PID_SHI_SUB_CODE_CHART)) then begin
+      call Node040b;
+   end else begin
+      call Node040c;
+   end
+
+end
+
+procedure Node040c begin
+   Reply(325);
+   NOption(236, Node029, 4);
+end
+
+procedure Node040b begin
+   if (local_var(LVAR_040_First_Use) == 0) then begin
+      set_local_var(LVAR_040_First_Use,1);
+      Reply(330);
+      NOption((g_mstr(353)), Node040, 4);
+   end else begin
+      call Node040;
+   end
+end
+
+procedure Node040 begin
+   Reply(331);
+   NOption(332, Node042, 4);
+   NOption(333, Node043, 4);
+   NOption(334, Node044, 4);
+   NOption(335, Node045, 4);
+   NOption(336, Node046, 4);
+   NOption(337, Node047, 4);
+   NOption(341, Node041, 4);
+   NOption(342, Node029, 4);
+
+end
+
+procedure Node041 begin
+   Reply(340);
+   NOption(338, Node048, 4);
+   NOption(339, Node049, 4);
+   NOption(342, Node040, 4);
+end
+
+procedure Node042 begin
+   Reply(345);
+   NOption(346, Node040, 4);
+end
+
+procedure Node043 begin
+   Reply(350);
+   NOption(351, Node040, 4);
+end
+
+procedure Node044 begin
+   Reply(360);
+   NOption(361, Node040, 4);
+end
+
+procedure Node045 begin
+   Reply(370);
+   NOption(371, Node040, 4);
+end
+
+procedure Node046 begin
+   Reply(380);
+   NOption(381, Node040, 4);
+end
+
+procedure Node047 begin
+   Reply(390);
+   NOption(391, Node040, 4);
+end
+
+procedure Node048 begin
+   Reply(400);
+   NOption(401, Node041, 4);
+end
+
+procedure Node049 begin
+   Reply(410);
+   NOption(411, Node041, 4);
+end
+
+//comm links
+procedure Node050 begin
+   Reply(420);
+   NOption(421, Node029, 4);
+end
+
+//personnel logs
+procedure Node051 begin
+   Reply(430);
+   NOption(431, Node052, 4);
+end
+
+procedure Node052 begin
+   Reply(440);
+   NOption(441, Node054, 4);
+end
+
+procedure Node053 begin
+   //unused
+end
+
+procedure Node054 begin
+   Reply(450);
+   NOption(451, Node055, 4);
+   NOption(452, Node029, 4);
+end
+
+procedure Node055 begin
+   Reply(460);
+   NOption(461, Node056, 4);
+   NOption(462, Node029, 4);
+end
+
+procedure Node056 begin
+   Reply(470);
+   NOption(471, Node057, 4);
+   NOption(472, Node029, 4);
+end
+
+procedure Node057 begin
+   Reply(480);
+   NOption(481, Node058, 4);
+   NOption(482, Node029, 4);
+end
+
+procedure Node058 begin
+   Reply(490);
+   NOption(491, Node059, 4);
+   NOption(492, Node029, 4);
+end
+
+procedure Node059 begin
+   Reply(500);
+   NOption(501, Node060, 4);
+   NOption(502, Node029, 4);
+end
+
+procedure Node060 begin
+   Reply(510);
+   NOption(511, Node061, 4);
+   NOption(512, Node029, 4);
+end
+
+procedure Node061 begin
+   Reply(520);
+   NOption(521, Node062, 4);
+   NOption(522, Node029, 4);
+end
+
+procedure Node062 begin
+   Reply(530);
+   NOption(531, Node063, 4);
+   NOption(532, Node029, 4);
+end
+
+procedure Node063 begin
+   Reply(540);
+   NOption(541, Node064, 4);
+   NOption(542, Node029, 4);
+end
+
+procedure Node064 begin
+   Reply(550);
+   NOption(551, Node065, 4);
+   NOption(552, Node029, 4);
+end
+
+procedure Node065 begin
+   Reply(560);
+   NOption(561, Node066, 4);
+   NOption(562, Node029, 4);
+end
+
+procedure Node066 begin
+   Reply(570);
+   NOption(571, Node067, 4);
+   NOption(572, Node029, 4);
+end
+
+procedure Node067 begin
+   Reply(580);
+   NOption(581, Node029, 4);
+end
+
+//mission R
+procedure Node068 begin
+   Reply(590);
+   NOption(591, Node069, 4);
+end
+
+procedure Node069 begin
+   Reply(600);
+   NOption(601, Node070, 4);
+end
+
+procedure Node070 begin
+   Reply(610);
+   NOption(611, Node071, 4);
+end
+
+procedure Node071 begin
+   Reply(620);
+   NOption(621, Node032, 4);
+   NOption(622, Node999, 4);
+end
+//end added
 
 procedure DoCallGuards begin
    variable obj;

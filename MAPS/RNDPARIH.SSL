@@ -19,6 +19,9 @@ procedure map_enter_p_proc;
 procedure map_update_p_proc;
 procedure map_exit_p_proc;
 
+variable pariah;
+
+
 procedure start begin
 end
 
@@ -38,6 +41,7 @@ procedure map_enter_p_proc begin
    Lighting;
 
    set_global_var(GVAR_SPECIAL_ENCOUNTER_PARIAH, 1);
+
 
    Check_Create_Car(CAR_RND_PARIAH_HEX, CAR_RND_PARIAH_ELEV)
 end

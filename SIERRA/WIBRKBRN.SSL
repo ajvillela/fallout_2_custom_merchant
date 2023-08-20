@@ -46,7 +46,12 @@ end
 procedure use_skill_on_p_proc begin
    if ((action_being_used == SKILL_SCIENCE) or (action_being_used == SKILL_REPAIR)) then begin
        script_overrides;
-       display_msg(mstr(100));
+       //added by killap - expansion
+       if ( (map_var(MVAR_Bio_Motivator) >= 1) and (map_var(MVAR_Bio_Gel) >= 1) and (map_var(MVAR_Bio_Brain) >= 1) ) then
+         display_msg(mstr(104));
+       else
+       //end added
+         display_msg(mstr(100));
    end
 end
 

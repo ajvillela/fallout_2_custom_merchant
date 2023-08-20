@@ -98,6 +98,9 @@ end
 
 procedure map_enter_p_proc begin
    gang_member_map_enter
+   
+   debug_msg("tyler count: " + global_var(GVAR_DEN_GANG_1_COUNT));
+   debug_msg("lara count: " + global_var(GVAR_DEN_GANG_2_COUNT));
 end
 
 procedure combat_p_proc begin
@@ -141,6 +144,7 @@ end
 
 procedure destroy_p_proc begin
    dest_gang_member;
+   debug_msg("count: " + (global_var(GVAR_DEN_GANG_1_COUNT)));
 end
 
 procedure look_at_p_proc begin
@@ -170,7 +174,11 @@ procedure Node002 begin
    floater(200);
 end
 procedure Node003 begin
-   floater_rand(225, 230);
+   // added by killap - expansion
+   if (gang_trap(state_gang_trap_no)) then
+      floater_rand(226, 230);
+   else
+      floater_rand(225, 230);
 end
 procedure Node004 begin
    floater_rand(251 - dude_is_female, 252 + dude_is_male);

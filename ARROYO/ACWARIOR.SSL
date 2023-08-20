@@ -119,7 +119,7 @@ procedure critter_p_proc begin
        attack(dude_obj);
    end
 
-   if (REP_ENEMY_ARROYO) then begin
+   if ( (REP_ENEMY_ARROYO) and (obj_can_see_obj(self_obj,dude_obj)) ) then begin //added and (obj_can_see_obj(self_obj,dude_obj)) by killap
        attack(dude_obj);
    end
 

@@ -9,6 +9,7 @@
  Here is all of the reputation defines for the game
 *********************************************************/
 
+variable tmp_gen_rep := 0; /*added by killap for implementation of karma beacon perk*/
 
 /*-----------------9/16/97 7:41:M-------------------
  General format for this file is:
@@ -74,7 +75,7 @@
 #define inc_childkiller         if (source_obj == dude_obj) then begin                                                               \
                                     remove_champion;                                                                                 \
                                     set_global_var(GVAR_CHILDKILLER_REPUTATION, (global_var(GVAR_CHILDKILLER_REPUTATION) +1));       \
-                                    dec_general_rep(REP_BONUS_KILLED_CHILD);                                                         \
+                                    inc_general_rep(REP_BONUS_KILLED_CHILD);                                                         \
                                 end
 #endif
 
@@ -115,25 +116,28 @@
                                 set_global_var(GVAR_KARMA_WANDERER,0);                                          \
                                 set_global_var(GVAR_KARMA_BETRAYER,0);                                          \
                                 set_global_var(GVAR_KARMA_SWORD_OF_DESPAIR,0);                                  \
-                                set_global_var(GVAR_KARMA_SCOURGE_OF_THE_WASTES,0);                              \
+                                set_global_var(GVAR_KARMA_SCOURGE_OF_THE_WASTES,0);                             \
                                 set_global_var(GVAR_KARMA_DEMON_SPAWN,0)
 
 #define CheckKarma              ClearReps;                                                                      \
-                                if (check_general_rep >= KARMA_HOLY_WARRIOR) then                               \
+								tmp_gen_rep := check_general_rep;												\
+								if (has_trait(TRAIT_PERK,dude_obj,PERK_karma_beacon_perk)) then					\
+									tmp_gen_rep := check_general_rep * 2;										\
+                                if (tmp_gen_rep >= KARMA_HOLY_WARRIOR) then                               		\
                                     set_global_var(GVAR_KARMA_HOLY_WARRIOR,1);                                  \
-                                else if (check_general_rep >= KARMA_GUARDIAN_OF_THE_WASTES) then                \
+                                else if (tmp_gen_rep >= KARMA_GUARDIAN_OF_THE_WASTES) then                		\
                                     set_global_var(GVAR_KARMA_GUARDIAN_OF_THE_WASTES,1);                        \
-                                else if (check_general_rep >= KARMA_SHIELD_OF_HOPE) then                        \
+                                else if (tmp_gen_rep >= KARMA_SHIELD_OF_HOPE) then                        		\
                                     set_global_var(GVAR_KARMA_SHIELD_OF_HOPE,1);                                \
-                                else if (check_general_rep >= KARMA_DEFENDER) then                              \
+                                else if (tmp_gen_rep >= KARMA_DEFENDER) then                              		\
                                     set_global_var(GVAR_KARMA_DEFENDER,1);                                      \
-                                else if (check_general_rep > KARMA_BETRAYER) then                               \
+                                else if (tmp_gen_rep > KARMA_BETRAYER) then                               		\
                                     set_global_var(GVAR_KARMA_WANDERER,1);                                      \
-                                else if (check_general_rep > KARMA_SWORD_OF_DESPAIR) then                       \
+                                else if (tmp_gen_rep > KARMA_SWORD_OF_DESPAIR) then                       		\
                                     set_global_var(GVAR_KARMA_BETRAYER,1);                                      \
-                                else if (check_general_rep > KARMA_SCOURGE_OF_THE_WASTES) then                  \
+                                else if (tmp_gen_rep > KARMA_SCOURGE_OF_THE_WASTES) then                  		\
                                     set_global_var(GVAR_KARMA_SWORD_OF_DESPAIR,1);                              \
-                                else if (check_general_rep > KARMA_DEMON_SPAWN) then                            \
+                                else if (tmp_gen_rep > KARMA_DEMON_SPAWN) then                            		\
                                     set_global_var(GVAR_KARMA_SCOURGE_OF_THE_WASTES,1);                         \
                                 else                                                                            \
                                     set_global_var(GVAR_KARMA_DEMON_SPAWN,1)
@@ -282,6 +286,7 @@
 #define REP_ENEMY_VAULT_VILLAGE                 (global_var(GVAR_ENEMY_VAULT_VILLAGE) == 1)
 #define REP_ENEMY_VAULT_CITY                    (global_var(GVAR_ENEMY_VAULT_CITY) == 1)
 #define REP_ENEMY_GECKO                         (global_var(GVAR_ENEMY_GECKO) == 1)
+#define REP_ENEMY_PRIMITIVE_TRIBE               (global_var(GVAR_ENEMY_PRIMITIVE_TRIBE) == 1)
 
 // Vault City Town Rep
 #define REP_TOWN_SEXED_UP_AMANDA                (-10)
@@ -363,7 +368,7 @@
 #define REP_TOWN_DEN_KILL_BECKY                 (-50)
 #define REP_TOWN_DEN_JOIN_SLAVERS               (-20)
 #define REP_TOWN_DEN_KILL_MOM                   (-20)
-#define inc_den_rep(x)                          inc_global_var(GVAR_TOWN_REP_THE_DEN, x)
+#define inc_den_rep(x)                          inc_global_var_amt(GVAR_TOWN_REP_THE_DEN, x) // Seraph's Fix: changed 'inc_global_var' to 'inc_global_var_amt'. Thanks Rob!
 
 // new reno rep mods
 /**************************************************************************
@@ -419,7 +424,7 @@
 #define REP_HERO_SAN_FRAN_ARMOR                 3
 #define REP_HERO_SAN_FRAN_GAS                   0
 
-#define inc_san_fran_rep(x) inc_global_var(GVAR_TOWN_REP_SAN_FRANCISCO, x)
+#define inc_san_fran_rep(x) inc_global_var_amt(GVAR_TOWN_REP_SAN_FRANCISCO, x) // Seraph's Fix: changed 'inc_global_var' to 'inc_global_var_amt'. Thanks Rob!
 
 // new reno
 #define REP_NEW_RENO_BOXER_LEVEL_1              (1)
@@ -453,7 +458,7 @@
 #define REP_NEW_RENO_RAMIREZ_PACKAGE            (3)
 #define REP_NEW_RENO_KILLED_BOSS                (-25)
 
-#define inc_reno_rep(x)    inc_global_var(GVAR_TOWN_REP_NEW_RENO, x)
+#define inc_reno_rep(x)    inc_global_var_amt(GVAR_TOWN_REP_NEW_RENO, x) // Seraph's Fix: changed 'inc_global_var' to 'inc_global_var_amt'. Thanks Rob!
 
 
 
@@ -492,8 +497,6 @@
 #define REP_BONUS_REBECCA_KILL_METZGER_REWARD   (50)
 #define REP_BONUS_DEN_GAVE_ANNA_LOCKET          (3)
 #define REP_BONUS_DEN_BURY_ANNA                 (75)
-#define REP_BONUS_TOLD_DAVE_LOVE                (50)
-#define REP_BONUS_FOOLED_DAVE                   (20)
 #define REP_BONUS_FRED_REWARD_TURNED_DOWN       (3)
 #define REP_BONUS_RETURN_REBECCA_MONEY          (5)
 #define REP_BONUS_BETRAY_LARA                   (-50)
@@ -580,6 +583,7 @@
 #define REP_POINT_NEW_RENO_KIDS_AND_GUNS_DONT_MIX  (-3)
 
 // Redding
+#define REP_BONUS_CURED_FANNIE                  (25) // Seraph's Code
 #define REP_BONUS_REDDING_WHORE_CUT             (25)
 #define REP_BONUS_EVICTED_ROONEY                (-25)
 #define REP_BONUS_HELPED_ROONEY                 (25)
@@ -686,5 +690,16 @@
 #define REP_BONUS_SAN_FRAN_BOS_QUEST             30
 #define REP_BONUS_SAN_FRAN_ARMOR                 5
 #define REP_BONUS_SAN_FRAN_GAS                   5
+#define REP_BONUS_TOLD_DAVE_LOVE                (50)
+#define REP_BONUS_FOOLED_DAVE                   (20)
+
+//PRIMITIVE TRIBE RELATED
+
+#define REP_BONUS_TRIBE_WEAPONS                  15
+#define REP_TOWN_TRIBE_WEAPONS                   15
+#define REP_TOWN_TRIBE_WELL                      10
+#define REP_TOWN_TRIBE_GHOSTPROBLEM              25
+#define REP_BONUS_TRIBE_MERCHANT_MEETING_NORMAL  15
+#define REP_BONUS_TRIBE_MERCHANT_MEETING_GOOD    20
 
 #endif // REPPOINT_H

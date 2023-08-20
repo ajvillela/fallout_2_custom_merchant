@@ -108,7 +108,7 @@ procedure Node001 begin
 
    NOption(109,Node010,004);
    NOption(110,Node011,004);
-   NOption(mstr(111)+obj_name(dude_obj),Node012,004);
+   NOption(mstr(111)+obj_name(dude_obj)+".",Node012,004); // edit by killap - added "."
 end
 
 procedure Node002 begin

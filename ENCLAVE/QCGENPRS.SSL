@@ -164,7 +164,8 @@ procedure talk_p_proc begin
            if (random(0,10) < 3) then
                floater(random(128,134));
            else
-               floater(mstr(random(135,137))+obj_name(dude_obj)+"!");
+               //floater(mstr(random(135,137))+obj_name(dude_obj)+"!");
+               float_msg(self_obj,mstr(random(135,137))+obj_name(dude_obj)+"!",FLOAT_COLOR_NORMAL); //edit by killap
        end
        else
            floater(random(116,127));

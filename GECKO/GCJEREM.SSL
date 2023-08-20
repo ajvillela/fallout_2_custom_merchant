@@ -91,6 +91,7 @@ procedure Node012;
 #define LVAR_Give                       (7)
 #define LVAR_01_before                  (8)
 #define LVAR_06_before                  (9)
+#define LVAR_Gave_Part                  (10)
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -115,7 +116,7 @@ end
 
 
 procedure critter_p_proc begin
-   if ( (global_var(GVAR_GECKO_MELTDOWN) == 1) and (obj_can_see_obj(self_obj,dude_obj))) then begin
+   if ( ( (global_var(GVAR_GECKO_MELTDOWN) == 1) or (global_var(GVAR_ENEMY_GECKO)) ) and (obj_can_see_obj(self_obj,dude_obj))) then begin //edit by killap - added (global_var(GVAR_ENEMY_GECKO))
       set_local_var(LVAR_Hostile,1);
       attack(dude_obj);
    end
@@ -190,13 +191,19 @@ procedure Node910 begin
 end
 
 procedure Node920 begin
-   my_form := obj_carrying_pid_obj(dude_obj, PID_PART_REQUISITION_FORM);
-   rm_obj_from_inven(dude_obj, my_form);
-   destroy_object(my_form);
-   item:=create_object(PID_PLASMA_TRANSFORMER,0,0); //need to define circuit board
-   add_obj_to_inven(dude_obj,item);
-   //MAY NEED TO SET A GLOBAL HERE -NBK (test it)
-   //set_map_var(MVAR_skeeter_part_given, 1); //may need to be global...check this
+   if obj_carrying_pid_obj(dude_obj, PID_PART_REQUISITION_FORM) then begin /* condition added by Seraph */
+      my_form := obj_carrying_pid_obj(dude_obj, PID_PART_REQUISITION_FORM);
+      rm_obj_from_inven(dude_obj, my_form);
+      destroy_object(my_form);
+      item:=create_object(PID_PLASMA_TRANSFORMER,0,0); //need to define circuit board
+      add_obj_to_inven(dude_obj,item);
+      set_local_var(LVAR_Gave_Part,1); //added by killap
+      
+      //MAY NEED TO SET A GLOBAL HERE -NBK (test it)
+      //set_map_var(MVAR_skeeter_part_given, 1); //may need to be global...check this
+   end
+   else
+      call Node002; // Added by Seraph
 end
 
 procedure Node995 begin
@@ -253,10 +260,13 @@ end
 
 procedure Node003 begin
    Reply(130);
-   NOption(131,Node004,004);  //WHY ARE TWO REPLIES NECESSARY? -NBK
-   NOption(132,Node005,004);
+   if ( (global_var(GVAR_GECKO_SKEETER_PART) == SKEETER_ASKED) and (local_var(LVAR_Gave_Part) == 0) ) then begin /* Added by Seraph */
+     NOption(131,Node004,004);  //WHY ARE TWO REPLIES NECESSARY? -NBK
+     NOption(132,Node005,004);
+   end // Added by Seraph
    if (visit_09_before == 0) then
       NOption(133,Node009,004); //**
+   NOption(300,Node999,004); // Added by Seraph
 end
 
 procedure Node004 begin
@@ -273,17 +283,20 @@ end
 procedure Node006 begin
    if (local_var(LVAR_06_before) == 0) then begin
       set_local_var(LVAR_06_before, 1);
-      floater(160);
+      //floater(160);
+      float_msg(self_obj, message_str(NAME,160),FLOAT_MSG_NORMAL); //edit by killap
+      
    end
    else begin
-      k := random(1,7);
+      /*k := random(1,7);
       if (k == 1) then floater(161);
       else if (k == 2) then floater(162);
       else if (k == 3) then floater(163);
       else if (k == 4) then floater(164);
       else if (k == 5) then floater(165);
       else if (k == 6) then floater(166);
-      else if (k == 7) then floater(167);
+      else if (k == 7) then floater(167);*/
+      float_msg(self_obj, message_str(NAME,random(161,167)),FLOAT_MSG_NORMAL); //edit by killap
    end
 end
 
@@ -294,13 +307,15 @@ procedure Node007 begin
 end
 
 procedure Node008 begin
-   floater(random(180,184));
+   //floater(random(180,184));
+   float_msg(self_obj, message_str(NAME,random(180,184)),FLOAT_MSG_NORMAL); //edit by killap
 end
 
 procedure Node009 begin
    visit_09_before:=1;
    Reply(190);
-   NOption(191,Node003,004);
+   if ((global_var(GVAR_GECKO_SKEETER_PART) == SKEETER_ASKED) and (local_var(LVAR_Gave_Part) == 0)) then /* Added by Seraph */
+      NOption(191,Node004,004); //edit by killap - was 003
    NOption(192,Node999,004);
 end
 

@@ -120,7 +120,7 @@ procedure map_enter_p_proc begin
    Only_Once:=0;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NCR_ENTRANCE);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_CITIZEN);
-   if (local_var(LVAR_Repair_Time) and (local_var(LVAR_Ratch_Parts) != RATCHDONEFIX)) then
+   if (local_var(LVAR_Repair_Time) and (local_var(LVAR_Ratch_Parts) == RATCHREPAIR)) then // edit by killap - was != RATCHDONEFIX
       add_timer_event(self_obj, game_ticks(60), RATCH_FIX_TIMER);
 end
 

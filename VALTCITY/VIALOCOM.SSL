@@ -56,6 +56,7 @@ procedure use_p_proc begin
        float_msg(dude_obj, message_str(NAME,109), FLOAT_COLOR_NORMAL);
        display_msg( mstr(110) );
        give_xp(EXP_ALOCATION_COMPUTER);
+       set_global_var(GVAR_VAULT_PIP,PIP_DONE); //added by killap
    end
    else begin
        display_msg( mstr(107) );

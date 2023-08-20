@@ -225,6 +225,8 @@ procedure talk_p_proc begin
 
    Move_Plant := 0;
 
+   set_global_var(GVAR_MET_SEYMOUR,1); //added by killap - expansion
+
    if( Force_Dialog == 1 ) then begin
       Force_Dialog := 0;
       start_gdialog(NAME,self_obj,4,-1,-1);
@@ -439,6 +441,7 @@ end
 
 procedure Node014 begin
    set_map_var( MVAR_Plant_Told_About_Chess, 1 );
+
    Reply(147);
 
    NLowOption(148, Node999);
@@ -476,6 +479,7 @@ end
 
 procedure Node018 begin
    set_map_var( MVAR_Plant_Told_About_Chess, 1 );
+
    Reply(160);
 
    NLowOption(161, Node019);

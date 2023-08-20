@@ -164,7 +164,8 @@ procedure critter_p_proc begin
          self_attack_dude;
       end else set_new_reno_watcher(myron_guard_obj)
    end else if (myron_called_guards) then begin
-      Follow_Dude(1, 1)
+//      Follow_Dude(1, 1)
+      self_attack_dude; //fix by killap
    end
 end
 
@@ -189,7 +190,7 @@ procedure talk_p_proc begin
          call Node004;
       end else if ((myron_left_stables) or (myron_dead)) then begin
          start_dialog_at_node(Node032);
-      end else if (myron_permission) then begin
+      end else if ( (myron_permission) or (myron_date) ) then begin
          start_dialog_at_node(Node031);
       end else begin
          start_dialog_at_node(Node018);
@@ -314,12 +315,16 @@ procedure Node018 begin
       end
    end
    if (dude_is_female) then begin
-      if ((dude_charisma > 5) or (dude_has_porn_star_rep)) then begin
+      if (myron_kitty) then begin //was(know_myron_whores)
+         NOption(331, Node028, 004);   //was Node029 - killap
+      end else if ((dude_charisma > 5) or (dude_has_porn_star_rep)) then begin
          GOption(332, Node027, 004);
          NOption(333, Node030, 004);
-      end else if (know_myron_whores) then begin
-         NOption(331, Node029, 004);
+      //added by killap - fail pretty looking check
+      end else begin
+         GOption(332, Node029, 004);
       end
+      //end added by killap
    end else begin
       BOption(328, Node021, 004);
    end
@@ -335,11 +340,12 @@ procedure Node019 begin
    prev_node := 19;
 end
 procedure Node020 begin
-   Reply(360 + (dude_iq > 3));
-   NOption(361, Node998, -003);
-   NOption(mstr(362) + dude_name + mstr(363), Node998, -003);
-   NOption(365, Node998, 004);
-   NOption(364, Node998, 001);
+   //Reply(360 + (dude_iq > 3)); //comment out by killap
+   Reply(random(360,361)); //added by killap
+   //NOption(361, Node998, -003); //comment out by killap
+   BOption(mstr(362) + dude_name + mstr(363), Node998, -003); //edit by killap - was NOption
+   BOption(365, Node998, 004); //edit by killap - was NOption
+   BOption(364, Node998, 001); //edit by killap - was NOption
    prev_node := 20;
 end
 procedure Node021 begin
@@ -407,7 +413,10 @@ procedure Node027 begin
 end
 procedure Node028 begin
    set_myron_permission;
-   Reply(445 + dude_is_male);
+   if (myron_date) then //added by killap
+      Reply(480);
+   else
+      Reply(445 + dude_is_male);
    NOption(447, Node999, 004);
    prev_node := 28;
 end
@@ -438,7 +447,10 @@ procedure Node031 begin
    end else begin
       Reply(mstr(225) + made_man_name + mstr(5476));
    end
-   NOption(477, Node028, 004);
+   if (myron_date) then //added by killap - expansion
+      NOption(479, Node028, 004);
+   else
+      NOption(477, Node028, 004);
    NOption(478, Node999, 004);
    prev_node := 31;
 end

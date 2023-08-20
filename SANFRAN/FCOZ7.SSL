@@ -188,7 +188,7 @@ procedure critter_p_proc begin
    actions need to be taken by the critter based on previous combat, the critter will remember
    this as well. */
 
-   if ((local_var(LVAR_Hostile) == 1) and (obj_can_see_obj(self_obj,dude_obj))) then begin
+   if ((local_var(LVAR_Hostile) == 2) and (obj_can_see_obj(self_obj,dude_obj))) then begin //edit by killap: was (local_var(LVAR_Hostile) == 1)
        set_local_var(LVAR_Hostile,1);
        self_attack_dude;
    end
@@ -240,8 +240,12 @@ procedure talk_p_proc begin
    if (san_fran_flag(SF_ELRON_ENEMY)) then begin
       call Node001;
    end else if (elron_flag(EL_REJECTED)) then begin
-      if (not map_var(MVAR_Force_Fields_Lower)) then
-         set_map_var(MVAR_Force_Fields_Lower, 1);
+      //if (not map_var(MVAR_Force_Fields_Lower)) then
+      //   set_map_var(MVAR_Force_Fields_Lower, 1);
+      //edit by killap
+      if (map_var(MVAR_Force_Fields_Lower) == 1) then  
+         set_map_var(MVAR_Force_Fields_Lower, 0);
+      //end edit
       call Node039;
    end else if (elron_flag(EL_SPOKEN)) then begin
       start_gdialog(NAME,self_obj,4,-1,-1);
@@ -780,9 +784,15 @@ procedure doForceFieldOff begin
    set_map_var(MVAR_Force_Fields_Lower, 1);
 end
 
+//#define DUDE_ADJUST_TILE 9910
+//#define DUDE_ADJUST_ROT  5
+//#define OZ7_ADJUST_TILE  9308
+//#define OZ7_ADJUST_ROT   2
+
+//edit for expansion maps - killap
 #define DUDE_ADJUST_TILE 9910
 #define DUDE_ADJUST_ROT  5
-#define OZ7_ADJUST_TILE  9308
+#define OZ7_ADJUST_TILE  9508
 #define OZ7_ADJUST_ROT   2
 
 procedure doAdjust begin
@@ -817,11 +827,11 @@ procedure doAdjustLesson1 begin
    if (adjustLesson == 0) then begin
       adjustLesson += 1;
       float_msg(self_obj, mstr(226), FLOAT_MSG_GREEN);
-      add_timer_event(self_obj, game_ticks(5), TIMER_DOADJUST_LESSON1);
+      add_timer_event(self_obj, game_ticks(10), TIMER_DOADJUST_LESSON1); //changed from 5 -killap
    end else if (adjustLesson == 1) then begin
       adjustLesson += 1;
       float_msg(dude_obj, mstr(227), FLOAT_MSG_YELLOW);
-      add_timer_event(self_obj, game_ticks(2), TIMER_DOADJUST_LESSON1);
+      add_timer_event(self_obj, game_ticks(4), TIMER_DOADJUST_LESSON1); //changed from 2 -killap
    end else if (adjustLesson == 2) then begin
       debug_msg("FCOZ7: enabling ui");
       game_ui_enable;

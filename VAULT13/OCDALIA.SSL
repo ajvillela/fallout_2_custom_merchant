@@ -110,9 +110,15 @@ end
 
 procedure start begin
    if (VAULT13_SEQ) then begin
-      DO_KILL_SELF
+      //added by killap
+      if (not dalia_state(DALIA_ON_15)) then begin
+         destroy_object(self_obj);
+      //end added
+      end else begin
+         DO_KILL_SELF
+      end
    end
-end
+end 
 
 procedure push_p_proc begin
 end

@@ -220,7 +220,7 @@ procedure timed_event_p_proc begin
          end
       end
    end else if (fixed_param == car_comment_param) then begin
-      animate_rotation(rotation_to_tile(tile_num(self_obj), CAR_NEW_RENO_HEX));
+      animate_rotation(rotation_to_tile(tile_num(self_obj), CAR_NEW_RENO1_HEX)); // Seraph's Fix: Changed 'CAR_NEW_RENO_HEX' to 'CAR_NEW_RENO1_HEX'
       if (((self_can_see_dude) or (obj_can_see_obj(dude_obj, self_obj))) and (obj_on_screen(self_obj))) then begin
          set_car_comment;
          floater(2000);
@@ -240,7 +240,8 @@ procedure map_enter_p_proc begin
       end
 
       if (car_comment == false) then begin
-         if (car_current_town == AREA_NEW_RENO) then begin
+         //if (car_current_town == AREA_NEW_RENO) then begin
+         if (tile_contains_pid_obj(CAR_NEW_RENO1_HEX, CAR_NEW_RENO_ELEV, PID_DRIVABLE_CAR) != 0) then begin //edit by killap
             nr_add_timer_event(self_obj, 1, car_comment_param);
          end
       end else begin
@@ -469,9 +470,11 @@ procedure Node019 begin
    NOption(498, Node067, 004);
    if (Fallout2_vault13_looking) then begin
       NOption(499, Node068, 004);
-   end else if (Fallout2_tribe_kidnapped) then begin
+   //end else if (Fallout2_tribe_kidnapped) then begin
+   end else if ((f2_flag_any >= f2_state_tribe_kidnapped) and (f2_flag_any < f2_state_enclave_destroyed)) then begin //edit by killap
       NOption(500, Node070, 004);
-   end else if (Fallout2_fix_tanker) then begin
+   //end else if (Fallout2_fix_tanker) then begin
+   end else if (Fallout2_fix_tanker) or (Fallout2_tanker_known) then begin //edit by killap  - added Fallout2_tanker_known
       NOption(501, Node071, 004);
    end
    if (looking_for_geck) then begin
@@ -855,6 +858,7 @@ procedure Node062 begin
    NOption(548, Node999, 004);
 end
 procedure Node063 begin
+   set_know_myron_whores;  //added by killap
    Reply(mstr(1115 + (dude_charisma > 5)) + mstr(1117));
    NOption(1118, Node062, 004);
    NOption(1119, Node019, 004);

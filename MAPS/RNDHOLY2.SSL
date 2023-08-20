@@ -76,11 +76,19 @@ procedure map_enter_p_proc begin
 
    Check_Create_Car(CAR_RND_HOLY2_HEX, 0)
 
-   Lighting;
+   if (dude_elevation == 0) then begin
+      Lighting;
+   end else begin
+      Cavern_Lighting;
+   end
 end
 
 procedure map_update_p_proc begin
-   Lighting;
+   if (dude_elevation == 0) then begin
+      Lighting;
+   end else begin
+      Cavern_Lighting;
+   end
 end
 
 

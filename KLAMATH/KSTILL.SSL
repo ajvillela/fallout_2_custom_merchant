@@ -112,6 +112,7 @@ procedure use_obj_on_p_proc begin
              if (global_var(GVAR_STILL_STATUS) == STILL_ACCEPT) then begin
                 wood:=obj_carrying_pid_obj(dude_obj, PID_FIREWOOD);
                 rm_obj_from_inven(dude_obj,wood);
+                destroy_object(wood); //added by killap
                 if ( (GAME_TIME_IN_HOURS - (global_var(GVAR_STILL_START)) ) > 24) then begin
                    set_global_var(GVAR_STILL_STATUS, STILL_FAILURE);
                    display_msg(mstr(130));
@@ -127,7 +128,12 @@ procedure use_obj_on_p_proc begin
              else begin
                 //player attempts to start up still while not on quest
                 //set_global_var(GVAR_STILL_STATUS, STILL_CANCEL);
-                display_msg(mstr(140));
+                if (global_var(GVAR_STILL_STATUS) == 0) then //added by killap - expansion
+                  display_msg(mstr(160)); //added by killap
+                else if (global_var(GVAR_STILL_STATUS) == STILL_BETRAY) then //added by killap
+                  display_msg(mstr(150)); //added by killap
+                else
+                  display_msg(mstr(140));
              end
    end
    else begin
@@ -141,7 +147,10 @@ end
    This should only hold the most cursory of glances for the player. */
 procedure look_at_p_proc begin
    script_overrides;
-   display_msg(mstr(100));
+   if (global_var(GVAR_STILL_STATUS) == STILL_BETRAY) then //added by killap
+      display_msg(mstr(102)); //added by killap
+   else
+      display_msg(mstr(100));
 end
 
 /* The player will see more indepth descriptions from this procedure. They are actively
@@ -149,7 +158,10 @@ end
    if the critter is known to the player. */
 procedure description_p_proc begin
    script_overrides;
-   display_msg(mstr(101));
+   if (global_var(GVAR_STILL_STATUS) == STILL_BETRAY) then //added by killap
+      display_msg(mstr(103)); //added by killap
+   else
+      display_msg(mstr(101));
 end
 
 /* Any time a skill is used on a critter this call is made. This can be to give examinations

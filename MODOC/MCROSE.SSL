@@ -36,6 +36,7 @@ procedure description_p_proc;
 procedure use_skill_on_p_proc;
 procedure damage_p_proc;
 procedure map_enter_p_proc;
+procedure map_update_p_proc; //added by killap
 procedure combat_p_proc;
 
 // dialog nodes
@@ -122,6 +123,12 @@ procedure combat_p_proc begin
    if (fixed_param == COMBAT_SUBTYPE_TURN) then begin
    end
 end
+
+//added by killap
+procedure map_update_p_proc begin
+   modoc_rose_obj := self_obj;
+end
+//end added
 
 procedure map_enter_p_proc begin
 
@@ -435,6 +442,7 @@ procedure Node026 begin
    NOption(214,Node023,004);
    NOption(215,Node010,004);
    NOption(g_bye,Node999,004);
+   NOption(g_grunt,Node999,-003); //added by killap
 end
 procedure Node027 begin
    Reply(216);
@@ -456,7 +464,7 @@ procedure Node031 begin
    critter_heal(dude_obj, (dude_max_hits - dude_cur_hits));
    poison(dude_obj, -get_poison(dude_obj));
    Reply(221);
-   NOption(g_mstr(random(202,203)),Node026,001);
+   NOption(g_mstr(random(202 + (100*dude_is_stupid),203 + (100*dude_is_stupid))),Node026,001); //edit by killap - 100*dude_is_stupid
 end
 procedure Node032 begin
    Reply(222);

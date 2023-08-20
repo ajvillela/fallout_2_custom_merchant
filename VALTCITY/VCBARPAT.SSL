@@ -100,11 +100,14 @@ procedure map_enter_p_proc begin
 
    if( not( is_loading_game ) ) then begin
       if( MacRae_Ptr != 0 ) then begin
+         //display_msg("MacRae_Ptr !=0");
          // Remove bar patrons if MacRae left his bar
-         if( self_visible ) then
-            set_obj_visibility( self_obj, true );
+         //if( self_visible ) then
+            destroy_object(self_obj); //edit by killap
+            //set_obj_visibility( self_obj, true );
       end
       else begin
+      debug_msg("MacRae_Ptr ==0");
          add_timer_event( self_obj, game_ticks(random(10, 30)), 1);
       end
    end

@@ -116,6 +116,7 @@ procedure Node041;
 #define LVAR_State                      (7)
 #define LVAR_Node34_Count               (8)
 #define LVAR_Restock_Time               (9)
+#define LVAR_Restock_Time_Fix           (10) //added by killap
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -135,15 +136,282 @@ end
    set up the Team number and AI packet for this critter. This will override the
    default from the prototype, and needs to be set in scripts. */
 procedure map_enter_p_proc begin
+   //added by killap
+   variable tmp;
+   variable special_item;
+   //end added 
+
    Only_Once:=0;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_SAN_FRAN_SHI);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_SF_SHI);
 
+   //added by killap - fix for game_time going negative after 7 years
+   if (((game_time) < 0) and (local_var(LVAR_Restock_Time_Fix) == 0)) then begin
+      set_local_var(LVAR_Restock_Time, game_time - 1);
+      set_local_var(LVAR_Restock_Time_Fix, 1);
+   end
+   //end added
+
    if (game_time > local_var(LVAR_Restock_Time)) then begin
+      tmp := create_object(PID_FOOTLOCKER_CLEAN_LEFT,5,0);
+      if (obj_is_carrying_obj_pid(self_obj, PID_NAV_COMPUTER_PARTS ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_NAV_COMPUTER_PARTS);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_NAVCOM_PARTS ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_NAVCOM_PARTS);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_COMPUTER_VOICE_MODULE ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_COMPUTER_VOICE_MODULE);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);
+      end 
+      if (obj_is_carrying_obj_pid(self_obj, PID_V15_COMPUTER_PART ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_V15_COMPUTER_PART);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);
+      end 
+      if (obj_is_carrying_obj_pid(self_obj, PID_GECK ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_GECK);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);
+      end 
+      if (obj_is_carrying_obj_pid(self_obj, PID_VERTIBIRD_PLANS ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_VERTIBIRD_PLANS);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);
+      end 
+      if (obj_is_carrying_obj_pid(self_obj, PID_TANKER_FOB ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_TANKER_FOB);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);   
+      end 
+      if (obj_is_carrying_obj_pid(self_obj, PID_CAR_FUEL_CELL ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_CAR_FUEL_CELL);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);   
+      end 
+      if (obj_is_carrying_obj_pid(self_obj, PID_CAR_FUEL_CELL_CONTROLLER ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_CAR_FUEL_CELL_CONTROLLER);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);   
+      end 
+      if (obj_is_carrying_obj_pid(self_obj, PID_CAR_FUEL_INJECTION ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_CAR_FUEL_INJECTION);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_VIC_RADIO ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_VIC_RADIO);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_VIC_WATER_FLASK ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_VIC_WATER_FLASK);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_HY_MAG_PART ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_HY_MAG_PART);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_DAY_PASS ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_DAY_PASS);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_FAKE_CITIZENSHIP ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_FAKE_CITIZENSHIP);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_CORNELIUS_GOLD_WATCH ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_CORNELIUS_GOLD_WATCH);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_RED_PASS_KEY ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_RED_PASS_KEY);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_BLUE_PASS_KEY ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_BLUE_PASS_KEY);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_GOLD_LOCKET ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_GOLD_LOCKET);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_YELLOW_PASS_KEY ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_YELLOW_PASS_KEY);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_ANNA_GOLD_LOCKET ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_ANNA_GOLD_LOCKET);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_TRAPPER_TOWN_KEY ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_TRAPPER_TOWN_KEY);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_GECKO_DATA_DISK ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_GECKO_DATA_DISK);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_REACTOR_DATA_DISK ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_REACTOR_DATA_DISK);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_YELLOW_REACTOR_KEYCARD ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_YELLOW_REACTOR_KEYCARD);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_RED_REACTOR_KEYCARD ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_RED_REACTOR_KEYCARD);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_PLASMA_TRANSFORMER ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_PLASMA_TRANSFORMER);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_MOORE_BAD_BRIEFCASE ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_MOORE_BAD_BRIEFCASE);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_MOORE_GOOD_BRIEFCASE ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_MOORE_GOOD_BRIEFCASE);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_LYNETTE_HOLO ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_LYNETTE_HOLO);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_WESTIN_HOLO ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_WESTIN_HOLO);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_SPY_HOLO ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_SPY_HOLO);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_DR_HENRY_PAPERS ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_DR_HENRY_PAPERS);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end      
+      if (obj_is_carrying_obj_pid(self_obj, PID_PRESIDENTIAL_PASS ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_PRESIDENTIAL_PASS);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_VAULT_13_SHACK_KEY ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_VAULT_13_SHACK_KEY);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_EXCAVATOR_CHIP ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_EXCAVATOR_CHIP);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_RAMIREZ_BOX_CLOSED ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_RAMIREZ_BOX_CLOSED);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_RAMIREZ_BOX_CLOSED ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_RAMIREZ_BOX_CLOSED);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_RAMIREZ_BOX_OPEN ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_RAMIREZ_BOX_OPEN);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_RAMIREZ_BOX_CLOSED ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_RAMIREZ_BOX_CLOSED);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_BISHOPS_HOLODISK ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_BISHOPS_HOLODISK);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_ACCOUNT_BOOK ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_ACCOUNT_BOOK);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_ECON_HOLODISK ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_ECON_HOLODISK);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_CELL_DOOR_KEY ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_CELL_DOOR_KEY);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_SMITTY_MEAL ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_SMITTY_MEAL);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_BECKY_BOOK ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_BECKY_BOOK);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_ENLIGHTENED_ONE_LETTER ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_ENLIGHTENED_ONE_LETTER);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_K9_MOTIVATOR ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_K9_MOTIVATOR);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      if (obj_is_carrying_obj_pid(self_obj, PID_PRES_ACCESS_KEY ) > 0) then begin
+         special_item := obj_carrying_pid_obj(self_obj, PID_PRES_ACCESS_KEY);
+         rm_obj_from_inven(self_obj,special_item);
+         add_obj_to_inven(tmp, special_item);  
+      end
+      //end new added
+      
+      destroy_obj_inven(self_obj); //added by killap - one of the preventives I am adding towards the "too many items bug"
+   
       check_restock_item(PID_STIMPAK, 5, 7, 100)
       check_restock_item(PID_FIRST_AID_KIT, 1, 3, 60)
       check_restock_item(PID_RADAWAY, 1, 3, 60)
       check_restock_item(PID_SUPER_STIMPAK, 1, 7, 50)
+
+      //new added - killap
+      move_obj_inven_to_obj(tmp, self_obj);
+      destroy_object(tmp);
+      //end new added
 
       set_local_var(LVAR_Restock_Time, game_time + (ONE_GAME_DAY * Random(1, 7)));
    end
@@ -279,7 +547,7 @@ procedure NodeBarter begin
 end
 
 procedure Node2829a begin
-   if (KNOW_DOC_HOLIDAY) then
+   if (KNOW_DOC_HOLIDAY > 1) then // Seraph's Fix: Replaced '!= 0' with '> 1'
       call Node028;
    else
       call Node029;
@@ -288,7 +556,7 @@ end
 procedure Node001 begin
    Reply(103);
    NLowOption(104, Node020);
-   if (dude_max_hits - dude_cur_hits) then
+   if ( (dude_max_hits - dude_cur_hits) or ( dude_is_crippled ) ) then //added ( dude_is_crippled ) - killap
       NOption(105, Node002, 4);
 //   if (If_Party_Has_Injured) then
 //      NOption(106, Node003, 4);// this could get complicated
@@ -340,13 +608,15 @@ procedure Node004 begin
    Reply(118);
    if (KNOW_DOC_HOLIDAY) then
       GOption(119, Node005, 4);
-   if (dude_max_hits - dude_cur_hits) then
+   if ( (dude_max_hits - dude_cur_hits) or ( dude_is_crippled ) ) then //added ( dude_is_crippled ) - killap
       NOption(120, Node002, 4);
 //   NOption(121, Node003, 4);
+   NOption(184, NOde001, 4); //added by killap
    NOption(122, NOde999, 4);
 end
 
 procedure Node005 begin
+   set_global_var(GVAR_KNOW_DOC_HOLIDAY, 2); // Seraph's Code
    Reply(123);
    NOption(124, Node006, 4);
 end
@@ -465,7 +735,9 @@ end
 
 procedure NodeBarter1 begin
    gdialog_barter;
-   call Node999;
+   
+   //call Node999; --commented out by killap: causes the game to freeze. Need to display something or return to main dialog node
+   call Node001;
 end
 
 procedure Node017 begin
@@ -511,7 +783,7 @@ end
 
 procedure Node022 begin
    Reply(171);
-   if (dude_cur_hits != dude_max_hits) then
+   if ( (dude_cur_hits != dude_max_hits) or ( dude_is_crippled ) ) then //added ( dude_is_crippled ) - killap
       NOption(172, Node002, 4);
 //   NOption(173, Node003, 4);
    NOption(107, NodeBarter, 4);
@@ -602,11 +874,12 @@ procedure Node034 begin
    end
 
    NOption(208, Node035, 4);
-   if (not(has_trait(TRAIT_PERK,dude_obj,PERK_dermal_armor_perk))) then
+   
+   if (not(has_trait(TRAIT_PERK,dude_obj,PERK_dermal_armor_perk)) and not(has_trait(TRAIT_PERK,dude_obj,PERK_dermal_enhancement_perk))) then
       NOption(209, Node036, 4);
    else if (not(has_trait(TRAIT_PERK,dude_obj,PERK_dermal_enhancement_perk))) then
       NOption(210, Node037, 4);
-   if (not(has_trait(TRAIT_PERK,dude_obj,PERK_phoenix_armor_perk))) then
+   if (not(has_trait(TRAIT_PERK,dude_obj,PERK_phoenix_armor_perk)) and not(has_trait(TRAIT_PERK,dude_obj,PERK_phoenix_enhancement_perk))) then
       NOption(211, Node038, 4);
    else if (not(has_trait(TRAIT_PERK,dude_obj,PERK_phoenix_enhancement_perk))) then
       NOption(212, Node039, 4);
@@ -618,11 +891,11 @@ procedure Node035 begin
    Reply(215);
    //216 looks like a screw up
 
-   if (not(has_trait(TRAIT_PERK,dude_obj,PERK_dermal_armor_perk))) then
+    if (not(has_trait(TRAIT_PERK,dude_obj,PERK_dermal_armor_perk)) and not(has_trait(TRAIT_PERK,dude_obj,PERK_dermal_enhancement_perk))) then
       NOption(217, Node036, 4);
    else if (not(has_trait(TRAIT_PERK,dude_obj,PERK_dermal_enhancement_perk))) then
       NOption(218, Node037, 4);
-   if (not(has_trait(TRAIT_PERK,dude_obj,PERK_phoenix_armor_perk))) then
+   if (not(has_trait(TRAIT_PERK,dude_obj,PERK_phoenix_armor_perk)) and not(has_trait(TRAIT_PERK,dude_obj,PERK_phoenix_enhancement_perk))) then
       NOption(219, Node038, 4);
    else if (not(has_trait(TRAIT_PERK,dude_obj,PERK_phoenix_enhancement_perk))) then
       NOption(220, Node039, 4);
@@ -633,9 +906,16 @@ end
 procedure NodeDoDermal begin
    variable item;
 
-   if (dude_caps > 5500 and dude_item(PID_COMBAT_ARMOR)) then begin
+   if (dude_caps > 5500 and (dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR)) ) then begin
       item_caps_adjust(dude_obj,-5500);
-      item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR);
+      if (dude_item(PID_COMBAT_ARMOR)) then//added check - killap
+         item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR);
+      //added by killap
+      else if (dude_item(PID_COMBAT_ARMOR_MK_II)) then
+         item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR_MK_II);
+      else if (dude_item(PID_BROTHERHOOD_COMBAT_ARMOR)) then
+         item:=obj_carrying_pid_obj(dude_obj,PID_BROTHERHOOD_COMBAT_ARMOR);
+      //end added by killap
       rm_obj_from_inven(dude_obj,item);
       destroy_object(item);
       critter_add_trait(dude_obj,TRAIT_PERK,PERK_dermal_armor_perk,1);
@@ -651,11 +931,19 @@ end
 procedure NodeDoDermalUpgrade begin
    variable item;
 
-   if (dude_caps > 33000 and dude_item(PID_COMBAT_ARMOR)) then begin
+   if (dude_caps > 33000 and (dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then begin
       item_caps_adjust(dude_obj,-33000);
-      item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR);
+      if (dude_item(PID_COMBAT_ARMOR)) then//added check - killap
+         item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR);
+      //added by killap
+      else if (dude_item(PID_COMBAT_ARMOR_MK_II)) then
+         item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR_MK_II);
+      else if (dude_item(PID_BROTHERHOOD_COMBAT_ARMOR)) then
+         item:=obj_carrying_pid_obj(dude_obj,PID_BROTHERHOOD_COMBAT_ARMOR);
+      //end added by killap
       rm_obj_from_inven(dude_obj,item);
       destroy_object(item);
+      critter_rm_trait(dude_obj,TRAIT_PERK,PERK_dermal_armor_perk,1); // Seraph's Code
       critter_add_trait(dude_obj,TRAIT_PERK,PERK_dermal_enhancement_perk,1);
       game_time_advance(5*ONE_GAME_DAY);
       gfade_out(600);
@@ -669,9 +957,16 @@ end
 procedure NodeDoPhoenix begin
    variable item;
 
-   if (dude_caps > 8500 and dude_item(PID_COMBAT_ARMOR)) then begin
+   if (dude_caps > 8500 and (dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then begin
       item_caps_adjust(dude_obj,-8500);
-      item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR);
+      if (dude_item(PID_COMBAT_ARMOR)) then//added check - killap
+         item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR);
+      //added by killap
+      else if (dude_item(PID_COMBAT_ARMOR_MK_II)) then
+         item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR_MK_II);
+      else if (dude_item(PID_BROTHERHOOD_COMBAT_ARMOR)) then
+         item:=obj_carrying_pid_obj(dude_obj,PID_BROTHERHOOD_COMBAT_ARMOR);
+      //end added by killap
       rm_obj_from_inven(dude_obj,item);
       destroy_object(item);
       critter_add_trait(dude_obj,TRAIT_PERK,PERK_phoenix_armor_perk,1);
@@ -687,11 +982,19 @@ end
 procedure NodeDoPhoenixUprade begin
    variable item;
 
-   if (dude_caps > 49000 and dude_item(PID_COMBAT_ARMOR)) then begin
+   if (dude_caps > 49000 and (dude_item(PID_COMBAT_ARMOR) or dude_item(PID_COMBAT_ARMOR_MK_II) or dude_item(PID_BROTHERHOOD_COMBAT_ARMOR))) then begin
       item_caps_adjust(dude_obj,-49000);
-      item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR);
+      if (dude_item(PID_COMBAT_ARMOR)) then//added check - killap
+         item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR);
+      //added by killap
+      else if (dude_item(PID_COMBAT_ARMOR_MK_II)) then
+         item:=obj_carrying_pid_obj(dude_obj,PID_COMBAT_ARMOR_MK_II);
+      else if (dude_item(PID_BROTHERHOOD_COMBAT_ARMOR)) then
+         item:=obj_carrying_pid_obj(dude_obj,PID_BROTHERHOOD_COMBAT_ARMOR);
+      //end added by killap
       rm_obj_from_inven(dude_obj,item);
       destroy_object(item);
+      critter_rm_trait(dude_obj,TRAIT_PERK,PERK_phoenix_armor_perk,1); // Seraph's Code
       critter_add_trait(dude_obj,TRAIT_PERK,PERK_phoenix_enhancement_perk,1);
       game_time_advance(4*ONE_GAME_DAY);
       gfade_out(600);

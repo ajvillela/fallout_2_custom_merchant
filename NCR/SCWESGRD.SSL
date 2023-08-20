@@ -28,7 +28,9 @@
 #define NPC_REACTION_TYPE       REACTION_TG
 #define NPC_REACTION_VAR        7 /* same as thief variable */
 #include "..\headers\define.h"
-//#include "..\headers\<TownName.h>"
+#include "..\headers\ncr.h"
+#include "..\headers\ncr1.h"  //added by killap
+#include "..\headers\ncr3.h"  //added by killap
 
 #define NAME                    SCRIPT_SCWESGRD
 #define TOWN_REP_VAR            (GVAR_TOWN_REP_NCR)
@@ -36,7 +38,7 @@
 #include "..\headers\command.h"
 #include "..\headers\ModReact.h"
 
-#include "..\headers\ncr.h"
+
 
 /* Standard Script Procedures */
 procedure start;
@@ -144,7 +146,7 @@ procedure map_enter_p_proc begin
    Only_Once:=0;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NCR_WESTIN);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_GUARD);
-
+   set_local_var(LVAR_Turn_Field_Off,0); //added by killap
    if (global_var(GVAR_NCR_GRANT_HOSTILE) == 5) then begin
       destroy_object(self_obj);
       i_westin_guard_obj := -1;
@@ -158,15 +160,20 @@ procedure map_enter_p_proc begin
       end
       i_westin_guard_obj := self_obj;
 
-      if (not is_loading_game) then begin
+      //if (not is_loading_game) then begin
          if (self_tile != starttile) then begin
             move_to(self_obj, starttile, 0);
-            animate_rotation(self_obj, startrot);
+            animate_rotation(startrot); // Seraph's Fix: animate_rotation always affects self_obj and only takes 1 arg. Thanks Rob!
          end
-      end
+      //end
    end
 end
 
+//added by killap
+procedure map_update_p_proc begin
+   i_westin_guard_obj := self_obj; 
+end
+//end added
 
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from
    Movement to attacking the player on sight can be placed in here.*/
@@ -318,16 +325,21 @@ end
 
 procedure Node001 begin
    if (cur_map_index == MAP_NCR_DOWNTOWN) then begin
-      if (local_var(LVAR_Let_In)) then begin
-         Reply(136);
-         NOption(137, NodeFieldOff, 1);
-         NOption(138, Node999, 1);
+      //added by killap - expansion
+      if (get_westin_flag(WESTIN_DEAD)) then begin
+        Reply(150);
+        NOption(g_mstr(350), Node999, 1);
+      //end added
+      end else if (local_var(LVAR_Let_In)) then begin
+        Reply(136);
+        NOption(137, NodeFieldOff, 1);
+        NOption(138, Node999, 1);
       end else begin
          Reply(103);
-         NLowOption(104, Node002, 4);
+         NLowOption(104, Node002); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
          if ((global_var( GVAR_VAULT_DELIVER_HOLODISK ) == HOLODISK_ACCEPTED) and (obj_is_carrying_obj_pid(dude_obj, PID_BISHOPS_HOLODISK))) then
             NLowOption(139, Node008);
-         NLowOption(105, Node999, 4);
+         NLowOption(105, Node999); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
          NOption(106, Node002, 4);
          if ((global_var( GVAR_VAULT_DELIVER_HOLODISK ) == HOLODISK_ACCEPTED) and (obj_is_carrying_obj_pid(dude_obj, PID_BISHOPS_HOLODISK))) then
             NOption(140, Node008, 4);
@@ -344,8 +356,8 @@ end
 
 procedure Node002 begin
    Reply(113);
-   NLowOption(114, Node003, 4);
-   NLowOption(115, Node999, 4);
+   NLowOption(114, Node003); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
+   NLowOption(115, Node999); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
    NOption(116, Node003, 4);
    NOption(117, Node999, 4);
 end
@@ -419,6 +431,8 @@ procedure FieldOff begin
    end
 end
 
+#define EMITTER_MAP_DELAY(x) set_map_var(MVAR_Emitter_Wes_Control, EMITTER_CONTROL_DELAY)
+
 procedure Walk begin
    variable tile;
 
@@ -430,11 +444,12 @@ procedure Walk begin
    if (local_var(LVAR_Turn_Field_Off)) then begin
       if (self_tile == tile) then begin
          if (i_westin_emitter_obj != -1) then begin
-            EMITTER_SET_FIELD_DELAY(i_westin_emitter_obj);
+            EMITTER_MAP_DELAY(MVAR_Emitter_Wes_Control); //edit by killap
          end
          reg_anim_clear(self_obj);
          reg_anim_begin();
          animate_move_to_tile(starttile);
+         animate_rotation(self_obj, startrot); //added by killap
          reg_anim_end();
          set_local_var(LVAR_Turn_Field_Off, 0);
       end else begin
@@ -452,6 +467,7 @@ procedure Walk begin
             reg_anim_clear(self_obj);
             reg_anim_begin();
             animate_move_to_tile(starttile);
+            animate_rotation(self_obj, startrot); //added by killap
             reg_anim_end();
          end
          add_timer_event(self_obj, 4, TIMER_WALK);

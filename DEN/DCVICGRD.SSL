@@ -291,14 +291,17 @@ procedure Node005 begin
       Reply(254);
    end else begin
       set_node_5;
+      //edit by killap - swapped the replies below
       if (vic_known(state_vic_known_name)) then begin
-         Reply(250 + has_rep_slaver);
-      end else begin
+         //Reply(250 + has_rep_slaver);
          Reply(252 + has_rep_slaver);
+      end else begin
+         //Reply(252 + has_rep_slaver);
+         Reply(250 + has_rep_slaver);
       end
    end
    set_vic_known(state_vic_known_name);
-   NOption(255, Node010, 004);
+   NOption(255, Node007, 004); //edit by killap - was 010
    if (metzger_known == false) then begin
       NOption(256, Node010, 004);
    end

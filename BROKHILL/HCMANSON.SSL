@@ -153,7 +153,7 @@ procedure map_enter_p_proc begin
 
    if( ( global_var(GVAR_BH_CONSPIRACY) == CONSPIRACY_SUCCESSFUL ) or
        ( ( global_var(GVAR_BH_JAIL) == JAIL_FORCE ) or
-         ( global_var(GVAR_BH_JAIL) == JAIL_CHARISMA ) or
+         ( ( global_var(GVAR_BH_JAIL) == JAIL_CHARISMA ) and ( global_var(GVAR_JAIL_BREAK) > 0 ) ) or
          ( global_var(GVAR_BH_JAIL) == JAIL_STEALTH ) or
          ( global_var(GVAR_BH_JAIL) == JAIL_COINCIDENTAL ) and
          ( global_var(GVAR_BH_CONSPIRACY) != CONSPIRACY_BROKEN_DOUBLECROSS ) and
@@ -254,7 +254,8 @@ end
    stored which affects player interactions. */
 procedure talk_p_proc begin
    GetReaction;
-
+   ReactToLevel; //added by killap
+   
    if (local_var(LVAR_Personal_Enemy) == 1) then begin
        call Node998;
    end

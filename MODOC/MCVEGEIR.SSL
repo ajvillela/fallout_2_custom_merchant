@@ -114,7 +114,15 @@ procedure critter_p_proc begin
    if (surrendered_to_slag) then begin
       set_surrendered_to_slag_off;
       debug_msg("going to force 1");
-      do_force_talk_vegeir("Node010");
+      if (global_var(GVAR_MODOC_MESSAGE) == message_state_delivered) then begin
+         if (local_var(LVAR_Said_Thanks)) then begin
+            do_force_talk_vegeir("Node003");
+         end else begin
+            do_force_talk_vegeir("Node001");
+         end
+      end else begin
+         do_force_talk_vegeir("Node010");
+      end
    end else if (surrender_to_guards) then begin
       set_surrender_to_guards_off;
       debug_msg("going to force 2");

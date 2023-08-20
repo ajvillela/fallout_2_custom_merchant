@@ -79,14 +79,25 @@ procedure map_enter_p_proc begin
 //   set_local_var(LVAR_Hostile, 2);
 end
 
-
+//added by killap
 procedure look_at_p_proc begin
-end
-
-procedure use_obj_on_p_proc begin
+   script_overrides;
+   if (critter_is_male) then
+      display_msg(mstr(105));
+   else
+      display_msg(mstr(106));
 end
 
 procedure description_p_proc begin
+   script_overrides;
+   if (critter_is_male) then
+      display_msg(mstr(105));
+   else
+      display_msg(mstr(106));
+end
+//end added
+
+procedure use_obj_on_p_proc begin
 end
 
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from
@@ -101,6 +112,8 @@ procedure critter_p_proc begin
 
 //   if (local_var(LVAR_Hostile) == 2 and obj_can_see_obj(self_obj,dude_obj)) then begin
 //      set_local_var(LVAR_Hostile, 1);
+      
+   if ( obj_can_see_obj(self_obj,dude_obj) ) then //added by killap
       attack(dude_obj);
 //   end
 

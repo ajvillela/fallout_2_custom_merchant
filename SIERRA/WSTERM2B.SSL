@@ -56,8 +56,10 @@ procedure Node999;                                      // This Node is Always E
 //~~~~~~~~~~~~~~~~ DESIGNER TOOL STARTS HERE
 
 procedure Node001;
+/*/ Disabled by Seraph
 procedure Node001a;
 procedure Node001b;
+//*/
 procedure Node010;
 procedure Node010a;
 procedure Node010b;
@@ -90,24 +92,26 @@ procedure Node025;
 
 /* Local Variables which are saved. All Local Variables need to be
    prepended by LVAR_ */
-#define LVAR_Comp_Off                   (0)
+#define LVAR_Comp_Off                   (4)
+/* Disabled by Seraph
 #define LVAR_Shock_1                    (1)
 #define LVAR_Field_1                    (2)
-#define LVAR_Hack_10                    (3)
-#define LVAR_Guess_10                   (4)
-#define LVAR_Hack_13                    (5)
-#define LVAR_Guess_13                   (6)
-#define LVAR_Seen_16                    (7)
-#define LVAR_Order_16                   (8)
-#define LVAR_Notice_16                  (9)
-#define LVAR_Penpal_16                  (10)
-#define LVAR_Trade_16                   (11)
-#define LVAR_Gave_Xp_Shock              (12)
-#define LVAR_Gave_Xp_Field              (13)
-#define LVAR_Hex_Field2a                (14)
-#define LVAR_Hex_Field2b                (15)
-#define LVAR_Hex_Field2c                (16)
-#define LVAR_Hex_Field2d                (17)
+//*/
+#define LVAR_Hack_10                    (5)
+#define LVAR_Guess_10                   (6)
+#define LVAR_Hack_13                    (7)
+#define LVAR_Guess_13                   (8)
+#define LVAR_Seen_16                    (9)
+#define LVAR_Order_16                   (10)
+#define LVAR_Notice_16                  (11)
+#define LVAR_Penpal_16                  (12)
+#define LVAR_Trade_16                   (13)
+#define LVAR_Gave_Xp_Shock              (14)
+#define LVAR_Gave_Xp_Field              (15)
+#define LVAR_Hex_Field2a                (16)
+#define LVAR_Hex_Field2b                (17)
+#define LVAR_Hex_Field2c                (18)
+#define LVAR_Hex_Field2d                (19)
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -119,12 +123,10 @@ import variable Field2c_Ptr;
 import variable Field2d_Ptr;
 
 /* Local variables which do not need to be saved between map changes. */
-variable Only_Once:=0;
 variable Injure_Player:=0;
 
 procedure start begin
 end
-
 
 /* Whenever the critter takes damage of any type, this procedure will be called. Things
    like setting ENEMY_ and LVAR_Personal_Enemy can be set here. */
@@ -136,21 +138,17 @@ procedure use_p_proc begin
 
    script_overrides;
 
-   if (local_var(LVAR_Comp_Off) == 1) then begin
+   if (local_var(LVAR_Comp_Off) == 1) then
        display_msg(mstr(200));
-   end
-
    else if (get_critter_stat(source_obj,STAT_iq) < 4) then begin
-       if (source_obj == dude_obj) then begin
-           display_msg(message_str(SCRIPT_WSTERM1B,102));
-       end
-       else begin
-           display_msg(obj_name(source_obj)+message_str(SCRIPT_WSTERM1B,200));
-       end
-   end
-   else begin
+       if (source_obj == dude_obj) then
+           // display_msg(message_str(SCRIPT_WSTERM1B,102)); // Disabled by Seraph
+           display_mstr(102); // Seraph's Code
+       else
+           // display_msg(obj_name(source_obj)+message_str(SCRIPT_WSTERM1B,200)); // Disabled by Seraph
+           display_mstr(400); // Seraph's Code
+   end else
        dialogue_system_enter;
-   end
 end
 
 /* The dialog system is setup and prepares the player to talk to this NPC. Where To Go
@@ -210,14 +208,15 @@ procedure Node001 begin
    else
        Reply(106);
 
-   if (local_var(LVAR_Shock_1) == 0) then
-       NOption(107,Node001a,004);
-   if (local_var(LVAR_Field_1) == 0) then
-       NOption(108,Node001b,004);
+   if (map_var(MVAR_Electric_Floor_2) == 0) then
+       NOption(107,Node010,004);
+   if (map_var(MVAR_Level2_Fields) == 0) then
+       NOption(108,Node013,004);
    NOption(109,Node016,004);
    NOption(110,Node999,004);
 end
 
+/* Disabled by Seraph
 procedure Node001a begin
    inc_local_var(LVAR_Shock_1);
 
@@ -229,6 +228,7 @@ procedure Node001b begin
 
    call Node013;
 end
+//*/
 
 procedure Node010 begin
    Reply(112);
@@ -262,13 +262,13 @@ end
 procedure Node010b begin
    inc_local_var(LVAR_Guess_10);
 
-   if (is_success(do_check(source_obj,STAT_lu,-2))) then
+   if (is_success(do_check(dude_obj,STAT_lu,-2))) then // Seraph's Fix: Replaced "source_obj" with "dude_obj"
        call Node021;
    else
        call Node022;
 end
 
-procedure Node011 begin
+procedure Node011 begin // Shock Plates on (Fail Hacking)
    variable floor_ptr;
 
    if (tile_contains_obj_pid(25299,elevation(self_obj),PID_ELECTRIC_FLOOR)) then begin
@@ -284,28 +284,7 @@ procedure Node011 begin
    NOption(119,Node999,004);
 end
 
-procedure Node012 begin
-   variable floor_ptr;
-
-   if (tile_contains_obj_pid(25299,elevation(self_obj),PID_ELECTRIC_FLOOR)) then begin
-       floor_ptr:=tile_contains_pid_obj(25299,elevation(self_obj),PID_ELECTRIC_FLOOR);
-       set_obj_visibility(floor_ptr,1);
-   end
-
-   set_map_var(MVAR_Electric_Floor_2,1);
-
-   if (local_var(LVAR_Gave_Xp_Shock) == 0) then begin
-       inc_local_var(LVAR_Gave_Xp_Shock);
-       give_xp(EXP_HACK_SIERRA_COMP_2B_SHOCK);
-   end
-
-   Reply(120);
-
-   NOption(121,Node001,004);
-   NOption(122,Node999,004);
-end
-
-procedure Node013 begin
+procedure Node013 begin // Force Fields
    Reply(123);
 
    if (local_var(LVAR_Hack_13) == 0) then
@@ -322,15 +301,15 @@ procedure Node013a begin
    inc_local_var(LVAR_Hack_13);
 
    if (has_skill(dude_obj,SKILL_SCIENCE) > 89) then
-       call Node012;
+       call Node015;
    else begin
        test:=roll_vs_skill(dude_obj,SKILL_SCIENCE,-40);
        if (is_success(test)) then
-           call Node012;
+           call Node015;
        else if (is_critical(test)) then
            call Node025;
        else
-           call Node011;
+           call Node014; //was Node011 - killap
    end
 end
 
@@ -344,50 +323,21 @@ procedure Node013b begin
 end
 
 procedure Node014 begin
-   set_map_var(MVAR_Level2_Fields,0);
-   set_map_var(MVAR_Field_2a,0);
-   set_map_var(MVAR_Field_2b,0);
-   set_map_var(MVAR_Field_2c,0);
-   set_map_var(MVAR_Field_2d,0);
+   set_map_var(MVAR_Level2_Fields,FIELD_ENABLED);
+   //set_map_var(MVAR_Field_2a,0);
+   //set_map_var(MVAR_Field_2b,0);
+   //set_map_var(MVAR_Field_2c,0);
+   //set_map_var(MVAR_Field_2d,0);
 
-   Field2a_Ptr:=create_object_sid(PID_NS_FORCE_FIELD,local_var(LVAR_Hex_Field2a),elevation(self_obj),SCRIPT_WSFELD2A);
-   Field2b_Ptr:=create_object_sid(PID_NS_FORCE_FIELD,local_var(LVAR_Hex_Field2b),elevation(self_obj),SCRIPT_WSFELD2B);
-   Field2c_Ptr:=create_object_sid(PID_NS_FORCE_FIELD,local_var(LVAR_Hex_Field2c),elevation(self_obj),SCRIPT_WSFELD2C);
-   Field2d_Ptr:=create_object_sid(PID_NS_FORCE_FIELD,local_var(LVAR_Hex_Field2d),elevation(self_obj),SCRIPT_WSFELD2D);
+   //Field2a_Ptr:=create_object_sid(PID_NS_FORCE_FIELD,local_var(LVAR_Hex_Field2a),elevation(self_obj),SCRIPT_WSFELD2A);
+   //Field2b_Ptr:=create_object_sid(PID_NS_FORCE_FIELD,local_var(LVAR_Hex_Field2b),elevation(self_obj),SCRIPT_WSFELD2B);
+   //Field2c_Ptr:=create_object_sid(PID_NS_FORCE_FIELD,local_var(LVAR_Hex_Field2c),elevation(self_obj),SCRIPT_WSFELD2C);
+   //Field2d_Ptr:=create_object_sid(PID_NS_FORCE_FIELD,local_var(LVAR_Hex_Field2d),elevation(self_obj),SCRIPT_WSFELD2D);
 
    Reply(128);
 
    NOption(129,Node001,004);
    NOption(130,Node999,004);
-end
-
-procedure Node015 begin
-   set_map_var(MVAR_Level2_Fields,1);
-   set_map_var(MVAR_Field_2a,FIELD_DESTROYED);
-   set_map_var(MVAR_Field_2b,FIELD_DESTROYED);
-   set_map_var(MVAR_Field_2c,FIELD_DESTROYED);
-   set_map_var(MVAR_Field_2d,FIELD_DESTROYED);
-
-   destroy_object(Field2a_Ptr);
-   destroy_object(Field2b_Ptr);
-   destroy_object(Field2c_Ptr);
-   destroy_object(Field2d_Ptr);
-
-   Field2a_Ptr:=0;
-   Field2b_Ptr:=0;
-   Field2c_Ptr:=0;
-   Field2d_Ptr:=0;
-
-
-   if (local_var(LVAR_Gave_Xp_Field) == 0) then begin
-       inc_local_var(LVAR_Gave_Xp_Field);
-       give_xp(EXP_HACK_SIERRA_COMP_2B_FIELD);
-   end
-
-   Reply(131);
-
-   NOption(132,Node001,004);
-   NOption(133,Node999,004);
 end
 
 procedure Node016 begin
@@ -444,22 +394,6 @@ procedure Node018 begin
    NOption(144,Node999,004);
 end
 
-procedure Node019 begin
-   variable floor_ptr;
-
-   if (tile_contains_obj_pid(25299,elevation(self_obj),PID_ELECTRIC_FLOOR)) then begin
-       floor_ptr:=tile_contains_pid_obj(25299,elevation(self_obj),PID_ELECTRIC_FLOOR);
-       set_obj_visibility(floor_ptr,1);
-   end
-
-   set_local_var(LVAR_Comp_Off,1);
-   set_map_var(MVAR_Electric_Floor_2,1);                // off
-
-   Reply(148);
-
-   NOption(144,Node999,004);
-end
-
 procedure Node020 begin
    Reply(150);
 
@@ -467,7 +401,7 @@ procedure Node020 begin
    NOption(144,Node999,004);
 end
 
-procedure Node021 begin
+procedure Node019 begin // Shock Plates off (Virus)
    variable floor_ptr;
 
    if (tile_contains_obj_pid(25299,elevation(self_obj),PID_ELECTRIC_FLOOR)) then begin
@@ -475,7 +409,65 @@ procedure Node021 begin
        set_obj_visibility(floor_ptr,1);
    end
 
-   set_map_var(MVAR_Electric_Floor_2,1);                // off
+   //added by killap - disable forcefield as well (makes sense since computer controlling them is gone
+   set_map_var(MVAR_Level2_Fields,FIELD_DISABLED);
+   set_map_var(MVAR_Field_2a,FIELD_DESTROYED);
+   set_map_var(MVAR_Field_2b,FIELD_DESTROYED);
+   set_map_var(MVAR_Field_2c,FIELD_DESTROYED);
+   set_map_var(MVAR_Field_2d,FIELD_DESTROYED);
+
+   destroy_object(Field2a_Ptr);
+   destroy_object(Field2b_Ptr);
+   destroy_object(Field2c_Ptr);
+   destroy_object(Field2d_Ptr);
+
+   Field2a_Ptr:=0;
+   Field2b_Ptr:=0;
+   Field2c_Ptr:=0;
+   Field2d_Ptr:=0;
+   //end add
+   
+   set_local_var(LVAR_Comp_Off,1);
+   set_map_var(MVAR_Electric_Floor_2,1);
+
+   Reply(148);
+
+   NOption(144,Node999,004);
+end
+
+procedure Node012 begin // Shock Plates off (Success Hacking)
+   variable floor_ptr;
+
+   if (tile_contains_obj_pid(25299,elevation(self_obj),PID_ELECTRIC_FLOOR)) then begin
+       floor_ptr:=tile_contains_pid_obj(25299,elevation(self_obj),PID_ELECTRIC_FLOOR);
+       set_obj_visibility(floor_ptr,1);
+   end
+
+   set_map_var(MVAR_Electric_Floor_2,1);
+
+   if (local_var(LVAR_Gave_Xp_Shock) == 0) then begin
+       inc_local_var(LVAR_Gave_Xp_Shock);
+// Begin Seraph's Code
+       display_msg(message_str(SCRIPT_GENERIC,1019));
+// End Seraph's Code
+       give_xp(EXP_HACK_SIERRA_COMP_2B_SHOCK);
+   end
+
+   Reply(120);
+
+   NOption(121,Node001,004);
+   NOption(122,Node999,004);
+end
+
+procedure Node021 begin // Shock Plates off (Success Guessing)
+   variable floor_ptr;
+
+   if (tile_contains_obj_pid(25299,elevation(self_obj),PID_ELECTRIC_FLOOR)) then begin
+       floor_ptr:=tile_contains_pid_obj(25299,elevation(self_obj),PID_ELECTRIC_FLOOR);
+       set_obj_visibility(floor_ptr,1);
+   end
+
+   set_map_var(MVAR_Electric_Floor_2,1);
 
    Reply(153);
 
@@ -483,7 +475,7 @@ procedure Node021 begin
    NOption(155,Node999,004);
 end
 
-procedure Node022 begin
+procedure Node022 begin // Shock Plates on (Fail Guessing)
    variable floor_ptr;
 
    if (tile_contains_obj_pid(25299,elevation(self_obj),PID_ELECTRIC_FLOOR)) then begin
@@ -491,7 +483,7 @@ procedure Node022 begin
        set_obj_visibility(floor_ptr,0);
    end
 
-   set_map_var(MVAR_Electric_Floor_2,0);                // on
+   set_map_var(MVAR_Electric_Floor_2,0);
 
    Reply(156);
 
@@ -499,7 +491,36 @@ procedure Node022 begin
    NOption(158,Node999,004);
 end
 
-procedure Node023 begin
+procedure Node015 begin // Force Fields Off (Success Hacking)
+   set_map_var(MVAR_Level2_Fields,1);
+   set_map_var(MVAR_Field_2a,FIELD_DESTROYED);
+   set_map_var(MVAR_Field_2b,FIELD_DESTROYED);
+   set_map_var(MVAR_Field_2c,FIELD_DESTROYED);
+   set_map_var(MVAR_Field_2d,FIELD_DESTROYED);
+
+   destroy_object(Field2a_Ptr);
+   destroy_object(Field2b_Ptr);
+   destroy_object(Field2c_Ptr);
+   destroy_object(Field2d_Ptr);
+
+   Field2a_Ptr:=0;
+   Field2b_Ptr:=0;
+   Field2c_Ptr:=0;
+   Field2d_Ptr:=0;
+
+
+   if (local_var(LVAR_Gave_Xp_Field) == 0) then begin
+       inc_local_var(LVAR_Gave_Xp_Field);
+       give_xp(EXP_HACK_SIERRA_COMP_2B_FIELD);
+   end
+
+   Reply(131);
+
+   NOption(132,Node001,004);
+   NOption(133,Node999,004);
+end
+
+procedure Node023 begin // Force Fields off (Success Guessing)
    set_map_var(MVAR_Level2_Fields,FIELD_DISABLED);
    set_map_var(MVAR_Field_2a,FIELD_DESTROYED);
    set_map_var(MVAR_Field_2b,FIELD_DESTROYED);
@@ -522,7 +543,7 @@ procedure Node023 begin
    NOption(161,Node999,004);
 end
 
-procedure Node024 begin
+/*procedure Node024 begin // Force Fields on (Fail Guessing)
    set_map_var(MVAR_Level2_Fields,FIELD_ENABLED);
    set_map_var(MVAR_Field_2a,0);
    set_map_var(MVAR_Field_2b,0);
@@ -538,7 +559,18 @@ procedure Node024 begin
 
    NOption(163,Node001,004);
    NOption(164,Node999,004);
-end
+end*/
+
+//added by killap
+procedure Node024 begin // Force Fields on (Fail Guessing)
+   set_map_var(MVAR_Level2_Fields,FIELD_ENABLED);
+
+   Reply(162);
+
+   NOption(163,Node001,004);
+   NOption(164,Node999,004);
+end 
+//end added
 
 procedure Node025 begin
    set_local_var(LVAR_Comp_Off,1);

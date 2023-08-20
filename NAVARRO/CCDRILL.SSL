@@ -120,6 +120,7 @@ variable Only_Once:=0;
 variable Setup_Rounds := 0;
 variable Force_Move := 0;
 variable Move_Player := 0;
+variable background; //added by killap - expansion
 
 procedure start begin
 end
@@ -269,7 +270,7 @@ end
    written by designers are placed in here. Additionally, Reactions are generated and
    stored which affects player interactions. */
 #define start_drill_dialog(the_node)                                                \
-         start_gdialog(NAME,self_obj,4,HEAD_COM_OFFICER,BACKGROUND_WASTELAND);      \
+         start_gdialog(NAME,self_obj,4,HEAD_COM_OFFICER,background);      \
          gSay_Start;                                                                \
             call the_node;                                                          \
          gSay_End;                                                                  \
@@ -280,7 +281,21 @@ procedure talk_p_proc begin
 
    Force_Move := 0;
 
-   if (global_var(GVAR_NAVARRO_BASE_ALERT) > 0) then begin
+   //added by killap - RP
+   if ((game_time_hour >= 2000) or (game_time_hour < 600)) then
+      background := BACKGROUND_WASTELAND_NIGHT;
+   else
+      background := BACKGROUND_WASTELAND;
+   //end added
+
+   // added by killap
+   if (local_var(LVAR_Hostile) == 2) then begin
+      if (self_can_see_dude) then begin
+        set_local_var(LVAR_Hostile,1);
+        self_attack_dude;
+      end
+   // end added
+   end else if (global_var(GVAR_NAVARRO_BASE_ALERT) > 0) then begin
       start_drill_dialog(Node016);
    end
    // Set up NOT AT POST

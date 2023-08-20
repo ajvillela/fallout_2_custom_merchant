@@ -75,6 +75,13 @@ procedure description_p_proc begin
 end
 
 procedure use_obj_on_p_proc begin
+   //added by killap - expansion
+   if ( (obj_pid(self_obj) == PID_GIANT_ANT) or (obj_pid(self_obj) == PID_TOUGH_GIANT_ANT) ) then begin
+      if ((obj_pid(obj_being_used_with) == PID_BUG_SPRAY)) then begin
+         kill_critter(self_obj, ANIM_melted_to_nothing_sf);
+      end
+   end
+   //end added
 end
 
 procedure use_skill_on_p_proc begin

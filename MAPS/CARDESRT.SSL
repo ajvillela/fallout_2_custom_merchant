@@ -3,9 +3,9 @@
 */
 
 /*
-        Name: Arroyo Bridge
-        Location: Arroyo
-        Description: This is the Map Script for the Bridge of Arroyo
+        Name: Car Desert (car outta power)
+        Location: Car outtapower
+        Description: This is the car outta power map script
 
         Log:
            Please note any changes that have been made to the file in Updated. Then comment
@@ -29,7 +29,7 @@
 #include "..\headers\CarDesrt.h"
 #include "..\headers\updatmap.h"
 
-#define NAME                    SCRIPT_ARBRIDGE
+#define NAME                    SCRIPT_CARDESRT //edit by killap
 
 #include "..\headers\command.h"
 

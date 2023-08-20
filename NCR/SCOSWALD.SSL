@@ -110,6 +110,10 @@ procedure critter_p_proc begin
    actions need to be taken by the critter based on previous combat, the critter will remember
    this as well. */
 
+   if ( (local_var(LVAR_Talked) == 0) and (local_var(LVAR_Personal_Enemy) == 1) ) then begin
+         dialogue_system_enter;
+         debug_msg("SCOSWALD: should be going into dialog");
+   end
    if ((local_var(LVAR_Hostile) == 2) and (obj_can_see_obj(self_obj,dude_obj))) then begin
        set_local_var(LVAR_Hostile,1);
        attack(dude_obj);
@@ -128,10 +132,10 @@ procedure damage_p_proc begin
       set_local_var(LVAR_Personal_Enemy,1);
       if (map_var(MVAR_Beat_On_Oswald) == 1) then begin
          terminate_combat;
-         if (local_var(LVAR_Talked) == 0) then begin
-            dialogue_system_enter;
-            debug_msg("SCOSWALD: should be going into dialog");
-         end
+         //if (local_var(LVAR_Talked) == 0) then begin
+         //   dialogue_system_enter;
+         //   debug_msg("SCOSWALD: should be going into dialog");
+         //end
       end
    end
 end
@@ -158,7 +162,7 @@ procedure talk_p_proc begin
    GetReaction;
 
 
-   if (map_var(MVAR_Beat_On_Oswald) == 1 and local_var(LVAR_Personal_Enemy) == 1) then begin
+   if (map_var(MVAR_Beat_On_Oswald) == 1 and local_var(LVAR_Personal_Enemy) == 1 and (local_var(LVAR_Talked) == 0) ) then begin
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
          call Node002;
@@ -182,6 +186,7 @@ procedure destroy_p_proc begin
 
 /* Increment the aligned critter counter*/
    inc_evil_critter
+   ncr_set_global_state(NCR_OSWALD_DEAD); //added by killap
 
 /* Set global_variable for Enemy status*/
 end

@@ -32,6 +32,7 @@ procedure timed_event_p_proc;
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Restock_Time               (7)
 #define LVAR_Leave                      (8)
+#define LVAR_Restock_Time_Fix           (9) //added by killap
 
 procedure NodeFleeing;
 procedure NodeFighting;
@@ -70,6 +71,14 @@ end
 procedure map_enter_p_proc begin
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_RND_TRAPPER);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_GUARDS);
+   
+   //added by killap - fix for game_time going negative after 7 years
+   if (((game_time) < 0) and (local_var(LVAR_Restock_Time_Fix) == 0)) then begin
+      set_local_var(LVAR_Restock_Time, game_time - 1);
+      set_local_var(LVAR_Restock_Time_Fix, 1);
+   end
+   //end added   
+   
    if (local_var(LVAR_Restock_Time) < game_time) then begin
       check_restock_item(PID_GECKO_PELT, 5, 7, 80)
       check_restock_item(PID_GOLDEN_GECKO_PELT, 1, 5, 60)
@@ -128,7 +137,8 @@ procedure talk_p_proc begin
 end
 
 procedure destroy_p_proc begin
-   inc_evil_critter
+   //inc_evil_critter
+   inc_neutral_critter //edit by killap
 end
 
 procedure look_at_p_proc begin
@@ -198,7 +208,7 @@ procedure NodeBuyNormal begin
 end
 
 procedure NodeBuyGolden begin
-   if (dude_caps >= normal_price) then begin
+   if (dude_caps >= golden_price) then begin //edit was normal_price --edit by killap
       item_caps_adjust(dude_obj, -golden_price);
       item_caps_adjust(self_obj, golden_price);
       rm_obj_from_inven(self_obj, gold_gecko_pelt);
@@ -212,7 +222,8 @@ end
 procedure Node003 begin
    variable amt;
    variable sub;
-
+   variable gecko_pelt_inv_msg; // added by killap (expansion)
+   
    gecko_pelt := obj_carrying_pid_obj(self_obj, PID_GECKO_PELT);
    gold_gecko_pelt := obj_carrying_pid_obj(self_obj, PID_GOLDEN_GECKO_PELT);
    gecko_pelt_num := obj_is_carrying_obj_pid(self_obj, PID_GECKO_PELT);
@@ -238,7 +249,19 @@ procedure Node003 begin
    else
       golden_price := floor (GOLDEN_GECKO_PRICE - (GOLDEN_GECKO_PRICE * amt));
 
-   Reply(mstr(111) + " " + gecko_pelt_num + " " + mstr(112) + " " + gecko_gold_pelt_num + " " + mstr(113));
+   // added by killap - expansion
+   if (gecko_pelt_num == 0 and gecko_gold_pelt_num > 0) then
+      gecko_pelt_inv_msg := mstr(140) + gecko_gold_pelt_num + mstr(113);
+   else if (gecko_pelt_num > 0 and gecko_gold_pelt_num == 0) then
+      gecko_pelt_inv_msg := mstr(141) + gecko_pelt_num + mstr(112);
+   else if (gecko_pelt_num == 0 and gecko_gold_pelt_num == 0) then
+      gecko_pelt_inv_msg := mstr(142);
+   else
+      gecko_pelt_inv_msg := mstr(111) + gecko_pelt_num + mstr(112) + " " + gecko_gold_pelt_num + mstr(113);
+   // end added
+
+   Reply(gecko_pelt_inv_msg);
+   
    if (gecko_pelt_num > 0) then
       NOption(mstr(134) + normal_price, NodeBuyNormal, 4);
    if (gecko_gold_pelt_num > 0) then
@@ -254,6 +277,10 @@ end
 procedure Node006a begin
    fadeout(1);
    playerSoldSex := 1;
+   if ( (dude_spouse_is_female) or (dude_spouse_is_male) ) then
+      debug_msg("you are married.");
+   else
+      up_sex_status;
    call Node999;
 end
 

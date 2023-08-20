@@ -51,7 +51,9 @@ procedure description_p_proc;
 procedure use_skill_on_p_proc;
 procedure damage_p_proc;
 procedure map_enter_p_proc;
+procedure map_exit_p_proc; //added by killap
 procedure timed_event_p_proc;
+
 
 /* Script Specific Procedure Calls */
 procedure Node998;                                      // This Node is Always Combat
@@ -96,7 +98,7 @@ end
 /* This procedure will get called each time that the map is first entered. It will
    set up the Team number and AI packet for this critter. This will override the
    default from the prototype, and needs to be set in scripts. */
-procedure map_enter_p_proc begin
+procedure map_enter_p_proc begin 
    Only_Once:=0;
    //critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_BROKEN_HILLS);
    //critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_COWARD);
@@ -106,6 +108,15 @@ procedure map_enter_p_proc begin
    reg_anim_animate( self_obj,ANIM_fall_back_sf,-1);
    reg_anim_end();
 end
+
+//added by killap
+procedure map_exit_p_proc begin
+   
+   if ( map_var( MVAR_Chuck_Awoke ) == 3 ) then
+      destroy_object( self_obj );
+
+end
+//end added
 
 procedure timed_event_p_proc begin
    if( fixed_param == 1 ) then begin
@@ -125,7 +136,14 @@ procedure critter_p_proc begin
    the player should the game be saved and loaded repeatedly. Additionally, if any special
    actions need to be taken by the critter based on previous combat, the critter will remember
    this as well. */
-
+      
+   //added by killap
+   if( ( map_var( MVAR_Chuck_Awoke ) == 3 ) and ( tile_num( self_obj ) != 30758 ) and ( anim_busy( self_obj ) == false ) )then begin
+      add_timer_event( self_obj, 1, 1 );
+      debug_msg("Chuck should be moving again");
+   end
+   //added by killap
+   
    if( map_var( MVAR_Chuck_Awoke ) == 1 ) then begin
       set_map_var( MVAR_Chuck_Awoke, 2 );
       game_ui_disable;
@@ -143,6 +161,15 @@ procedure critter_p_proc begin
        //Macro made by Tom to keep the critter fleeing.
    end
 end
+
+//added by killap
+procedure combat_p_proc begin
+   if( map_var( MVAR_Chuck_Awoke ) == 0 ) then begin
+      script_overrides;
+   end
+end
+//end added
+
 
 /* Whenever the critter takes damage of any type, this procedure will be called. Things
    like setting ENEMY_ and LVAR_Personal_Enemy can be set here. */
@@ -235,6 +262,7 @@ end
 /* Anytime that there is a need for an ending to dialog, this node is to be called. It will just
    exit from the dialog system without any reprisals from the NPC. */
 procedure Node999 begin
+   set_map_var( MVAR_Chuck_Awoke, 3 ); //added by killap
 end
 
 

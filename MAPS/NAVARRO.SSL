@@ -44,6 +44,10 @@ export variable chris_ptr;
 export variable Commander_Locker_Ptr;
 export variable doctor_ptr;
 export variable xarn_ptr;
+export variable air_guard_obj; //added by killap - expansion
+export variable guard1_obj; //added by killap - expansion
+export variable guard2_obj; //added by killap - expansion
+export variable guard3_obj; //added by killap - expansion
 
 variable levtile;
 variable lev;
@@ -52,13 +56,46 @@ procedure start begin
 end
 
 procedure map_enter_p_proc begin
-   override_map_start_hex( 28695, 0, 0 );
-
-   if (map_first_run) then begin
-       display_msg(mstr(100));
+   
+   if (global_var(GVAR_LOAD_MAP_INDEX) == 10) then begin
+      override_map_start_hex( 19517, 2, 2 );
+      gfade_in(600);
+   end else begin
+      override_map_start_hex( 28894, 0, 0 ); //edit by killap - was 28695
+   end
+   
+   if (global_var(GVAR_CAME_ON_VERTIBIRD) == 1) then begin
+      game_ui_disable;
+      override_map_start_hex( 19519, 2, 0 );
+   end
+   
+   if ( (map_first_run) and (global_var(GVAR_LOAD_MAP_INDEX) != 10) ) then begin
+      if (global_var(GVAR_CAME_ON_VERTIBIRD) == 1) then begin
+         display_msg(mstr(101));
+      end else begin
+         display_msg(mstr(100));
+      end
    end
 
-   Check_Create_Car(CAR_NAVARRO_HEX, CAR_NAVARRO_ELEV)
+   // Begin Seraph's Code - expansion
+   if (map_var(MVAR_Doctor_Dead) == 1 and global_var(GVAR_SCHREBER_DEAD) > 1) then begin
+      set_global_var(GVAR_SCHREBER_DEAD,1);
+   end
+   // End Seraph's Code
+   
+   
+   //added by killap - prevent car from disappearing if the car runs out of gas while on the town circle
+   if ((metarule(30, 0) == 21) and (cur_map_index != MAP_CAR_DESERT) and (car_out_of_fuel)) then begin
+      set_global_var(GVAR_CAR_PLACED_TILE, 0);
+      Create_Car(CAR_NAVARRO_HEX,CAR_NAVARRO_ELEV)
+      if (tile_contains_pid_obj(CAR_NAVARRO_HEX, CAR_NAVARRO_ELEV, PID_DRIVABLE_CAR) != 0) then begin
+         Create_Trunk(CAR_NAVARRO_HEX,CAR_NAVARRO_ELEV)
+      end 
+   end else 
+      Check_Create_Car(CAR_NAVARRO_HEX, CAR_NAVARRO_ELEV)
+   //end added
+   
+   //Check_Create_Car(CAR_NAVARRO_HEX, CAR_NAVARRO_ELEV)
 
    if (elevation(dude_obj) == 1) then begin
       Full_Light;

@@ -116,7 +116,13 @@ procedure map_enter_p_proc begin
          end
       end
       nr_add_timer_event_rand(self_obj, 3, 5, float_param);
+      new_reno_barking_dog_obj := self_obj; // added by killap - expansion
    end
+end
+
+// added by killap - expansion
+procedure map_update_p_proc begin
+  new_reno_barking_dog_obj := self_obj;
 end
 
 procedure map_exit_p_proc begin
@@ -148,6 +154,7 @@ end
 
 procedure destroy_p_proc begin
    inc_neutral_critter
+   new_reno_barking_dog_obj := 0; // added by killap - expansion
 end
 
 procedure look_at_p_proc begin

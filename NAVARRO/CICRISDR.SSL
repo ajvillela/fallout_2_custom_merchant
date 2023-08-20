@@ -29,6 +29,8 @@
 procedure start;
 procedure use_p_proc;
 procedure map_enter_p_proc;
+procedure damage_p_proc; //added by killap
+procedure destroy_p_proc; //added by killap
 
 import variable chris_ptr;
 
@@ -64,3 +66,17 @@ procedure use_p_proc begin
       obj_unlock( self_obj );
    end
 end
+
+//added by killap
+procedure damage_p_proc begin
+   if (weapon_dmg_type(target_obj) == DMG_explosion) then begin
+      obj_unlock(self_obj);
+      call destroy_p_proc;
+      add_timer_event( chris_ptr, 1, 1 );
+      destroy_object(self_obj);
+   end
+end
+
+procedure destroy_p_proc begin
+end
+//end added

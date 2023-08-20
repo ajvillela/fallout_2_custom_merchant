@@ -20,6 +20,7 @@
 #define TOWN_REP_VAR            GVAR_TOWN_REP_RAIDERS
 #include "..\headers\command.h"
 #include "..\headers\Raiders.h"
+#include "..\headers\Raiders2.h" //added by killap - expansion
 
 /* Standard Script Procedures */
 procedure start;
@@ -50,6 +51,7 @@ procedure Node002;
 #define LVAR_Flags                     (0)
 #define LVAR_Home_Tile                 (1)
 #define LVAR_Home_Rot                  (2)
+#define LVAR_Leave_Time                (3)
 
 #define attempt_alarm_bit              bit_10
 
@@ -82,6 +84,20 @@ procedure timed_event_p_proc begin
 end
 
 procedure map_enter_p_proc begin
+   //added by killap - expansion
+   if (map_first_run) then begin
+      if (random(1,2) == 1) then
+         set_local_var(LVAR_Leave_Time,ONE_GAME_DAY);
+      else
+         set_local_var(LVAR_Leave_Time,(ONE_GAME_DAY*2));
+   end
+   
+   if (map_var(MVAR_Scout_Left)) then begin
+      if ( (game_time - map_var(MVAR_Raiders_Leave_Time)) >= (local_var(LVAR_Leave_Time)) ) then
+         destroy_object(self_obj);
+   end
+   //end added by killap
+
    if (is_loading_game == false) then begin
       if (map_first_run) then begin
          inc_raiders_counter;

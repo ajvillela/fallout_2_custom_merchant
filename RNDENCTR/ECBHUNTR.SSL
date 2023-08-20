@@ -165,6 +165,8 @@ end
 /* Look_at_p_proc gets called any time that the player passes the cursor over any object.
    This should only hold the most cursory of glances for the player. */
 procedure look_at_p_proc begin
+   script_overrides;
+   display_msg(mstr(100));
 end
 
 /* The player will see more indepth descriptions from this procedure. They are actively
@@ -199,11 +201,11 @@ procedure Node001 begin
 end
 
 procedure NodeFleeing begin
-   float_msg(self_obj, mstr(Random(105, 107)), FLOAT_MSG_YELLOW);
+   float_msg(self_obj, mstr(Random(106, 108)), FLOAT_MSG_YELLOW);
 end
 
 procedure NodeFighting begin
-   float_msg(self_obj, mstr(Random(100, 104)), FLOAT_MSG_RED);
+   float_msg(self_obj, mstr(Random(101, 105)), FLOAT_MSG_RED);
 end
 
 

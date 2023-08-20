@@ -29,6 +29,7 @@
 //#include "..\headers\<TownName.h>"
 
 #define NAME                    SCRIPT_ECMELKID
+#define TOWN_REP_VAR            GVAR_TOWN_REP_THE_DEN
 
 #include "..\headers\command.h"
 #include "..\headers\base.h"
@@ -108,9 +109,10 @@ procedure talk_p_proc begin
 end
 
 procedure destroy_p_proc begin
-   if (source_obj == dude_obj) then begin
+   /*if (source_obj == dude_obj) then begin
       inc_childkiller
-   end
+   end*/
+   inc_good_critter //edit by killap
 end
 
 procedure look_at_p_proc begin

@@ -110,7 +110,7 @@ procedure talk_p_proc begin
    if (get_guard_assignment(guard_assignment_none)) then begin
       call Node998;
    end else begin
-      display_msg(550);
+      display_msg(mstr(550)); //edit by killap - added mstr
    end
    set_herebefore;
 end

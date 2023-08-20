@@ -126,6 +126,10 @@ end
    written by designers are placed in here. Additionally, Reactions are generated and
    stored which affects player interactions. */
 procedure talk_p_proc begin
+   //added by killap - expansion
+   if (rnd_enc_flag(HOMESTEAD_REWARDED)) then begin
+      floater(210);
+   end
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -136,18 +140,27 @@ procedure destroy_p_proc begin
 /* Increment the aligned critter counter*/
    inc_good_critter
 
+   //added by killap - expansion
+   if not(rnd_enc_flag(HOMESTEAD_FAIL)) then
+      set_rnd_enc_flag(HOMESTEAD_FAIL);
+   //end added
+   
 /* Set global_variable for Enemy status*/
 end
 
 /* Look_at_p_proc gets called any time that the player passes the cursor over any object.
    This should only hold the most cursory of glances for the player. */
 procedure look_at_p_proc begin
+   script_overrides;
+   display_msg(mstr(200));
 end
 
 /* The player will see more indepth descriptions from this procedure. They are actively
    looking at the critter and want more information. Things like names can be added here
    if the critter is known to the player. */
 procedure description_p_proc begin
+   script_overrides;
+   display_msg(mstr(201 + critter_is_female));
 end
 
 /* Any time a skill is used on a critter this call is made. This can be to give examinations

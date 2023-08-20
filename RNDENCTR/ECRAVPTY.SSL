@@ -282,7 +282,7 @@ procedure description_p_proc begin
       if (get_critter_stat(self_obj,STAT_gender) == GENDER_MALE) then
           display_msg(mstr(102));
       else
-          display_msg(mstr(202));
+          display_msg(mstr(210)); //edit by killap - was 202
    end
 end
 
@@ -464,7 +464,7 @@ procedure Node001A begin
 
    if (not lang_filter_on and sex == SEX_PROP) then begin
       NOption(178, NodeDoSexA, 4);
-      NLowOption(179, NodeDoSexA, 4);
+      NLowOption(179, NodeDoSexA); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
    end
 end
 

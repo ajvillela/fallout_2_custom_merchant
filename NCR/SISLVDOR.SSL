@@ -28,6 +28,7 @@
 #include "..\headers\command.h"
 
 #include "..\headers\ncr.h"
+#include "..\headers\NCRENT.h"
 
 /* Defines and Macros */
 
@@ -69,6 +70,8 @@
 
 #define door_mstr(x)                    message_str(SCRIPT_DOOR, x)
 
+#define NUM_OF_PENS                     (13)
+
 /* Standard Script Procedures */
 procedure start;
 procedure use_p_proc;
@@ -95,7 +98,7 @@ procedure Set_Lockpick_Lock;
 procedure Set_Trap;
 procedure Pry_Door;
 procedure Damage_Critter;
-
+procedure destroy_p_proc;
 
 /*****************************************************************
    Local Variables which are saved. All Local Variables need to be
@@ -265,6 +268,7 @@ procedure use_skill_on_p_proc begin
    Skill_Used:=action_being_used;
 
    if (Skill_Used == SKILL_LOCKPICK) then begin
+      script_overrides; //added by killap
       display_msg(mstr(212));
 /*
        if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
@@ -333,6 +337,7 @@ procedure use_obj_on_p_proc begin
    end
 */
    if ((Tool == PID_DYNAMITE) or (Tool == PID_PLASTIC_EXPLOSIVES)) then begin
+       script_overrides; //added by killap
        call Set_Trap;
    end else begin
       script_overrides;
@@ -352,6 +357,7 @@ procedure damage_p_proc begin
 
   /************ Wood Door ****************/
 
+ if (weapon_dmg_type(target_obj) == DMG_explosion) then begin //added by killap
    if (DOOR_STATUS == STATE_WOOD) then begin
        if (local_var(LVAR_Trapped) == STATE_ACTIVE) then begin
            set_local_var(LVAR_Trapped, STATE_INACTIVE);
@@ -384,12 +390,26 @@ procedure damage_p_proc begin
            destroy_object(self_obj);
        end
    end
-
+ end
+ 
    else begin
        display_msg(door_mstr(193));
    end
+   
+  /************ Wood Door ****************/
+
 end
 
+//added by killap
+procedure destroy_p_proc begin
+   inc_map_var(MVAR_Pens_Destroyed);
+   if (map_var(MVAR_Pens_Destroyed) == NUM_OF_PENS) then begin
+      ncr_set_global_state(NCR_SLAVES_FREE);
+      set_map_var(MVAR_NCR_ENT_SLAVES_FREED, 1);
+      set_map_var(MVAR_Slavers_Attack, 1);
+   end
+end
+//end added
 
 /***************************************************************************************
    Whenever the map is first entered, this procedure will be called. The main purpose of

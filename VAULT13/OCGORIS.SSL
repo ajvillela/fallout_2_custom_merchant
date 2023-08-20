@@ -33,6 +33,7 @@
 
 #include "..\headers\command.h"
 #include "..\headers\ModReact.h"
+#include "..\headers\partybkg.h"
 
 #include "..\headers\v13.h"
 
@@ -51,8 +52,8 @@ procedure map_enter_p_proc;
 procedure push_p_proc;
 procedure timed_event_p_proc;
 procedure combat_p_proc;
-procedure combat_is_starting_p_proc;
-procedure combat_is_over_p_proc;
+//procedure combat_is_starting_p_proc; // comment out by killap - this procedure was never implemented by the original devs
+//procedure combat_is_over_p_proc; // comment out by killap - this procedure was never implemented by the original devs
 procedure map_update_p_proc;
 
 /* Script Specific Procedure Calls */
@@ -166,7 +167,8 @@ end
 procedure start begin
 end
 
-procedure combat_is_starting_p_proc begin
+// comment out by killap - these procedures were never implemented by the original devs
+/*procedure combat_is_starting_p_proc begin
    inc_local_var(LVAR_First_Combat);
 
 //   if (self_visible) then
@@ -176,7 +178,7 @@ end
 procedure combat_is_over_p_proc begin
 //   if (self_visible) then
 //      art_change_fid_num(self_obj, 99);
-end
+end*/
 
 procedure combat_p_proc begin
    variable fid;
@@ -201,7 +203,21 @@ procedure push_p_proc begin
 end
 
 procedure timed_event_p_proc begin
-   if (fixed_param == TIMER_DESTROY) then begin
+   //added by killap
+   if (fixed_param == 900) then begin
+      if (self_visible) then begin
+         if (Goris_In_Party) then begin
+            if (Is_Crippled(self_obj)) then
+               floater(2000);
+            else if (get_critter_stat(self_obj, STAT_current_rad)) then 
+               floater(2001);
+            else if (get_poison(self_obj)) then
+               floater(2002);
+         end
+      end
+      add_timer_event(self_obj, random(50, 80), 900);
+   //end added by killap
+   end else if (fixed_param == TIMER_DESTROY) then begin
       if (not obj_on_screen(self_obj)) then
          if (not Goris_In_Party) then
             destroy_object(self_obj);
@@ -232,9 +248,14 @@ procedure map_enter_p_proc begin
    if (not Goris_In_Party) then begin
       critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_VAULT13);
    end else begin
+      if (local_var(LVAR_First_Combat) == 0) then
+         set_local_var(LVAR_First_Combat,1);
       critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_PLAYER);
    end
 //   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_VAULT_DEATHCLAW);
+
+   //added by killap
+   add_timer_event(self_obj, random(25, 40), 900);
 end
 
 
@@ -262,7 +283,7 @@ procedure critter_p_proc begin
       if (Goris_In_Party and self_visible) then begin
          party_member_follow_dude
 
-         if (has_rep_berserker or has_rep_childkiller or check_general_rep < 0) then begin
+         if ( (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) and (has_rep_berserker or has_rep_childkiller or check_general_rep < 0) ) then begin //edit by killap - added (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)))
             float_msg(self_obj, mstr(1160), FLOAT_MSG_RED);
             set_self_abandon_party;
             critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_VAULT13);
@@ -300,7 +321,9 @@ end
    will be remembered. */
 procedure pickup_p_proc begin
    if (source_obj == dude_obj) then begin
-       set_local_var(LVAR_Hostile,2);
+      if (Goris_In_Party == false) then begin //added by killap
+         set_local_var(LVAR_Hostile,2);
+      end
    end
 end
 
@@ -316,9 +339,14 @@ procedure talk_p_proc begin
 
    GetReaction;
 
+   ReactToLevel; //added by killap
+   
+   find_party_background; //added by killap
+
    if (lvar_bit(LVAR_State, STATE_PACK_TROUBLE) and not lvar_bit(LVAR_State, STATE_PACK_TROUBLE_TALK)) then begin
       if (not combat_is_initialized) then begin
          set_lvar_bit_on(LVAR_State, STATE_PACK_TROUBLE_TALK);
+         //start_gdialog(NAME,self_obj,4,HEAD_GORIS,PartyMemberBackground);
          start_gdialog(NAME,self_obj,4,-1,-1);
          gSay_Start;
             call Node024;
@@ -330,6 +358,7 @@ procedure talk_p_proc begin
    end else if (cur_map_index == MAP_VAULT_13 and VAULT13_SEQ and not VAULT13_SEQ_DONE) then begin
       call Node025;
    end else if (cur_map_index == MAP_VAULT_13 and VAULT13_SEQ and VAULT13_SEQ_DONE and not Goris_In_Party) then begin
+      //start_gdialog(NAME,self_obj,4,HEAD_GORIS,PartyMemberBackground);
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
          call Node026;
@@ -339,6 +368,7 @@ procedure talk_p_proc begin
       call Node015;
    else if (lvar(LVAR_Herebefore) == 0 and cur_map_index == MAP_VAULT_13) then begin
       start_gdialog(NAME,self_obj,4,-1,-1);
+      //start_gdialog(NAME,self_obj,4,HEAD_GORIS,PartyMemberBackground);
       gSay_Start;
           call Node001;
       gSay_End;
@@ -346,12 +376,14 @@ procedure talk_p_proc begin
    end
    else if ((lvar(LVAR_Herebefore) > 0 and cur_map_index == MAP_VAULT_13 and not Goris_In_Party) or party_is_waiting) then begin
       start_gdialog(NAME,self_obj,4,-1,-1);
+      //start_gdialog(NAME,self_obj,4,HEAD_GORIS,PartyMemberBackground);
       gSay_Start;
           call Node020;
       gSay_End;
       end_dialogue;
    end else if (Goris_In_Party) then begin
       start_gdialog(NAME,self_obj,4,-1,-1);
+      //start_gdialog(NAME,self_obj,4,HEAD_GORIS,PartyMemberBackground);
       gSay_Start;
           call Node1000;
       gSay_End;
@@ -427,6 +459,15 @@ end
    for things like Doctor skill or messages for various other skills. */
 procedure use_skill_on_p_proc begin
 end
+
+//added by killap
+procedure use_obj_on_p_proc begin
+   if ( (obj_pid(obj_being_used_with) == PID_MICRO_FUSION_CELL) or (obj_pid(obj_being_used_with) == PID_SMALL_ENERGY_CELL) ) then begin
+      script_overrides;
+      display_msg(g_mstr(20000));
+   end
+end
+//end added
 
 /* Should the Player ever cause the NPC too much discomfort that he desires to attack the player,
    this call will be made. Essentially, it stores the Hostile vaule so that the critter remembers
@@ -690,7 +731,7 @@ procedure Node013 begin
 end
 
 procedure Node014 begin
-   if (global_var(TOWN_REP_VAR) >= 0 and (check_general_rep >= 0) and (not has_rep_childkiller) and (not has_rep_berserker)) then begin
+   if ( (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)) or ((global_var(TOWN_REP_VAR) >= 0) and ( (check_general_rep >= 0) and (not has_rep_childkiller) and (not has_rep_berserker)) ) ) then begin //edit by killap - added (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       debug_msg("OCGORIS: true_party_size " + true_party_size);
       debug_msg("OCGORIS: party_max_formula " + party_max_formula);
       debug_msg("OCGORIS: ((true_party_size >= (party_max_formula)) or (true_party_size >= 5)): " + ((true_party_size >= (party_max_formula)) or (true_party_size >= 5)));
@@ -783,8 +824,9 @@ procedure Node020 begin
 end
 
 procedure Node021 begin
-   Reply(204);
-   NLowOption(205, Node022, 4);
+   //Reply(204);
+   Reply(mstr(204) + " " + dude_name + mstr(216)); // edit by killap 
+   NLowOption(205, Node022); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
    NOption(206, Node022, 4);
 end
 
@@ -794,15 +836,16 @@ procedure NodeRemove begin
 end
 
 procedure Node022 begin
-   set_lvar_bit_on(LVAR_State, STATE_TALK_DCLAW);
+   //set_lvar_bit_on(LVAR_State, STATE_TALK_DCLAW);
+   set_local_var(LVAR_First_Combat,2); // added by killap
    if (dude_iq < 4) then
       Reply(207);
    else
       Reply(208);
 
-   NLowOption(209, NodeRemove);
+   NLowOption(209, Node1002); // edit by killap - was NodeRemove
    GLowOption(210, Node999);
-   NOption(211, NodeRemove, 4);
+   NOption(211, Node1002, 4); // edit by killap - was NodeRemove
    GOption(212, Node999, 4);
 end
 
@@ -827,23 +870,25 @@ end
       NOption(1018, Node999, 4)
 
 #define GORISDEFAULTPARTYOPTIONS                                        \
-   NLowOption(1001, Node1001);                                          \
+   if (self_cur_hits != self_max_hits) then                             \
+      NLowOption(1001, Node1001);                                       \
    NLowOption(1002, Node1002);                                          \
    NLowOption(1003, Node1003);                                          \
    NLowOption(1167, Node1007);                                          \
    if (party_is_waiting) then                                           \
-      NLowOption(1007, Node1100);                                       \
-   if (lvar(LVAR_First_Combat) >= 1 and not lvar_bit(LVAR_State, STATE_TALK_DCLAW)  ) then                               \
+      NLowOption(200, Node1100); /* edit by killap - was 1007 */        \
+   if (local_var(LVAR_First_Combat) == 1) then                          \
       NLowOption(1008, Node022);                                        \
    NLowOption(1009, Node999);                                           \
                                                                         \
-   NOption(1010, Node1001, 4);                                          \
+   if (self_cur_hits != self_max_hits) then                             \
+      NOption(1010, Node1001, 4);                                       \
    NOption(1011, Node1002, 4);                                          \
    NOption(1012, Node1003, 4);                                          \
    NOption(1166, Node1007, 4);                                          \
    if (party_is_waiting) then                                           \
-      NLowOption(1016, Node1100, 4);                                    \
-   if (lvar(LVAR_First_Combat) >= 1 and not lvar_bit(LVAR_State, STATE_TALK_DCLAW) ) then                               \
+      NOption(1016, Node1100, 4); /* edit by killap - was NLowOption */ \
+   if (local_var(LVAR_First_Combat) == 1) then                          \
       NOption(1017, Node022, 4);                                        \
    NOption(1018, Node999, 4)
 
@@ -943,6 +988,8 @@ end
 
 procedure Node026 begin
    Reply(1161);
+   
+   set_lvar_bit_on(LVAR_State, STATE_PACK_TROUBLE_TALK); //added by killap
    NOption(1162, Node014, 4);
    NOption(1163, Node999, 4);
    NLowOption(1164, Node014);

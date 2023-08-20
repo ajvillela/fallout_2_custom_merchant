@@ -129,13 +129,23 @@ procedure critter_p_proc begin
        attack(dude_obj);
    end
 
-   if( ( day ) and ( tile_num( self_obj ) != 14143 ) ) then begin
-      reg_anim_obj_move_to_tile( self_obj, 14143, -1 );
-      animate_rotation(2);
+   if( ( day ) ) then begin
+      //added by killap
+      reg_anim_begin();
+         animate_move_to_tile(14143);
+      reg_anim_end();
+      //end added by killap
+      //reg_anim_obj_move_to_tile( self_obj, 14143, -1 );
+      //animate_rotation(2);
    end
-   else if( ( night ) and ( tile_num( self_obj ) != 13531 ) ) then begin
-      reg_anim_obj_move_to_tile( self_obj, 13531, -1 );
-      animate_rotation(2);
+   else if( ( night ) ) then begin
+      //added by killap
+      reg_anim_begin();
+         animate_move_to_tile(13531);
+      reg_anim_end();
+      //end added by killap
+      //reg_anim_obj_move_to_tile( self_obj, 13531, -1 );
+      //animate_rotation(2);
    end
 end
 
@@ -313,7 +323,7 @@ end
 procedure Node008 begin
    Reply(130);
 
-   NLowOption(131, Node999, 004);
+   NLowOption(131, Node999); // Seraph's Fix: NLowOption only takes two parameters. Thanks Rob!
 end
 
 procedure Node009 begin

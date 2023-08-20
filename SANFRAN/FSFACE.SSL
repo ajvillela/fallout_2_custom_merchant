@@ -301,8 +301,8 @@ end
 
 procedure NodeStr15 begin
    fadeout(500);
-   set_critter_stat(dude_obj, STAT_st, 1);
-   game_time_advance(ONE_GAME_WEEK * 2);
+      game_time_advance(ONE_GAME_WEEK * 2);
+      set_critter_stat(dude_obj, STAT_st, 1);
    fadein(500);
    set_adjust(STR);
    call Node015;
@@ -310,8 +310,8 @@ end
 
 procedure NodeInt15 begin
    fadeout(500);
-   set_critter_stat(dude_obj, STAT_iq, 1);
-   game_time_advance(ONE_GAME_WEEK * 4);
+      game_time_advance(ONE_GAME_WEEK * 4);
+      set_critter_stat(dude_obj, STAT_iq, 1);
    fadein(500);
    set_adjust(INT);
    call Node015;
@@ -319,17 +319,29 @@ end
 
 procedure NodePer15 begin
    fadeout(500);
-   set_critter_stat(dude_obj, STAT_pe, 1);
-   game_time_advance(ONE_GAME_WEEK * 2);
+      game_time_advance(ONE_GAME_WEEK * 2);
+      set_critter_stat(dude_obj, STAT_pe, 1);
    fadein(500);
    set_adjust(PER);
    call Node015;
 end
 
 procedure NodeChr15 begin
+   variable extra_ch := 0; //added by killap
    fadeout(500);
-   set_critter_stat(dude_obj, STAT_ch, 1);
-   game_time_advance(ONE_GAME_WEEK * 3);
+      game_time_advance(ONE_GAME_WEEK * 3);
+      
+      // added by killap - expansion
+      if (has_trait(TRAIT_PERK, dude_obj, PERK_dermal_enhancement_perk) or has_trait(TRAIT_PERK, dude_obj, PERK_phoenix_enhancement_perk)) then
+         set_pc_extra_stat(STAT_ch, get_pc_extra_stat(STAT_ch) + 1);
+      else
+         set_critter_stat(dude_obj, STAT_ch, 1); 
+         
+      //edit by killap - requires sfall functions; odd hack for one user. Not sure if others are affected, or why it happened...
+      extra_ch := get_pc_extra_stat(STAT_ch);
+      if (extra_ch < 0) then
+         set_pc_extra_stat(STAT_ch, extra_ch + 1);
+      //end
    fadein(500);
    set_adjust(CHR);
    call Node015;
@@ -684,7 +696,7 @@ procedure sequence begin
 
    if (seqCnt == 0) then begin
       fadeout(500);
-//      party_member_hide_all
+      party_member_hide_all // Seraph's Fix: Uncommented out this line
 
       game_ui_disable;
       lastDudePos := dude_tile;
@@ -815,11 +827,11 @@ procedure sequence begin
 
       move_to(dude_obj, 14547, 1);
       party_no_follow_off;
-      animate_rotation(dude_obj, lastDudeRot);
+      anim(dude_obj, ANIMATE_ROTATION, lastDudeRot); // Seraph's Fix: animate_rotation only affects self_obj. Thanks Rob!
       set_obj_visibility(dude_obj, OBJ_VIS);
       game_ui_enable;
 
-//      party_member_unhide_all
+      party_member_unhide_all // Seraph's Fix: Uncommented out this line
 
       ON_BOS_SEQ_DONE;
       fadein(500);

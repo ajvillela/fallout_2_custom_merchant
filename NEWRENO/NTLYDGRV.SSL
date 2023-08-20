@@ -31,7 +31,7 @@ procedure spatial_p_proc begin
       if ((get_escape(escape_none) == false) and (uncovered_lloyd_grave)) then begin
          if ((dude_tile == 13066) or (dude_tile == 13067) or (dude_tile == 13068)) then begin
             gfade_out(5);
-               critter_attempt_placement(dude_obj, under_grave_tile_dude, 1);
+               //critter_attempt_placement(dude_obj, under_grave_tile_dude, 1);
                move_to(dude_obj, under_grave_tile_dude, 1);
             gfade_in(5);
          end

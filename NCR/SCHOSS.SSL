@@ -48,6 +48,7 @@ procedure description_p_proc;
 procedure use_skill_on_p_proc;
 procedure damage_p_proc;
 procedure map_enter_p_proc;
+procedure combat_p_proc;
 
 /* Script Specific Procedure Calls */
 procedure Node998;                                      // This Node is Always Combat
@@ -104,6 +105,14 @@ variable HpStop := 0;
 procedure start begin
 end
 
+procedure combat_p_proc begin
+
+   if ( (self_cur_hits <= (self_max_hits / 3)) and (is_critter_prone(self_obj)) ) then begin
+      set_global_var(GVAR_NCR_BEAT_HOSS, 1);
+   end
+   
+end
+
 procedure timed_event_p_proc begin
    if (fixed_param == TIMER_CHECK_END_FIGHT) then begin
       debug_msg("SCHOSS: checking for weapon");
@@ -115,7 +124,7 @@ procedure timed_event_p_proc begin
          call surrender;
       end else begin
          if (combat_is_initialized) then
-            add_timer_event(self_obj, game_ticks(1), TIMER_CHECK_END_FIGHT);
+            add_timer_event(self_obj, game_ticks(2), TIMER_CHECK_END_FIGHT);
       end
    end else if (fixed_param == TIMER_TALK) then begin
       dialogue_system_enter;
@@ -198,7 +207,7 @@ procedure talk_p_proc begin
          call Node001;
       gSay_End;
       end_dialogue;
-   end else if (beat_hoss == 0 and local_var(LVAR_Surrendered) == 1) then begin
+   end else if ( ( (beat_hoss == 0) and (local_var(LVAR_Surrendered) == 1) ) or ( (beat_hoss == 1) and (local_var(LVAR_Surrendered) == 0) ) ) then begin
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
       if (local_var(LVAR_Used_Gun)) then
@@ -265,7 +274,7 @@ end
 
 procedure NodeCombat begin
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LOANER);
-   add_timer_event(self_obj, game_ticks(1), TIMER_CHECK_END_FIGHT);
+   add_timer_event(self_obj, game_ticks(2), TIMER_CHECK_END_FIGHT);
    call Node998;
 end
 
@@ -298,12 +307,14 @@ end
 
 procedure Node005 begin
    set_global_var(GVAR_NCR_BEAT_HOSS, 1);
+   set_local_var(LVAR_Surrendered, 1); //added by killap
    Reply(113);
    ENDOPTION;
 end
 
 procedure Node006 begin
    set_global_var(GVAR_NCR_BEAT_HOSS, 1);
+   set_local_var(LVAR_Surrendered, 1); //added by killap
    Reply(114);
    ENDOPTION;
 end
@@ -362,24 +373,26 @@ procedure dude_pulls_gun begin
    variable pid;
    variable obj;
 
-
-   obj := critter_inven_obj(dude_obj, INVEN_TYPE_RIGHT_HAND);
-   if (obj) then begin
-      pid := obj_pid(obj);
-
-      if not pid then begin
-         obj := critter_inven_obj(dude_obj, INVEN_TYPE_LEFT_HAND);
-         if (obj) then
-            pid := obj_pid(obj);
+   if (dude_is_armed) then begin // added check by killap - prevents crash when calling proto_data
+      obj := critter_inven_obj(dude_obj, INVEN_TYPE_RIGHT_HAND);
+      if (obj >= 0) then begin // changed to >=0 so that we actually check both hands - killap
+         pid := obj_pid(obj);
+         if (not(pid) or pid == -1) then begin
+            obj := critter_inven_obj(dude_obj, INVEN_TYPE_LEFT_HAND);
+            if (obj) then
+               pid := obj_pid(obj);
+         end
       end
+   
+      if (pid and (pid != -1)) then begin
+         if (proto_data(pid, it_weapon_range) > 2) then
+            return 1;
+      end
+   
+      return 0;
+   end else begin
+      return 0;
    end
-
-   if (pid and (pid != -1)) then begin
-      if (proto_data(pid, it_weapon_range) > 2) then
-         return 1;
-   end
-
-   return 0;
 end
 
 //xxxxxxxxxxxxxxxxxxxx

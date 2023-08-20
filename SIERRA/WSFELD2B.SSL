@@ -53,6 +53,7 @@ procedure use_obj_on_p_proc;
 procedure map_update_p_proc;
 procedure spatial_p_proc;
 procedure timed_event_p_proc;
+procedure map_enter_p_proc;   //added by killap
 
 #define LVAR_Timed_Event                (0)
 
@@ -63,6 +64,23 @@ variable Field_Ptr;
 
 procedure start begin
 end
+
+//added by killap
+procedure map_enter_p_proc begin
+   if (obj_pid(self_obj) != -1) then begin
+       FIELD_PTR:=self_obj;
+   end
+
+   //this can only happen if the player leaves the map before a timed event has expired
+   if (local_var(LVAR_Timed_Event) == 1) then begin
+       set_local_var(LVAR_Timed_Event,0);
+       set_map_var(FIELD_STATUS,FIELD_ENABLED);
+       if (obj_pid(self_obj) != -1) then begin
+           set_obj_visibility(self_obj,0);                  // vis
+       end
+   end
+end 
+//end added
 
 procedure map_update_p_proc begin
    if (obj_pid(self_obj) != -1) then begin

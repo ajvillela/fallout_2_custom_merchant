@@ -297,6 +297,7 @@ procedure use_skill_on_p_proc begin
            call Skill_Disarm_Traps;
        end
        else begin
+           script_overrides; //added by killap
            if (source_obj == dude_obj) then begin
                display_msg(mstr(195));
            end

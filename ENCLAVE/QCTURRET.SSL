@@ -37,6 +37,7 @@ procedure start;
 procedure critter_p_proc;
 procedure map_enter_p_proc;
 procedure Security_Check(variable Security);
+procedure damage_p_proc; //added by killap
 
 import variable Frank_Ptr;
 variable countdown;
@@ -141,3 +142,16 @@ procedure Security_Check(variable Security) begin
            attack(dude_obj);
    end
 end
+
+//added by killap
+procedure damage_p_proc begin
+   if (cur_map_index == MAP_ENCLAVE_DETENTION) then
+       set_global_var(GVAR_ENCLAVE_TURRET_DETENTION,TURRET_ALERT);
+   else if (cur_map_index == MAP_ENCLAVE_BARRACKS) then
+       set_global_var(GVAR_ENCLAVE_TURRET_GUARD,TURRET_ALERT);
+   else if (cur_map_index == MAP_ENCLAVE_PRESIDENT) then
+       set_global_var(GVAR_ENCLAVE_TURRET_PRESIDENT,TURRET_ALERT);
+   else if (cur_map_index == MAP_ENCLAVE_REACTOR) then
+       set_global_var(GVAR_ENCLAVE_TURRET_SCIENCE,TURRET_ALERT);
+end
+//end added

@@ -65,7 +65,8 @@ end
    default from the prototype, and needs to be set in scripts. */
 procedure map_enter_p_proc begin
    Only_Once:=0;
-   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_RND_RAIDERS);
+   //critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_RND_RAIDERS);
+   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_RND_GANGS); //edit by killap
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_BERSERKER);
 end
 
@@ -90,7 +91,7 @@ procedure critter_p_proc begin
    this as well. */
 
    if (obj_can_see_obj(self_obj,dude_obj)) then begin
-       floater(random(200,211));
+       floater(random(200,209)); //edit by killap - ended with 211, but this included Raider specific dialogue
        attack(dude_obj);
    end
 
@@ -129,6 +130,7 @@ procedure destroy_p_proc begin
    if (global_var(GVAR_MORTON_GANG) <= 0) then begin
        display_msg(g_mstr(1018));
        give_xp(EXP_CLEAR_FROG_MORTON_GANG);
+       inc_global_var_amt(GVAR_TOWN_REP_REDDING, 10); //added by killap
    end
 /* Set global_variable for Enemy status*/
 end

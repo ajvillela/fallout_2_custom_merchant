@@ -43,7 +43,8 @@ end
 procedure timed_event_p_proc begin
 variable willie_obj;
    if (fixed_param == diggin_willie_param) then begin
-      dude_floater(201);
+      float_msg_clear(self_obj); //added by killap
+      dude_floater(201 + (500*dude_is_stupid));
       nr_add_timer_event(self_obj, 2, back_to_diggin_param);
    end else if (fixed_param == back_to_diggin_param) then begin
       gfade_out(ONE_GAME_SECOND);
@@ -89,7 +90,7 @@ procedure check_free_willie_proc begin
          set_dug_up_willie;
          game_ui_disable;
          float_msg(self_obj, " ", FLOAT_MSG_GREY);
-         dude_floater(200);
+         dude_floater(200 + (500*dude_is_stupid)); //edit by killap - added (500*dude_is_stupid)
          nr_add_timer_event(self_obj, 2, diggin_willie_param);
       end
    end

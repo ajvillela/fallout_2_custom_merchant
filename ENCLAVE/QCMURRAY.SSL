@@ -182,13 +182,14 @@ procedure talk_p_proc begin
        call Node003;
    end
 
-   else if ((dude_wearing_power_armor) and (party_size == 1)) then begin
+   //commented out unimplemented disguise code
+   /*else if ((dude_wearing_power_armor) and (party_size == 1)) then begin
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node004;
        gSay_End;
        end_dialogue;
-   end
+   end*/
 
    else begin
        start_gdialog(NAME,self_obj,4,-1,-1);
@@ -241,6 +242,7 @@ end
 procedure Node998 begin
    floater(random(129,133));
    set_local_var(LVAR_Hostile,2);
+   set_global_var(GVAR_ENCLAVE_ALARM,ALARM_INTRUDER);  //added by killap
 end
 
 /* Anytime that there is a need for an ending to dialog, this node is to be called. It will just
@@ -335,7 +337,7 @@ procedure Node010 begin
    Reply(141);
 
    BOption(142,Node010a,004);
-   NOption(143,Node998,004);
+   BOption(143,Node998,004); //edit by killap: was NOption
    NOption(144,Node014,004);
    GOption(145,Node008b,004);
 end
@@ -369,19 +371,20 @@ procedure Node013 begin
        give_xp(EXP_DESTROY_REACTOR_TALK);
    end
    set_global_var(GVAR_ENCLAVE_ALARM,ALARM_REACTOR);
+   set_global_var(GVAR_ENCLAVE_COMPUTER,COMPUTER_DESTROYED); //added by killap
 
    Reply(153);
 
    GOption(154,Node013a,004);
    BOption(155,Node998,004);
    NOption(156,Node008b,004);
-end
+end 
 
 procedure Node013a begin
    if (skill_success(dude_obj,SKILL_CONVERSANT,0)) then
        call Node999;
    else
-       call Node008a;
+       call Node008b; //edit by killap - was Node008a
 end
 
 procedure Node014 begin

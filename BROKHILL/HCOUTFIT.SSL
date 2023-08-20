@@ -215,28 +215,28 @@ procedure talk_p_proc begin
        gSay_End;
        end_dialogue;
    end
-   else if( ( local_var( LVAR_Caravan ) == V_CITY ) and ( get_day == 21 ) ) then begin
+   else if( ( local_var( LVAR_Caravan ) == V_CITY ) and ( get_day == 21 ) and ( global_var( GVAR_CHAD_DEAD ) == 0 ) and ( (global_var(GVAR_BH_CHAD) != CHAD_ARRESTED) and (global_var( GVAR_BH_CHAD) != CHAD_FLED ) ) ) then begin // edits by killap - expansion
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node023;
        gSay_End;
        end_dialogue;
    end
-   else if( ( local_var( LVAR_Caravan ) == GKO ) and ( get_day == 1 ) ) then begin
+   else if( ( local_var( LVAR_Caravan ) == GKO ) and ( get_day == 1 ) and ( global_var( GVAR_CHAD_DEAD ) == 0 ) and ( (global_var(GVAR_BH_CHAD) != CHAD_ARRESTED) and (global_var( GVAR_BH_CHAD) != CHAD_FLED ) ) ) then begin // edits by killap - expansion
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node025;
        gSay_End;
        end_dialogue;
    end
-   else if( ( local_var( LVAR_Caravan ) == NCR ) and ( get_day == 11 ) and ( global_var(GVAR_BH_FTM) == FTM_EXPOSED ) ) then begin
+   else if( ( local_var( LVAR_Caravan ) == NCR ) and ( get_day == 11 ) and ( global_var(GVAR_BH_FTM) == FTM_EXPOSED ) and ( global_var( GVAR_CHAD_DEAD ) == 0 ) and ( (global_var(GVAR_BH_CHAD) != CHAD_ARRESTED) and (global_var( GVAR_BH_CHAD) != CHAD_FLED ) )) then begin // edits by killap - expansion
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node026;
        gSay_End;
        end_dialogue;
    end
-   else if( ( local_var( LVAR_Caravan ) == NCR ) and ( get_day == 11 ) ) then begin
+   else if( ( local_var( LVAR_Caravan ) == NCR ) and ( get_day == 11 ) and ( global_var( GVAR_CHAD_DEAD ) == 0 ) and ( (global_var(GVAR_BH_CHAD) != CHAD_ARRESTED) and (global_var( GVAR_BH_CHAD) != CHAD_FLED ) ) ) then begin // edits by killap - expansion
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node024;
@@ -341,7 +341,11 @@ end
 procedure Node003 begin
    if( global_var( GVAR_CHAD_DEAD ) == 1 ) then begin
       Reply(212);
+   //added by killap - expansion
+   end else if ( (global_var(GVAR_BH_CHAD) == CHAD_ARRESTED) or (global_var( GVAR_BH_CHAD) == CHAD_FLED ) ) then begin
+      Reply(214);
    end
+   //end added
    else if( local_var( LVAR_Crap_Shoveled ) < 5 ) then begin
       if (dude_iq < 4) then
          Reply(114);
@@ -363,7 +367,8 @@ procedure Node003 begin
       end
    end
 
-   if( global_var( GVAR_CHAD_DEAD ) == 1 ) then begin
+   //edit by killap - added ( (global_var(GVAR_BH_CHAD) == CHAD_ARRESTED) or (global_var( GVAR_BH_CHAD) == CHAD_FLED ) ) - expansion
+   if ( ( global_var( GVAR_CHAD_DEAD ) == 1 ) or (global_var(GVAR_BH_CHAD) == CHAD_ARRESTED) or (global_var( GVAR_BH_CHAD) == CHAD_FLED )  ) then begin
       NOption(213, Node999, 001);
    end
    else begin

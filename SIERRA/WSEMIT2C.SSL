@@ -36,7 +36,7 @@
 
 #define TRAPS_PENALTY           (-20)
 #define SCIENCE_PENALTY         (-40)
-#define TOOL_BONUS              (SCIENCE_PENALTY + 20)
+#define TOOL_BONUS              (SCIENCE_PENALTY + 20 + ((obj_pid(obj_being_used_with) == PID_SUPER_TOOL_KIT) * 20))
 
 #define LEVEL_MAP_VAR           MVAR_Security_Level_2
 #define FIELD_STATUS            MVAR_Field_2c
@@ -118,7 +118,7 @@ procedure use_obj_on_p_proc begin
 
    Tool:=obj_pid(obj_being_used_with);
 
-   if ((Tool == PID_MULTI_TOOL) and (map_var(FIELD_STATUS) < FIELD_DAMAGED) and (global_var(GVAR_SIERRA_BASE_POWER) == 0)) then begin
+   if (((Tool == PID_MULTI_TOOL) or (Tool == PID_SUPER_TOOL_KIT)) and (map_var(FIELD_STATUS) < FIELD_DAMAGED) and (global_var(GVAR_SIERRA_BASE_POWER) == 0)) then begin //added super_tool_kit - killap
        script_overrides;
        if (skill_success(source_obj,SKILL_SCIENCE,TOOL_BONUS)) then begin
            if (map_var(FIELD_STATUS) == FIELD_ENABLED) then begin
@@ -164,32 +164,36 @@ procedure damage_p_proc begin
    variable Field_Pid;
    variable Field_Elev;
 
-   if (skill_success(dude_obj,SKILL_TRAPS,TRAPS_PENALTY)) then begin
-       set_map_var(FIELD_STATUS,FIELD_DESTROYED);
-       destroy_object(Field_Ptr);
-       Field_Ptr:=0;
-       display_msg(mstr(116));
-       debug_msg("Successfully destroyed the Field.");
-   end
-   else begin
-       set_map_var(FIELD_STATUS,FIELD_DAMAGED);
-       Field_Hex:=tile_num(Field_Ptr);
-       Field_Pid:=obj_pid(Field_Ptr);
-       Field_Elev:=elevation(Field_Ptr);
-       destroy_object(Field_Ptr);
-       Field_Ptr:=0;
-       if (Field_Pid == PID_NS_FORCE_FIELD) then begin
-           debug_msg("Make NW Pain Field.");
-           create_object_sid(PID_NS_PAIN_FIELD,Field_Hex,Field_Elev,CUR_FIELD_SCRIPT);
-       end
-       else begin
-           debug_msg("Make EW Pain Field.");
-           create_object_sid(PID_EW_PAIN_FIELD,Field_Hex,Field_Elev,CUR_FIELD_SCRIPT);
-       end
-   end
+   if (map_var(FIELD_STATUS) != FIELD_DESTROYED) then begin //added check by killap
+      if (skill_success(dude_obj,SKILL_TRAPS,TRAPS_PENALTY)) then begin
+         set_map_var(FIELD_STATUS,FIELD_DESTROYED);
+         destroy_object(Field_Ptr);
+         Field_Ptr:=0;
+         display_msg(mstr(116));
+         debug_msg("Successfully destroyed the Field.");
+      end
+      else begin
+         if (map_var(FIELD_STATUS) != FIELD_DAMAGED) then begin //added check by killap
+            set_map_var(FIELD_STATUS,FIELD_DAMAGED);
+            Field_Hex:=tile_num(Field_Ptr);
+            Field_Pid:=obj_pid(Field_Ptr);
+            Field_Elev:=elevation(Field_Ptr);
+            destroy_object(Field_Ptr);
+            Field_Ptr:=0;
+            if (Field_Pid == PID_NS_FORCE_FIELD) then begin
+               debug_msg("Make NW Pain Field.");
+               create_object_sid(PID_NS_PAIN_FIELD,Field_Hex,Field_Elev,CUR_FIELD_SCRIPT);
+            end
+            else begin
+               debug_msg("Make EW Pain Field.");
+               create_object_sid(PID_EW_PAIN_FIELD,Field_Hex,Field_Elev,CUR_FIELD_SCRIPT);
+            end
+         end
+      end
 
-   set_map_var(LEVEL_MAP_VAR,1);
-   set_global_var(GVAR_SIERRA_BASE_ALERT,SIERRA_ALERT_ON);
-   set_global_var(GVAR_SIERRA_BASE_SECURITY,SIERRA_SECURITY_ON);
-   display_msg(mstr(111));
+      set_map_var(LEVEL_MAP_VAR,1);
+      set_global_var(GVAR_SIERRA_BASE_ALERT,SIERRA_ALERT_ON);
+      set_global_var(GVAR_SIERRA_BASE_SECURITY,SIERRA_SECURITY_ON);
+      display_msg(mstr(111));
+   end
 end

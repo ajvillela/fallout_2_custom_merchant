@@ -116,7 +116,11 @@ procedure Node111;
 procedure Node112;
 procedure Node113;
 procedure Node114;
-
+//added by killap - RP
+procedure Node115;
+procedure Node116;
+procedure Node117;
+//end added
 procedure PartyFree;
 procedure PayDude;
 procedure PayParty;
@@ -132,6 +136,7 @@ procedure PayParty;
 #define LVAR_Hostile                    (5)
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Freeheal                   (7)
+#define LVAR_Heardramble                (8) // added by killap
 
 #define FH_GIVEN                (1)     //doc has told player he will give freeheal
 #define FH_USED                 (2)     //player has used the freeheal
@@ -147,6 +152,61 @@ import variable broken_hills_temp_box;
 #define move_inven_to_temp_box         move_obj_inven_to_obj(self_obj, broken_hills_temp_box);
 #define move_inven_from_temp_box       move_obj_inven_to_obj(broken_hills_temp_box, self_obj);
 
+//added by killap
+#define If_Companion_Needs_Healing                unhealthy_members := 0;         \
+                                                   if (Vic_In_Party) then                              \
+                                                      if ((Is_Injured(Vic_Ptr)) or (get_poison(Vic_Ptr) > 0) or (get_critter_stat(Vic_Ptr, STAT_current_rad)) or (Is_Crippled(Vic_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (Myron_In_Party) then                            \
+                                                      if ((Is_Injured(Myron_Ptr)) or (get_poison(Myron_Ptr) > 0) or (get_critter_stat(Myron_Ptr, STAT_current_rad)) or (Is_Crippled(Myron_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (Marcus_In_Party) then                           \
+                                                      if ((Is_Injured(Marcus_Ptr)) or (get_poison(Marcus_Ptr) > 0) or (get_critter_stat(Marcus_Ptr, STAT_current_rad)) or (Is_Crippled(Marcus_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (MacRae_In_Party) then                           \
+                                                      if ((Is_Injured(MacRae_Ptr)) or (get_poison(MacRae_Ptr) > 0) or (get_critter_stat(MacRae_Ptr, STAT_current_rad)) or (Is_Crippled(MacRae_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (Sulik_In_Party) then                            \
+                                                      if ((Is_Injured(Sulik_Ptr)) or (get_poison(Sulik_Ptr) > 0) or (get_critter_stat(Sulik_Ptr, STAT_current_rad)) or (Is_Crippled(Sulik_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (Lenny_In_Party) then                            \
+                                                      if ((Is_Injured(Lenny_Ptr)) or (get_poison(Lenny_Ptr) > 0) or (get_critter_stat(Lenny_Ptr, STAT_current_rad)) or (Is_Crippled(Lenny_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (Cyberdog_In_Party) then                         \
+                                                      if ((Is_Injured(Cyberdog_Ptr)) or (get_poison(Cyberdog_Ptr) > 0) or (get_critter_stat(Cyberdog_Ptr, STAT_current_rad)) or (Is_Crippled(Cyberdog_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (Doc_In_Party) then                              \
+                                                      if ((Is_Injured(Doc_Ptr)) or (get_poison(Doc_Ptr) > 0) or (get_critter_stat(Doc_Ptr, STAT_current_rad)) or (Is_Crippled(Doc_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (Goris_In_Party) then                            \
+                                                      if ((Is_Injured(Goris_Ptr)) or (get_poison(Goris_Ptr) > 0) or (get_critter_stat(Goris_Ptr, STAT_current_rad)) or (Is_Crippled(Goris_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (Davin_In_Party) then                            \
+                                                      if ((Is_Injured(Davin_Ptr)) or (get_poison(Davin_Ptr) > 0) or (get_critter_stat(Davin_Ptr, STAT_current_rad)) or (Is_Crippled(Davin_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (Miria_In_Party) then                            \
+                                                      if ((Is_Injured(Miria_Ptr)) or (get_poison(Miria_Ptr) > 0) or (get_critter_stat(Miria_Ptr, STAT_current_rad)) or (Is_Crippled(Miria_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (Robobrain_In_Party) then                        \
+                                                      if ((Is_Injured(Robobrain_Ptr)) or (get_poison(Robobrain_Ptr) > 0) or (get_critter_stat(Robobrain_Ptr, STAT_current_rad)) or (Is_Crippled(Robobrain_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (Dogmeat_In_Party) then                        \
+                                                      if ((Is_Injured(Dogmeat_Ptr)) or (get_poison(Dogmeat_Ptr) > 0) or (get_critter_stat(Dogmeat_Ptr, STAT_current_rad)) or (Is_Crippled(Dogmeat_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (K9_In_Party) then                        \
+                                                      if ((Is_Injured(K9_Ptr)) or (get_poison(K9_Ptr) > 0) or (get_critter_stat(K9_Ptr, STAT_current_rad)) or (Is_Crippled(K9_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \     
+                                                   if (Kitsune_In_Party) then                        \
+                                                      if ((Is_Injured(Kitsune_Ptr)) or (get_poison(Kitsune_Ptr) > 0) or (get_critter_stat(Kitsune_Ptr, STAT_current_rad)) or (Is_Crippled(Kitsune_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \    
+                                                   if (Dex_In_Party) then                        \
+                                                      if ((Is_Injured(Dex_Ptr)) or (get_poison(Dex_Ptr) > 0) or (get_critter_stat(Dex_Ptr, STAT_current_rad)) or (Is_Crippled(Dex_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \    
+                                                    if (Cat_Jules_In_Party) then                        \
+                                                      if ((Is_Injured(Cat_Jules_Ptr)) or (get_poison(Cat_Jules_Ptr) > 0) or (get_critter_stat(Cat_Jules_Ptr, STAT_current_rad)) or (Is_Crippled(Cat_Jules_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \                                                                                                                                                                                                                                                                                                                                                                                                             
+                                                   if (unhealthy_members > 0)
+
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
 variable member;
@@ -154,6 +214,7 @@ variable Heal_Cost := 0;
 variable From_5 := 0;
 variable From_26 := 0;
 variable From_32 := 0;
+variable unhealthy_members:=0; //added by killap
 
 procedure start begin
 end
@@ -296,7 +357,6 @@ end
 procedure Node001 begin
    if ( local_var(LVAR_Herebefore) == 0 ) then begin
       set_local_var(LVAR_Herebefore,1);
-      set_global_var(GVAR_KNOW_DOC_HOLIDAY,1);
       Reply(103);
    end
    else
@@ -305,11 +365,13 @@ procedure Node001 begin
    NLowOption(105,Node020);
    if( dude_cur_hits < dude_max_hits ) then
       NOption(106,Node001a,004);
-   if( party_size >= 2 ) then
+   //if( party_size >= 2 ) then
+   If_Companion_Needs_Healing then // edit by killap
       NOption(107,Node001b,004);
    if ( local_var(LVAR_Freeheal) == 0 ) then
       NOption(108,Node004,004);
-   NOption(109,Node005,004);
+   if ( local_var(LVAR_Heardramble) == 0 ) then // added by killap
+     NOption(109,Node005,004);
    NOption(110,Node006,004);
    NOption(111,Node001c,004);
    NOption(112,Node999,004);
@@ -382,6 +444,21 @@ procedure Node001b begin
       if (Is_Injured(K9_Ptr) or Is_Crippled(K9_Ptr)) then
          NOption(401,Node114,004);
    end
+   //added by killap - RP
+   if (Kitsune_In_Party) then begin
+      if (Is_Injured(Kitsune_Ptr) or Is_Crippled(Kitsune_Ptr)) then
+         NOption(402,Node115,004);
+   end
+   if (Dex_In_Party) then begin
+      if (Is_Injured(Dex_Ptr) or Is_Crippled(Dex_Ptr)) then
+         NOption(403,Node116,004);
+   end
+   if (Cat_Jules_In_Party) then begin
+      if (Is_Injured(Cat_Jules_Ptr) or Is_Crippled(Cat_Jules_Ptr)) then
+         NOption(404,Node117,004);
+   end
+   //end added by killap
+   
    NOption(313,Node999,004); //end dialogue
 end
 
@@ -563,6 +640,13 @@ procedure Node021 begin
    else begin
       item_caps_adjust(dude_obj, -(money/2)); //take half if less than 100...check with Colin
    end
+   // Begin Seraph's Code
+   critter_heal(dude_obj,dude_max_hits-dude_cur_hits);
+   critter_uninjure(dude_obj, (DAM_CRIP_LEG_LEFT bwor DAM_CRIP_LEG_RIGHT bwor DAM_CRIP_ARM_LEFT bwor DAM_CRIP_ARM_RIGHT));
+   gfade_out(600);
+   game_time_advance(game_ticks(2*ONE_GAME_HOUR));//Heal Damage
+   gfade_in(600);
+   // End Seraph's Code
    Reply(170); //check doc NBK
    NLowOption(171,Node022);
 end
@@ -672,7 +756,8 @@ end
 
 procedure Node032 begin
    From_32 := 1;
-   set_global_var(GVAR_KNOW_DOC_HOLIDAY,1);
+   if (global_var(GVAR_KNOW_DOC_HOLIDAY) == 0) then  // Seraph's Code
+      set_global_var(GVAR_KNOW_DOC_HOLIDAY,1);
    Reply(206); //add know_holiday
    NOption(207,Node034,004);
    BOption(208,Node033,004);
@@ -708,6 +793,7 @@ end
 
 procedure Node036 begin
    set_local_var(LVAR_Freeheal,FH_GIVEN);
+   set_local_var(LVAR_Heardramble,1); // added by killap
    Reply(217);
    NOption(218,Node001,004);
    NOption(219,Node999,004);
@@ -830,6 +916,31 @@ procedure Node114 begin
    else
       call Node003;
 end
+//added by killap - RP
+procedure Node115 begin
+   member:=Kitsune_Ptr;
+   if (local_var(LVAR_Freeheal) == FH_GIVEN) then
+      call Node030;
+   else
+      call Node003;
+end
+
+procedure Node116 begin
+   member:=Dex_Ptr;
+   if (local_var(LVAR_Freeheal) == FH_GIVEN) then
+      call Node030;
+   else
+      call Node003;
+end
+
+procedure Node117 begin
+   member:=Cat_Jules_Ptr;
+   if (local_var(LVAR_Freeheal) == FH_GIVEN) then
+      call Node030;
+   else
+      call Node003;
+end
+//end added
 
 procedure PartyFree begin
    critter_heal(dude_obj,dude_max_hits-dude_cur_hits);
@@ -920,6 +1031,26 @@ procedure PartyFree begin
          critter_uninjure(K9_Ptr, (DAM_CRIP_LEG_LEFT bwor DAM_CRIP_LEG_RIGHT bwor DAM_CRIP_ARM_LEFT bwor DAM_CRIP_ARM_RIGHT));
       end
    end
+   //added by killap - RP
+   if (Kitsune_In_Party) then begin
+      if (Is_Injured(Kitsune_Ptr) or Is_Crippled(Kitsune_Ptr)) then begin
+         critter_heal(Kitsune_Ptr,Injured_How_Much(Kitsune_Ptr));
+         critter_uninjure(Kitsune_Ptr, (DAM_CRIP_LEG_LEFT bwor DAM_CRIP_LEG_RIGHT bwor DAM_CRIP_ARM_LEFT bwor DAM_CRIP_ARM_RIGHT));
+      end
+   end
+   if (Dex_In_Party) then begin
+      if (Is_Injured(Dex_Ptr) or Is_Crippled(Dex_Ptr)) then begin
+         critter_heal(Dex_Ptr,Injured_How_Much(Dex_Ptr));
+         critter_uninjure(Dex_Ptr, (DAM_CRIP_LEG_LEFT bwor DAM_CRIP_LEG_RIGHT bwor DAM_CRIP_ARM_LEFT bwor DAM_CRIP_ARM_RIGHT));
+      end
+   end
+   if (Cat_Jules_In_Party) then begin
+      if (Is_Injured(Cat_Jules_Ptr) or Is_Crippled(Cat_Jules_Ptr)) then begin
+         critter_heal(Cat_Jules_Ptr,Injured_How_Much(Cat_Jules_Ptr));
+         critter_uninjure(Cat_Jules_Ptr, (DAM_CRIP_LEG_LEFT bwor DAM_CRIP_LEG_RIGHT bwor DAM_CRIP_ARM_LEFT bwor DAM_CRIP_ARM_RIGHT));
+      end
+   end   
+   //end added
 end
 
 procedure PayDude begin

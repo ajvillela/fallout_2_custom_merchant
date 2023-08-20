@@ -41,7 +41,7 @@
 /* Sets whether the door is locked or trapped */
 #define LOCKED_STATUS                   STATE_ACTIVE
 #define TRAPPED_STATUS                  STATE_INACTIVE
-#define DOOR_STATUS                     STATE_WOOD
+#define DOOR_STATUS                     STATE_METAL
 #define LOCK_STATUS                     STATE_STANDARD_LOCK
 
 /* Penalties for Lock difficulty based on whether or not you are using lockpicks. */
@@ -234,7 +234,7 @@ procedure description_p_proc begin
 end
 
 procedure timed_event_p_proc begin
-   set_map_var(MVAR_Lockpick_Attempt,0);
+   //set_map_var(MVAR_Lockpick_Attempt,0);
 end
 
 procedure anger begin
@@ -254,6 +254,7 @@ procedure use_skill_on_p_proc begin
    Skill_Used:=action_being_used;
 
    if (Skill_Used == SKILL_LOCKPICK) then begin
+       script_overrides; //added by killap
        if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
            call Unlock_Lock;
        end
@@ -263,6 +264,7 @@ procedure use_skill_on_p_proc begin
    end                                                          // End of Skill_Lockpick
 
    else if (Skill_Used == SKILL_TRAPS) then begin
+       script_overrides; //added by killap
        if (local_var(LVAR_Trapped) == STATE_ACTIVE) then begin
            call Skill_Disarm_Traps;
        end
@@ -293,6 +295,7 @@ procedure use_obj_on_p_proc begin
 
    if (LOCK_STATUS == STATE_STANDARD_LOCK) then begin
        if (Tool == PID_LOCKPICKS) then begin
+           script_overrides; //added by killap
            if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
                call Lockpick_Lock;
            end
@@ -301,6 +304,7 @@ procedure use_obj_on_p_proc begin
            end
        end
        else if (Tool == PID_EXP_LOCKPICK_SET) then begin
+           script_overrides; //added by killap
            if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
                call Super_Lockpick_Lock;
            end
@@ -312,6 +316,7 @@ procedure use_obj_on_p_proc begin
 
    else if (LOCK_STATUS == STATE_ELECTRIC_LOCK) then begin
        if (Tool == PID_ELECTRONIC_LOCKPICKS) then begin
+           script_overrides; //added by killap
            if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
                call Lockpick_Lock;
            end
@@ -320,6 +325,7 @@ procedure use_obj_on_p_proc begin
            end
        end
        else if (Tool == PID_ELEC_LOCKPICK_MKII) then begin
+           script_overrides; //added by killap
            if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
                call Super_Lockpick_Lock;
            end
@@ -330,10 +336,12 @@ procedure use_obj_on_p_proc begin
    end
 
    else if (Tool == PID_CROWBAR) then begin
+       script_overrides; //added by killap
        call Pry_Door;
    end
 
    else if ((Tool == PID_DYNAMITE) or (Tool == PID_PLASTIC_EXPLOSIVES)) then begin
+       script_overrides; //added by killap
        call Set_Trap;
    end
 
@@ -1221,7 +1229,7 @@ end
 ***************************************************************************/
 
 procedure Lockpick_Door begin
-   call anger;
+   //call anger;
    if (is_success(Locks_Roll)) then begin
        set_local_var(LVAR_Locked, STATE_INACTIVE);              // Door is unlocked
        obj_unlock(self_obj);                                    // engine unlock door

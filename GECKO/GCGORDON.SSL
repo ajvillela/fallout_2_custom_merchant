@@ -32,8 +32,8 @@
 #define TOWN_REP_VAR            (GVAR_TOWN_REP_GECKO)
 #define floater(x)		float_msg(self_obj, message_str(NAME,x),FLOAT_MSG_RED)
 #define PID_ECON_DISK           PID_GECKO_DATA_DISK
-#define RECEIVED                1
-#define GIVEN                   2
+//#define RECEIVED                1
+//#define GIVEN                   2
 #define PLANT_UNTOUCHED         0 //need to add plant_untouched to global.h
 
 #include "..\headers\command.h"
@@ -147,11 +147,11 @@ procedure critter_p_proc begin
    actions need to be taken by the critter based on previous combat, the critter will remember
    this as well. */
 
-   if ( (global_var(GVAR_GECKO_MELTDOWN) == 1) and (obj_can_see_obj(self_obj,dude_obj))) then begin
+   if ( ((global_var(GVAR_GECKO_MELTDOWN) == 1) or (global_var(GVAR_ENEMY_GECKO)) ) and (obj_can_see_obj(self_obj,dude_obj))) then begin //edit by killap - added (global_var(GVAR_ENEMY_GECKO))
       set_local_var(LVAR_Hostile,1);
       attack(dude_obj);
    end
-   else if ((local_var(LVAR_Hostile) == 2) and (obj_can_see_obj(self_obj,dude_obj))) then begin
+   else if ( (local_var(LVAR_Hostile) == 2)  and (obj_can_see_obj(self_obj,dude_obj))) then begin
        set_local_var(LVAR_Hostile,1);
        attack(dude_obj);
    end
@@ -208,12 +208,12 @@ procedure talk_p_proc begin
       call Node001;
    end
 
-   else if (global_var(GVAR_GECKO_ECON_DISK) >= GIVEN) then begin
+   else if (global_var(GVAR_GECKO_ECON_DISK) >= ECON_DISK_RECEIVED) then begin //killap's fix: was 'GIVEN'
       debug_msg("global_var(GVAR_GECKO_ECON_DISK) >= GIVEN");
       if (global_var(GVAR_VAULT_PLANT_STATUS) >= PLANT_OPTIMIZED) then begin
          start_gdialog(NAME,self_obj,4,-1,-1);
          gSay_Start;
-             call Node021;
+             call Node023; //killap's fix: was 021
          gSay_End;
          end_dialogue;
       end
@@ -221,7 +221,7 @@ procedure talk_p_proc begin
          debug_msg("global_var(GVAR_VAULT_PLANT_STATUS) >= PLANT_REPAIRED");
          start_gdialog(NAME,self_obj,4,-1,-1);
          gSay_Start;
-             call Node020;
+             call Node021; //killap's fix: was 020
          gSay_End;
          end_dialogue;
       end
@@ -229,7 +229,7 @@ procedure talk_p_proc begin
          debug_msg("global_var(GVAR_VAULT_PLANT_STATUS) >= PLANT_UNTOUCHED");
          start_gdialog(NAME,self_obj,4,-1,-1);
          gSay_Start;
-             call Node023;
+             call Node020; //killap's fix: was 023
          gSay_End;
          end_dialogue;
       end
@@ -290,7 +290,7 @@ procedure combat begin
 end
 
 procedure Node910 begin
-   if (global_var(GVAR_VAULT_PLANT_STATUS) == PLANT_REPAIRED) then
+   if (global_var(GVAR_VAULT_PLANT_STATUS) >= PLANT_REPAIRED) then
       call Node008;
    else
       call Node007;
@@ -308,11 +308,11 @@ procedure Node912 begin
    end
   stuff:=create_object(PID_ECON_DISK,0,0);
   add_obj_to_inven(dude_obj,stuff);
-  set_global_var(GVAR_GECKO_ECON_DISK, RECEIVED);
+  set_global_var(GVAR_GECKO_ECON_DISK, ECON_DISK_RECEIVED);
 end
 
 procedure Node915 begin
-   if ( (global_var(GVAR_GECKO_ECON_DISK) == RECEIVED) or (global_var(GVAR_GECKO_ECON_DISK) == GIVEN) ) then begin
+   if ( (global_var(GVAR_GECKO_ECON_DISK) == ECON_DISK_RECEIVED) or (global_var(GVAR_GECKO_ECON_DISK) == ECON_DISK_GIVEN) ) then begin
       call Node014;
    end
    else begin
@@ -320,8 +320,9 @@ procedure Node915 begin
    end
 end
 
+// Unused - killap
 procedure Node917 begin
-   set_global_var(GVAR_GECKO_ECON_DISK, GIVEN);
+   set_global_var(GVAR_GECKO_ECON_DISK, ECON_DISK_GIVEN);
 end
 
 /*
@@ -380,6 +381,7 @@ procedure Node934 begin
 end
 
 procedure Node936 begin
+   set_local_var(LVAR_hey_i_gave_disk_already,1); //added by killap
    if (global_var(GVAR_VAULT_GECKO_PLANT) < PLANT_NEED_PART) then begin
       debug_msg("set part needed");
       set_global_var(GVAR_VAULT_GECKO_PLANT, PLANT_NEED_PART);
@@ -388,7 +390,7 @@ procedure Node936 begin
    end
    stuff:=create_object(PID_ECON_DISK,0,0);
    add_obj_to_inven(dude_obj,stuff);
-   set_global_var(GVAR_GECKO_ECON_DISK, GIVEN);
+   set_global_var(GVAR_GECKO_ECON_DISK, ECON_DISK_RECEIVED); // Seraph's Fix: changed 'GIVEN' to 'RECEIVED'
    call Node999;
 end
 
@@ -506,6 +508,8 @@ procedure Node008 begin
    Reply(170);
    if (local_var(LVAR_04_before) == 0) then
       NOption(171,Node004,004);
+   else if (local_var(LVAR_hey_i_gave_disk_already) == 0) then //added by killap - expansion
+      NOption(172,Node007,004);
    NOption(600,Node999,004);
 end
 
@@ -577,9 +581,15 @@ procedure Node019 begin
 end
 
 procedure Node020 begin
-   Reply(300);
-   NOption(301,Node032,004);
-   NOption(302,Node999,004);
+   //if (global_var(GVAR_GECKO_ECON_DISK) >= ECON_DISK_GIVEN) then begin
+      Reply(303);
+      NOption(304,Node999,004);
+      NOption(305,Node999,004);
+   //end else begin
+   //   Reply(300);
+   //   NOption(301,Node032,004);
+   //   NOption(302,Node999,004);
+   //end
 end
 
 procedure Node021 begin
@@ -616,7 +626,7 @@ procedure Node025 begin
    Reply(350);
    NOption(351,Node026,004);
    NOption(352,Node030,004);
-   NOption(352,Node031,004);
+   NOption(353,Node031,004); //killap's fix: changed from 352
 end
 
 procedure Node026 begin
@@ -661,6 +671,6 @@ end
 procedure Node032 begin
    Reply(420);
    NOption(421,Node999,004);
-   NOption(422,Node004,004);
+   NOption(422,Node999,004);//killap's fix: changed from 004
 end
 //xxxxxxxxxxxxxxxxxxxx

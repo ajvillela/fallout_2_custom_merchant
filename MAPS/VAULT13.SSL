@@ -45,6 +45,8 @@ procedure map_update_p_proc;
 
 procedure Initial_Inven;
 
+variable do_times := 3; // added by killap - expansion
+
 procedure start begin
    i_matt_obj := -1;
    i_geck_obj := -1;
@@ -73,6 +75,12 @@ procedure map_enter_p_proc begin
 end
 
 procedure map_update_p_proc begin
+   // added by killap (expansion) - On game load this runs once and fails. Need to run it again.
+   if (VAULT13_SEQ and do_times > 0) then begin
+      kill_critter_type(PID_DEATHCLAW_EGG,KILL_LEAVE_BODY);
+      do_times := do_times - 1;
+   end
+   // end added
    Full_Light;
 end
 

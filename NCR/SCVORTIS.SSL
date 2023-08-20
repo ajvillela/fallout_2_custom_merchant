@@ -26,6 +26,7 @@
         -rwh2   11/13/97
 */
 #include "..\headers\define.h"
+#include "..\headers\den.h" //added by killap
 #include "..\headers\ncrent.h"
 
 #define NAME                    SCRIPT_SCVORTIS
@@ -81,6 +82,30 @@ procedure Node020;
 procedure Node021;
 procedure Node022;
 
+procedure Node023; //added by killap
+//added by killap - expansion
+procedure Node024;
+procedure Node025;
+procedure Node026;
+procedure Node027;
+procedure Node028;
+procedure Node029;
+procedure Node030;
+procedure Node031;
+procedure Node032;
+//added by killap
+procedure Node033;
+procedure Node034;
+procedure Node035;
+procedure Node036;
+//end added
+procedure Node990;
+procedure Node991;
+procedure Node992;
+procedure Node993; //added by killap
+procedure Node019a;
+//end added
+
 procedure doLoadStuff;
 procedure callGuards;
 procedure checkTime;
@@ -100,6 +125,8 @@ procedure anim_end_call;
 #define LVAR_Hostile                    (5)
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Vortis_Location            (7)
+#define LVAR_Prepare_For_Attack         (8) //added by killap - expansion
+#define LVAR_Got_Slaver_Camp_Location   (9) //added by killap - expansion
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -114,6 +141,7 @@ variable Node13Count   := 0;
 variable warpPlayerOut := 0;
 variable anim_flag     := 0;
 variable attacked      := 0;
+variable warnedPlayer  := 0;
 
 procedure start begin
    i_vortis_obj := self_obj;
@@ -122,9 +150,15 @@ end
 procedure timed_event_p_proc begin
    if (fixed_param == TIMER_CLOSE) then begin
       call checkTime;
-      add_timer_event(self_obj, game_ticks(60), TIMER_CLOSE);
+      add_timer_event(self_obj, 5, TIMER_CLOSE);
    end else if (fixed_param == TIMER_DOOR_CHECK) then begin
-      call Node022;
+      if not(warnedPlayer) then begin
+        warnedPlayer := 1;
+        call Node022;
+      end else begin
+        call Node021;
+      end
+      //call Node022;
    end
 end
 
@@ -138,7 +172,7 @@ procedure map_enter_p_proc begin
 
    if (is_loading_game == FALSE) then
       call doLoadStuff;
-   add_timer_event(self_obj, ONE_GAME_MINUTE, TIMER_CLOSE);
+   add_timer_event(self_obj, 5, TIMER_CLOSE);
 end
 
 
@@ -196,9 +230,15 @@ procedure talk_p_proc begin
    CheckKarma;
 
    GetReaction;
-
+   
+   ReactToLevel; //added by killap
+   
+// (tile_distance(tile_num(dude_obj), VORTISBEDPLACE) < 6) 
    if (local_var(LVAR_Vortis_Location) == VORTISBEDPLACE) then begin
-      call Node021;
+      if ( (tile_distance(tile_num(dude_obj), VORTISBEDPLACE) < 9) ) then //added by killap
+         call Node021;
+      else
+         call Node023; //added by killap
    end else begin
       if (global_var(GVAR_NCR_VORTIS_QUEST_STATE) == VORTIS_QUEST_ACCEPTED) then begin
          start_gdialog(NAME,self_obj,4,-1,-1);
@@ -207,6 +247,24 @@ procedure talk_p_proc begin
          gSay_End;
          end_dialogue;
          set_local_var(LVAR_Herebefore, 1);
+      //added by killap - expansion
+      end else if (global_var(GVAR_NCR_VORTIS_QUEST_STATE) == VORTIS_QUEST2_ACCEPTED) then begin
+         if (local_var(LVAR_Prepare_For_Attack) == 1) then begin
+            start_gdialog(NAME,self_obj,4,-1,-1);
+            gSay_Start;
+               call Node032;
+            gSay_End;
+            end_dialogue;
+            set_local_var(LVAR_Herebefore, 1);
+         end else begin
+            start_gdialog(NAME,self_obj,4,-1,-1);
+            gSay_Start;
+               call Node027;
+            gSay_End;
+            end_dialogue;
+            set_local_var(LVAR_Herebefore, 1);
+         end
+      //end added
       end else if (local_var(LVAR_Herebefore) == 0) then begin
          start_gdialog(NAME,self_obj,4,-1,-1);
          gSay_Start;
@@ -246,7 +304,13 @@ procedure destroy_p_proc begin
 /* Increment the aligned critter counter*/
    //inc_good_critter
    inc_evil_critter
-
+   
+   //added by killap - expansion
+   if (global_var(GVAR_NCR_VORTIS_QUEST_STATE) == VORTIS_QUEST2_ACCEPTED) then begin
+      set_global_var(GVAR_NCR_VORTIS_QUEST_STATE, 5); //failure
+   end
+   //end added
+   
 /* Set global_variable for Enemy status*/
    i_vortis_obj := -1;
 end
@@ -342,7 +406,8 @@ procedure Node001 begin
    //108 was skipped oops.
    if (doOptions) then begin
       NOption(109, Node003, 4);
-      if (global_var(GVAR_NCR_VORTIS_QUEST_STATE) != VORTIS_QUEST_DONE) then
+      //if (global_var(GVAR_NCR_VORTIS_QUEST_STATE) != VORTIS_QUEST_DONE) then -- edit by killap for expansion pack
+      if ( (global_var(GVAR_NCR_VORTIS_QUEST_STATE) != VORTIS_QUEST_DONE) and (global_var(GVAR_NCR_VORTIS_QUEST_STATE) != VORTIS_QUEST2_DONE) ) then
          NOption(110, Node0405a, 4);
       NLowOption(111, Node001r);
       NLowOption(112, Node999);
@@ -353,7 +418,9 @@ end
 
 procedure Node002 begin
    Reply(115);
-   NOption(116, Node999, 1);
+   NOption(116, Node999, 4); //edit by killap - was NOption(116, Node999, 1);
+   NLowOption(111, Node999); //added by killap
+   
    //Note the design had Slavers=leave in it. I am not sure what the hell that means.
    warpPlayerOut := 1;
 end
@@ -363,7 +430,7 @@ procedure Node91018a begin
       call Node018;
    end
    else begin
-      if (TOWN_REP_VAR > VORTIS_GREP_THRESH) then
+      if (global_var(TOWN_REP_VAR) > VORTIS_GREP_THRESH) then //edit by killap: TOWN_REP_VAR, changed to global_var(TOWN_REP_VAR)
          call Node009;
       else
          call Node010;
@@ -382,6 +449,8 @@ procedure Node003 begin
       if (global_var(GVAR_NCR_RANGERS_KNOWN) bwand RANGERS_KNOWN) then
             GOption(122, Node91018a, 4);
       BOption(123, Node011, 4);
+      if ( (global_var(GVAR_SULIK_SISTER) == 1) and (local_var(LVAR_Got_Slaver_Camp_Location) == 0) )then
+        NOption(241, Node033, 4);
    end
 end
 
@@ -447,7 +516,7 @@ end
 procedure Node012 begin
    Reply(147);
    NOption(148, Node014a, 4);
-   NOption(149, NOde005, 4);
+   NOption(149, Node005, 4);
 end
 
 procedure Node013r begin
@@ -493,8 +562,152 @@ procedure Node19a begin
    add_obj_to_inven(self_obj, obj);
    item_caps_adjust(dude_obj, 500);
 
-   call Node019;
+   if ( (has_rep_slaver) or ( (check_general_rep <= KARMA_BETRAYER) or (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)) ) ) then //edit by killap - added and (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
+      call Node024;
+   else
+      call Node019;
 end
+
+//added by killap - expansion
+procedure Node024 begin
+   if (has_rep_slaver) then
+      Reply(200);
+   else 
+      Reply(201);
+      
+   NOption(202, Node025, 4);
+   NOption(203, Node026, 4);
+end
+
+procedure Node025 begin
+   Reply(204);
+   if (has_skill(dude_obj,SKILL_CONVERSANT) >= 80) then
+      NOption(207, Node029, 4);
+   NOption(206, Node990, 4);
+end
+
+procedure Node026 begin
+   Reply(205);
+   NOption(206, Node019a, 4);
+end
+
+procedure Node027 begin
+   Reply(210);
+   if (global_var(GVAR_WIPED_OUT_RANGER_SAFE_HOUSES) == 3) then
+      NOption(211, Node028, 4);
+   NOption(212, Node020, 4);
+end
+
+procedure Node028 begin
+   item_caps_adjust(dude_obj, 1000);
+   display_msg(mstr(240));
+   set_global_var(GVAR_NCR_VORTIS_QUEST_STATE, VORTIS_QUEST2_DONE);
+   
+   Reply(215);
+   NOption(216, Node999, 4);
+   NOption(217, Node999, 4);
+   NOption(218, Node999, 4);
+   
+end
+
+procedure Node029 begin
+   if( is_success( roll_vs_skill( dude_obj, SKILL_CONVERSANT, -10 ) ) ) then
+      call Node030;
+   else 
+      call Node031;
+end
+
+procedure Node030 begin
+   Reply(225);
+   NOption(226, Node991, 4);
+   NOption(227, Node992, 4);
+   NOption(228, Node992, 4);
+   NOption(229, Node026, 4);
+end
+
+procedure Node031 begin
+   Reply(220);
+   NOption(221, Node990, 4);
+   NOption(222, Node026, 4);
+   BOption(223, Node998, 4);
+end
+
+procedure Node032 begin
+   Reply(230);
+   NOption(231, Node999, 4);
+   NOption(232, Node992, 4);
+end
+
+procedure Node033 begin
+   Reply(250);
+   NOption(251, Node034, 4);
+   if (metzger_dead) then
+     BOption(252, Node998, 4);
+end
+
+procedure Node034 begin
+   Reply(260);
+   NOption(261, Node035, 4);
+end
+
+procedure Node035 begin
+   variable dude_goody_two_shoes;
+   if (check_general_rep > KARMA_SHIELD_OF_HOPE) then
+     dude_goody_two_shoes := 1;
+   else
+     dude_goody_two_shoes := 0;
+   Reply(270+dude_goody_two_shoes);
+   if ((dude_goody_two_shoes and dude_caps >= 2000) or (dude_caps >= 1000)) then
+     NOption(272, Node993, 4);
+   else
+     NOption(275, Node999, 4);
+   NOption(273, Node003, 4);
+   BOption(274, Node998, 4);
+end
+
+procedure Node036 begin
+   mark_on_map(AREA_SLAVER_CAMP)
+   set_local_var(LVAR_Got_Slaver_Camp_Location,1);
+   Reply(280);
+   NOption(133, Node003, 4);
+   NOption(281, Node999, 4);
+end
+
+procedure Node993 begin
+  variable price;
+  if (check_general_rep > KARMA_SHIELD_OF_HOPE) then
+    price := 2000;
+  else
+    price := 1000;
+  item_caps_adjust(dude_obj, -price);
+  call Node036;
+end
+
+procedure Node990 begin
+   set_global_var(GVAR_NCR_VORTIS_QUEST_STATE, VORTIS_QUEST2_ACCEPTED);
+   mark_area_known(0, AREA_RANGER_SAFE1, MARK_STATE_KNOWN);
+   mark_area_known(0, AREA_RANGER_SAFE2, MARK_STATE_KNOWN);
+   mark_area_known(0, AREA_RANGER_SAFE3, MARK_STATE_KNOWN);
+end
+
+procedure Node991 begin
+   mark_area_known(0, AREA_RANGER_SAFE1, MARK_STATE_KNOWN);
+   mark_area_known(0, AREA_RANGER_SAFE2, MARK_STATE_KNOWN);
+   mark_area_known(0, AREA_RANGER_SAFE3, MARK_STATE_KNOWN);
+   set_local_var(LVAR_Prepare_For_Attack,1);
+   set_global_var(GVAR_NCR_VORTIS_QUEST_STATE, VORTIS_QUEST2_ACCEPTED);
+end
+
+procedure Node992 begin
+   mark_area_known(0, AREA_RANGER_SAFE1, MARK_STATE_KNOWN);
+   mark_area_known(0, AREA_RANGER_SAFE2, MARK_STATE_KNOWN);
+   mark_area_known(0, AREA_RANGER_SAFE3, MARK_STATE_KNOWN);
+   set_global_var(GVAR_NCR_VORTIS_QUEST_STATE, VORTIS_QUEST2_ACCEPTED);
+   set_local_var(LVAR_Prepare_For_Attack,0);
+   load_map(MAP_RANGER_SAFE_HOUSE1, 5);
+end
+//end added
+
 
 procedure Node016 begin
    Reply(163);
@@ -521,6 +734,10 @@ procedure Node019 begin
    NOption(172, Node999, 4);
 end
 
+procedure Node019a begin
+   set_global_var(GVAR_NCR_VORTIS_QUEST_STATE, VORTIS_QUEST_DONE);
+end
+
 procedure Node020 begin
    Reply(173);
    NOption(174, Node999, 4);
@@ -536,6 +753,11 @@ procedure Node022 begin
    float_msg(self_obj, mstr(176), FLOAT_MSG_RED);
 end
 
+//added by killap
+procedure Node023 begin
+   float_msg(self_obj, mstr(177), FLOAT_MSG_RED);
+end
+//end added by killap
 
 procedure doLoadStuff begin
    variable time;
@@ -551,6 +773,7 @@ procedure doLoadStuff begin
 end
 
 procedure callGuards begin
+   set_map_var(MVAR_Slavers_Attack, 1); //added by killap
    // Eventually when guards get designed they will do somthing
 end
 

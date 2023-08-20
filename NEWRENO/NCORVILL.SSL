@@ -148,6 +148,7 @@ variable the_obj;
          critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NEW_RENO_WRIGHT);
          critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_GUARD);
       end else if (global_var(GVAR_NEW_RENO_KILL_DADDY_WEAPON) != 0) then begin
+         set_wright_dead; //added by killap
          the_obj := create_object(global_var(GVAR_NEW_RENO_KILL_DADDY_WEAPON), tile_num_in_direction(self_tile, random(0,5), 1), self_elevation);
          kill_critter(self_obj, random(ANIM_fall_back_blood_sf, ANIM_fall_front_blood_sf));
       end
@@ -231,6 +232,7 @@ procedure Node998 begin
    if (hostile == false) then begin
       set_hostile;
    end
+   attack_family(self_family) //added by killap
 end
 procedure Node999 begin
 end
@@ -358,7 +360,7 @@ procedure Node005 begin
 end
 procedure Node006 begin
    Reply(mstr(275 + (prev_node != 0)) + mstr(277));
-   NOption(278, Node998, -003);
+   BOption(278, Node998, -003); // edit by killap - was NOption
    if (check_general_rep >= 0) then begin
       BOption(279, Node998, 004);
    end else if (prev_node != 0) then begin

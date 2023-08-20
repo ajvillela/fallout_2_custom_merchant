@@ -230,6 +230,7 @@ procedure talk_p_proc begin
    q1 := 0;
    q2 := 0;
    q3 := 0;
+   Node16Rep := 0; //added by killap - expansion
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -243,10 +244,14 @@ procedure destroy_p_proc begin
 /* Set global_variable for Enemy status*/
    set_mss(MSS_ELRON_DEAD);
    set_global_var(GVAR_NCR_KILL_ELRON_QST, 2);
-   give_exp_points(EXP_MERK_HUB_DEAD);
-   display_msg(mstr(218) + EXP_MERK_HUB_DEAD + mstr(219));
+   //give_exp_points(EXP_MERK_HUB_DEAD);
+   //display_msg(mstr(218) + EXP_MERK_HUB_DEAD + mstr(219));
 
-   set_merk_status(MERK_STATUS_PLEASED);
+   //set_merk_status(MERK_STATUS_PLEASED);
+   
+   if (merk_seed_status(MSS_KILL_ELRON)) then begin //edit by killap
+      set_merk_status(MERK_STATUS_PLEASED);
+   end 
 end
 
 /* Look_at_p_proc gets called any time that the player passes the cursor over any object.
@@ -317,6 +322,7 @@ end
 procedure Node004 begin
    set_local_var(LVAR_Hostile, 1);
    Reply(118);
+   ENDOPTION;  //added by killap
 end
 
 procedure Node005 begin
@@ -325,7 +331,7 @@ procedure Node005 begin
    NOption(121, Node013, 4);
    NOption(122, Node014, 4);
    NOption(123, Node006, 4);
-   NOption(124, Node004, 4);
+   BOption(124, Node004, 4); //edit by killap - was NOption
 end
 
 procedure Node999a begin
@@ -367,10 +373,12 @@ procedure Node008 begin
    if (Node8Rep == 1) then
       NOption(135, Node008, 4);
    if (dude_iq >= 8 or is_skill_tagged(SKILL_CONVERSANT)) then
-      NOption(136, Node019, 8);  //137
-/*   if (local_var(LVAR_Freeibe) == 0) then begin
+      NOption(136, Node019, 4);  //137 --edit by killap - had an int requirement of 8 before.
+   //unlocked by killap - expansion
+   if (local_var(LVAR_Freeibe) == 0) then begin
       NOption(mstr(138) + " " + dude_level + mstr(217), Node020, 4);
-   end*/
+   end
+   //end
    NOption(139, Node224a, 4);
    NOption(140, Node023, 4);
 end
@@ -445,7 +453,7 @@ procedure Node016 begin
       Reply(156);
    else if (Node16Rep == 3) then
       Reply(157);
-   if (not q1) then
+   if ( (not q1) and (Node16Rep == 3) ) then //edit by killap (expansion) - added Node16Rep == 3
       NOption(158, Node0161, 4);
    if (not q3) then
       NOption(159, Node0163, 4);
@@ -463,7 +471,7 @@ end
 procedure Node018 begin
    Reply(165);
    NOption(166, Node016, 4);
-   NOption(167, NOde004, 4);
+   BOption(167, NOde004, 4); //edit by killap - was NOption
 end
 
 procedure Node019 begin
@@ -477,7 +485,8 @@ procedure Node019 begin
 end
 
 procedure Node021a begin
-//   give_xp(EXP_TALK_FALLOUT2);
+   //give_xp(EXP_TALK_FALLOUT2);
+   give_xp(100);
    inc_general_rep(REP_BONUS_NCR_TALK_FALLOUT2);
    set_local_var(LVAR_Freeibe, 1);
    call Node021;
@@ -489,6 +498,7 @@ procedure Node020 begin
 end
 
 procedure Node021 begin
+   Node8Rep -= 1; //added by killap (expansion)
    Reply(175);
    MOREOPTION(Node008);
 end
@@ -563,8 +573,8 @@ end
 
 procedure Node032 begin
    Reply(204);
-   NOption(205, Node998a, 4);
-   NOption(206, Node998, 4);
+   NOption(205, Node999, 4); //edit by killap - was Node998a. Just didn't make sense to randomly get the quest with no explanation
+   BOption(206, Node998, 4); //edit by killap: was NOption
 end
 
 procedure Node033 begin
@@ -625,8 +635,8 @@ procedure warpToPos begin
    fadeout(1);
    move_to(self_obj, POS_ADJUST, 0);
    move_to(dude_obj, POS_ADJUST_PLAYER, 0);
-   animate_rotation(self_obj, 2);
-   animate_rotation(dude_obj, 5);
+   animate_rotation(2); // Seraph's Fix: animate_rotation only takes 1 arg, and just affects self_obj. Thanks Rob!
+   anim(dude_obj, ANIMATE_ROTATION, 5); // Seraph's Fix: animate_rotation only takes 1 arg, and just affects self_obj. Thanks Rob!
    fadein(1);
 end
 
@@ -634,8 +644,8 @@ procedure warpBackToPos begin
    fadeout(1);
    move_to(self_obj, warpBack, 0);
    move_to(dude_obj, pwarpBack, 0);
-   animate_rotation(self_obj, 3);
-   animate_rotation(dude_obj, 0);
+   animate_rotation(3); // Seraph's Fix: animate_rotation only takes 1 arg, and just affects self_obj. Thanks Rob!
+   anim(dude_obj, ANIMATE_ROTATION, 0); // Seraph's Fix: animate_rotation only takes 1 arg, and just affects self_obj. Thanks Rob!
    fadein(1);
 end
 

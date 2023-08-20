@@ -142,7 +142,7 @@ procedure talk_p_proc begin
 
    GetReaction;
 
-   if ((TOWN_REPUTATION < -15) or (global_var(GVAR_VAULT_PLOW_PROBLEM) == PLOW_SCREW_SMITH)) then
+   if ((TOWN_REPUTATION < -15 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) or (global_var(GVAR_VAULT_PLOW_PROBLEM) == PLOW_SCREW_SMITH)) then // edit by killap - added not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
        floater(106);
    else if (global_var(GVAR_VAULT_PLOW_PROBLEM) == QUEST_NONE) then begin
        floater(107);

@@ -3,8 +3,8 @@
 */
 
 /*
-        Name:
-        Location:
+        Name: Sub-Amenities Officer Farrell
+        Location: Vault City Amenities Office A
         Description:
 
         Log:
@@ -231,11 +231,14 @@ procedure talk_p_proc begin
 
    GetReaction;
 
-   if ( ( Marcus_Ptr != 0 ) and ( global_var(GVAR_VAULT_CITIZEN) != CITIZEN_CAPTAIN_GUARD ) ) then begin
+   if (global_var(GVAR_VAULT_CITIZENSHIP) != CITIZEN_TRUE) then //added by killap
+      gdialog_set_barter_mod(50);
+      
+   if ( not(Fallout2_enclave_destroyed) and ( Marcus_Ptr != 0 ) and ( global_var(GVAR_VAULT_CITIZEN) != CITIZEN_CAPTAIN_GUARD ) ) then begin
        call Node005;
    end
 
-   else if ( ( Lenny_Ptr != 0 ) and ( global_var(GVAR_VAULT_CITIZEN) != CITIZEN_CAPTAIN_GUARD ) ) then begin
+   else if ( not(Fallout2_enclave_destroyed) and ( Lenny_Ptr != 0 ) and ( global_var(GVAR_VAULT_CITIZEN) != CITIZEN_CAPTAIN_GUARD ) ) then begin
        call Node006;
    end
 
@@ -365,7 +368,7 @@ procedure Node009a begin
        NOption(149, Node012, 004);
    end
    else begin
-       gdialog_mod_barter(-50);
+       gdialog_mod_barter(50); // Seraph's Fix: changed '-50' to '50'
        Reply(148);
        NOption(149, Node011, 004);
    end

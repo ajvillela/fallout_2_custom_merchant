@@ -46,7 +46,32 @@ procedure map_update_p_proc;
 procedure start begin
 end
 
+//modified code by killap
 procedure map_update_p_proc begin
+   if (cur_map_index == MAP_SIERRA_123) then begin
+       if ((elevation(self_obj) == map_var(MVAR_Eyeball_Used)) and (tile_num(self_obj) != 19918)) then begin
+           obj_open(self_obj);
+       end
+
+       else if ((elevation(self_obj) == map_var(MVAR_Eyeball_Level)) and (tile_num(self_obj) == 19918)) then begin
+           obj_open(self_obj);
+       end
+   end
+
+   else if (map_var(MVAR_Eyeball_Used_4) == elevation(self_obj)) then begin
+       obj_open(self_obj);
+   end
+
+end
+
+procedure use_p_proc begin
+   script_overrides;
+   if (source_obj == dude_obj) then //added by killap
+      display_msg(mstr(100));
+end 
+//end modified
+
+/*procedure map_update_p_proc begin
    if (cur_map_index == MAP_SIERRA_123) then begin
        if ((elevation(self_obj) == map_var(MVAR_Eyeball_Used)) and (tile_num(self_obj) != 19918)) then begin
            obj_open(self_obj);
@@ -79,7 +104,7 @@ procedure use_p_proc begin
        script_overrides;
        display_msg(mstr(100));
    end
-end
+end*/
 
 procedure use_skill_p_proc begin
    if (action_being_used == SKILL_LOCKPICK) then begin

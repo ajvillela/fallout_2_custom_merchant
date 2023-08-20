@@ -99,6 +99,7 @@ end
 procedure critter_p_proc begin
    if (self_can_see_dude) then begin
       if (hostile or chop_shop_hostile) then begin
+         set_stolen_car(stolen_car_drive_away); 
          self_attack_dude;
       end else set_new_reno_watcher(chop_shop_boy_obj)
    end
@@ -165,44 +166,50 @@ end
 #define is_insert_message(x)  ((x == 221) or (x == 268))
 
 procedure Node001 begin
-   if (message_str(SCRIPT_NCPERSON, 100) == "You see one of the Reno townsfolk.") then
+   //if (message_str(SCRIPT_NCPERSON, 100) == "You see one of the Reno townsfolk.") then
       floater_rand(200, 208);
-   else
-      floater(200);
+   //else
+   //   floater(200);
 end
 procedure Node002 begin
-   if (message_str(SCRIPT_NCPERSON, 100) == "You see one of the Reno townsfolk.") then begin
+   //if (message_str(SCRIPT_NCPERSON, 100) == "You see one of the Reno townsfolk.") then begin
       floater_rand_with_check(224 - (4 * dude_has_porn_star_rep), 231 + (3 * (dude_has_porn_star_rep == false)), porn_star_name, 5000);
-   end else begin
-      floater_rand_with_check(220, 221, porn_star_name, 5000);
-   end
+   //end else begin
+   //   floater_rand_with_check(220, 221, porn_star_name, 5000);
+   //end
 end
 procedure Node003 begin
-   if (message_str(SCRIPT_NCPERSON, 100) == "You see one of the Reno townsfolk.") then
+   //if (message_str(SCRIPT_NCPERSON, 100) == "You see one of the Reno townsfolk.") then
       floater_rand(245, 254);
-   else
-      floater_rand(245, 246);
+   //else
+   //   floater_rand(245, 246);
 end
 procedure Node004 begin
-   if (message_str(SCRIPT_NCPERSON, 100) == "You see one of the Reno townsfolk.") then begin
+   //if (message_str(SCRIPT_NCPERSON, 100) == "You see one of the Reno townsfolk.") then begin
       floater_rand_with_check(267 - (2 * dude_has_porn_star_rep), 272 + (2 * (dude_has_porn_star_rep == false)), porn_star_name, 5000);
-   end else
-      floater_rand(265, 266);
+   //end else
+   //   floater_rand(265, 266);
 end
 procedure Node005 begin
-   if (message_str(SCRIPT_NCPERSON, 100) == "You see one of the Reno townsfolk.") then
+   //if (message_str(SCRIPT_NCPERSON, 100) == "You see one of the Reno townsfolk.") then
       floater_rand(304 - (4 * (car_has_been_recovered)), 319 + (3 * get_stolen_car(stolen_car_stolen)));
-   else
-      floater_rand(300, 301);
+   //else
+   //   floater_rand(300, 301);
 end
 procedure Node006 begin
-   if (touched_stolen_car) then begin
-      call Node998;
-   end else begin
-      set_touched_stolen_car;
-      if (message_str(SCRIPT_NCPERSON, 100) == "You see one of the Reno townsfolk.") then
-         floater_bad_rand(330, 332);
-      else
-         floater(331);
+   //added by killap
+   if (get_stolen_car(stolen_car_recovered)) then begin
+   end
+   //end added by killap
+   else begin
+      if (touched_stolen_car) then begin
+         call Node998;
+      end else begin
+         set_touched_stolen_car;
+         //if (message_str(SCRIPT_NCPERSON, 100) == "You see one of the Reno townsfolk.") then
+            floater_bad_rand(330, 332);
+         //else
+         //   floater(331);
+      end
    end
 end

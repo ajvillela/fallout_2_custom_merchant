@@ -102,6 +102,11 @@ procedure TakeInven;
 procedure ReturnInven;
 procedure checkTestObj;
 
+//added by killap - expansion
+procedure doVaultBoxerAppearance;
+procedure removeVaultBoxerAppearance;
+//end added
+
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
 // seen by the design Tool
@@ -155,6 +160,12 @@ procedure checkTestObj;
 #define TIMER_LEARN1        6
 #define TIMER_LEARN2        7
 
+//added by killap - expansion
+#define REG_HAIR                        (0)
+#define LONG_HAIR                       (1)
+#define BALD_HAIR                       (2)
+//end added
+
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
    Needs to be saved, make it a map variable (MVAR_) */
@@ -177,6 +188,7 @@ procedure combat_p_proc begin
    variable max;
    variable cur;
    variable wepobj;
+   variable armor;
 
    if (local_var(LVAR_Test_Stage)) then
       call checkTestObj;
@@ -186,7 +198,8 @@ procedure combat_p_proc begin
    end
 
    if (obj and (called == 0)) then begin
-      if (critter_state(obj) bwand CRITTER_IS_DEAD) then begin
+      //if ((critter_state(obj) bwand CRITTER_IS_DEAD) or (is_critter_prone(obj))) then begin //added is_critter_prone (knock out code) - killap
+      if ( (is_critter_dead(obj)) or (is_critter_prone(obj)) or ((critter_state(obj) bwand DAM_KNOCKED_OUT)) ) then begin //changed by killap
          max := 4;
          cur := 0;
          debug_msg("FCLOPAN: critter was dead..." + max + " cur: " + cur);
@@ -199,14 +212,16 @@ procedure combat_p_proc begin
       if (cur < (max / 4)) then begin
          if (cur > 0) then
             critter_heal(obj, 1 - cur);
-         called := 1;
+ //        called := 1;
 
          float_msg(self_obj, mstr(226), FLOAT_MSG_WARNING);
 
          if (local_var(LVAR_Test_Stage) < 6) then begin
+            called := 1;   //added by killap
             add_timer_event(self_obj, 2, TIMER_DOTEST);
             debug_msg("FCLOPAN: called dotest");
          end else begin
+            called := 1; //added by killap
             add_timer_event(self_obj, 2, TIMER_DOENDTESTPASS);
             debug_msg("FCLOPAN: called do end test pass");
          end
@@ -286,11 +301,81 @@ procedure critter_p_proc begin
    actions need to be taken by the critter based on previous combat, the critter will remember
    this as well. */
 
+   //added by killap
+   
+   variable obj;
+   variable max;
+   variable cur;
+   variable wepobj;
+
+   //end added
+
+
    if ((local_var(LVAR_Hostile) == 2) and (obj_can_see_obj(self_obj,dude_obj))) then begin
        set_local_var(LVAR_Hostile,1);
        self_attack_dude;
    end
+   
+   
+   //added by killap
 
+   if (local_var(LVAR_Test_Stage)) then
+      call checkTestObj;
+   if (local_var(LVAR_Test_Obj)) then begin
+      obj := local_var(LVAR_Test_Obj);
+      script_overrides;
+   end
+
+   if (obj and (called == 0)) then begin
+      //if ((critter_state(obj) bwand CRITTER_IS_DEAD) or (is_critter_prone(obj))) then begin //added is_critter_prone (knock out code) - killap
+      if ( (is_critter_dead(obj)) or (is_critter_prone(obj)) ) then begin //changed by killap
+         max := 4;
+         cur := 0;
+         debug_msg("FCLOPAN: critter was dead..." + max + " cur: " + cur);
+      end else begin
+         max := get_critter_stat(obj, STAT_max_hp);
+         cur := get_critter_stat(obj, STAT_current_hp);
+         debug_msg("FCLOPAN: critter wasn't dead... " + max + " cur: " + cur);
+      end
+
+      if (cur < (max / 4)) then begin
+         if (cur > 0) then
+            critter_heal(obj, 1 - cur);
+ //        called := 1;
+
+         float_msg(self_obj, mstr(226), FLOAT_MSG_WARNING);
+
+         if (local_var(LVAR_Test_Stage) < 6) then begin
+            called := 1;   //added by killap
+            add_timer_event(self_obj, 2, TIMER_DOTEST);
+            debug_msg("FCLOPAN: called dotest");
+         end else begin
+            called := 1; //added by killap
+            add_timer_event(self_obj, 2, TIMER_DOENDTESTPASS);
+            debug_msg("FCLOPAN: called do end test pass");
+         end
+      end else begin
+         max := dude_max_hits;
+         cur := dude_cur_hits;
+
+         if (cur < (max / 4)) then begin
+            called := 1;
+            float_msg(self_obj, mstr(227), FLOAT_MSG_WARNING);
+            add_timer_event(self_obj, game_ticks(2), TIMER_DOENDTESTFAIL);
+         end
+      end
+   end else if (local_var(LVAR_Challenge) == 1) then begin
+      if (self_cur_hits < self_max_hits / 3 and not self_item(PID_223_PISTOL)) then begin
+         wepobj := create_object(PID_223_PISTOL, 0,0);
+         add_obj_to_inven(self_obj, wepobj);
+         add_mult_objs_to_inven(self_obj, create_object(PID_223_FMJ, 0, 0), 2);
+         float_msg(self_obj, mstr(229), FLOAT_MSG_YELLOW);
+         wield_obj(wepobj);
+      end
+   end
+   
+   //end added
+  
 end
 
 /* Whenever the critter takes damage of any type, this procedure will be called. Things
@@ -332,7 +417,12 @@ procedure talk_p_proc begin
    CheckKarma;
 
    GetReaction;
-   if (san_fran_flag(SF_LOPAN_ENEMY)) then begin
+   //added by killap
+   if (local_var(LVAR_Challenge)) then begin
+      set_local_var(LVAR_Hostile,1);
+      attack(dude_obj);
+   //end added
+   end else if (san_fran_flag(SF_LOPAN_ENEMY)) then begin
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
          call Node016;
@@ -432,7 +522,7 @@ procedure destroy_p_proc begin
    set_san_fran_flag(SF_LOPAN_DEAD);
 
    if (local_var(LVAR_Challenge) == 1) then begin
-      if (global_var(GVAR_SAN_FRAN_LOPAN_KDRAGON_QST) == 0) then begin
+      if (global_var(GVAR_SAN_FRAN_DRAGON_KLOPAN_QST) == 0) then begin
          give_xp(EXP_LOPAN_CHALLENGE_NO_MISSION);
          inc_san_fran_rep(REP_HERO_SAN_FRAN_KILL_LOPAN);
       end
@@ -440,14 +530,16 @@ procedure destroy_p_proc begin
       fadeout(1);
       move_to(dude_obj, local_var(LVAR_Old_Dude_Tile), elevation(dude_obj));
       call ReturnInven;
+      call removeVaultBoxerAppearance; //added by killap - expansion
       fadein(1);
       display_mstr(214);
       if (combat_is_initialized) then
          terminate_combat;
+
    end else begin
       inc_evil_critter
    end
-end
+end 
 
 /* Look_at_p_proc gets called any time that the player passes the cursor over any object.
    This should only hold the most cursory of glances for the player. */
@@ -502,8 +594,8 @@ end
 
 procedure Node001 begin
    Reply(103);
-   NLowOption(104, Node002);
-   NLowOption(105, Node003);
+   NLowOption(105, Node003);  //edit by killap
+   NLowOption(104, Node002);  //edit by killap
    if (local_var(LVAR_Node1_Count) == 0 and not san_fran_flag(SF_DRAGON_DEAD)) then begin
       inc_local_var(LVAR_Node1_Count);
       NOption(106, Node007, 4);
@@ -527,8 +619,8 @@ end
 
 procedure Node003 begin
    Reply(113);
-   NOption(114, Node4_5, 4);
-   NOption(115, Node999, 4);
+   NLowOption(114, Node4_5);  //killap's fix: was NOption(114, Node4_5,4)
+   NLowOption(115, Node999);  //killap's fix: was NOption(114, Node4_5,4)
 end
 
 procedure NodeLearn begin
@@ -561,11 +653,12 @@ procedure Node005 begin
    set_local_var(LVAR_State, STATE_ANGRY);
    Reply(118);
    NOption(119, Node999, 4);
+   NLowOption(121, Node999);  //added by killap
 end
 
 procedure Node006 begin
    Reply(120);
-   NOption(121, Node999, 4);
+   NLowOption(121, Node999); //killap's fix: was NOption(121, Node999,4)
 end
 
 procedure Node008a begin
@@ -730,6 +823,11 @@ procedure Node023 begin
 end
 
 procedure Node024 begin
+   //added by killap
+   if (global_var(GVAR_SAN_FRAN_DRAGON_KLOPAN_QST) == 1) then
+      set_global_var(GVAR_SAN_FRAN_DRAGON_KLOPAN_QST, 3); //set to failure
+   //end added
+   
    set_local_var(LVAR_State, STATE_DONE);
    inc_general_rep(REP_BOUNS_KILL_DRAGON_ON_MISSION);
    COMPLETE_LOPAN_KDRAGON_QUEST;
@@ -740,6 +838,11 @@ procedure Node024 begin
 end
 
 procedure Node025 begin
+   //added by killap
+   if (global_var(GVAR_SAN_FRAN_DRAGON_KLOPAN_QST) == 1) then
+      set_global_var(GVAR_SAN_FRAN_DRAGON_KLOPAN_QST, 3); //set to failure
+   //end added
+   
    set_local_var(LVAR_State, STATE_DONE);
    inc_general_rep(REP_BOUNS_KILL_DRAGON);
    COMPLETE_LOPAN_KDRAGON_QUEST;
@@ -778,14 +881,15 @@ procedure Node028 begin
 end
 
 procedure SafeDestroy begin
+   debug_msg("FCLOPAN: SafeDestroy called"); // Seraph's Code
    if (local_var(LVAR_Test_Obj)) then begin
-      if (not (is_critter_dead(local_var(LVAR_Test_Obj)))) then begin
+      //if (not (is_critter_dead(local_var(LVAR_Test_Obj)))) then begin // Commented out by Seraph
          reg_anim_clear(local_var(LVAR_Test_Obj));
          destroy_object(local_var(LVAR_Test_Obj));
-      end else begin
-         debug_msg("FCDRAGON: couldn't delete object already dead");
-         move_to(local_var(LVAR_Test_Obj), self_tile, 2);
-      end
+      /* Commented out by Seraph
+      end else
+         debug_msg("FCLOPAN: couldn't delete object already dead");
+      //*/
       set_local_var(LVAR_Test_Obj, 0);
    end
 end
@@ -810,6 +914,7 @@ procedure DoTest begin
       called1 := 0;
       call TakeInven;
       call SafeDestroy;
+      call doVaultBoxerAppearance; //added by killap - expansion
 
       if (local_var(LVAR_Test_Stage) == 0) then begin
          fadeout(1);
@@ -923,6 +1028,7 @@ procedure endTestFail begin
       called1 := 1;
       call SafeDestroy;
       call ReturnInven;
+      call removeVaultBoxerAppearance; //added by killap - expansion
 
       set_local_var(LVAR_Test_Stage, 0);
       move_to(self_obj, local_var(LVAR_Old_Self_Tile), elevation(self_obj));
@@ -945,6 +1051,7 @@ procedure endTestPass begin
       call SafeDestroy;
       called1 := 0;
       call ReturnInven;
+      call removeVaultBoxerAppearance; //added by killap
 
       set_local_var(LVAR_Test_Stage, 0);
       critter_heal(dude_obj, dude_max_hits - dude_cur_hits);
@@ -952,13 +1059,14 @@ procedure endTestPass begin
       move_to(dude_obj, local_var(LVAR_Old_Dude_Tile), elevation(dude_obj));
       set_local_var(LVAR_Beaten, 1);
 
-      COMP_QUEST(0, 0, EXP_DRAGON_BEAT_TEST);
+      COMP_QUEST(0, 0, EXP_LOPAN_BEAT_TEST)
 
       if (san_fran_flag(SF_DRAGON_DEAD)) then begin
          set_local_var(LVAR_State, STATE_DONE);
       end
 
       fadein(1);
+
       dialogue_system_enter;
    end else begin
       if (called1 == 0) then begin
@@ -974,11 +1082,11 @@ end
 procedure DoChallenge begin
    game_ui_disable;
    call TakeInven;
+   call doVaultBoxerAppearance; //added by killap - expansion
    fadeout(1);
    critter_heal(dude_obj, dude_max_hits - dude_cur_hits);
    critter_heal(self_obj, self_max_hits - self_cur_hits);
-   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_SAN_FRAN_SHI);
-
+   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LONER); //edit by killap - was TEAM_SAN_FRAN_SHI
 
    move_to(self_obj, TEST_POS_LOAD, elevation(self_obj));
    move_to(dude_obj, TEST_POS_DUDE, elevation(dude_obj));
@@ -990,6 +1098,7 @@ end
 procedure DoLearn begin
    game_ui_disable;
    fadeout(1);
+   inven_unwield(dude_obj); //added by killap - expansion
    move_to(self_obj, TEST_POS_LOAD, elevation(self_obj));
    move_to(dude_obj, TEST_POS_DUDE, elevation(dude_obj));
    animate_rotation(1);
@@ -1070,6 +1179,59 @@ procedure TakeInven begin
       end
    end
 end
+
+//added by killap - option in RP installer
+procedure doVaultBoxerAppearance begin
+   variable armor;
+   set_global_var(GVAR_TMP_GLOBAL_VAR,1);
+   if (dude_is_male) then begin
+      if ((get_sfall_global_int("HApStyle")) == LONG_HAIR) then begin
+         if (obj_carrying_pid_obj(dude_obj,PID_VAULT_BOXER_MALE_LONG_HAIR) == 0) then begin
+            armor := create_object(PID_VAULT_BOXER_MALE_LONG_HAIR,0,0);
+            add_obj_to_inven(dude_obj,armor);
+            wield_obj_critter(dude_obj, armor);
+            refresh_pc_art;
+            //metarule3(107,dude_obj,FID_HMBOXL,0);
+         end
+      end else if ((get_sfall_global_int("HApStyle")) == BALD_HAIR) then begin
+         if (obj_carrying_pid_obj(dude_obj,PID_VAULT_BOXER_MALE_BALD) == 0) then begin
+            armor := create_object(PID_VAULT_BOXER_MALE_BALD,0,0);
+            add_obj_to_inven(dude_obj,armor);
+            wield_obj_critter(dude_obj, armor);
+            refresh_pc_art;
+            //metarule3(107,dude_obj,FID_HMBOXB,0);
+         end
+      end else if ((get_sfall_global_int("HApStyle")) == REG_HAIR) then begin
+         if (obj_carrying_pid_obj(dude_obj,PID_VAULT_BOXER_MALE_NORMAL) == 0) then begin
+            armor := create_object(PID_VAULT_BOXER_MALE_NORMAL,0,0);
+            add_obj_to_inven(dude_obj,armor);
+            wield_obj_critter(dude_obj, armor);
+            refresh_pc_art;
+            //metarule3(107,dude_obj,FID_HMBOXS,0);
+         end
+      end
+   end
+end
+
+procedure removeVaultBoxerAppearance begin
+   set_global_var(GVAR_TMP_GLOBAL_VAR,0);
+   if (dude_is_male) then begin
+      if ((get_sfall_global_int("HApStyle")) == LONG_HAIR) then begin
+         remove_armor(dude_obj)   
+         destroy_object(obj_carrying_pid_obj(dude_obj,PID_VAULT_BOXER_MALE_LONG_HAIR));
+         refresh_pc_art;
+      end else if ((get_sfall_global_int("HApStyle")) == BALD_HAIR) then begin
+         remove_armor(dude_obj)       
+         destroy_object(obj_carrying_pid_obj(dude_obj,PID_VAULT_BOXER_MALE_BALD));
+         refresh_pc_art;
+      end else if ((get_sfall_global_int("HApStyle")) == REG_HAIR) then begin
+         remove_armor(dude_obj)
+         destroy_object(obj_carrying_pid_obj(dude_obj,PID_VAULT_BOXER_MALE_NORMAL));
+         refresh_pc_art;
+      end
+   end
+end
+//end added
 
 procedure getCurrentPid begin
    if (local_var(LVAR_Test_Stage) == 0) then

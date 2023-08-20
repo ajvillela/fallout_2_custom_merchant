@@ -90,9 +90,9 @@ procedure Node024;
 procedure Node025;
 procedure Node026;
 procedure Node027;
-procedure Node027a;
+//procedure Node027a; --comment out by killap
 procedure Node028;
-//procedure Node029;
+procedure Node029; //uncomment out by killap
 procedure Node030;
 procedure Node031;
 //procedure Node032;
@@ -100,6 +100,12 @@ procedure Node033;
 procedure Node034;
 procedure Node035;
 procedure Node036;
+
+//added by killap
+procedure Node022a;
+procedure Node022b;
+procedure Node022c;
+//end added
 
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
@@ -128,7 +134,7 @@ variable Drink_Type := 0;
 variable Drink_Cost := 0;
 variable From_36 := 0;
 variable Tip_Type := 0;
-
+   
 procedure start begin
    Phil_Ptr := self_obj;
 end
@@ -195,7 +201,8 @@ procedure talk_p_proc begin
    Karma_Perception:=KARMA_PERCEPTION3;
 
    GetReaction;
-
+   ReactToLevel; //added by killap
+   
    Drink_Type := 0;
    Drink_Cost := 0;
    From_36 := 0;
@@ -207,14 +214,28 @@ procedure talk_p_proc begin
    else if ( ( dude_iq == 2 ) or ( dude_iq == 3 ) ) then begin
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
-           call Node013;
+       //added by killap
+       if (local_var(LVAR_Herebefore) == 0) then begin
+         set_local_var(LVAR_Herebefore,1);
+         call Node001;
+       //end added
+       end else begin
+         call Node013;
+       end
        gSay_End;
        end_dialogue;
    end
    else if (dude_iq == 1) then begin
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
-           call Node014;
+       //added by killap
+       if (local_var(LVAR_Herebefore) == 0) then begin
+         set_local_var(LVAR_Herebefore,1);
+         call Node001;
+       //end added
+       end else begin
+         call Node014;
+       end
        gSay_End;
        end_dialogue;
    end
@@ -567,7 +588,7 @@ procedure Node018 begin
    // Give the drink to the player. Remove cash.
    item := create_object( Drink_Type, 0, 0 );
    add_obj_to_inven( dude_obj, item );
-   item_caps_adjust( dude_obj, -Drink_Cost );
+   item_caps_adjust( dude_obj, -(Drink_Cost + Tip_Type) ); //aded Tip_Type - killap
 
    if( From_36 == 1 ) then begin
       From_36 := 0;
@@ -620,9 +641,42 @@ end
 
 procedure Node022 begin
    Reply(198);
+   
+   NOption(202,Node022a,004);
+   
+   //NOption(199,Node031,004);
+   //NOption(200,Node999,004);
+end
+
+//added by killap
+procedure NOde022a begin
+   if ( (global_var(GVAR_BH_JAIL) < JAIL_STEALTH) ) then begin
+      Reply(1981);
+      NOption(1984,Node022b,004);
+      NOption(199,Node031,004);
+      NOption(200,Node999,004);
+   end else begin
+      call Node022b;
+   end
+end
+
+procedure Node022b begin
+   if( global_var( GVAR_BH_MINE ) < MINE_FIXED_CASH ) then begin
+      Reply(1982);
+      NOption(1984,Node022c,004);
+      NOption(199,Node031,004);
+      NOption(200,Node999,004);
+   end else begin
+      call Node022c;
+   end
+end
+
+procedure Node022c begin
+   Reply(1983);
    NOption(199,Node031,004);
    NOption(200,Node999,004);
 end
+//end added
 
 procedure Node023 begin
    Reply(201);
@@ -644,41 +698,71 @@ procedure Node024 begin
 end
 
 procedure Node025 begin
-   if( global_var(GVAR_BH_MIGHTY_MAN) == 0 ) then
-      set_global_var(GVAR_BH_MIGHTY_MAN, MIGHTY_MAN_KNOWN);
-   Reply(209);
-   NOption(210,Node026,004);
-   NOption(211,Node999,004);
+   //added - ( ( global_var( GVAR_BH_CONSPIRACY ) != CONSPIRACY_SUCCESSFUL ) and ( global_var( GVAR_BH_FTM ) != FTM_SUCCESSFUL ) ) - killap
+   if ( ( global_var(GVAR_BH_MIGHTY_MAN) < MIGHTY_MAN_WON ) and
+      ( ( global_var( GVAR_BH_CONSPIRACY ) != CONSPIRACY_SUCCESSFUL ) and 
+      ( global_var( GVAR_BH_FTM ) != FTM_SUCCESSFUL ) ) ) then begin
+      if( global_var(GVAR_BH_MIGHTY_MAN) == 0 ) then
+         set_global_var(GVAR_BH_MIGHTY_MAN, MIGHTY_MAN_KNOWN);
+      Reply(209);
+      NOption(210,Node026,004);
+      NOption(211,Node999,004);
+   end else begin
+      call Node026;
+   end
 end
 
 procedure Node026 begin
-   Reply(212);
-   NOption(213,Node027,004);
-   NOption(214,Node999,004);
+   if( global_var(GVAR_BH_MISSING) < MISSING_FINISHED_CASH ) then begin
+      Reply(212);
+      NOption(213,Node027,004);
+      NOption(214,Node999,004);
+   end else begin
+      call Node027;
+   end
 end
 
 procedure Node027 begin
-   if( global_var( GVAR_BH_MINE ) == 0 ) then
-      set_global_var(GVAR_BH_MINE, MINE_KNOWN);
-   Reply(215);
-   NOption(216,Node027a,004);
-   NOption(217,Node999,004);
+   if ( global_var( GVAR_BH_CONSPIRACY ) >= CONSPIRACY_SUCCESSFUL ) then begin
+      call Node029;
+   end else if ( global_var( GVAR_BH_MINE ) < MINE_FIXED_CASH ) then begin
+      if( global_var( GVAR_BH_MINE ) == 0 ) then
+         set_global_var(GVAR_BH_MINE, MINE_KNOWN);
+      Reply(215);
+      NOption(216,Node029,004); //edit by killap - was 027a
+      NOption(217,Node999,004);
+   end else begin
+      call Node028;
+   end
 end
 
-procedure Node027a begin
+/*procedure Node027a begin --comment out by killap
    if( ( global_var(GVAR_BH_MINE) == MINE_FIXED_CASH ) or
        ( global_var(GVAR_BH_MINE) == MINE_FIXED_FREE ) or
        ( global_var(GVAR_BH_MINE) == MINE_REWARDED ) ) then
       call Node028;
    else
       call Node030;
-end
+end*/
 
 procedure Node028 begin
    Reply(218);
-   NOption(219,Node030,004);
+   NOption(219,Node029,004);
    NOption(220,Node999,004);
 end
+
+//added by killap
+
+procedure Node029 begin
+   if ( (global_var(GVAR_BH_JAIL) == JAIL_STEALTH) or (global_var(GVAR_BH_JAIL) == JAIL_FORCE) or (global_var(GVAR_BH_JAIL) == JAIL_CHARISMA) ) then begin
+      Reply(221);
+      NOption(222,Node030,004);
+      NOption(223,Node999,004);
+   end else begin
+      call Node030;
+   end
+end
+//end added
 
 procedure Node030 begin
    Reply(224);
@@ -712,6 +796,7 @@ procedure Node035 begin
 end
 
 procedure Node036 begin
+   item_caps_adjust( dude_obj, -(Drink_Cost + Tip_Type) ); //aded by killap
    From_36 := 1;
    set_local_var( LVAR_Clue_Given, 1 );
    set_map_var( MVAR_Phil_Told_About_Guns, 1 );

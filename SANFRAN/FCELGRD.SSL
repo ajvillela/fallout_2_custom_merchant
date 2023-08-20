@@ -191,9 +191,10 @@ procedure critter_p_proc begin
    end
 
    if (OBJ_NOTIFY_GUARD bwand local_var(LVAR_Guard_Bit)) then begin
-      BIT_NOTIFY_GUARD_OFF(local_var(LVAR_Guard_Bit));
-      if (obj_can_see_obj(self_obj, OBJ_ATTACK_OBJ)) then
+      if (obj_can_see_obj(self_obj, OBJ_ATTACK_OBJ)) then begin
+         BIT_NOTIFY_GUARD_OFF(local_var(LVAR_Guard_Bit)); // moved from above by killap
          attack(OBJ_ATTACK_OBJ);
+      end
    end
 
 

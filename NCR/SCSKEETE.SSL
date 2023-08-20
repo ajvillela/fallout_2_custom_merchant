@@ -37,6 +37,7 @@
 
 #define TIMER_TALK 1
 #define TIMER_MOVE 2
+#define TIMER_STEAL_STUFF 3
 
 /* Standard Script Procedures */
 procedure start;
@@ -88,11 +89,15 @@ procedure Node017;
 #define LVAR_Hostile                    (5)
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Node3_Count                (7)
+#define LVAR_stole_today                (8) //added by killap - expansion
+#define LVAR_paid                       (9) //added by killap - expansion
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
    Needs to be saved, make it a map variable (MVAR_) */
 
+
+import variable playerTmpBox2;   //added
 
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
@@ -102,17 +107,35 @@ variable repeatN1 := 0;
 variable repeatN3 := 0;
 variable repeatN7 := 0;
 variable repeatN11 := 0;
+variable from_node011Take := 0; //added by killap
+//variable stole_today := 0; //added by killap - expansion
 
 //Movement vars
 variable startTileNum;
 //Blah
 #define CAROBJ PID_BEER
 
-
 procedure timed_event_p_proc begin
    variable which;
    variable tileNum;
    variable info;
+   variable Inven_Roll; //added
+   variable item; //added
+   variable count;   //added
+   
+//begin killap's code - expansion
+   if (fixed_param == TIMER_STEAL_STUFF) then begin
+      if ( (global_var(GVAR_NCR_CAR_JACKED) == 1) and (local_var(LVAR_stole_today) == 0) and (game_time_hour > 100) and (game_time_hour < 700) ) then begin
+           Inven_Roll := random(0, (inven_count(Trunk_Ptr)-1));
+           item := inven_ptr(Trunk_Ptr, Inven_Roll);
+           count := rm_mult_objs_from_inven(Trunk_Ptr, item, 1);
+           add_mult_objs_to_inven(playerTmpBox2, item, 1); //changed from self_obj
+           set_local_var(LVAR_stole_today,1);
+      end else begin
+           add_timer_event(self_obj, ONE_GAME_HOUR*7, TIMER_STEAL_STUFF);
+      end
+   end
+//end killap's code
 
    if (fixed_param == TIMER_TALK) then begin
       if not(combat_is_initialized) then begin
@@ -121,7 +144,7 @@ procedure timed_event_p_proc begin
             float_msg(self_obj, mstr(176 + which), Random(4, 7));
          end else begin
             if (obj_can_see_obj(self_obj, dude_obj)) then begin
-               float_msg(self_obj, mstr(176), FLOAT_MSG_GREEN);
+               float_msg(self_obj, mstr(176), FLOAT_MSG_GREEN);       
             end
          end
       end
@@ -171,10 +194,16 @@ procedure map_enter_p_proc begin
    Skeeter_High := Random(0, 1);
 
    startTileNum := tile_num(self_obj);
-   add_timer_event(self_obj, 0, TIMER_TALK);
+   add_timer_event(self_obj, 1, TIMER_TALK);
    add_timer_event(self_obj, 15, TIMER_MOVE);
 
-   hasCar := global_var(GVAR_PLAYER_GOT_CAR);
+
+   // Fix for Chosen One having the car but leaving it behind and arriving in NCR by joining a caravan - killap
+   if ((global_var(GVAR_PLAYER_GOT_CAR)) and (metarule(30, 0) == 10)) then
+     hasCar := global_var(GVAR_PLAYER_GOT_CAR);
+   else
+     hasCar := 0;
+
    if (local_var(LVAR_Herebefore) == 0) then
       Skeeter_High := 0;
 
@@ -249,7 +278,7 @@ procedure talk_p_proc begin
       gSay_End;
       end_dialogue;
    end
-   set_local_var(LVAR_Herebefore, 1);
+   //set_local_var(LVAR_Herebefore, 1); moved by killap
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -260,8 +289,18 @@ procedure destroy_p_proc begin
 /* Increment the aligned critter counter*/
 
    //inc_good_critter
-   inc_evil_critter
-
+   //inc_evil_critter --comment out
+   
+   inc_neutral_critter // added by killap
+   
+   //added by killap
+   if (merk_seed_status(MSS_KILL_SKEETER)) then begin
+      set_merk_status(MERK_STATUS_PLEASED);
+   end 
+   //end
+   
+   set_mss(MSS_SKEETER_DEAD); //added by killap
+   
 /* Set global_variable for Enemy status*/
 end
 
@@ -306,8 +345,8 @@ end
 //~~~~~~~~~~~~~~~~ DESIGN TOOL STARTS HERE
 
 procedure Node001Inc begin
-   repeatN1 += 1;
-   if (repeatN1 > 2) then repeatN1 := 2;
+   repeatN1 := 1;
+   //if (repeatN1 > 2) then repeatN1 := 2;
    call Node001;
 end
 
@@ -327,10 +366,14 @@ procedure Node001 begin
    end else begin
       if (repeatN1 == 0) then
          Reply(104);
-      else if (repeatN1 == 1) then
+      else if (repeatN1 == 1) then begin
          Reply(105);
-      else if (repeatN1 == 2) then
+         repeatN1:=0;
+      end
+      else if (repeatN1 == 2) then begin
          Reply(106);
+         repeatN1:=0;
+      end
    end
    if (hasCar) then begin
       NLowOption(107, Node0506a);
@@ -339,9 +382,11 @@ procedure Node001 begin
    if (dude_is_female) then
       NOption(109, Node001Inc, 4);
    NOption(110, Node009, 4);
-   if (hasCar) then
+   if ((hasCar) and (local_var(LVAR_paid) == 0)) then begin
       NOption(111, Node0506a, 4);
-   NOption(112, Node999, 4);
+      NOption(112, Node007, 4); //killap's fix: changed from 999 to 007
+   end
+   NOption(138, Node999, 4); //added by killap
 end
 
 procedure Node002 begin
@@ -350,30 +395,36 @@ procedure Node002 begin
    if (dude_is_female) then
       NOption(115, Node008, 4);
    NOption(116, Node008, 4);
-   if (has_trait(TRAIT_PERK, dude_obj, PERK_speaker)) then
-      NOption(117, Node011, 4);
+   if (has_trait(TRAIT_PERK, dude_obj, PERK_speaker)) then begin
+     // added by killap
+     if (repeatN11 >= 5) then
+       repeatN11 := 0;
+     NOption(117, Node011, 4);
+   end
    BOption(118, Node999, 4);
 end
 
 procedure Node003inc begin
-   inc_local_var(LVAR_Node3_Count);
+   set_local_var(LVAR_Node3_Count,1); //killap
+   //inc_local_var(LVAR_Node3_Count);
    call Node003;
 end
 
 procedure Node003 begin
-   if (global_var(GVAR_NCR_CAR_JACKED) != 1 and hasCar and local_var(LVAR_Herebefore) == 0) then
+   if ((global_var(GVAR_NCR_CAR_JACKED) != 1) and hasCar and (local_var(LVAR_Herebefore) == 0)) then
       call Node001;
-   else if (global_var(GVAR_NCR_CAR_JACKED) == 1 and hasCar) then
+   else if ((global_var(GVAR_NCR_CAR_JACKED) == 1) and hasCar and (local_var(LVAR_stole_today) == 1)) then
       call Node004;
    else begin
       if (repeatN3 == 0) then begin
          if (local_var(LVAR_Node3_Count) == 0) then begin
             Reply(119);
          end else begin
-            Reply(120);
+            Reply(121); //was 120 - killap
+            set_local_var(LVAR_Node3_Count,0); //killap
          end
       end else
-         Reply(121);
+         Reply(119); //was 121 - killap
       NLowOption(122, Node012);
       if (dude_is_female) then
          NOption(123, Node003inc, 4);
@@ -381,6 +432,7 @@ procedure Node003 begin
       NOption(125, Node009, 4);
       NOption(126, Node999, 4);
    end
+   set_local_var(LVAR_Herebefore, 1); //moved here by killap
 end
 
 procedure Node004 begin
@@ -391,7 +443,9 @@ procedure Node004 begin
 end
 
 procedure Node005 begin
-   set_global_var(GVAR_NCR_CAR_JACKED, -1);
+   set_global_var(GVAR_NCR_CAR_JACKED, 0); //killap's fix: changed from -1
+   set_local_var(LVAR_paid, 1); //added by killap
+   
    Reply(131);
    NOption(132, Node009, 4);
    NOption(133, Node999, 1);
@@ -409,7 +463,8 @@ end
 
 procedure Node007 begin
    if (repeatN7 == 0) then begin
-      set_global_var(GVAR_NCR_CAR_JACKED, -2);
+      set_global_var(GVAR_NCR_CAR_JACKED, 1); //killap's fix: changed fron -2
+      add_timer_event(self_obj, ONE_GAME_HOUR*7, TIMER_STEAL_STUFF); //added by killap - expansion
       Reply(135);
       NOption(137, Node007Inc, 4);
       NOption(138, Node999, 4);
@@ -436,8 +491,11 @@ end
 procedure Node009 begin
    Reply(144);
 
-   if (global_var(GVAR_NCR_CAR_JACKED) == 0 and hasCar) then
-      NOption(145, Node001Stub, 4);
+   if ((hasCar) and (local_var(LVAR_paid) == 0)) then begin
+      NOption(145, Node001, 4);
+      repeatN1 := 2;
+   end
+      
    NOption(146, Node999, 4);
 end
 
@@ -448,7 +506,8 @@ procedure Node010 begin
 end
 
 procedure Node011Take begin
-   repeatN11 += 1;
+   //repeatN11 += 1; // comment out by killap
+   from_node011Take := 1; // added by killap
    move_obj_inven_to_obj(self_obj, dude_obj);
    Reply(187);
    NOption(MORESTRING, Node011, 1);
@@ -459,7 +518,7 @@ procedure Node011Repeat begin
 end
 
 procedure Node011 begin
-   if (repeatN11 == 0) then
+   if (repeatN11 == 0 or from_node011Take) then // added from_node011Take - killap
       Reply(150);
    else if (repeatN11 == 1) then
       Reply(151);
@@ -469,12 +528,13 @@ procedure Node011 begin
       Reply(153);
    else if (repeatN11 == 4) then
       Reply(154);
-   else if (repeatN11 == 5) then
+   else if (repeatN11 >= 5) then
       Reply(155);
 
    NOption(156, Node011Take, 4);
    NOption(157, Node011Repeat, 4);
    NOption(158, Node999, 4);
+   from_node011Take := 0;
 end
 
 procedure Node012 begin
@@ -492,7 +552,7 @@ procedure Node01606a begin
 end
 
 procedure Node016017a begin
-   if (bad_critter_reaction) then
+   if (dude_strength >= 8) then
       call Node016;
    else
       call Node017;
@@ -523,9 +583,10 @@ procedure Node016 begin
 end
 
 procedure Node017 begin
-   Reply(172);
-   GOption(173, Node01606a, 4);
-   NLowOption(175, Node999);
-   NOption(176, Node999, 4);
+   Reply(174); //killap's fix: changed from 172
+  // GOption(173, Node01606a, 4);
+  // NLowOption(175, Node999);
+  // NOption(176, Node999, 4);
+   call Node998; //added by killap
 end
 //xxxxxxxxxxxxxxxxxxxx

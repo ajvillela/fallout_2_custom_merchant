@@ -33,7 +33,7 @@
 
 #include "..\headers\command.h"
 #include "..\headers\sanfran.h"
-
+#include "..\headers\SFCHINA2.H" // added by killap - expansion
 
 /* Standard Script Procedures */
 procedure start;
@@ -66,6 +66,7 @@ procedure Node007;
 procedure Node008;
 procedure Node009;
 procedure Node010;
+procedure doCallGuards; // added by killap
 
 #define PASSWORD_PAPERS_PID PID_PASSWORD_PAPER
 
@@ -138,7 +139,7 @@ procedure talk_p_proc begin
    end else if (not san_fran_flag(SF_EMP_ROOM_BIO)) then begin
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
-         call Node010;
+         call Node009;  //killap's fix: changed to Node009
       gSay_End;
       end_dialogue;
    end else begin
@@ -150,6 +151,14 @@ procedure talk_p_proc begin
    end
 
    set_local_var(LVAR_Herebefore, 1);
+   
+   // added by killap
+   if (callGuards) then begin
+      callGuards := 0;
+      call doCallGuards;
+   end   
+   // end added   
+   
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -195,7 +204,7 @@ end
 procedure NodeHack begin
    if (skill_success(dude_obj, SKILL_SCIENCE, -110)) then begin
       call Node002;
-   end else if (skill_success(dude_obj, SKILL_SCIENCE, 100)) then begin
+   end else if (skill_success(dude_obj, SKILL_SCIENCE, -100)) then begin //edit by killap - was 100
       set_shihacked_flag(SHI_TRUE);
       call Node002;
    end else begin
@@ -235,6 +244,7 @@ procedure Node002 begin
    NOption(112, Node007, 1);
    NOption(113, Node008, 1);
    NOption(114, Node009a, 1);
+   NOption(108, Node999, 1); //added by killap
 end
 
 procedure Node003 begin
@@ -246,6 +256,7 @@ end
 procedure Node004 begin
    set_local_var(LVAR_Denied, 1);
    set_shihacked_flag(SHI_TRUE);
+   callGuards := 1; // added by killap
    Reply(118);
    NOption(119, Node999, 4);
 end
@@ -273,6 +284,7 @@ procedure Node006 begin
 end
 
 procedure Node007 begin
+   set_map_var(MVAR_Xeno_Program_Know,1); // added by killap - expansion
    Reply(130);
    NOption(131, Node005, 1);
    NOption(132, Node006, 1);
@@ -281,6 +293,7 @@ procedure Node007 begin
 end
 
 procedure Node008 begin
+   set_global_var(GVAR_SHI_FIND_DR_SHENG, PLANT_QUEST_DRSHENG_KNOW); // added by killap - expansion
    Reply(135);
    NOption(136, Node005, 1);
    NOption(137, Node006, 1);
@@ -296,5 +309,11 @@ end
 
 procedure Node010 begin
    Reply(143);
-   NOption(144, Node999, 1);
+   NOption(144, Node002, 1);
 end
+
+//added by killap
+procedure doCallGuards begin
+   set_san_fran_flag(SF_SHI_ENEMY);
+end
+//end added

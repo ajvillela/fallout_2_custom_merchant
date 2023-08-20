@@ -65,7 +65,27 @@ end
    default from the prototype, and needs to be set in scripts. */
 procedure map_enter_p_proc begin
    add_timer_event( self_obj, game_ticks(6), 1 );
+
+   //added by killap - expansion
+   if ( global_var(GVAR_BH_MINE) >= MINE_FIXED_CASH ) then begin
+      reg_anim_begin();
+      reg_anim_animate_forever(self_obj, ANIM_stand);
+      reg_anim_end();
+   end
+   add_timer_event(self_obj, 1, 2);
+   //end added
 end
+
+//added by killap - expansion
+procedure map_update_p_proc begin
+   if ((combat_is_initialized == 0) and ( global_var(GVAR_BH_MINE) >= MINE_FIXED_CASH ) ) then
+   begin
+      reg_anim_begin();
+      reg_anim_animate_forever(self_obj, ANIM_stand);
+      reg_anim_end();
+   end
+end
+//end added
 
 procedure timed_event_p_proc begin
    if( fixed_param == 1 ) then begin
@@ -74,7 +94,16 @@ procedure timed_event_p_proc begin
       else
          floater( random(131, 133) );
       add_timer_event( self_obj, game_ticks(6), 1 );
+   //added by killap - expansion
+   end else if( fixed_param == 2 ) then begin
+      if ( ( global_var(GVAR_BH_MINE) >= MINE_FIXED_CASH ) and (anim_busy(self_obj) == false) and (combat_is_initialized == 0) ) then begin
+         reg_anim_begin();
+         reg_anim_animate_forever(self_obj, ANIM_stand);
+         reg_anim_end();
+      end
+      add_timer_event(self_obj, 1, 2);   
    end
+   //end added
 end
 
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from

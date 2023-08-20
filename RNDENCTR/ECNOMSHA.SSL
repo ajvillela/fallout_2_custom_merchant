@@ -6,7 +6,6 @@
    have been designed.
 */
 
-procedure start;
 
 #include "..\headers\define.h"
 
@@ -106,6 +105,30 @@ end
    set up the Team number and AI packet for this critter. This will override the
    default from the prototype, and needs to be set in scripts. */
 procedure map_enter_p_proc begin
+   if (cur_map_index == MAP_RND_MOUNTAIN_4) then
+      move_to(self_obj, 17076, 0);
+   else if (cur_map_index == MAP_RND_MOUNTAIN_5) then
+      move_to(self_obj, 18303, 0);
+   else if (cur_map_index == MAP_RND_DESERT4) then
+      move_to(self_obj, 19098, 0);
+   else if (cur_map_index == MAP_RND_DESERT5) then
+      move_to(self_obj, 20686, 0);
+   else if (cur_map_index == MAP_RND_DESERT_9) then
+      move_to(self_obj, 17894, 0);
+   else if (cur_map_index == MAP_RND_COAST7) then
+      move_to(self_obj, 21302, 0);
+   else if (cur_map_index == MAP_RND_COAST8) then
+      move_to(self_obj, 18682, 0);
+   else if (cur_map_index == MAP_RND_COAST9) then
+      move_to(self_obj, 18089, 0);
+   else if (cur_map_index == MAP_RND_COAST_10) then
+      move_to(self_obj, 17305, 0);
+   else if (cur_map_index == MAP_RND_COAST_11) then
+      move_to(self_obj, 17894, 0);
+   else if (cur_map_index == MAP_RND_COAST_12) then
+      move_to(self_obj, 19088, 0);
+   
+   
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_RND_NOMAD);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_CITIZEN);
 
@@ -113,7 +136,7 @@ procedure map_enter_p_proc begin
    check_restock_item(PID_CLUB, 5, 7, 40)
    check_restock_item(PID_KNIFE, 3, 5, 30)
    check_restock_item(PID_SHARPENED_POLE, 4, 6, 80)
-   check_restock_item(PID_RADSCORPION_PARTS, 5, 6, 10)
+   //check_restock_item(PID_RADSCORPION_PARTS, 5, 6, 10)
    check_restock_item(PID_GECKO_PELT, 5, 6, 20)
 
    healing_price  := Random(MIN_HEALING_PRICE, MAX_HEALING_PRICE);
@@ -238,7 +261,8 @@ procedure Node001 begin
    if (dude_cur_hits != dude_max_hits or dude_is_crippled or dude_is_poisoned) then
       NOption(105, Node002, 4);
    NOption(106, Node008, 4);
-   NOption(107, Node003, 4);
+   //NOption(107, Node003, 4); //commented out by killap, new code placed below.
+   NOption(107, Node999, 4);
    NLowOption(108, Node011);
 end
 
@@ -349,7 +373,7 @@ procedure NodeCombine begin
    broc := obj_carrying_pid_obj(dude_obj, PID_BROC_FLOWER);
 
    item_caps_adjust(dude_obj, -powder_price);
-   item_caps_adjust(dude_obj, powder_price);
+   item_caps_adjust(self_obj, powder_price); //edit by killap - was dude_obj
 
    while (rootamt > 0 and brocamt > 0) do begin
       cnt += 1;
@@ -384,15 +408,18 @@ end
 
 procedure Node011 begin
    Reply(134);
-   NOption(135, Node999, 4);
+   //NOption(135, Node999, 4);
+   NOption(135, Node999, 1); //commented out by killap, new code placed below.
 end
 
 procedure NodeFleeing begin
-   float_msg(self_obj, mstr(Random(120, 122)), FLOAT_MSG_YELLOW);
+   //float_msg(self_obj, mstr(Random(120, 122)), FLOAT_MSG_YELLOW); //commented out by killap, new code placed below.
+   float_msg(self_obj, mstr(Random(147, 149)), FLOAT_MSG_YELLOW);
 end
 
 procedure NodeFighting begin
-   float_msg(self_obj, mstr(Random(116, 119)), FLOAT_MSG_RED);
+   //float_msg(self_obj, mstr(Random(116, 119)), FLOAT_MSG_RED); //commented out by killap, new code placed below.
+   float_msg(self_obj, mstr(Random(143, 146)), FLOAT_MSG_RED);
 end
 
 

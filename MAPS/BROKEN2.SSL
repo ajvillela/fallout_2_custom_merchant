@@ -23,7 +23,7 @@
         -rwh2   11/13/97
 */
 #include "..\headers\define.h"
-#include "..\headers\broken.h"
+//#include "..\headers\broken.h" - comment out by killap
 #include "..\headers\broken2.h"
 #include "..\headers\updatmap.h"
 
@@ -34,6 +34,7 @@
 procedure start;
 procedure map_enter_p_proc;
 procedure map_update_p_proc;
+procedure map_exit_p_proc;
 procedure timed_event_p_proc;
 
 procedure CauseDamage;
@@ -46,10 +47,17 @@ variable manson_hex;
 variable Damage_Timer_Started := 0;
 variable damage;
 
+/*#define wearing_protective_gear(x)  ( ( obj_pid( critter_inven_obj( x, INVEN_TYPE_WORN ) ) == PID_POWERED_ARMOR ) or \
+                                      ( obj_pid( critter_inven_obj( x, INVEN_TYPE_WORN ) ) == PID_HARDENED_POWER_ARMOR ) or \
+                                      ( obj_pid( critter_inven_obj( x, INVEN_TYPE_WORN ) ) == PID_ADVANCED_POWER_ARMOR ) or \
+                                      ( obj_pid( critter_inven_obj( x, INVEN_TYPE_WORN ) ) == PID_ADVANCED_POWER_ARMOR_MK2 ) )*/
+//edited below for expansion - killap                                     
 #define wearing_protective_gear(x)  ( ( obj_pid( critter_inven_obj( x, INVEN_TYPE_WORN ) ) == PID_POWERED_ARMOR ) or \
                                       ( obj_pid( critter_inven_obj( x, INVEN_TYPE_WORN ) ) == PID_HARDENED_POWER_ARMOR ) or \
                                       ( obj_pid( critter_inven_obj( x, INVEN_TYPE_WORN ) ) == PID_ADVANCED_POWER_ARMOR ) or \
-                                      ( obj_pid( critter_inven_obj( x, INVEN_TYPE_WORN ) ) == PID_ADVANCED_POWER_ARMOR_MK2 ) )
+                                      ( obj_pid( critter_inven_obj( x, INVEN_TYPE_WORN ) ) == PID_ADVANCED_POWER_ARMOR_MK2 ) or \
+                                      ( obj_pid( critter_inven_obj( x, INVEN_TYPE_WORN ) ) == PID_ENVIRONMENTAL_ARMOUR ) or \
+                                      ((obj_pid(critter_inven_obj(dude_obj,INVEN_TYPE_RIGHT_HAND)) == PID_GAS_MASK) or (obj_pid(critter_inven_obj(dude_obj,INVEN_TYPE_LEFT_HAND)) == PID_GAS_MASK)) )                                      
 
 #define apply_radon_damage(x)    damage := random( 10, 15 ); \
                                  critter_dmg( x, damage, ( DMG_normal_dam BWOR DMG_NOANIMATE BWOR DMG_BYPASS_ARMOR ));
@@ -62,6 +70,8 @@ export variable scorpion_obj;
 export variable Professor_Box1;
 export variable Professor_Box2;
 export variable seymour_obj;
+
+export variable Chad_Ptr; //added by killap - expansion pack
 
 /*
 variable cow_ptr;
@@ -76,7 +86,7 @@ end
 procedure map_enter_p_proc begin
    override_map_start_hex(21144,0,0);
 
-   set_map_var( MVAR_Came_From_Broken2, 1 );
+   //set_map_var( MVAR_Came_From_Broken2, 1 ); - comment out by killap
 
    Damage_Timer_Started := 0;
 
@@ -122,7 +132,7 @@ procedure map_enter_p_proc begin
 end
 
 procedure map_update_p_proc begin
-   set_map_var( MVAR_Came_From_Broken2, 1 );
+   //set_map_var( MVAR_Came_From_Broken2, 1 ); - comment out by killap
 
    if( elevation( dude_obj ) == 0 ) then
       Lighting;
@@ -146,6 +156,12 @@ procedure map_update_p_proc begin
    end
 
 end
+
+//added by killap
+procedure map_exit_p_proc begin
+   set_global_var( GVAR_CAME_FROM_BROKEN2, 1 );
+end
+//end added
 
 procedure timed_event_p_proc begin
    if( fixed_param == 1 ) then begin

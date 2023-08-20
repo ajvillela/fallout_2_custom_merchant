@@ -207,7 +207,7 @@ procedure Node001 begin
          NLowOption(108,Node002);
          if (map_var(MVAR_Replace) == 1) then
             NLowOption(109,Node004);
-         BLowOption(110,Node998,004);
+         BLowOption(110,Node998); // Seraph's Fix: BLowOption only takes 2 args. Thanks Rob!
          NOption(111,Node002,004);
          if (map_var(MVAR_Replace) == 1) then
             NOption(112,Node004,004);
@@ -253,13 +253,15 @@ procedure Node006 begin
 end
 
 procedure Node007 begin
-   set_local_var( LVAR_Suited_Up, 1 );
+   //set_local_var( LVAR_Suited_Up, 1 );
    if( ( local_var( LVAR_Suited_Up ) == 0 ) and
        ( obj_pid(critter_inven_obj(dude_obj,INVEN_TYPE_WORN)) != PID_ADVANCED_POWER_ARMOR ) and
        ( obj_pid(critter_inven_obj(dude_obj,INVEN_TYPE_WORN)) != PID_ADVANCED_POWER_ARMOR_MK2 ) ) then begin
       Reply(125);
 
       NOption(126,Node004,001);
+      
+      set_local_var( LVAR_Suited_Up, 1 ); //moved here by killap
    end
    else
       NMessage(124);

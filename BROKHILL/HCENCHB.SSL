@@ -66,6 +66,15 @@ procedure Node004;
 procedure Node005;
 procedure Node006;
 
+//added by killap - expansion
+procedure Node007;
+procedure Node008;
+procedure Node009;
+procedure Node010;
+procedure Node011;
+procedure Node012;
+//end added
+
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
 // seen by the design Tool
@@ -76,6 +85,8 @@ procedure Node006;
 #define LVAR_Herebefore                 (4)
 #define LVAR_Hostile                    (5)
 #define LVAR_Personal_Enemy             (6)
+#define LVAR_Told_About_Chad            (7) //added by killap - expansion
+
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -98,9 +109,12 @@ procedure map_enter_p_proc begin
    variable item;
 
    Only_Once:=0;
+   //edits by killap - expansion
+   //critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_BROKEN_HILLS);
+   //critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_GUARDS);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_BROKEN_HILLS);
-   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_GUARDS);
-
+   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_CITIZEN);
+   
    if map_first_run then begin
       weapon := create_object(PID_COMBAT_SHOTGUN,0,0);
       add_obj_to_inven(self_obj, weapon);
@@ -278,11 +292,14 @@ end
 
 procedure Node001 begin
    Reply(103);
-   giQ_Option(-1,NAME,104,Node002,NEUTRAL_REACTION);
-   if dude_moron_not_vegetable then
+   if dude_moron_not_vegetable then begin
+      NOption(104,Node002,002);
       NOption(105,Node002,002);
+   end
    NOption(106,Node003,004);
-   NOption(107,Node004,004);
+   if ( (global_var(GVAR_BH_CHAD) >= CHAD_SUSPICIOUS) and (local_var(LVAR_Told_About_Chad) == 0) ) then
+      NOption(107,Node004,004);
+   NOption(117,Node999,004);
 end
 
 procedure Node002 begin
@@ -292,13 +309,16 @@ end
 
 procedure Node003 begin
    Reply(110);
-   NOption(111,Node003,004);
+   //added by killap - expansion
+   set_local_var(LVAR_Herebefore,1);
+   if ( (global_var(GVAR_BH_CHAD) >= CHAD_SUSPICIOUS) and local_var(LVAR_Told_About_Chad) == 0 ) then
+      NOption(111,Node004,004); //edit by killap - expansion (was Node003)
    NOption(112,Node999,004);
 end
 
 procedure Node004 begin
    Reply(113);
-   NOption(114,Node003,004);
+   NOption(114,Node007,004); //edit by killap - expansion (was Node003)
    NOption(115,Node999,004);
 end
 
@@ -309,6 +329,47 @@ end
 
 procedure Node006 begin
    Reply(118);
-   NOption(119,Node998,004);
+   BOption(119,Node998,004); //edit by killap - expansion (was NOption)
 end
+
+//added by killap - expansion
+procedure Node007 begin
+   set_local_var(LVAR_Told_About_Chad,1);
+   set_global_var( GVAR_BH_CHAD, CHAD_CONFIRMED_GECKO );
+   
+   Reply(120);
+   NOption(121,Node008,004);
+end
+
+procedure Node008 begin
+   Reply(122);
+   NOption(123,Node009,004);
+end
+
+procedure Node009 begin
+   Reply(124);
+   NOption(125,Node010,004);
+end
+
+procedure Node010 begin
+   Reply(126);
+   NOption(128,Node011,004);
+end
+
+procedure Node011 begin
+   Reply(129);
+   NOption(g_mstr(352),Node012,004);
+
+end
+
+procedure Node012 begin
+   game_time_advance(ONE_GAME_MINUTE*5);
+   set_global_var(GVAR_CHAD_EVIDENCE_TIP,1);
+   critter_mod_skill(dude_obj, SKILL_LOCKPICK, 5);
+   Reply(130);
+   NOption(131,Node999,004);
+   display_msg(mstr(200));
+   give_xp(350);
+end
+//end added
 //xxxxxxxxxxxxxxxxxxxx

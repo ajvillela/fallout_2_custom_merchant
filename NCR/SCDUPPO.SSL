@@ -89,6 +89,14 @@ procedure combat_p_proc;
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Restock_Time               (7)
 
+#define LVAR_Cattle_Drives              (8)  //added by killap
+#define  LVAR_Restock_Time_Fix          (9)  //added by killap
+
+//killap code
+#define new_run                         ((game_time >= local_var(LVAR_Cattle_Drives)) and (local_var(LVAR_Cattle_Drives) != 0))
+#define start_next_cattle_run           if (local_var(LVAR_Cattle_Drives) == 0) then set_local_var(LVAR_Cattle_Drives, game_time + (ONE_GAME_MONTH*6))
+//end killap code
+
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
    Needs to be saved, make it a map variable (MVAR_) */
@@ -121,10 +129,27 @@ procedure map_enter_p_proc begin
    Only_Once:=0;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NCR);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_STORE_OWNER);
+   
+   //added by killap - fix for game_time going negative after 7 years
+   if (((game_time) < 0) and (local_var(LVAR_Restock_Time_Fix) == 0)) then begin
+      set_local_var(LVAR_Restock_Time, game_time - 1);
+      set_local_var(LVAR_Restock_Time_Fix, 1);
+   end
+   //end added
+
    if (local_var(LVAR_Restock_Time) < game_time) then begin
       check_restock_item(PID_BOTTLE_CAPS, 30, 30, 100)
       set_local_var(LVAR_Restock_Time, (random(1,6) * ONE_GAME_DAY) + game_time);
    end
+   
+   //added by killap
+   if ((new_run) and not(cattle_drive(HAL_DEAD))) then begin
+   	if ((cattle_drive(CATTLE_FINISHED)) or (cattle_drive(CATTLE_MISSED))) then begin
+        set_global_var(GVAR_NCR_CATTLE_DRIVE,0);
+      end
+   end
+   //added by killap
+
 end
 
 
@@ -272,7 +297,13 @@ end
 procedure Node002 begin
    if (not cattle_drive(CATTLE_ACCEPT)) then begin
       if (cattle_drive(CATTLE_OFFERED) == 0) then begin
-         Reply(107);
+         //added by killap
+	 if (new_run) then begin
+	   Reply(156);
+	 end
+	 //end added by killap
+	 else
+           Reply(107);
       end else begin
          Reply(108);
       end
@@ -284,7 +315,7 @@ procedure Node002 begin
          NOption(133, Node010, 4);
       end
    end else begin
-      if (not cattle_drive(CATTLE_FINISHED)) then begin
+      if (not cattle_drive(CATTLE_FINISHED) and (not cattle_drive(CATTLE_MISSED))) then begin //killap's fix: added (not cattle_drive(CATTLE_MISSED))
          Reply(155);
          ENDOPTION;
       end else begin
@@ -313,6 +344,7 @@ procedure Node006b begin
    set_global_var(GVAR_NCR_CATTLE_TIME_MIN, val);
    set_global_var(GVAR_NCR_CATTLE_TIME_MAX, val + (ONE_GAME_HOUR * 6));
    set_global_var(GVAR_NCR_BRAHMN_QST, 1);
+   start_next_cattle_run;  //added by killap
    call Node006;
 end
 
@@ -344,8 +376,8 @@ procedure Node006 begin
       NOption(124, Node007, 4);
    end
    if (get_carlson_flag(CARLSON_ACCEPT_SNUFF) and not get_carlson_flag(CARLSON_DEAD)) then begin
-      NOption(125, Node009, 4);
-      NLowOption(126, Node009);
+      NOption(125, Node008, 4); //was 009 - edit by killap
+      NLowOption(126, Node008); //was 009 - edit by killap
    end
    NOption(127, Node999, 1);
 end
@@ -362,10 +394,10 @@ end
 
 procedure Node008 begin
    if (dude_iq < 4) then begin
-      Reply(130);
+      Reply(131); //was 130 - edit by killap
       ENDOPTION;
    end else begin
-      Reply(131);
+      Reply(130); //was 131 - edit by killap
       ENDOPTION;
    end
 end

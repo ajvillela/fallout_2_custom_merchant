@@ -180,7 +180,8 @@ procedure Node002 begin
    else
       Reply(110);
    NOption(111, Node001, 1);
-   NOption(112, Node999, 1);
+   NOption(112, Node999, 4); //was , 1
+   NLowOption(130,Node999); //added by killap
 end
 
 procedure Node003 begin
@@ -189,7 +190,8 @@ procedure Node003 begin
    else
       Reply(114);
    NOption(115, Node001, 1);
-   NOption(116, Node999, 1);
+   NOption(116, Node999, 4); //was , 1
+   NLowOption(130,Node999); //added by killap
 end
 
 procedure Node004 begin
@@ -198,7 +200,8 @@ procedure Node004 begin
    else
       Reply(118);
   NOption(119, Node001, 1);
-  NOption(120, Node999, 1);
+  NOption(120, Node999, 4); //was , 1
+  NLowOption(130,Node999); //added by killap
 end
 
 procedure Node005 begin
@@ -207,7 +210,8 @@ procedure Node005 begin
    else
       Reply(122);
    NOption(123, Node001, 1);
-   NOption(124, Node999, 4);
+   NOption(124, Node999, 4); //was , 1
+   NLowOption(130,Node999); //added by killap
 end
 
 procedure Node006 begin
@@ -216,5 +220,6 @@ procedure Node006 begin
    else
       Reply(126);
    NOption(127, Node001, 1);
-   NOption(128, Node999, 1);
+   NOption(128, Node999, 4);
+   NLowOption(130,Node999); //added by killap
 end

@@ -107,6 +107,7 @@ procedure use_obj_on_p_proc begin
    tool := obj_pid(obj_being_used_with);
 
    if (tool == PID_OIL_CAN) then begin
+      script_overrides; //added by killap
       set_local_var(LVAR_Used_Can, 1);
       dialogue_system_enter;
    end

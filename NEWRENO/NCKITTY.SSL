@@ -21,7 +21,7 @@
 #include "..\headers\command.h"
 #include "..\headers\NewReno.h"
 #include "..\headers\ModReact.h"
-
+#include "..\headers\NEWR1.h" //added by killap
 
 /* Standard Script Procedures */
 procedure start;
@@ -82,7 +82,7 @@ procedure Node031;
 
 #define node_24_bit                    bit_10
 #define speech_bonus_given_bit         bit_11
-#define myron_date_bit                 bit_12
+//#define myron_date_bit                 bit_12 -now part of newreno.h (killap - expansion)
 
 #define node_24                        lvar_bit(LVAR_Flags, node_24_bit)
 #define set_node_24                    set_lvar_bit_on(LVAR_Flags, node_24_bit)
@@ -93,11 +93,12 @@ procedure Node031;
                                        end                                                      \
                                        set_lvar_bit_on(LVAR_Flags, speech_bonus_given_bit)
 
-#define myron_date                     lvar_bit(LVAR_Flags, myron_date_bit)
-#define set_myron_date                 if (myron_date == false) then begin             \
-                                          give_xp(EXP_NEW_RENO_WHORE_FOR_MYRON);       \
-                                       end                                             \
-                                       set_lvar_bit_on(LVAR_Flags, myron_date_bit)
+//commented out below - now part of newreno.h - killap expansion
+//#define myron_date                     lvar_bit(LVAR_Flags, myron_date_bit)
+//#define set_myron_date                 if (myron_date == false) then begin             \
+//                                          give_xp(EXP_NEW_RENO_WHORE_FOR_MYRON);       \
+//                                       end                                             \
+//                                       set_lvar_bit_on(LVAR_Flags, myron_date_bit)
 
 #define amt_to_cost(x)                 (((x * (100 - ((dude_charisma) + (10 * get_jules_kitty(jules_kitty_discount)) + (25 * ((dude_is_prizefighter) or (dude_has_porn_star_rep))))))/100) * ((Fallout2_enclave_destroyed == false) and (dude_is_made_man == false)))
 
@@ -112,14 +113,15 @@ procedure Node031;
 #define get_date(x)                    (local_var(LVAR_Date) == x)
 #define set_date(x)                    if ((x == DATE_DONE) and (get_date(DATE_TRUE))) then begin        \
                                           inc_reno_rep(REP_NEW_RENO_KITTY_DATE);                         \
-                                          set_critter_stat(dude_obj, STAT_ag, dude_agility + 1);         \
+                                          set_critter_stat(dude_obj, STAT_ag, 1);/*edit by killap - was dude_agility+1 */ \
+                                          display_msg(mstr(900));    /*added by killap - RP*/   \
                                        end                                                               \
                                        if (local_var(LVAR_Date) < x) then set_local_var(LVAR_Date, x)
 
 #define know_kitty                     herebefore
 #define set_know_kitty                 set_herebefore
 
-#define possible_sex_partners          (true_party_size - Cyberdog_In_Party - Goris_In_Party)
+#define possible_sex_partners          (true_party_size - Cyberdog_In_Party - Goris_In_Party - Dogmeat_In_Party - K9_In_Party - Pariah_Dog_In_Party - Robobrain_Abnormal_In_Party - Robobrain_Chimp_In_Party - Laddie_In_Party)
 
 #define sex_blow_job                   (700)
 #define sex_sex                        (701)
@@ -179,6 +181,9 @@ procedure Node031;
                                           check_party_applaude(Davin_Ptr)        \
                                           check_party_applaude(Miria_Ptr)        \
                                           check_party_applaude(Robobrain_Ptr)    \
+                                          check_party_applaude(Dex_Ptr)          \
+                                          check_party_applaude(Cat_Jules_Ptr)    \
+                                          check_party_applaude(Kitsune_Ptr)      \
                                        end
 
 /* Imported variables from the Map scripts. These should only be
@@ -323,8 +328,29 @@ procedure Node989 begin
    end else if (Robobrain_Ptr != 0) then begin
       sex_partner_obj := Robobrain_Ptr;
       call Node031;
+   end else if (Robobrain_Human_Ptr != 0) then begin
+      sex_partner_obj := Robobrain_Human_Ptr;
+      call Node015;
    end
+   //added by killap - expansion
+   else if (Dex_Ptr != 0) then begin
+      sex_partner_obj := Dex_Ptr;
+      call Node015;
+   end else if (Cat_Jules_Ptr != 0) then begin
+      sex_partner_obj := Cat_Jules_Ptr;
+      call Node015;
+   end else if (Kitsune_Ptr != 0) then begin
+      sex_partner_obj := Kitsune_Ptr;
+      call Node015;
+   end
+   //end added
 end
+
+#define sex_blow_job                   (700)
+#define sex_sex                        (701)
+#define sex_talk                       (702)
+#define sex_strange_sex                (703)
+
 procedure Node988 begin
    gfade_out(ONE_GAME_SECOND);
       set_no_whore_floats;
@@ -334,27 +360,39 @@ procedure Node988 begin
       end
       if (sex_type == sex_blow_job) then begin
          game_time_advance(have_sex_time / 2);
-         use_obj_on_obj(create_object(PID_KITTY_SEX_DRUG_STRENGTH,0,0), sex_partner_obj);
+         //use_obj_on_obj(create_object(PID_KITTY_SEX_DRUG_STRENGTH,0,0), sex_partner_obj);
+         set_map_var(MVAR_Kitty_Drug,DRUG_STRENGTH); //added by killap
       end else if (sex_type == sex_talk) then begin
          game_time_advance(ONE_GAME_HOUR * 3);
          set_speech_bonus_given;
          display_mstr(710);
-         use_obj_on_obj(create_object(PID_KITTY_SEX_DRUG_INTELLIGENCE,0,0), sex_partner_obj);
-      end else if (sex_type == sex_strange_sex) then begin
+         //use_obj_on_obj(create_object(PID_KITTY_SEX_DRUG_INTELLIGENCE,0,0), sex_partner_obj);
+         set_map_var(MVAR_Kitty_Drug,DRUG_INTELLIGENCE); //added by killap
+      //end else if (sex_type == sex_strange_sex) then begin
+      end else if (sex_type == sex_sex) then begin //edit by killap
          game_time_advance(have_sex_time * 2);
-         use_obj_on_obj(create_object(PID_KITTY_SEX_DRUG_STRENGTH,0,0), sex_partner_obj);
+         //use_obj_on_obj(create_object(PID_KITTY_SEX_DRUG_STRENGTH,0,0), sex_partner_obj);
+         set_map_var(MVAR_Kitty_Drug,DRUG_STRENGTH); //added by killap
       end else begin
          game_time_advance(have_sex_time_obj(sex_partner_obj));
          if (sex_partner_obj != dude_obj) then begin
-            use_obj_on_obj(create_object(PID_KITTY_SEX_DRUG_STRENGTH,0,0), sex_partner_obj);
+            //use_obj_on_obj(create_object(PID_KITTY_SEX_DRUG_STRENGTH,0,0), sex_partner_obj);
+            set_map_var(MVAR_Kitty_Drug,sex_partner_obj); //added by killap
          end else begin
-            use_obj_on_obj(create_object(PID_KITTY_SEX_DRUG_AGILITY,0,0), sex_partner_obj);
+            //use_obj_on_obj(create_object(PID_KITTY_SEX_DRUG_AGILITY,0,0), sex_partner_obj);
+            set_map_var(MVAR_Kitty_Drug,DRUG_AGILITY); //added by killap
          end
       end
       if (sex_partner_obj == dude_obj) then begin
-         up_sex_status;
+         if (sex_type != sex_talk and sex_type != sex_blow_job) then begin//added by killap
+            up_sex_status;
+         end
       end
-      if (sex_partner_obj != Marcus_Ptr) then begin
+      //added by killap - RP
+      if (sex_partner_obj == Dex_Ptr) then begin
+         float_msg(sex_partner_obj, mstr(random(706,709)), FLOAT_COLOR_NORMAL);
+      //end added
+      end else if (sex_partner_obj != Marcus_Ptr) then begin
          float_msg(sex_partner_obj, mstr(sex_type), FLOAT_COLOR_NORMAL);
       end else begin
          set_marcus_laid;
@@ -404,11 +442,37 @@ procedure Node978 begin
    sex_partner_obj := Miria_Ptr;
    call Node015;
 end
+
+//added by killap - expansion
+procedure Node991 begin
+   sex_partner_obj := Dex_Ptr;
+   call Node015;
+end
+
+procedure Node992 begin
+   sex_partner_obj := Cat_Jules_Ptr;
+   call Node015;
+end
+
+procedure Node993 begin
+   sex_partner_obj := Kitsune_Ptr;
+   call Node015;
+end
+
+procedure Node994 begin
+   sex_partner_obj := Robobrain_Human_Ptr;
+   call Node015;
+end
+//end added
+
 procedure Node977 begin
    gfade_out(ONE_GAME_SECOND);
-      up_sex_status;
+      if (sex_type != sex_talk and sex_type != sex_blow_job) then begin//added by killap
+        up_sex_status;
+      end
       game_time_advance(ONE_GAME_HOUR * 12);
       nr_add_timer_event(self_obj, 1, kitty_sex_param);
+      set_date(DATE_DONE); //added by killap - RP
    gfade_in(ONE_GAME_SECOND);
 end
 procedure Node976 begin
@@ -576,6 +640,7 @@ procedure Node011 begin
    NOption(340, Node012, 004);
    NOption(251, Node999, 004);
 end
+
 procedure Node012 begin
    Reply_Rand(350, 353);
    if ((myron_kitty) and (myron_date == false)) then begin
@@ -606,7 +671,14 @@ end
 procedure Node013 begin
    sex_partner_obj := dude_obj;
    Reply(375);
-   NOption(random(376, 380), Node031, 004);
+   
+   //edit by killap - added check
+   if (dude_is_male) then
+      NOption(random(376, 378), Node031, 004);
+   else
+      NOption(random(379, 380), Node031, 004);
+      
+   //NOption(random(376, 380), Node031, 004);
    if (angela_known) then begin
       NOption(381, Node031, 004);
    end
@@ -648,6 +720,23 @@ procedure Node014 begin
    if (Robobrain_In_Party) then begin
       NOption(402, Node981, 004);
    end
+   //added Robobrain_Human_In_Party - killap (expansion)
+   if (Robobrain_Human_In_Party) then begin
+      NOption(402, Node994, 004);
+   end    
+   if (Dex_In_Party) then begin
+      NOption(407, Node991, 004);
+   end
+   
+   if (Cat_Jules_In_Party) then begin
+      NOption(408, Node992, 004);
+   end
+   
+   if (Kitsune_In_Party) then begin
+      NOption(409, Node993, 004);
+   end
+   
+   
    NOption(406, Node999, 004);
 end
 procedure Node015 begin
@@ -804,7 +893,7 @@ procedure Node030 begin
 end
 procedure Node031 begin
    sex_type := sex_strange_sex;
-   temp_cost := sex_strange_sex;
+   temp_cost := strange_sex_cost; // Seraph's Fix: changed 'sex_strange_sex' to 'strange_sex_cost'
    if (temp_cost > 0) then begin
       Reply(mstr(620 + (sex_partner_obj != dude_obj)) + temp_cost + mstr(422));
       if (dude_caps >= temp_cost) then begin

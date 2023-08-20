@@ -197,4 +197,9 @@ procedure map_enter_p_proc begin
 end
 
 procedure map_exit_p_proc begin
+   //added by killap
+   if (cur_map_index == MAP_MODOC_BRAHMINPASTURES) then begin
+     rm_timer_event(self_obj);
+   end
+   //end added
 end

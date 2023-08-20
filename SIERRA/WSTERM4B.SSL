@@ -70,6 +70,12 @@ procedure Node014;
 
 procedure Node999;
 
+//added by killap
+procedure use_skill_on_p_proc;
+procedure Check_And_Kill_Row(variable start_tile, variable pid);
+procedure Check_And_Kill(variable pid); 
+//end added
+
 #define LVAR_Organ                      (0)
 #define LVAR_Species                    (1)
 #define LVAR_Gave_Xp                    (2)
@@ -90,6 +96,16 @@ procedure Node999;
 #define Species_Mutant                  (5)
 #define Species_Deathclaw               (6)
 
+//added by killap
+#define BRAIN_HUMAN       (0)
+#define BRAIN_ABNORMAL    (1)
+#define BRAIN_CHIMP       (2)
+#define BRAIN_CYBERNETIC  (3)
+#define BRAIN_NONE        (4) 
+
+variable kill_player := 0;
+//end added
+
 procedure start begin
 end
 
@@ -102,6 +118,22 @@ procedure description_p_proc begin
    script_overrides;
    display_msg(mstr(101));
 end
+
+//added by killap
+// Allows Myron or some other science geek to use the
+// terminal -- useful if the player wants to suicide.
+procedure use_skill_on_p_proc begin
+   variable skill;
+      
+   script_overrides;
+
+   skill:=action_being_used;
+
+   if (skill == SKILL_SCIENCE) then begin
+      call use_p_proc;
+   end
+end
+//end added
 
 procedure use_p_proc begin
    variable Damage;
@@ -125,6 +157,14 @@ procedure talk_p_proc begin
        call Node001;
    gSay_End;
    end_dialogue;
+   
+   //added by killap - expansion
+   if (kill_player == 1) then begin
+      kill_player := 0;
+      critter_damage(dude_obj,10000);
+   end
+   //end added
+   
 end
 
 procedure Node001 begin
@@ -246,9 +286,195 @@ procedure Node013g begin
    call Node012;
 end
 
+//added by killap
+procedure Check_And_Kill_Row(variable start_tile, variable pid) begin
+
+   variable i := 0;
+   variable end_tile := 0;
+   variable extracted_obj_ptr := 0;
+   variable extracted_count := 0;
+
+   i := start_tile;
+   end_tile := start_tile+10;
+   while (i <= end_tile) do begin
+      if (tile_contains_obj_pid(i, self_elevation, pid)) then begin
+         extracted_obj_ptr := tile_contains_pid_obj(i, self_elevation, pid);
+         extracted_count+=1;
+         critter_damage(extracted_obj_ptr,10000);
+      end
+      i+=1;
+   end
+
+   return extracted_count;
+   
+end
+
+procedure Check_And_Kill(variable pid) begin
+   variable tile_row_start := 0;
+   variable extracted := 0;
+
+   tile_row_start := 16513;
+   while (tile_row_start <= 17713) do begin
+      extracted += Check_And_Kill_Row(tile_row_start, pid);
+      tile_row_start+=200;
+   end
+
+   return extracted;
+end
+//end added
+
+//new code by killap
 procedure Node014 begin
+
+   variable Room_Capacity:=0;
+   variable New_Brain;
+   variable Brain_Type := 0;
+   variable Security_Bot_Killed := 0; // see below for explanation
+   variable i;
+
+   // Things that give human brain -- Marcus and Lenny may be moved
+   // the same section as Goris (Do ghouls and super mutants, given
+   // all their mutations, still have a human brain?)
+   Room_Capacity += Check_And_Kill(PID_VIC);
+   Room_Capacity += Check_And_Kill(PID_MYRON);
+   Room_Capacity += Check_And_Kill(PID_MARCUS);
+   Room_Capacity += Check_And_Kill(PID_JOHN_MACRAE);
+   Room_Capacity += Check_And_Kill(PID_SULIK);
+   Room_Capacity += Check_And_Kill(PID_LENNY);
+   Room_Capacity += Check_And_Kill(PID_DOC);
+   Room_Capacity += Check_And_Kill(PID_DAVIN);
+   Room_Capacity += Check_And_Kill(PID_MIRIA);
+   Room_Capacity += Check_And_Kill(PID_ROBOBRAIN_HUMAN);
+
+   // The dogs -- can give no brains or abnormal brains as desired
+   i := Check_And_Kill(PID_CYBERDOG);
+   if (i > 0) then begin
+      Brain_Type := BRAIN_NONE;
+      Room_Capacity += i;
+   end
+   i := Check_And_Kill(PID_DOGMEAT);
+   if (i > 0) then begin
+      Brain_Type := BRAIN_NONE;
+      Room_Capacity += i;
+   end
+   i := Check_And_Kill(PID_PARIAH_DOG);
+   if (i > 0) then begin
+      Brain_Type := BRAIN_NONE;
+      Room_Capacity += i;
+   end
+   i := Check_And_Kill(PID_K9);
+   if (i > 0) then begin
+      Brain_Type := BRAIN_NONE;
+      Room_Capacity += i;
+   end
+   i := Check_And_Kill(PID_LADDIE);
+   if (i > 0) then begin
+      Brain_Type := BRAIN_NONE;
+      Room_Capacity += i;
+   end
+
+   // Goris certainly shouldn't yield human brain
+   // Set to no brain, but can easily be changed to
+   // abnormal brain
+   i := Check_And_Kill(PID_GORIS);
+   if (i > 0) then begin
+      Brain_Type := BRAIN_NONE;
+      Room_Capacity += i;
+   end
+
+   // Special case for Skynet
+   i := Check_And_Kill(PID_BRAINBOT);
+   if (i > 0) then begin
+      Brain_Type := BRAIN_CYBERNETIC;
+      Room_Capacity += i;
+   end
+   i := Check_And_Kill(PID_ROBOBRAIN_ABNORMAL);
+   if (i > 0) then begin
+      Brain_Type := BRAIN_ABNORMAL;
+      Room_Capacity += i;
+   end
+   i := Check_And_Kill(PID_ROBOBRAIN_CHIMP);
+   if (i > 0) then begin
+      Brain_Type := BRAIN_CHIMP;
+      Room_Capacity += i;
+   end
+
+   // Check to see if player lured any security bots
+   // into the extraction chamber -- these shouldn't
+   // yield brains, for obvious reasons. Note also the
+   // use of the variable "Security_Bot_Killed". It
+   // doesn't make sense to give the player a karma
+   // penalty for destroying security bots using a
+   // smart tactic, but at the same time, their presence
+   // should trigger the extraction failure condition.
+   // So we need to know if any security bots were in
+   // the room, but not add them to the room capacity
+   // count.
+   i := Check_And_Kill(PID_EYEBALL);
+   if (i > 0) then begin
+      Brain_Type := BRAIN_NONE;
+      Security_Bot_Killed := 1;
+   end
+   i := Check_And_Kill(PID_MISSILE_BOT);
+   if (i > 0) then begin
+      Brain_Type := BRAIN_NONE;
+      Security_Bot_Killed := 1;
+   end
+   i := Check_And_Kill(PID_TOUGH_MISSILE_BOT);
+   if (i > 0) then begin
+      Brain_Type := BRAIN_NONE;
+      Security_Bot_Killed := 1;
+   end
+
+   // Kill player if player is in extraction room
+   if (In_Room(dude_obj)) then begin
+       Room_Capacity+=1;
+       kill_player := 1;
+       while (dude_iq > 1) do begin
+          set_critter_stat(dude_obj,STAT_iq,-1);
+       end
+   end
+   
+   inc_general_rep(REP_BONUS_EXTRACTING_ORGANS * Room_Capacity);
+
+   if ( (local_var(LVAR_Gave_Xp) == 0) and ( (Room_Capacity > 0) or (Security_Bot_Killed == 1) ) ) then begin
+       give_xp(EXP_EXTRACT_ORGAN);
+       set_local_var(LVAR_Gave_Xp,1);
+   end
+   
+   // Kill ppl in room
+   debug_msg("Room_Capacity == "+Room_Capacity);
+
+   // only true if no security bots and no one else was in extraction chamber
+   if ((Room_Capacity == 0) and (Security_Bot_Killed == 0)) then
+       Reply(148);
+   else if (Room_Capacity > 1) then
+       Reply(149);
+   // since all bots yield BRAIN_NONE, this captures the Security_Bot_Killed==1 condition as well
+   else if (Brain_Type == BRAIN_NONE) then
+       Reply(149);
+   else if (not(Room_Species)) then
+       Reply(150);
+   else begin
+       if (Brain_Type == BRAIN_HUMAN) then
+          New_Brain:=create_object(PID_HUMAN_BRAIN,0,0);
+       else if (Brain_Type == BRAIN_ABNORMAL) then
+          New_Brain:=create_object(PID_ABNORMAL_BRAIN,0,0);
+       else if (Brain_Type == BRAIN_CHIMP) then
+          New_Brain:=create_object(PID_CHIMP_BRAIN,0,0);
+       else if (Brain_Type == BRAIN_CYBERNETIC) then
+          New_Brain:=create_object(PID_CYBERNETIC_BRAIN,0,0);
+       move_to(New_Brain,16515,0);
+       Reply(mstr(151)+mstr(152));
+   end
+
+   NOption(153,Node999,004);
+end 
+
+/*procedure Node014 begin
     variable Room_Capacity:=0;
     variable New_Brain;
+    variable brain_type; //added by killap
 
     if (Vic_In_Party) then begin
        if (In_Room(Vic_Ptr)) then begin
@@ -331,6 +557,7 @@ procedure Node014 begin
        if (In_Room(Robobrain_Ptr)) then begin
            Room_Capacity+=1;
            critter_damage(Robobrain_Ptr,1000);
+           brain_type := 1; //added by killap
        end
     end
 
@@ -347,6 +574,57 @@ procedure Node014 begin
            critter_damage(Pariah_Dog_Ptr,1000);
        end
     end
+
+   //added by killap
+   if (Robobrain_Human_In_Party) then begin
+       if (In_Room(Robobrain_Human_Ptr)) then begin
+           Room_Capacity+=1;
+           critter_damage(Robobrain_Human_Ptr,1000);
+           brain_type := 2;
+       end
+   end
+   
+   if (Robobrain_Chimp_In_Party) then begin
+       if (In_Room(Robobrain_Chimp_Ptr)) then begin
+           Room_Capacity+=1;
+           critter_damage(Robobrain_Chimp_Ptr,1000);
+           brain_type := 3;
+       end
+   end
+   
+   if (Robobrain_Abnormal_In_Party) then begin
+       if (In_Room(Robobrain_Abnormal_Ptr)) then begin
+           Room_Capacity+=1;
+           critter_damage(Robobrain_Abnormal_Ptr,1000);
+           brain_type := 4;
+       end
+   end
+   //end added by killap
+      
+   //added by killap - expansion
+   if (Dex_In_Party) then begin
+       if (In_Room(Dex_Ptr)) then begin
+           Room_Capacity+=1;
+           critter_damage(Dex_Ptr,1000);
+       end
+    end
+    
+   if (Cat_Jules_In_Party) then begin
+       if (In_Room(Cat_Jules_Ptr)) then begin
+           Room_Capacity+=1;
+           critter_damage(Cat_Jules_Ptr,1000);
+       end
+   end
+   
+   if (Kitsune_In_Party) then begin
+       if (In_Room(Kitsune_Ptr)) then begin
+           Room_Capacity+=1;
+           critter_damage(Kitsune_Ptr,1000);
+       end
+   end
+   //end expansion add
+
+
 
    if (In_Room(dude_obj)) then begin
        Room_Capacity+=1;
@@ -371,13 +649,23 @@ procedure Node014 begin
    else if (not(Room_Species)) then
        Reply(150);
    else begin
-       New_Brain:=create_object(PID_HUMAN_BRAIN,0,0);
-       move_to(New_Brain,16515,0);
-       Reply(mstr(151)+mstr(152));
+      if (brain_type == 1) then
+         New_Brain:=create_object(PID_CYBERNETIC_BRAIN,0,0);
+      else if (brain_type == 2) then
+         New_Brain:=create_object(PID_HUMAN_BRAIN,0,0);
+      else if (brain_type == 3) then  
+         New_Brain:=create_object(PID_CHIMP_BRAIN,0,0);
+      else if (brain_type == 4) then
+         New_Brain:=create_object(PID_ABNORMAL_BRAIN,0,0);
+      else
+         New_Brain:=create_object(PID_HUMAN_BRAIN,0,0);
+       
+      move_to(New_Brain,16515,0);
+      Reply(mstr(151)+mstr(152));
    end
 
    NOption(153,Node999,004);
-end
+end*/
 
 procedure Node999 begin
 end

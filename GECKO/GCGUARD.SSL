@@ -100,7 +100,7 @@ procedure critter_p_proc begin
          set_local_var(LVAR_Hostile,1);
          attack(dude_obj);
       end
-      else if (((local_var(LVAR_Hostile) == 2)or(local_var(LVAR_Personal_Enemy) == 1))) then begin
+      else if (((local_var(LVAR_Hostile) == 2)or(local_var(LVAR_Personal_Enemy) == 1)) or (global_var(GVAR_ENEMY_GECKO)) ) then begin //edit by killap - added (global_var(GVAR_ENEMY_GECKO))
          set_local_var(LVAR_Hostile,1);
          attack(dude_obj);
       end
@@ -110,7 +110,8 @@ procedure critter_p_proc begin
       //else if (global_var(GVAR_VAULT_PLANT_STATUS) == PLANT_TURNED_OFF) then begin
       //   attack(dude_obj);
       //end
-      else if (MVAR_Lockpick_Attempt == 1) then begin
+      else if (map_var(MVAR_Lockpick_Attempt) == 1) then begin //edit by killap
+      //else if (MVAR_Lockpick_Attempt == 1) then begin
          if (map_var(MVAR_Count_Lockpick) < 1) then begin
             set_map_var(MVAR_Count_Lockpick, map_var(MVAR_Count_Lockpick)+1);
             call Node010;

@@ -62,8 +62,9 @@ procedure map_enter_p_proc begin
    Only_Once:=0;
    if (local_var(LVAR_Hostile) == 0) then begin
       critter_injure(self_obj,DAM_CRIP_LEG_RIGHT);
-      set_local_var(LVAR_Hostile,2);
+      //set_local_var(LVAR_Hostile,2);
    end
+   set_local_var(LVAR_Hostile,2); //moved out from above block by killap
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NCR);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_CRAZED_ROBOT);
 end
@@ -140,6 +141,7 @@ end
 /* Any time a skill is used on a critter this call is made. This can be to give examinations
    for things like Doctor skill or messages for various other skills. */
 procedure use_skill_on_p_proc begin
+   script_overrides;
 end
 
 

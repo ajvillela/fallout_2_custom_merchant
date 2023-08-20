@@ -33,7 +33,8 @@
 
 #include "..\headers\command.h"
 #include "..\headers\ModReact.h"
-
+//added by killap - expansion
+#include "..\headers\encpres.h"
 
 /* Standard Script Procedures */
 procedure start;
@@ -196,7 +197,8 @@ end
    incrementing the death count for reputation purposes and Enemy Counters are placed
    in here. */
 procedure destroy_p_proc begin
-
+   //added by killap - expansion
+   set_map_var(MVAR_Met_Vice_Pres,0);
 /* Increment the aligned critter counter*/
    inc_good_critter
 
@@ -246,6 +248,8 @@ end
 //~~~~~~~~~~~~~~~~ DESIGN TOOL STARTS HERE
 
 procedure Node001 begin
+   //added by killap - expansion
+   set_map_var(MVAR_Met_Vice_Pres,1);
    if (local_var(LVAR_Said_1) == 0) then begin
        inc_local_var(LVAR_Said_1);
        if (party_size > 1) then

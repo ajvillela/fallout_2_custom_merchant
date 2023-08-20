@@ -329,7 +329,7 @@ procedure Node008 begin
 end
 
 procedure Node008a begin
-   if( global_var( GVAR_BH_POWER ) != POWER_ACCEPTED ) then
+   if( global_var( GVAR_BH_POWER ) < POWER_ACCEPTED ) then //changed to < rather than != - killap
       call Node005;
    else
       call Node013;
@@ -366,7 +366,7 @@ procedure Node012 begin
    set_global_var( GVAR_BH_POWER, POWER_REJECTED );
    Reply(150);
 
-   NOption(151, Node998, 004);
+   BOption(151, Node998, 004); //edit by killap: was NOption
    NOption(152, Node999, 004);
 end
 

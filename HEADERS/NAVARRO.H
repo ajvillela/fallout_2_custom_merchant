@@ -39,6 +39,9 @@
 #define MVAR_Deathclaw_Allowed                 (21)
 #define MVAR_Xarn_In_Party                     (22)
 #define MVAR_Med_Guard_Dead                    (23)
+#define MVAR_Guard_Shift                       (24)
+#define MVAR_Verti_Satellite_Alignment         (25)
+#define MVAR_Verti_Status                      (26)
 
 #define looking_for_navarro           ( f2_flag_any == f2_state_tribe_kidnapped ) or					\
                                       ( shi_whirly( SH_WH_ACCEPTED ) ) or		\
@@ -59,7 +62,9 @@
 
 #define took_brotherhood_quest        san_fran_flag(SF_BROTHER_PLANS)
 
-#define not_alone                         ( ( true_party_size - K9_In_Party ) >= 1 )
+#ifndef not_alone
+   #define not_alone                      ( ( true_party_size - K9_In_Party ) >= 1 )
+#endif
 
 #define not_wearing_power_armor       ( (obj_pid(critter_inven_obj(dude_obj,INVEN_TYPE_WORN)) != PID_POWERED_ARMOR) and			\
                                         (obj_pid(critter_inven_obj(dude_obj,INVEN_TYPE_WORN)) != PID_HARDENED_POWER_ARMOR) and	\

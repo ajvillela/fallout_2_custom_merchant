@@ -279,6 +279,7 @@ procedure use_skill_on_p_proc begin
    Skill_Used:=action_being_used;
 
    if (Skill_Used == SKILL_LOCKPICK) then begin
+       script_overrides; //added by killap
        if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
            call Unlock_Lock;
        end
@@ -288,6 +289,7 @@ procedure use_skill_on_p_proc begin
    end                                                          // End of Skill_Lockpick
 
    else if (Skill_Used == SKILL_TRAPS) then begin
+       script_overrides; //added by killap
        if (local_var(LVAR_Trapped) == STATE_ACTIVE) then begin
            call Skill_Disarm_Traps;
        end
@@ -318,6 +320,7 @@ procedure use_obj_on_p_proc begin
 
    if (LOCK_STATUS == STATE_STANDARD_LOCK) then begin
        if (Tool == PID_LOCKPICKS) then begin
+           script_overrides; //added by killap
            if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
                call Lockpick_Lock;
            end
@@ -326,6 +329,7 @@ procedure use_obj_on_p_proc begin
            end
        end
        else if (Tool == PID_EXP_LOCKPICK_SET) then begin
+           script_overrides; //added by killap
            if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
                call Super_Lockpick_Lock;
            end
@@ -345,6 +349,7 @@ procedure use_obj_on_p_proc begin
 
    else if (LOCK_STATUS == STATE_ELECTRIC_LOCK) then begin
        if (Tool == PID_ELECTRONIC_LOCKPICKS) then begin
+           script_overrides; //added by killap
            if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
                call Lockpick_Lock;
            end
@@ -353,6 +358,7 @@ procedure use_obj_on_p_proc begin
            end
        end
        else if (Tool == PID_ELEC_LOCKPICK_MKII) then begin
+           script_overrides; //added by killap
            if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
                call Super_Lockpick_Lock;
            end
@@ -363,10 +369,12 @@ procedure use_obj_on_p_proc begin
    end
 
    else if (Tool == PID_CROWBAR) then begin
+       script_overrides; //added by killap
        call Pry_Door;
    end
 
    else if ((Tool == PID_DYNAMITE) or (Tool == PID_PLASTIC_EXPLOSIVES)) then begin
+       script_overrides; //added by killap
        call Set_Trap;
    end
 
@@ -446,15 +454,13 @@ procedure map_enter_p_proc begin
        set_local_var(LVAR_Locked,STATE_ACTIVE);
    end
 
-   if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
+   if ( (local_var(LVAR_Locked) == STATE_ACTIVE) and (global_var(GVAR_START_ARROYO_TRIAL) <= TRIAL_NONE) ) then begin //edit by killap - added (global_var(GVAR_START_ARROYO_TRIAL) <= TRIAL_NONE)
        obj_lock(self_obj);
-   end
-
-   else begin
+   end else begin
        obj_unlock(self_obj);
+       set_local_var(LVAR_Locked,STATE_INACTIVE); //added by killap
    end
 end
-
 
 /**************************************************************************************
    This procedure gets called roughly every 30 seconds of real time. It is used to make
@@ -480,16 +486,16 @@ procedure map_update_p_proc begin
        end
 
        else if ((tile_num(self_obj) == 13528) and (map_var(MVAR_Passed_Fighting) == Fighting_Finished) and (global_var(GVAR_DUMAR_STATUS) == 0)) then begin
+           obj_unlock(self_obj); //added by killap
            set_local_var(LVAR_Locked,STATE_INACTIVE);
        end
    end
 
-   if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
+   if ( (local_var(LVAR_Locked) == STATE_ACTIVE) and (global_var(GVAR_START_ARROYO_TRIAL) <= TRIAL_NONE) ) then begin //edit by killap - added (global_var(GVAR_START_ARROYO_TRIAL) <= TRIAL_NONE)
        obj_lock(self_obj);
-   end
-
-   else begin
+   end else begin
        obj_unlock(self_obj);
+       set_local_var(LVAR_Locked,STATE_INACTIVE); //added by killap
    end
 end
 
@@ -1307,6 +1313,8 @@ procedure Lockpick_Door begin
        if (local_var(LVAR_Gave_Locks_XP) == 0) then begin
            set_local_var(LVAR_Gave_Locks_XP,1);
            give_xp(Lockpick_Exp);
+           set_local_var(LVAR_Locked, STATE_INACTIVE);
+           obj_unlock(self_obj); 
        end
    end
 
@@ -1393,6 +1401,8 @@ procedure Lock_Door begin
        if (local_var(LVAR_Gave_Locks_XP) == 0) then begin
            set_local_var(LVAR_Gave_Locks_XP,1);
            give_xp(Lockpick_Exp);
+           set_local_var(LVAR_Locked, STATE_ACTIVE);
+           obj_lock(self_obj);
        end
    end
 

@@ -48,13 +48,13 @@ procedure destroy_p_proc;
 procedure look_at_p_proc;
 procedure description_p_proc;
 procedure use_skill_on_p_proc;
+procedure use_obj_on_p_proc;   // Seraph's Code
 procedure damage_p_proc;
 procedure map_enter_p_proc;
 
 /* Script Specific Procedure Calls */
 procedure Node998;                                      // This Node is Always Combat
 procedure Node999;                                      // This Node is Always Ending
-
 
 // The next lines are added in by the Designer Tool.
 // Do NOT add in any lines here.
@@ -87,7 +87,16 @@ procedure Node019;
 procedure Node020;
 procedure Node021;
 procedure Node022;
+// Begin Seraph's Code
+procedure Node023;
+procedure Node024a;
+procedure Node024b;
+procedure Node025;
+procedure Node026;
+procedure Node027;
+// End Seraph's Code
 
+procedure Node990; //added by killap - expansion
 
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
@@ -101,6 +110,10 @@ procedure Node022;
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Looked_At                  (7)
 #define LVAR_Visits                     (8)
+#define LVAR_Thankyou                   (9)  // Seraph's Code
+#define LVAR_Gave_Money                 (10)
+#define LVAR_Just_Gave_Money            (11) //added by killap - expansion
+#define LVAR_Kill_Fannie                (12) //added by killap - expansion
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -118,10 +131,25 @@ end
    default from the prototype, and needs to be set in scripts. */
 procedure map_enter_p_proc begin
    Only_Once:=0;
+   
+   //added by killap - expansion
+   if (fannie == FANNIE_DEAD) then
+      destroy_object(self_obj);
+   //end added
+   
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_MALAMUTE_SALOON);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_REDDING_ADDICT);
 end
 
+//added by killap - expansion
+procedure map_exit_p_proc begin
+   if (local_var(LVAR_Kill_Fannie) == 1) then begin
+      set_fannie(FANNIE_DEAD);
+   end else begin
+      set_local_var(LVAR_Just_Gave_Money,0);
+   end
+end
+//end added
 
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from
    Movement to attacking the player on sight can be placed in here.*/
@@ -165,10 +193,26 @@ procedure pickup_p_proc begin
    end
 end
 
+// Begin Seraph's Code
+procedure use_obj_on_p_proc begin
+// comment out by killap
+/*   if((obj_pid(obj_being_used_with) == PID_JET_ANTIDOTE) and (not rehab_set) and (not fannie_cured)) then begin
+      display_mstr(200);
+      script_overrides;
+      set_rehab_time
+   end*/
+end 
+// End Seraph's Code
+
 /* The dialog system is setup and prepares the player to talk to this NPC. Where To Go
    written by designers are placed in here. Additionally, Reactions are generated and
    stored which affects player interactions. */
 procedure talk_p_proc begin
+// Begin Seraph's Debug Code
+   debug_msg("fannie = " + fannie);
+   debug_msg("rehab_time = " + map_var(MVAR_Rehab_Time));
+   debug_msg("game_time = " + game_time);
+// End Seraph's Debug Code
    Evil_Critter:=0;
    Slavery_Tolerant:=SLAVE_TOLERANT;
    Karma_Perception:=KARMA_PERCEPTION0;
@@ -178,25 +222,45 @@ procedure talk_p_proc begin
    GetReaction;
 
    if (dude_iq < 4) then
-       call Node003;
+      call Node003;
 
-   else if ((map_var(MVAR_Fannie_Mae) == FANNIE_SICK) or (map_var(MVAR_Fannie_Mae) == FANNIE_SICKER)) then begin
-       start_gdialog(NAME,self_obj,4,-1,-1);
-       gSay_Start;
-           call Node001;
-       gSay_End;
-       end_dialogue;
+   // Begin Seraph's Code - expansion
+   else if (not rehab_done and rehab_set) then
+      call Node026;
+   else if (fannie == FANNIE_CURED_LOU) then begin
+      if (local_var(LVAR_Thankyou) == 0) then begin
+         start_gdialog(NAME,self_obj,4,-1,-1);
+            gSay_Start;
+               call Node023;
+            gSay_End;
+         end_dialogue;
+      end else begin
+         start_gdialog(NAME,self_obj,4,-1,-1);
+            gSay_Start;
+               call Node025;
+            gSay_End;
+         end_dialogue;
+      end
+   end
+  // End Seraph's Code
+
+   else if ((fannie == FANNIE_SICK) or (fannie == FANNIE_SICKER)) then begin
+      start_gdialog(NAME,self_obj,4,-1,-1);
+      gSay_Start;
+         call Node001;
+      gSay_End;
+      end_dialogue;
    end
 
-   else if (map_var(MVAR_Fannie_Mae) == FANNIE_MONEY_GIVEN) then begin
-       start_gdialog(NAME,self_obj,4,-1,-1);
-       gSay_Start;
-           call Node015;
-       gSay_End;
-       end_dialogue;
+   else if (fannie == FANNIE_MONEY_GIVEN) then begin
+      start_gdialog(NAME,self_obj,4,-1,-1);
+      gSay_Start;
+         call Node015;
+      gSay_End;
+      end_dialogue;
    end
 
-   else if (map_var(MVAR_Fannie_Mae) == FANNIE_MONEY_ASKED) then begin
+   else if (fannie == FANNIE_MONEY_ASKED) then begin
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node019;
@@ -204,7 +268,7 @@ procedure talk_p_proc begin
        end_dialogue;
    end
 
-   else if (map_var(MVAR_Fannie_Mae) == FANNIE_CUSTOMER) then begin
+   else if (fannie == FANNIE_CUSTOMER) then begin
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node020;
@@ -276,7 +340,7 @@ end
 //~~~~~~~~~~~~~~~~ DESIGN TOOL STARTS HERE
 
 procedure Node001 begin
-   if (map_var(MVAR_Fannie_Mae) == FANNIE_SICK) then
+   if (fannie == FANNIE_SICK) then
        if (dude_is_male) then
            Reply(103);
        else
@@ -286,7 +350,7 @@ procedure Node001 begin
    else
        Reply(106);
 
-   if (map_var(MVAR_Fannie_Mae) == FANNIE_SICKER) then
+   if (fannie == FANNIE_SICKER) then
        NOption(107,Node002,004);
    NOption(108,Node002,004);
    NOption(109,Node002,004);
@@ -294,7 +358,7 @@ procedure Node001 begin
 end
 
 procedure Node002 begin
-   if (map_var(MVAR_Fannie_Mae) == FANNIE_SICKER) then
+   if (fannie == FANNIE_SICKER) then
        Reply(111);
    else
        Reply(112);
@@ -303,7 +367,18 @@ procedure Node002 begin
        NOption(113,Node004,004);
    BOption(114,Node999,004);
    BOption(115,Node999,004);
+   
+   NOption(210,Node990,004); //added by killap - expansion
+   
 end
+
+
+//added by killap - expansion
+procedure Node990 begin
+   inc_local_var(LVAR_Visits);
+   call Node007a;
+end
+//end added
 
 procedure Node003 begin
    floater(random(116,120));
@@ -326,6 +401,7 @@ procedure Node004a begin
        item:=obj_carrying_pid_obj(dude_obj,PID_JET);
        junkit:=rm_mult_objs_from_inven(dude_obj,item,1);
        add_mult_objs_to_inven(self_obj,item,1);
+       //inc sickness
    end
 
    call Node005;
@@ -372,11 +448,15 @@ procedure Node007a begin
    item_caps_adjust(dude_obj,0-COST_FOR_SEX);
    item_caps_adjust(self_obj,COST_FOR_SEX);
 
-   set_map_var(MVAR_Fannie_Mae,FANNIE_CUSTOMER);
+   //added by killap
+   if (fannie != FANNIE_MONEY_GIVEN) then
+      set_fannie(FANNIE_CUSTOMER);
+   //end added
 
    gfade_out(600);
    do_default_sex;
 // need to move player to the back room
+   move_to(dude_obj,12901,elevation(self_obj)); //added by killap
    gfade_in(600);
 
    call Node008;
@@ -390,15 +470,23 @@ procedure Node008 begin
 end
 
 procedure node009 begin
-   Reply(142);
+   if (not fannie_cured) then begin  // Seraph's Code
+      Reply(142);
 
-   NOption(143,Node010,004);
-   if (map_var(MVAR_Fannie_Mae) == FANNIE_MONEY_GIVEN) then
-       NOption(144,Node017,004);
+      NOption(143,Node010,004);
+      if (fannie == FANNIE_MONEY_GIVEN) then
+         NOption(144,Node017,004);
+   // Begin Seraph's Code
+   end else begin
+      Reply(192);
+
+      NOption(193,Node999,004);
+   end
+   // End Seraph's Code
 end
 
 procedure Node010 begin
-   set_map_var(MVAR_Fannie_Mae,FANNIE_MONEY_ASKED);
+   set_fannie(FANNIE_MONEY_ASKED);
 
    Reply(145);
 
@@ -418,11 +506,23 @@ end
 procedure Node011a begin
    item_caps_adjust(dude_obj,0-FREE_CASH);
    item_caps_adjust(self_obj,FREE_CASH);
+   
+   //added by killap - expansion
+   inc_local_var(LVAR_Gave_Money);
+   set_local_var(LVAR_Just_Gave_Money,1);
+   
+   if (local_var(LVAR_Gave_Money) == 4) then begin
+      set_fannie(FANNIE_SICKER);
+   end else if (local_var(LVAR_Gave_Money) == 2) then begin
+      set_fannie(FANNIE_SICK);
+   end
+   //end added
+   
    call Node012;
 end
 
 procedure Node012 begin
-   set_map_var(MVAR_Fannie_Mae,FANNIE_MONEY_GIVEN);
+   set_fannie(FANNIE_MONEY_GIVEN);
 
    Reply(152);
 
@@ -431,10 +531,11 @@ procedure Node012 begin
 end
 
 procedure Node012a begin
-   set_map_var(MVAR_Fannie_Mae,FANNIE_MONEY_GIVEN);
+   set_fannie(FANNIE_MONEY_GIVEN);
    gfade_out(600);
    do_default_sex;
 // need to move player to the back room
+   move_to(dude_obj,12901,elevation(self_obj)); //added by killap
    gfade_in(600);
 
    call Node014;
@@ -485,6 +586,24 @@ end
 procedure Node018a begin
    item_caps_adjust(dude_obj,0-FINAL_MONEY);
    item_caps_adjust(self_obj,FINAL_MONEY);
+   
+   //added by killap - expansion
+   inc_local_var(LVAR_Gave_Money);
+   
+   if ( (local_var(LVAR_Just_Gave_Money) == 0) and (local_var(LVAR_Gave_Money) > 1) ) then
+      set_local_var(LVAR_Just_Gave_Money,1);
+   
+   if (local_var(LVAR_Just_Gave_Money) == 1) then begin
+      set_local_var(LVAR_Kill_Fannie,1);
+   end
+   
+   if (local_var(LVAR_Gave_Money) == 4) then begin
+      set_fannie(FANNIE_SICKER);
+   end else if (local_var(LVAR_Gave_Money) == 2) then begin
+      set_fannie(FANNIE_SICK);
+   end
+   //end added
+   
    call Node012;
 end
 
@@ -520,5 +639,48 @@ procedure Node022 begin
    NOption(184,Node999,004);
    NOption(185,Node999,004);
 end
+
+// Begin Seraph's Code
+procedure Node023 begin
+   set_local_var(LVAR_Thankyou,1);
+
+   Reply(186);
+
+   NOption(191,Node024a,004);
+   NOption(187,Node999,004);
+end
+
+procedure Node024a begin
+   gfade_out(600);
+   do_default_sex;
+// need to move player to the back room
+   move_to(dude_obj,12901,elevation(self_obj)); //added by killap
+   gfade_in(600);
+
+   call Node024b;
+end
+
+procedure Node024b begin
+   Reply(188);
+
+   NOption(158,Node999,004);
+end
+
+procedure Node025 begin
+   Reply(189);
+
+   NOption(153,Node024a,004);
+   NOption(175,Node999,004);
+end
+
+procedure Node026 begin
+   floater(190);
+end
+
+procedure Node027 begin
+   set_rehab_time
+   display_msg(mstr(200));
+end
+// End Seraph's Code
 
 //xxxxxxxxxxxxxxxxxxxx

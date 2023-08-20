@@ -32,7 +32,6 @@ variable Karma_Perception:=0;           // see defines for values
 variable reaction_bonus_town_rep:=0;
 variable reaction_bonus_karma:=0;
 
-
 /* Slave Tolerance */
 #define SLAVE_VERY_INTOLERANT           (0)
 #define SLAVE_INTOLERANT                (1)
@@ -90,7 +89,11 @@ variable reaction_bonus_karma:=0;
 /* Reaction Bonus */
 //#define REACTION_BONUS_CHARISMA         ((get_critter_stat(dude_obj,STAT_ch) - AVERAGE_CHARISMA) * CHARISMA_MODIFIER)
 #define REACTION_BONUS_CHARISMA         ((get_critter_stat(dude_obj,STAT_ch) - CRITTER_CHARISMA) * CHARISMA_MODIFIER)
-#define TOWN_REPUTATION                 global_var(TOWN_REP_VAR)
+
+#ifndef TOWN_REPUTATION
+   #define TOWN_REPUTATION              global_var(TOWN_REP_VAR)
+#endif
+
 //#define REACTION_BONUS_TOWN_REP         ((TOWN_REPUTATION)/(TOWN_REP_MODIFIER))
 //#define REACTION_BONUS_KARMA            ((check_general_rep*Karma_Perception)/KARMA_MODIFIER)
 #define REACTION_BONUS_COMP_KARMA       (check_general_rep*Karma_Perception*((has_trait(TRAIT_PERK,dude_obj,PERK_karma_beacon_perk)+1)))
@@ -139,7 +142,7 @@ variable reaction_bonus_karma:=0;
 
 #define bad_critter_reaction            (local_var(LVAR_reaction_level) <= REACTION_LEVEL_BAD)
 
-#define neutral_critter_reaction        (local_var(LVAR_reaction_level) == REACTION_LEVEL_NEUTRAL)
+#define neutral_critter_reaction        ((local_var(LVAR_reaction_level) <= REACTION_LEVEL_DECENT and local_var(LVAR_reaction_level) >= REACTION_LEVEL_POOR))
 
 #define good_critter_reaction           (local_var(LVAR_reaction_level) >= REACTION_LEVEL_GOOD)
 
@@ -308,9 +311,15 @@ variable reaction_bonus_karma:=0;
                                         else                                                                                    \
                                             debug_msg("Sex Appeal Bonus == 0");                                                 \
                                         if (Evil_Critter == 1) then begin                                                       \
-                                            Static_Reaction:=Static_Reaction - reaction_bonus_karma;                            \
+                                            if (reaction_bonus_karma >= 0) then													\
+					    						Static_Reaction:=Static_Reaction - reaction_bonus_karma;                        \
+					    					else																				\
+												Static_Reaction:=Static_Reaction + reaction_bonus_karma;                        \
                                             debug_msg("Karma Reaction Bonus == "+Static_Reaction);                              \
-                                            Static_Reaction:=Static_Reaction - reaction_bonus_town_rep;                         \
+                                            if (reaction_bonus_town_rep >= 0) then					        					\
+					    						Static_Reaction:=Static_Reaction - reaction_bonus_town_rep;                     \
+				            				else																				\
+												Static_Reaction:=Static_Reaction + reaction_bonus_town_rep;                     \
                                             debug_msg("Town Rep Bonus == "+Static_Reaction);                                    \
                                             CheckKarma;                                                                         \
                                             if (has_rep_holy_warrior) then                                                      \
@@ -324,32 +333,6 @@ variable reaction_bonus_karma:=0;
                                             else if (has_rep_wanderer) then                                                     \
                                                 Static_Reaction:=Static_Reaction - REACTION_BONUS_WANDERER;                     \
                                             else if (has_rep_betrayer) then                                                     \
-                                                Static_Reaction:=Static_Reaction - REACTION_BONUS_BETRAYER;                     \
-                                            else if (has_rep_sword) then                                                        \
-                                                Static_Reaction:=Static_Reaction - REACTION_BONUS_SWORD;                        \
-                                            else if (has_rep_scourge) then                                                      \
-                                                Static_Reaction:=Static_Reaction - REACTION_BONUS_SCOURGE;                      \
-                                            else                                                                                \
-                                                Static_Reaction:=Static_Reaction - REACTION_BONUS_DEMON;                        \
-                                            debug_msg("Bad Person Reaction Bonus == "+Static_Reaction);                         \
-                                        end                                                                                     \
-                                        else begin                                                                              \
-                                            Static_Reaction:=Static_Reaction + reaction_bonus_karma;                            \
-                                            debug_msg("Karma Reaction Bonus == "+Static_Reaction);                              \
-                                            Static_Reaction:=Static_Reaction + reaction_bonus_town_rep;                         \
-                                            debug_msg("Town Rep Bonus == "+Static_Reaction);                                    \
-                                            CheckKarma;                                                                         \
-                                            if (has_rep_holy_warrior) then                                                      \
-                                                Static_Reaction:=Static_Reaction + REACTION_BONUS_HOLY;                         \
-                                            else if (has_rep_guardian) then                                                     \
-                                                Static_Reaction:=Static_Reaction + REACTION_BONUS_GUARDIAN;                     \
-                                            else if (has_rep_shield) then                                                       \
-                                                Static_Reaction:=Static_Reaction + REACTION_BONUS_SHIELD;                       \
-                                            else if (has_rep_defender) then                                                     \
-                                                Static_Reaction:=Static_Reaction + REACTION_BONUS_DEFENDER;                     \
-                                            else if (has_rep_wanderer) then                                                     \
-                                                Static_Reaction:=Static_Reaction + REACTION_BONUS_WANDERER;                     \
-                                            else if (has_rep_betrayer) then                                                     \
                                                 Static_Reaction:=Static_Reaction + REACTION_BONUS_BETRAYER;                     \
                                             else if (has_rep_sword) then                                                        \
                                                 Static_Reaction:=Static_Reaction + REACTION_BONUS_SWORD;                        \
@@ -357,6 +340,32 @@ variable reaction_bonus_karma:=0;
                                                 Static_Reaction:=Static_Reaction + REACTION_BONUS_SCOURGE;                      \
                                             else                                                                                \
                                                 Static_Reaction:=Static_Reaction + REACTION_BONUS_DEMON;                        \
+                                            debug_msg("Bad Person Reaction Bonus == "+Static_Reaction);                         \
+                                        end                                                                                     \
+                                        else begin                                                                              \
+                                            Static_Reaction:=Static_Reaction + reaction_bonus_karma;                            \
+                                            debug_msg("Karma Reaction Bonus == "+Static_Reaction);                              \
+                                            Static_Reaction:=Static_Reaction + reaction_bonus_town_rep;                         \
+                                            debug_msg("Town Rep Bonus == "+Static_Reaction);                                    \
+											CheckKarma;                                                                         \
+											if (has_rep_holy_warrior) then                                                      \
+												Static_Reaction:=Static_Reaction + REACTION_BONUS_HOLY;                         \
+											else if (has_rep_guardian) then                                                     \
+												Static_Reaction:=Static_Reaction + REACTION_BONUS_GUARDIAN;                     \
+											else if (has_rep_shield) then                                                       \
+												Static_Reaction:=Static_Reaction + REACTION_BONUS_SHIELD;                       \
+											else if (has_rep_defender) then                                                     \
+												Static_Reaction:=Static_Reaction + REACTION_BONUS_DEFENDER;                     \
+											else if (has_rep_wanderer) then                                                     \
+												Static_Reaction:=Static_Reaction + REACTION_BONUS_WANDERER;                     \
+											else if (has_rep_betrayer) then                                                     \
+												Static_Reaction:=Static_Reaction + REACTION_BONUS_BETRAYER;                     \
+											else if (has_rep_sword) then                                                        \
+												Static_Reaction:=Static_Reaction + REACTION_BONUS_SWORD;                        \
+											else if (has_rep_scourge) then                                                      \
+												Static_Reaction:=Static_Reaction + REACTION_BONUS_SCOURGE;                      \
+											else                                                                                \
+												Static_Reaction:=Static_Reaction + REACTION_BONUS_DEMON;                        \
                                             debug_msg("Good Person Reaction Bonus == "+Static_Reaction);                        \
                                         end                                                                                     \
                                         if (Slavery_Tolerant == SLAVE_VERY_INTOLERANT) then begin                               \
@@ -377,6 +386,15 @@ variable reaction_bonus_karma:=0;
                                        if (has_rep_childkiller) then                                                            \
                                             Static_Reaction:=Static_Reaction + REACTION_BONUS_CHILDKILLER;                      \
                                        debug_msg("Childkiller Reaction == "+Static_Reaction);                                   \
+                                       if (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)) then begin				\
+                                       		if (Evil_Critter == 1) then begin													\
+                                       			if (Static_Reaction > 0) then													\
+                                       				Static_Reaction := Static_Reaction * -1;									\
+                                       		end else begin																	    \
+                                       			if (Static_Reaction < 0) then													\
+                                       				Static_Reaction := Static_Reaction * -1;									\
+                                       		end																					\
+                                       end																						\
                                        set_local_var(LVAR_reaction,(local_var(LVAR_base_reaction) + Static_Reaction));          \
                                        debug_msg("Initial Reaction == "+local_var(LVAR_reaction))
 

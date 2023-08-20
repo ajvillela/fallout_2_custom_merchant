@@ -89,6 +89,7 @@ procedure Node009;
 procedure Node010;
 procedure Node011;
 procedure Node012;
+procedure Node012; // added by killap
 procedure Node013;
 procedure Node014;
 procedure Node015;
@@ -126,7 +127,7 @@ variable dlev;
 variable mytile;
 variable mylev;
 variable newtile;
-variable active;
+//variable active;
 
 procedure start begin
    debug_msg("test");
@@ -145,18 +146,18 @@ end
 
 //need code for smiley in KLAMATH after the rescue
 procedure should_i_be_here begin
-   active:=1;
+   //active:=1;
    if (cur_map_index == MAP_KLAMATH_TOXICCAVES) then begin
       if (global_var(GVAR_SMILEY_STATUS) < SMILEY_RETURNED) then begin
         //he is here
         set_obj_visibility(self_obj,0);
-        active:=1; //enable all p_procs
+        //active:=1; //enable all p_procs
       end
       else begin
         //he is gone
         move_to(self_obj,0,0);
         set_obj_visibility(self_obj,1);
-        active:=0; //disable all p_procs
+        //active:=0; //disable all p_procs
       end
    end
 end
@@ -202,7 +203,7 @@ end
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from
    Movement to attacking the player on sight can be placed in here.*/
 procedure critter_p_proc begin
-   if active then begin
+   //if active then begin
 
        if ((local_var(LVAR_Hostile) == 2) and (obj_can_see_obj(self_obj,dude_obj))) then begin
            set_local_var(LVAR_Hostile,1);
@@ -228,11 +229,11 @@ procedure critter_p_proc begin
           end
        end//follow
 
-   end//active
+   //end//active
 end
 
 procedure damage_p_proc begin
-   if active then begin
+   //if active then begin
       if (source_obj == dude_obj) then begin
          set_global_var(GVAR_ENEMY_SMILEY,1);
          if (cur_map_index == MAP_KLAMATH_TOXICCAVES) then begin
@@ -242,7 +243,7 @@ procedure damage_p_proc begin
             set_global_var(GVAR_ENEMY_KLAMATH,1);
          end
       end
-   end//active
+   //end//active
 
 end
 
@@ -328,13 +329,13 @@ end
    incrementing the death count for reputation purposes and Enemy Counters are placed
    in here. */
 procedure destroy_p_proc begin
-   if active then begin
+   //if active then begin
 //   set_local_var(LVAR_Smiley_Dead,1);
 
    set_global_var(GVAR_SMILEY_STATUS, SMILEY_DEAD);
 /* Increment the aligned critter counter*/
    inc_good_critter
-   end//active
+   //end//active
 
 /* Set global_variable for Enemy status*/
 end
@@ -355,7 +356,12 @@ end
    if the critter is known to the player. */
 procedure description_p_proc begin
    script_overrides;
-   display_msg(mstr(101));
+   if (global_var(GVAR_SMILEY_STATUS) == SMILEY_IS_HERE) then //added by killap
+      display_msg(mstr(104));
+   else if (local_var(LVAR_Herebefore)) then //added check by killap
+      display_msg(mstr(101));
+   else
+      display_msg(mstr(103)); //added by killap
 end
 
 procedure push_p_proc begin
@@ -557,6 +563,11 @@ procedure Node012 begin
    NOption(226, Node999, 004);
 end
 
+procedure Node012b begin
+   set_local_var(LVAR_12_before,0);
+   call Node012;
+end
+
 procedure Node013 begin
    Reply(230);
 
@@ -569,7 +580,7 @@ procedure Node014 begin
    Reply(240);
 
    NLowOption(241,Node999);
-   NOption(242,Node012,004);
+   NOption(242,Node012b,004); //edit by killap - was Node012
    NOption(243,Node999,004);
 end
 
@@ -577,14 +588,15 @@ procedure Node015 begin
    if (local_var(LVAR_15_before) == 1) then
       Reply(250);
    else begin
-      if (has_skill(dude_obj, SKILL_OUTDOORSMAN) > 49) then
+      if (has_skill(dude_obj, SKILL_OUTDOORSMAN) > 49) then begin
          Reply(251);
-      else
+      end else begin
          Reply(252);
+         NOption(255, Node016, 007); //made this only part of the above reply - killap
+      end
       NOption(253, Node016, 004);
-      NOption(255, Node016, 007);
    end
-   NOption(254, Node012, 004);
+   NOption(254, Node012b, 004); //edit by killap - was Node012
 end
 
 procedure Node016 begin
@@ -606,14 +618,14 @@ end
 procedure Node018 begin
    Reply(280);
 
-   NOption(281,Node012,004);
+   NOption(281,Node012b,004); //edit by killap - was Node012
    NOption(282,Node999,004);
 end
 
 procedure Node019 begin
    Reply(290);
 
-   GOption(291,Node012,004);
+   GOption(291,Node012b,004); //edit by killap - was Node012
    NOption(292,Node999,004);
 end
 //xxxxxxxxxxxxxxxxxxxx

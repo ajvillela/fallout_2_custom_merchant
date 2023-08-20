@@ -116,6 +116,12 @@ procedure Node045;
 procedure Node046;
 procedure Node047;
 procedure Node050;
+//added by killap - RP
+procedure Node051;
+procedure Node052;
+procedure Node053;
+procedure Node054;
+//end added
 
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
@@ -135,6 +141,9 @@ procedure Node050;
 #define LVAR_deck_init                 (12)
 #define LVAR_total_decks               (13)
 #define LVAR_days_since_restock        (14)
+#define LVAR_tragic_addiction_level    (15) //added by killap
+#define LVAR_Restock_Time              (16) //added by killap
+#define LVAR_Restock_Time_Fix          (17) //added by killap
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -148,6 +157,7 @@ variable item;
 variable In_Timed_Event:=0;
 variable four_before:=0;
 variable seven_before:=0;
+variable tragic_addiction := 0
 
 procedure start begin
 end
@@ -156,6 +166,26 @@ end
    set up the Team number and AI packet for this critter. This will override the
    default from the prototype, and needs to be set in scripts. */
 procedure map_enter_p_proc begin
+
+   // added by killap - expansion
+   // fix for going negative after 7 years
+   if (((game_time) < 0) and (local_var(LVAR_Restock_Time_Fix) == 0)) then begin
+      set_local_var(LVAR_Restock_Time, game_time - 1);
+      set_local_var(LVAR_Restock_Time_Fix, 1);
+   end
+   
+   
+   if (local_var(LVAR_Restock_Time) < game_time) then begin
+      debug_msg("Should have restocked");
+      //check_restock_item(PID_BOOZE, 10, 20, 100)
+      //check_restock_item(PID_BEER, 20, 30, 100)
+      check_restock_item(PID_GAMMA_GULP_BEER, 5, 10, 100)
+      check_restock_item(PID_ROT_GUT, 5, 10, 100)
+      check_restock_item(PID_BOTTLE_CAPS, 30, 60, 100)
+      set_local_var(LVAR_Restock_Time, (random(1,4) * ONE_GAME_DAY) + game_time);
+   end
+   // end added
+
    if (local_var(LVAR_deck_init) == 0) then begin
       set_local_var(LVAR_deck_init,1);
       set_local_var(LVAR_total_decks,14);
@@ -183,7 +213,7 @@ procedure critter_p_proc begin
    this as well. */
 
    if (obj_can_see_obj(self_obj,dude_obj)) then begin
-      if (global_var(GVAR_GECKO_MELTDOWN) == 1) then begin
+      if ( (global_var(GVAR_GECKO_MELTDOWN) == 1) or (global_var(GVAR_ENEMY_GECKO)) ) then begin //edit by killap - added (global_var(GVAR_ENEMY_GECKO))
          set_local_var(LVAR_Hostile,1);
          attack(dude_obj);
       end
@@ -232,7 +262,11 @@ end
    written by designers are placed in here. Additionally, Reactions are generated and
    stored which affects player interactions. */
 procedure talk_p_proc begin
+   CheckKarma; //added by killap
+
    GetReaction;
+
+   ReactToLevel; //added by killap
 
    //restock Wooz's decks
    if (local_var(LVAR_total_decks) < 1) then begin
@@ -260,7 +294,8 @@ procedure talk_p_proc begin
           floater(random(375,377));
        end
    end
-   else if (LVAR_reaction_level < -25) then begin
+   //else if (LVAR_reaction_level < -25) then begin
+   else if (local_var(LVAR_reaction_level) < REACTION_LEVEL_BAD ) then begin//edit by killap
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
          call Node020;
@@ -313,6 +348,8 @@ end
    in here. */
 procedure destroy_p_proc begin
    inc_good_critter
+   // added by killap - expansion
+   set_gvar_bit_on(GVAR_WOOZ_STATUS, WOOZ_DEAD);
 end
 
 /* Look_at_p_proc gets called any time that the player passes the cursor over any object.
@@ -353,7 +390,13 @@ procedure Node920 begin
       item:=create_object(PID_GAMMA_GULP_BEER,0,0);
       add_obj_to_inven(dude_obj,item);
       //use_obj_on_obj(create_object(PID_GAMMA_GULP_BEER,0,0), dude_obj);
-      call Node999;
+      
+      //killap
+      Reply(723);
+      NOption(311,Node004,004);
+      NOption(726,Node007,004);
+      NOption(725,Node999,004);
+      //end killap
    end
    else begin
       call Node008;
@@ -368,7 +411,14 @@ procedure Node922 begin
       item:=create_object(PID_ROENTGEN_RUM,0,0);
       add_obj_to_inven(dude_obj,item);
       //use_obj_on_obj(create_object(PID_ROENTGEN_RUM,0,0), dude_obj);
-      call Node999;
+      
+      //killap
+      Reply(723);
+      NOption(311,Node004,004);
+      NOption(726,Node007,004);
+      NOption(725,Node999,004);
+      //end killap
+      
    end
    else begin
       call Node008;
@@ -400,7 +450,15 @@ procedure Node924 begin
          set_local_var(LVAR_drink_round,4);
          //drink_round:=4;
       end
-      call Node999;
+      //call Node999;
+      
+      //killap
+      Reply(731);
+      NOption(311,Node004,004);
+      NOption(142,Node007,004);
+      NOption(732,Node009,004);
+      NOption(725,Node999,004);
+      //end killap
    end
    else begin
       call Node008;
@@ -412,6 +470,18 @@ procedure Node930 begin
    gfade_out(600);
    game_time_advance(game_ticks(k*3600)); //k hours
    gfade_in(600);
+//begin killap code  
+   if (local_var(LVAR_tragic_addiction_level) <= 5) then begin
+      set_local_var(LVAR_tragic_addiction_level,(local_var(LVAR_tragic_addiction_level)+1));
+      if (local_var(LVAR_tragic_addiction_level) == 5) then begin
+         set_global_var(GVAR_ADDICT_TRAGIC,1);
+         if not(is_iface_tag_active(4)) then
+            show_iface_tag(4);
+         add_timer_event(dude_obj, (ONE_GAME_WEEK - ONE_GAME_SECOND), 5);
+         display_msg(mstr(730));
+      end
+   end  
+//end killap code    
    if (obj_is_carrying_obj_pid(dude_obj, PID_DECK_OF_TRAGIC_CARDS)) then begin
       if (is_success(roll_vs_skill(dude_obj,SKILL_GAMBLING,0))) then
          call Node030;
@@ -487,7 +557,7 @@ else if (local_var(LVAR_Wooz_Friend) == 2) then begin
    Reply(112);
 end
    Reply(110);
-   NOption(113,Node007,001);
+   NOption(113,Node007,004); //edit by killap - was 001
    NOption(114,Node004,004);
    NOption(115,Node006,004);
    NOption(116,Node003,004);
@@ -508,6 +578,7 @@ procedure Node003 begin
 end
 
 procedure Node004 begin
+   set_gvar_bit_on(GVAR_WOOZ_STATUS, WOOZ_TALKED); // added by killap - expansion
    if (four_before == 0) then begin
       four_before:=1;
       Reply(140);
@@ -546,13 +617,41 @@ procedure Node007 begin
       Reply(171);
    end
 //need first time
-   Reply(170);
-   NOption(172,Node920,004);
-   NOption(173,Node920,004);
-   NOption(174,Node922,004);
+   //Reply(170);
+   NOption(172,Node051,004); //was 920 - killap
+   NOption(173,Node052,004); //was 920 - killap 
+   NOption(174,Node053,004); //was 922 - killap
    NOption(175,Node009,004);
    NOption(176,Node999,004);
 end
+
+//added by killap
+procedure Node051 begin
+   Reply(721);
+   NOption(727,Node920,004);
+   NOption(728,Node007,004);
+   NOption(729,Node999,004);
+end
+
+procedure Node052 begin
+   Reply(722);
+   
+   NOption(g_mstr(352),Node920,004);
+end
+
+procedure Node053 begin
+   Reply(724);
+   
+   NOption(g_mstr(352),Node922,004);
+
+end
+
+procedure Node054 begin
+   Reply(740);
+   NOption(741,Node999,004);
+   NOption(742,Node004,004);
+end
+//end added by killap
 
 procedure Node008 begin
    Reply(180);
@@ -567,7 +666,7 @@ end
 procedure Node009 begin
    Reply(190);
    if (local_var(LVAR_drink_round) == 0) then
-      NOption(191,Node924,001);
+      NOption(191,Node924,004); //edit by killap - was 001
    if (local_var(LVAR_drink_round) == 1) then
       NOption(192,Node924,004);
    if (local_var(LVAR_drink_round) == 2) then
@@ -691,10 +790,32 @@ procedure Node026 begin
 end
 
 procedure Node027 begin
-   Reply(370);
-   GOption(371,Node032,004); //reaction minor
-   NOption(372,Node033,004);
+//Begin killap code
+   set_gvar_bit_on(GVAR_WOOZ_STATUS, WOOZ_TALKED); // added by killap
+   if ( (tragic_addiction > 5) and (global_var(GVAR_ADDICT_TRAGIC) == 0)) then begin
+      tragic_addiction := 0;
+      set_local_var(LVAR_tragic_addiction_level,0);
+   end
+
+   if ( (tragic_addiction >= 10) and (global_var(GVAR_ADDICT_TRAGIC) == 1) ) then begin
+      Reply(716);
+      
+      NOption(717,Node930,004);
+   end
+   else begin
+      Reply(370);
+      
+      if (global_var(GVAR_ADDICT_TRAGIC) == 1) and (tragic_addiction <= 10) then
+         NOption(372,Node033,004);
+      else begin   
+         GOption(371,Node032,004);
+         NOption(715,Node004,004);
+      end 
+   end
+   
+   tragic_addiction := (tragic_addiction+1);
 end
+//end killap code
 
 procedure Node028 begin
    item:=create_object(PID_DECK_OF_TRAGIC_CARDS,0,0);
@@ -716,8 +837,12 @@ procedure Node030 begin
    add_obj_to_inven(dude_obj,item);
    set_local_var(LVAR_total_decks, local_var(LVAR_total_decks)-1);
    Reply(400);
-   BOption(401,Node999,004); //reaction tiny
-   NOption(402,Node999,004);
+   if (tragic_addiction > 10) then
+      NOption(718,Node999,004);
+   else begin
+      BOption(401,Node999,004); //reaction tiny
+      NOption(402,Node999,004);
+   end
 end
 
 procedure Node031 begin
@@ -730,25 +855,40 @@ procedure Node031 begin
    end
 //move one tragic deck from player to wooz
    Reply(410);
-   BOption(411,Node999,004);
-   NOption(412,Node999,004); //reaction tiny
+   if (tragic_addiction > 10) then //added by killap
+      NOption(719,Node999,004);  //added by killap
+   else begin
+      NOption(411,Node999,004); //killap's fix: swaped BOption to NOption
+      BOption(412,Node999,004); //reaction tiny //killap's fix: swaped NOption to BOption
+   end
 end
 
 procedure Node032 begin
    Reply(420);
-   BOption(421,Node930,004);
-   NOption(422,Node004,004); //reaction tiny
+   NOption(421,Node930,004);  //killap's fix: should not have been considered a bad option
+   if (tragic_addiction > 5) then   //added by killap
+      NOption(422,Node004,004); //reaction tiny
+   else
+      NOption(715,Node004,004); //ask more questions.
 end
 
 procedure Node033 begin
    Reply(430);
-   BOption(431,Node004,004);
-   NOption(432,Node999,004);
+   //begin killap code
+   if (global_var(GVAR_ADDICT_TRAGIC) == 1) and (tragic_addiction <= 10) then begin
+      NOption(720,Node930,004);
+      NOption(422,Node004,004);
+   end
+   else begin
+      NOption(431,Node004,004);  //killap's fix: should not be a bad option
+      NOption(432,Node999,004);
+   end
+   //end killap code
 end
 
 procedure Node034 begin
    Reply(440);
-   BOption(441,Node036,004);
+   NOption(441,Node036,004);  //killap's fix: should not be a bad option
    NOption(442,Node038,004);
 end
 
@@ -765,6 +905,10 @@ end
 
 procedure Node037 begin
    Reply(470);
+   //added by killap - RP
+   if ( (town_known(AREA_VAULT_VILLAGE) == MARK_STATE_VISITED) and ((global_var(GVAR_VAULT_SERVANT) < SERVANT_BRAIN_AGREEMENT) and ( (global_var(GVAR_QUEST_VAULT_VILLAGE) >= VILLAGE_QUEST_GET_GUNS) and (global_var(GVAR_QUEST_VAULT_VILLAGE) < VILLAGE_QUEST_DELIVERED_GUNS) )) or ( ((global_var(GVAR_VAULT_SERVANT) < SERVANT_BRAIN_AGREEMENT) and ( (global_var(GVAR_QUEST_VAULT_VILLAGE) >= VILLAGE_QUEST_SPEAK_WITH_COUNCIL) and (global_var(GVAR_QUEST_VAULT_VILLAGE) < VILLAGE_QUEST_FINISHED_DIPLOMATIC) ))) ) then
+      NOption(473,Node054,004);
+   //end added
    NOption(471,Node004,004);
    BOption(472,Node999,004); //reaction major
 end

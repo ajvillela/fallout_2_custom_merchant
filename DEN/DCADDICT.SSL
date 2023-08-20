@@ -175,6 +175,7 @@ variable the_temp;
 end
 
 procedure map_enter_p_proc begin
+   CHECK_LEVEL //added by killap - expansion pack
    if (local_var(LVAR_Home_Tile) == 0) then begin
       set_local_var(LVAR_Home_Tile, self_tile);
    end
@@ -275,7 +276,7 @@ procedure Node001 begin
 end
 procedure Node002 begin
    if (heavy_high) then begin
-      floater_rand(201 - (check_general_rep < 0), 212 + (check_general_rep > 0));
+      floater_rand(201 - ( (check_general_rep < 0) and (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) ), 212 + ( (check_general_rep > 0) or (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)) ) ); //edit by killap - added (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
    end else if (light_high) then begin
       floater_rand(215 - dude_is_male, 221);
    end else if (light_withdrawal) then begin

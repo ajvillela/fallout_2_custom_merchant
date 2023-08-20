@@ -101,7 +101,7 @@ procedure use_p_proc begin
       item:=create_object(PID_CAR_FUEL_INJECTION,0,0);
       add_obj_to_inven(dude_obj,item);
       display_msg(mstr(130));
-      give_exp_points(EXP_KC_FIND_CAR_PART);
+      give_xp(EXP_KC_FIND_CAR_PART); //killap's fix: changed from give_exp_points
    end
 end
 
@@ -150,7 +150,7 @@ procedure repair_it begin
    end
    else begin
       if (is_critical(repair_check)) then
-         display_msg(mstr(124)); //critical failure
+         display_msg(mstr(122)); //critical failure --//changed from 124 by killap
       else
          display_msg(mstr(123));
    end
@@ -158,17 +158,19 @@ end
 
 procedure zamin_it begin
    per_check:=do_check(dude_obj, STAT_pe, 0);
-   if (is_success(per_check)) then begin
-      if (is_critical(per_check)) then
-         display_msg(mstr(110)); //critical success
-      else
-         display_msg(mstr(111));
-   end
-   else begin
-      if (is_critical(per_check)) then
-         display_msg(mstr(113)); //critical failure
-      else
-         display_msg(mstr(112));
+   if (local_var(LVAR_Part_Given) == 0) then begin //added check by killap
+      if (is_success(per_check)) then begin
+         if (is_critical(per_check)) then
+            display_msg(mstr(110)); //critical success
+         else
+            display_msg(mstr(111));
+      end
+      else begin
+         if (is_critical(per_check)) then
+            display_msg(mstr(113)); //critical failure
+         else
+            display_msg(mstr(112));
+      end
    end
 end
 

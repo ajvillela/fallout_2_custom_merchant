@@ -6,5 +6,6 @@
 #define ENCPRES_H
 
 #define MVAR_Pres_Ordered             (0)
+#define MVAR_Met_Vice_Pres            (1)
 
 #endif // ENCPRES_H

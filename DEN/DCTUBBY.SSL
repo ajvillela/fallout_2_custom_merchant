@@ -133,9 +133,15 @@ end
 
 procedure talk_p_proc begin
    script_overrides;
+   
+   if (local_var(LVAR_Penalty) > 0) then //added by killap
+      gdialog_set_barter_mod(30);
+                                 
+                                 
    move_obj_inven_to_obj(self_obj,generic_temp_box);
    move_obj_inven_to_obj(den_tubby_box_obj,self_obj);
    GetReaction;
+   ReactToLevel; //added by killap
    start_gdialog(NAME,self_obj,4,-1,-1);
    gSay_Start;
       if (dude_is_stupid) then begin
@@ -192,8 +198,11 @@ procedure Node998 begin
 end
 
 #define do_tubby_barter    begin                                                                \
-                              gdialog_barter;                                                   \
-                              Reply(" ");                                                       \
+                              if (local_var(LVAR_Penalty) > 0) then                             \
+                                 gdialog_mod_barter(30);                                        \
+                              else                                                              \
+                                 gdialog_barter;                                                \
+                              Reply(520);                                                       \
                               NOption(179,Node999,-003);                                        \
                               if (local_var(LVAR_Penalty) > 0) then NOption(170,Node999,004);   \
                               else NOption(168,Node999,004);                                    \
@@ -260,7 +269,7 @@ procedure Node000 begin
 end
 procedure Node001 begin
    set_local_var(LVAR_Penalty, 1);
-   gdialog_set_barter_mod(-30);
+   //gdialog_set_barter_mod(30); //killap's fix: was -30
    Reply(153);
    NOption(154,Node996,005);
    NOption(155,Node005,004);

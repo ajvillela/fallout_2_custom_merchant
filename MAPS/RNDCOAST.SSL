@@ -61,7 +61,13 @@ procedure map_enter_p_proc begin
    variable the_hex;
    variable the_elev;
 
-   Lighting;
+   wm_area_set_pos(AREA_RND_COAST, metarule(44, 0), metarule(45, 0));   //added by killap
+
+   //added by killap
+   if( elevation( dude_obj ) == 1 ) then
+      Cavern_Lighting;
+   else
+      Lighting;
 
    if (cur_map_index == MAP_RND_COAST1) then begin
        the_hex := CAR_RND_COAST1_HEX;
@@ -154,7 +160,11 @@ procedure map_enter_p_proc begin
 end
 
 procedure map_update_p_proc begin
-   Lighting;
+   //added by killap
+   if( elevation( dude_obj ) == 1 ) then
+      Cavern_Lighting;
+   else
+      Lighting;
 end
 
 

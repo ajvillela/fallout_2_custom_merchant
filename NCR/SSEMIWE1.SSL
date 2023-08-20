@@ -111,6 +111,8 @@ end
 
 procedure map_enter_p_proc begin
    variable destroyOnLoad := 0;
+   
+   i_westin_emitter_obj := self_obj; //added by killap
 
    if (MAP_NOTIFY != -1) then begin
       if (map_var(MAP_NOTIFY) == 4) then begin
@@ -126,7 +128,7 @@ procedure map_enter_p_proc begin
 
 #ifdef CONTROL_MAC
       // This is used if a control macro is defined
-      // add_timer_event(self_obj, 5, TIMER_CONTROL);
+      add_timer_event(self_obj, ONE_GAME_SECOND / 2, TIMER_CONTROL);
 #endif
 
    if (not FIELD_DESTROYED and not destroyOnLoad) then begin
@@ -212,7 +214,8 @@ end
 
 procedure use_obj_on_p_proc begin
    variable Tool;
-
+   variable modifier := 0;
+   
    Tool:=obj_pid(obj_being_used_with);
 
    if (MAP_NOTIFY != -1) then begin
@@ -222,11 +225,15 @@ procedure use_obj_on_p_proc begin
       set_global_var(GLOBAL_NOTIFY, 3);
    end
 
-   if ((Tool == PID_MULTI_TOOL) and (not FIELD_DESTROYED)) then begin
+   if ( ((Tool == PID_MULTI_TOOL) or (Tool == PID_SUPER_TOOL_KIT)) and (not FIELD_DESTROYED) ) then begin //added super_tool_kit - killap
       script_overrides;
+      
+      if (Tool == PID_SUPER_TOOL_KIT) then
+         modifier := 20;
+         
       if (i_westin_guard_obj > 0) then begin
          add_timer_event(i_westin_guard_obj, 0, TIMER_PLAYER_USE_EMITTER);
-      end else if (skill_success(source_obj,SKILL_SCIENCE,TOOL_BONUS)) then begin
+      end else if (skill_success(source_obj,SKILL_REPAIR,(TOOL_BONUS + modifier))) then begin //edit by killap: was SKILL_SCIENCE
          if (FIELD_ON) then begin
             SET_FIELD_DELAY;
             if (source_obj == dude_obj) then begin
@@ -284,6 +291,7 @@ procedure damage_p_proc begin
 end
 
 procedure map_update_p_proc begin
+   i_westin_emitter_obj := self_obj; //added by killap
 end
 
 procedure timed_event_p_proc begin
@@ -372,6 +380,8 @@ procedure timed_event_p_proc begin
       end
       add_timer_event(self_obj, ONE_GAME_SECOND / 2, TIMER_CONTROL);
    end else if (fixed_param == TIMER_CLEAR_CONTROL) then begin
+#ifdef CONTROL_MAC_CLEAR
       CONTROL_MAC_CLEAR;
+#endif
    end
 end

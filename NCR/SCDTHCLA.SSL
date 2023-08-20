@@ -173,7 +173,8 @@ procedure critter_p_proc begin
    if (local_var(LVAR_Talk_Count) == 5) then begin
       if (obj_on_screen(self_obj)) then begin
          if (not anim_busy(self_obj)) then begin
-            animate_run_to_tile(tile_num_in_direction(self_tile, Run_Away_From_Dude_Dir, 5));
+            //animate_run_to_tile(tile_num_in_direction(self_tile, Run_Away_From_Dude_Dir, 5));
+            animate_run_to_tile(27055); // edit by killap - this way they will actually be hidden and not just stand there in plain view
          end
       end else begin
          if (numDeathClaws > 0) then

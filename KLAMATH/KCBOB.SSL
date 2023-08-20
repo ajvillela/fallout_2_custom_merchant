@@ -247,7 +247,8 @@ procedure talk_p_proc begin
        end_dialogue;
    end
 
-   else if (global_var(TOWN_REPUTATION) <= -3) then begin
+// else if (global_var(TOWN_REPUTATION) <= -3) then begin //killap's fix
+   else if (TOWN_REPUTATION <= -3 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then begin //killap's fix
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node004;
@@ -255,7 +256,8 @@ procedure talk_p_proc begin
        end_dialogue;
    end
 
-   else if (global_var(TOWN_REPUTATION) >= -2) then begin
+//   else if (global_var(TOWN_REPUTATION) >= -2) then begin
+   else if (TOWN_REPUTATION >= -2 or (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then begin //killap's fix
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
        if (local_var(LVAR_Herebefore) == 0) then begin
@@ -338,7 +340,7 @@ end
 
 procedure Node955 begin
    set_global_var(GVAR_STILL_STATUS, STILL_REWARDED);
-   item_caps_adjust(dude_obj,55);
+   item_caps_adjust(dude_obj,65);   //killap's fix: changed from 55 to 65 (what .msg says he gives)
 end
 
 procedure Node995 begin
@@ -438,7 +440,7 @@ end
 
 procedure Node008 begin
    Reply(180);
-   NLowOption(181,Node003);
+   NOption(181,Node003,004); //edit by killap - was NLowOption(181,Node003);
 end
 
 procedure Node009 begin
@@ -457,12 +459,14 @@ procedure Node011 begin
    if (obj_is_carrying_obj_pid(self_obj,PID_BOOZE)) then begin
       mybooze:=obj_carrying_pid_obj(self_obj,PID_BOOZE);
       rm_obj_from_inven(self_obj,mybooze);
-      item:=create_object(PID_BOOZE,0,0);
-      add_obj_to_inven(dude_obj,item);
+      //destroy_object(mybooze); //added by killap
+      //item:=create_object(PID_BOOZE,0,0);
+      add_obj_to_inven(dude_obj,mybooze);
    end
 //give player one bottle of booze  -nbk
    Reply(210);
-   NLowOption(181,Node009);
+   //NLowOption(181,Node009);
+   NOption(181,Node009,004); //edit by killap
 
 end
 
@@ -534,12 +538,63 @@ inc_general_rep(REP_BONUS_KLAMATH_REFUEL_STILL);
 end
 
 procedure Node019 begin
-   Reply(290);
-   NOption(291,Node021,004);
-   NOption(292,Node023,004);
-   NOption(293,Node024,004);
-   NOption(294,Node025,004);
-   NOption(295,Node026,004);
+   //added by killap - RP
+   variable msg;
+   variable comma_needed := false;
+   variable count := 0;
+   
+   msg := mstr(290);
+   
+   if ((global_var(GVAR_KLAMATH_FIND_RUSTLERS) < FIND_RUSTLERS_SUCCESS) and (global_var(GVAR_DUNTON_DEAD) == 0) and (global_var(GVAR_SCARE_DUNTONS) == 0)) then begin
+      msg += mstr(2901);
+      comma_needed := true;
+      count += 1;
+   end
+ 
+   if not(map_is_known(MAP_KLAMATH_CANYON)) then begin
+      if (comma_needed) then
+         msg += ", ";
+      else 
+        comma_needed := true;   
+      msg += mstr(2902);
+      count += 1;
+   end
+
+   if (global_var(GVAR_QUEST_RAT_GOD) < RAT_GOD_SUCCESS) then begin
+      if (comma_needed) then
+         msg += ", ";
+      else 
+        comma_needed := true;
+      msg += mstr(2903);
+      count += 1;
+   end
+
+   if (global_var(GVAR_SMILEY_STATUS) < SMILEY_RETURNED) then begin
+      if (comma_needed) then
+         msg += ", ";
+      msg += mstr(2904);
+      count += 1;
+   end
+   
+   if (count > 0) then
+      msg += mstr(2905);
+   else if (count == 0) then
+      msg := mstr(2900);
+   //end added
+
+   Reply(msg);
+   
+   if ((global_var(GVAR_KLAMATH_FIND_RUSTLERS) < FIND_RUSTLERS_SUCCESS) and (global_var(GVAR_DUNTON_DEAD) == 0) and (global_var(GVAR_SCARE_DUNTONS) == 0)) then //added by killap
+      NOption(291,Node021,004);
+   if not(map_is_known(MAP_KLAMATH_CANYON)) then //added by killap
+      NOption(292,Node023,004);
+   if (global_var(GVAR_QUEST_RAT_GOD) < RAT_GOD_SUCCESS) then // added by check killap
+      NOption(293,Node024,004);
+   if not(den_visit) then // added by killap
+      NOption(294,Node025,004);
+   if (global_var(GVAR_SMILEY_STATUS) < SMILEY_RETURNED) then // added by check killap
+      NOption(295,Node026,004);
+   
    NOption(296,Node031,004);
    NOption(297,Node003,004);
    //NOption(298,Node004,006);

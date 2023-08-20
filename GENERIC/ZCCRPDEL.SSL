@@ -1736,7 +1736,7 @@ procedure Node001 begin
    if (local_var(LVAR_Bet_Total) > 0) then
       NOption(118, NodeRoll, 1);
 
-   if (NUMBETS == 0) then
+   //if (NUMBETS == 0) then --comment out by killap - no reason to not always allow this; plus player can get stuck without it
       NOption(712, Node999, 1);
 end
 

@@ -94,6 +94,7 @@ procedure Node022;
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Sing                       (7)
 #define LVAR_Warned_About_Door          (8)
+#define LVAR_Commented_On_Singing       (9) //added by killap
 
 #define SING_NOTHING                   (0)
 #define SING_ALLOWED                   (1)
@@ -105,16 +106,19 @@ procedure Node022;
 
 
 /* Local variables which do not need to be saved between map changes. */
+import variable vault_city_martin_obj; // Seraph's Code
 variable Only_Once:=0;
 variable Sing_State := 0;
 
 procedure start begin
+   vault_city_martin_obj := self_obj; // Seraph's Code
 end
 
 /* This procedure will get called each time that the map is first entered. It will
    set up the Team number and AI packet for this critter. This will override the
    default from the prototype, and needs to be set in scripts. */
 procedure map_enter_p_proc begin
+   vault_city_martin_obj := self_obj; // Seraph's Code
    Only_Once:=0;
    Sing_State := 0;
 
@@ -319,6 +323,8 @@ end
    in here. */
 procedure destroy_p_proc begin
 
+    vault_city_martin_obj := 0; // Seraph's Code
+
 /* Increment the aligned critter counter*/
    inc_good_critter
 
@@ -514,15 +520,25 @@ procedure Node016 begin
 end
 
 procedure Node016a begin
-   inc_general_rep( REP_BONUS_MARTIN_STOP_SINGING );
-   set_local_var( LVAR_Sing, SING_NOT_ALLOWED );
-   call Node018;
+   if( local_var(LVAR_Commented_On_Singing) == 0 ) then begin  //added by killap
+      set_local_var(LVAR_Commented_On_Singing,1);              //added by killap
+      inc_general_rep( REP_BONUS_MARTIN_STOP_SINGING );
+      set_local_var( LVAR_Sing, SING_NOT_ALLOWED );
+    end  
+
+	call Node018;
+   
 end
 
 procedure Node016b begin
-   inc_general_rep( REP_BONUS_MARTIN_KEEP_SINGING );
-   set_local_var( LVAR_Sing, SING_ALLOWED );
-   call Node017;
+   if( local_var(LVAR_Commented_On_Singing) == 0 ) then begin  //added by killap
+      set_local_var(LVAR_Commented_On_Singing,1);              //added by killap
+      inc_general_rep( REP_BONUS_MARTIN_KEEP_SINGING );
+      set_local_var( LVAR_Sing, SING_ALLOWED );
+   end
+
+	call Node017;
+
 end
 
 procedure Node017 begin

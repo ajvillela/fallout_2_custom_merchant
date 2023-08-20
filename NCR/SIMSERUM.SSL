@@ -45,14 +45,18 @@ end
 procedure use_obj_on_p_proc begin
 //Source_obj == user
 //Target_obj == use on
-
-
+   script_overrides;
    if (critter_kill_type(target_obj) == KILL_TYPE_super_mutant_kills) then begin
       script_overrides;
       if (global_var(GVAR_NCR_HENRY_HYPO) < HYPO_USED) then begin
+         script_overrides;
          set_global_var(GVAR_NCR_HENRY_HYPO, HYPO_USED);
-         give_exp_points(EXP_DOCHENRY_MUTA_TEST);
-         display_msg(mstr(101) + EXP_DOCHENRY_MUTA_TEST + mstr(102));
+         
+         display_msg(mstr(101));
+         give_xp(EXP_DOCHENRY_MUTA_TEST); 
+         
+         //give_exp_points(EXP_DOCHENRY_MUTA_TEST);
+         //display_msg(mstr(101) + EXP_DOCHENRY_MUTA_TEST + mstr(102));
       end
       rm_obj_from_inven(source_obj, self_obj);
       add_obj_to_inven(target_obj, self_obj);
@@ -60,6 +64,7 @@ procedure use_obj_on_p_proc begin
       owner := target_obj;
       add_timer_event(self_obj, 2, TIMER_DOKILL);
    end else begin
+      script_overrides;
       display_mstr(100);
    end
 end

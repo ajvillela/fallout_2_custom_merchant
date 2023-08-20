@@ -85,6 +85,12 @@ procedure Node026;
 procedure Node027;
 procedure Node028;
 procedure Node029;
+// Begin Seraph's Code - expansion
+
+procedure Node030;
+procedure Node031;
+
+// End Seraph's Code
 
 procedure Node003a;
 procedure Node004a;
@@ -107,6 +113,8 @@ procedure Node022a;
 #define LVAR_Said_1                     (9)
 #define LVAR_Said_18                    (10)
 #define LVAR_Said_21                    (11)
+#define LVAR_Fannie_Money_Rant          (12) //added by killap
+#define LVAR_Fannie_Dead_Rant           (13) //added by killap
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -187,7 +195,7 @@ procedure talk_p_proc begin
        call Node005;
    end
 
-   else if (map_var(MVAR_Fannie_Mae) == FANNIE_DEAD) then begin
+   else if ( (local_var(LVAR_Fannie_Dead_Rant) == 0) and (map_var(MVAR_Fannie_Mae) == FANNIE_DEAD) ) then begin
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node025;
@@ -195,7 +203,7 @@ procedure talk_p_proc begin
        end_dialogue;
    end
 
-   else if (map_var(MVAR_Fannie_Mae) == FANNIE_MONEY_GIVEN) then begin
+   else if ( (local_var(LVAR_Fannie_Money_Rant) == 0) and (map_var(MVAR_Fannie_Mae) == FANNIE_MONEY_GIVEN) ) then begin
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node026;
@@ -268,23 +276,25 @@ end
 //~~~~~~~~~~~~~~~~ DESIGN TOOL STARTS HERE
 
 procedure Node001 begin
-   if (global_var(GVAR_REDDING_WHORE_CUT) == WHORE_CUT_KILLED) then
-       Reply(103);
+
+   if ((global_var(GVAR_REDDING_WHORE_CUT) == WHORE_CUT_KILLED) or (map_var(MVAR_Fannie_Mae) == FANNIE_CURED_LOU)) then
+       Reply(103+(1000*local_var(LVAR_Said_1)== 0));
    else if (global_var(GVAR_REDDING_WHORE_CUT) == WHORE_CUT_JAILED) then
-       Reply(104);
+       Reply(104+(1000*local_var(LVAR_Said_1)== 0));
    else if (global_var(GVAR_REDDING_WHORE_CUT) == WHORE_CUT_LET_GO) then
-       Reply(105);
+       Reply(105+(1000*local_var(LVAR_Said_1)== 0));
    else if (map_var(MVAR_Fannie_Mae) == FANNIE_DEAD) then
-       Reply(106);
+       Reply(106+(1000*local_var(LVAR_Said_1)== 0));
    else if (map_var(MVAR_Fannie_Mae) == FANNIE_MONEY_GIVEN) then
-       Reply(107);
+       Reply(107+(1000*local_var(LVAR_Said_1)== 0));
    else if (local_var(LVAR_Said_1)== 0) then begin
-       set_local_var(LVAR_Said_1,1);
        Reply(108);
    end
    else
        Reply(109);
 
+   set_local_var(LVAR_Said_1,1);
+          
    NLowOption(110,Node002);
    NOption(111,Node020,004);
    if (not(dude_found_geck)) then
@@ -294,14 +304,21 @@ procedure Node001 begin
    NOption(115,Node011,006);
    if (global_var(GVAR_REDDING_WHORE_CUT) == WHORE_CUT_CUT) then
        NOption(116,Node014,004);
+   
+   // Begin Seraph's Code - expansion
+   if ( (not(fannie_cured)) and (obj_is_carrying_obj_pid(dude_obj,PID_JET_ANTIDOTE)) and (map_var(MVAR_Fannie_Mae) == FANNIE_MONEY_GIVEN) ) then
+      GOption(310,Node030,004);
+   // End Seraph's Code
+       
+   NOption(301,Node999,004); //added by killap
 end
 
 procedure Node002 begin
    Reply(117);
 
-   NLowOption(118,Node003,004);
-   NLowOption(119,Node004,004);
-   NLowOption(120,Node999,004);
+   NLowOption(118,Node003); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
+   NLowOption(119,Node004); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
+   NLowOption(120,Node999); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
 end
 
 procedure Node003 begin
@@ -345,8 +362,12 @@ procedure Node004a begin
 
    healing:=4*get_critter_stat(dude_obj,STAT_heal_rate);
    critter_heal(dude_obj,healing);
-
    game_time_advance(8*ONE_GAME_HOUR);
+   //added by killap
+   gfade_out(600);
+   move_to(dude_obj,12901,elevation(self_obj));
+   gfade_in(600);
+   //added by killap   
 end
 
 procedure Node005 begin
@@ -400,6 +421,8 @@ procedure Node010 begin
 end
 
 procedure Node011 begin
+   mark_san_francisco_on_map // Seraph's Code
+
    Reply(148);
 
    NOption(149,Node012,004);
@@ -532,7 +555,11 @@ procedure Node022a begin
    critter_heal(dude_obj,healing);
 
    game_time_advance(8*ONE_GAME_HOUR);
-
+   //added by killap
+   gfade_out(600);
+   move_to(dude_obj,12901,elevation(self_obj));
+   gfade_in(600);
+   //added by killap   
 end
 
 procedure Node023 begin
@@ -564,6 +591,7 @@ procedure Node024 begin
 end
 
 procedure Node025 begin
+   set_local_var(LVAR_Fannie_Dead_Rant,1); // added by killap
    Reply(211);
 
    NOption(212,Node001,004);
@@ -572,6 +600,7 @@ procedure Node025 begin
 end
 
 procedure Node026 begin
+   set_local_var(LVAR_Fannie_Money_Rant,1); // added by killap
    Reply(215);
 
    NOption(216,Node027,004);
@@ -581,6 +610,11 @@ end
 
 procedure Node027 begin
    Reply(219);
+
+// Begin Seraph's Code - expansion
+   if (obj_is_carrying_obj_pid(dude_obj,PID_JET_ANTIDOTE)) then
+      GOption(229,Node030,004);
+// End Seraph's Code
 
    BOption(220,Node029,004);
    BOption(221,Node999,004);
@@ -600,6 +634,35 @@ procedure Node029 begin
    BOption(227,Node001,004);
    NOption(228,Node999,004);
 end
+
+// Begin Seraph's Code - expansion
+procedure Node030 begin
+   Reply(230);
+
+   NOption(231,Node031,004);
+end
+
+procedure Node031 begin
+   variable item; //added by killap
+   
+   set_fannie(FANNIE_CURED_LOU);
+   item:=obj_carrying_pid_obj(dude_obj, PID_JET_ANTIDOTE); //added by killap
+   rm_obj_from_inven(dude_obj,obj_carrying_pid_obj(dude_obj,PID_JET_ANTIDOTE));
+   destroy_object(item); //added by killap
+   display_msg(mstr(300));
+   set_rehab_time
+   debug_msg("REHAB_TIME = " + map_var(MVAR_Rehab_Time));
+
+   Reply(232);
+
+   NOption(233,Node020,004);
+   NOption(112,Node006,004);
+   NOption(234,Node007,004);
+   NOption(134,Node999,004);
+end
+
+// End Seraph's Code
+
 
 
 //xxxxxxxxxxxxxxxxxxxx

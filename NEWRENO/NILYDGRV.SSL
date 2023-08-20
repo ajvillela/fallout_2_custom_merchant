@@ -231,6 +231,8 @@ procedure use_p_proc begin
             move_to(dude_obj, 22295, 1);
             gfade_in(5);
          end
+      end else begin
+         script_overrides; //added by killap
       end
    end
 end

@@ -5,7 +5,9 @@
 #ifndef BHRNDDST_H
 #define BHRNDDST_H
 
-#define MVAR_Made_Car                           (0)
+#ifndef MVAR_Made_Car
+   #define MVAR_Made_Car                        (0)
+#endif
 #define MVAR_Hostile_Total                      (1)
 
 

@@ -84,7 +84,7 @@ procedure Node004;
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
    Needs to be saved, make it a map variable (MVAR_) */
-
+import variable dr_wong_tech_assistant; // added by killap - expansion
 
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
@@ -107,8 +107,20 @@ procedure map_enter_p_proc begin
    Only_Once:=0;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_SAN_FRAN_SHI);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_SF_SHI);
+   // added by killap - expansion
+   if (self_tile == 19733) then begin
+      dr_wong_tech_assistant := self_obj;
+   end
+   // end added
 end
 
+// added by killap - expansion
+procedure map_update_p_proc begin
+   if (self_tile == 19733) then begin
+      dr_wong_tech_assistant := self_obj;
+   end
+end
+// end added
 
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from
    Movement to attacking the player on sight can be placed in here.*/
@@ -169,8 +181,8 @@ procedure talk_p_proc begin
    end
    */
 
-   if (san_fran_flag(SF_SHI_ENEMY) or san_fran_flag(SF_WONG_YI_TZE_DEAD) or
-       san_fran_flag(SF_SHENG_MING_DEAD) or san_fran_flag(SF_JING_TIE_GAHNG_DEAD)) then begin
+   if (san_fran_flag(SF_SHI_ENEMY) /*or san_fran_flag(SF_WONG_YI_TZE_DEAD) or
+       san_fran_flag(SF_SHENG_MING_DEAD) or san_fran_flag(SF_JING_TIE_GAHNG_DEAD)*/) then begin
       call Node004;
    end else if (shihacked_flag(SHI_TRUE) or badger_flag(BADGER_DONESHI)) then begin
       call Node003;
@@ -188,7 +200,7 @@ procedure destroy_p_proc begin
 
 /* Increment the aligned critter counter*/
    inc_good_critter
-
+   dr_wong_tech_assistant := -1; // added by killap - expansion
 /* Set global_variable for Enemy status*/
 end
 

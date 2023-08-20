@@ -122,6 +122,14 @@ procedure Node032;
 procedure Node033;
 procedure Node034;
 
+//added by killap - expansion pack
+procedure Node035;
+procedure Node022a;
+procedure Node022b;
+procedure Node022c;
+procedure Node036;
+//end added
+
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
 // seen by the design Tool
@@ -225,7 +233,7 @@ end
 procedure talk_p_proc begin
    script_overrides;
    GetReaction;
-
+   
    if ((REP_ENEMY_KLAMATH) or (local_var(LVAR_Personal_Enemy) == 1)) then begin
        call Node998;
    end
@@ -235,13 +243,16 @@ procedure talk_p_proc begin
       gSay_Start;
 
       if dude_low_iq then call Node002;
+      else if (local_var(LVAR_Maida_Angry) == 1) then call Node001; //moved up by killap
       else if (global_var(GVAR_ARDIN_FREEDOM) == 1) then call Node034;
-      else if (local_var(LVAR_Torr_Search_Accept) == 1) then call Node030;
-      else if (local_var(LVAR_Torr_Left) == 1) then call Node024;
-      else if (local_var(LVAR_Maida_Angry) == 1) then call Node001;
+      else if (global_var(GVAR_QUEST_RESCUE_TORR) == TORR_RESCUE_SUCCESS) then call Node023; //moved up and altered by killap
+      else if ( (local_var(LVAR_Torr_Search_Accept) == 1) and (global_var(GVAR_QUEST_RESCUE_TORR) != 3) ) then call Node030; // edit by killap - added (global_var(GVAR_QUEST_RESCUE_TORR) != 3
+      else if ( (global_var(GVAR_TORR_MISSING) == 1) and (global_var(GVAR_QUEST_RESCUE_TORR) != 3) )  then call Node024; //killap's fix: changed from (local_var(LVAR_Torr_Left) == 1)
+//      else if (local_var(LVAR_Maida_Angry) == 1) then call Node001;
       else if (local_var(LVAR_Sulik_Freed) == 1) then call Node021;
-      else if (local_var(LVAR_Torr_Search_Success) == 1) then call Node023;
+//      else if (local_var(LVAR_Torr_Search_Success) == 1) then call Node023; moved up and altered by killap
       else call Node004;
+
 
       set_local_var(LVAR_Herebefore,1);
 
@@ -320,6 +331,7 @@ procedure Node911 begin
       UpReactTiny;
       item_caps_adjust(dude_obj,-5);
       call addbeer;
+      call Node004; //added by killap
       //end
    end
    else
@@ -432,6 +444,7 @@ end
 procedure Node991 begin
    UpReactModerate;
    set_local_var(LVAR_Torr_Search_Accept,1);
+   set_global_var(GVAR_QUEST_RESCUE_TORR, TORR_RESCUE_ACCEPT); //added by killap
    call Node029;
 end
 
@@ -522,11 +535,15 @@ procedure Node004 begin
       else Reply(233);
    end
    else begin
-      if (TOWN_REPUTATION < 5) then
+      if (TOWN_REPUTATION < 5 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then // edit by killap - added not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
          Reply(230);
       else
          Reply(231);
    end
+   //added by killap - expansion
+   if ( (global_var(GVAR_SCARE_DUNTONS) == 1) and (global_var(GVAR_KLAMATH_FIND_RUSTLERS) < FIND_RUSTLERS_SUCCESS) ) then
+      NOption(700,Node035,004);
+   //end added
    NOption(235,Node005,004);
    NOption(236,Node006,004);
    NOption(237,Node007,004);
@@ -611,7 +628,8 @@ procedure Node012 begin
    mark_den_on_map
    Reply(310);
    NOption(311,Node011,004);
-   NOption(312,Node975,004);
+   if (global_var(GVAR_SULIK_FREE) == 0) then //added check by killap
+      NOption(312,Node975,004);
    NOption(313,Node005,004);
 end
 
@@ -658,6 +676,7 @@ end
 procedure Node020 begin
 set_local_var(LVAR_Sulik_Freed,1);
 set_global_var(GVAR_SULIK_FREE,1);
+give_xp(EXP_KC_FREE_SULIK); //added aug 06
 KC_REP_ADJUST(10)
    if (from_23) then
       Reply(391);
@@ -675,13 +694,65 @@ procedure Node021 begin
 end
 
 procedure Node022 begin
-   if (local_var(LVAR_Torr_Left) == 1) then
+   // edits by killap - expansion
+   if (local_var(LVAR_Torr_Left) == 1) then begin
       Reply(421);
-   else
+      NOption(427,Node022a,004);
+      NOption(423,Node005,004);
+   end else begin
+      call Node022a;
+   end
+   
+   /*if (local_var(LVAR_Torr_Left) == 1) then
+      Reply(421);
+   else if ((global_var(GVAR_TORR_GUARD_STATUS) < TORR_GUARD_ACCEPT))
+      Reply(424);
+   else if ((global_var(GVAR_SMILEY_STATUS) < SMILEY_RETURNED))
       Reply(420);
-   NOption(422,Node005,004);
+   else 
+      Reply(425);
+      
+   if ((global_var(GVAR_TORR_GUARD_STATUS) < TORR_GUARD_ACCEPT)) then
+      NOption(426,Node005,004);
+   if ((global_var(GVAR_SMILEY_STATUS) < SMILEY_RETURNED)) then
+      NOption(422,Node005,004);
    if (local_var(LVAR_Torr_Left) == 1) then
       NOption(423,Node005,004);
+   
+   if (local_var(LVAR_Told_Player) < 3) then begin
+      NOption(427,Node005,004);
+      set_local_var(LVAR_Told_Player,local_var(LVAR_Told_Player) + 1);
+   end
+   NOption(428,Node005,004);*/
+      
+end
+
+procedure Node022a begin
+   if ( (global_var(GVAR_TORR_GUARD_STATUS) < TORR_GUARD_ACCEPT) or (global_var(GVAR_KLAMATH_FIND_RUSTLERS) < FIND_RUSTLERS_ACCEPT)) then begin
+      Reply(424);
+      NOption(710,Node036,004); //added by killap
+      NOption(712,Node022b,004);
+      NOption(426,Node005,004);
+      if (global_var(GVAR_KLAMATH_FIND_RUSTLERS) < FIND_RUSTLERS_ACCEPT) then
+         set_global_var(GVAR_KLAMATH_FIND_RUSTLERS,FIND_RUSTLERS_ACCEPT);
+   end else begin
+      call Node022b;
+   end
+end
+
+procedure Node022b begin
+   if ((global_var(GVAR_SMILEY_STATUS) < SMILEY_RETURNED)) then begin
+      Reply(420);
+      NOption(427,Node022c,004);
+      NOption(422,Node005,004);
+   end else begin
+      call Node022c;
+   end
+end
+
+procedure Node022c begin
+   Reply(425);
+   NOption(428,Node005,004);
 end
 
 procedure Node023 begin
@@ -692,8 +763,8 @@ procedure Node023 begin
       set_local_var(LVAR_23_before, 1);
       Reply(430);
    end
-   NOption(432,Node005,004);//reaction +20, goto4
-   NOption(433,Node006,004);//reaction +20, end
+   NOption(432,Node004,004);//reaction +20, goto4 //killap's fix: changed from 005
+   NOption(433,Node999,004);//reaction +20, end   //killap's fix: changed from 006
    if (global_var(GVAR_SULIK_FREE) == 0) then
       NOption(434,Node020,004);
 end
@@ -716,9 +787,9 @@ end
 
 procedure Node027 begin
    Reply(470);
-   NOption(471,Node992,004);//reaction +15,goto28
+   GOption(471,Node992,004);//reaction +15,goto28 //was NOption - killap
    NOption(472,Node994,004);//reaction +5,goto4
-   NOption(473,Node980,004);//reaction +10,goto4
+   BOption(473,Node970,004);//reaction +10,goto4   //killap's fix: changed from 980 and NOption
 end
 
 procedure Node028 begin
@@ -734,7 +805,12 @@ end
 
 procedure Node030 begin
    Reply(510);
-   NLowOption(600,Node004);
+   //NLowOption(600,Node004);
+   
+   //added by killap
+   NOption(511,Node005,004);
+   NOption(512,Node029,004);
+   //end added by killap
 end
 
 procedure Node031 begin
@@ -759,14 +835,28 @@ procedure Node033 begin
 end
 
 procedure Node034 begin
-set_global_var(GVAR_ARDIN_FREEDOM,2); //dont call this node again
-
-set_local_var(LVAR_Sulik_Freed,1);
-set_global_var(GVAR_SULIK_FREE,1);
-KC_REP_ADJUST(10)
+   set_global_var(GVAR_ARDIN_FREEDOM,2); //dont call this node again
+   set_local_var(LVAR_Sulik_Freed,1);
+   set_global_var(GVAR_SULIK_FREE,1);
+   KC_REP_ADJUST(10)
+   give_xp(EXP_KC_FREE_SULIK); //added aug 06
+   
    Reply(550);
    GOption(392,Node980,004);
    BOption(393,Node985,004);
    NOption(394,Node999,004);
 end
 //xxxxxxxxxxxxxxxxxxxx
+
+//added by killap - expansion
+procedure Node035 begin
+   Reply(701);
+   NOption(702,Node999,004);
+end
+
+procedure Node036 begin
+   Reply(711);
+   NOption(712,Node022b,004);
+   NOption(426,Node005,004);
+end
+//end added

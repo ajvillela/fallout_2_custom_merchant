@@ -21,5 +21,7 @@
 #define MVAR_Field_1a                          (4)
 #define MVAR_Security_Level_1                  (5)
 #define MVAR_Emitter_Control                   (6)
+#define MVAR_Pens_Destroyed                    (7)
+#define MVAR_Do_Lenny_Fight                    (8)
 
 #endif // NCRENT_H

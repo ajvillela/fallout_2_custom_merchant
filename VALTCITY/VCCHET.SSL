@@ -259,11 +259,13 @@ procedure Node001e begin
    if( DayPass_KickOutCount > 0 ) then begin
       DayPass_KickOutObj := obj_carrying_pid_obj(dude_obj, PID_DAY_PASS);
       KickOutTemp := rm_mult_objs_from_inven(dude_obj, DayPass_KickOutObj, DayPass_KickOutCount );
+      destroy_object(DayPass_KickOutObj); //added by killap
    end
    CitizenPapers_KickOutCount := obj_is_carrying_obj_pid(dude_obj, PID_FAKE_CITIZENSHIP);
    if( CitizenPapers_KickOutCount > 0 ) then begin
       CitizenPapers_KickOutObj := obj_carrying_pid_obj(dude_obj, PID_FAKE_CITIZENSHIP);
       KickOutTemp := rm_mult_objs_from_inven(dude_obj, CitizenPapers_KickOutObj, CitizenPapers_KickOutCount );
+      destroy_object(CitizenPapers_KickOutObj); //added by killap
    end
 end
 

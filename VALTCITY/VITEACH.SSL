@@ -121,6 +121,7 @@ procedure use_skill_on_p_proc begin
          gfade_out(600);
          game_time_advance( ONE_GAME_HOUR );
          gfade_in(600);
+         script_overrides; //added by killap
          display_msg( mstr(104) );
          give_xp(350);
       end
@@ -128,6 +129,7 @@ procedure use_skill_on_p_proc begin
          gfade_out(600);
          game_time_advance( ONE_GAME_HOUR );
          gfade_in(600);
+         script_overrides; //added by killap
          display_msg( mstr(105) );
       end
    end

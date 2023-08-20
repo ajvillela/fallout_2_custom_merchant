@@ -61,6 +61,9 @@ export variable new_reno_bishop_men_obj;
 export variable new_reno_porn_actress_obj;
 export variable new_reno_bitch_obj;
 export variable new_reno_keith_wright_obj;
+export variable comedian_obj; //added by killap - expansion pack
+export variable new_reno_jimmy_j_box; //added by killap
+
 
 #define newr2_lighting                    if (dude_elevation == 1) then          \
                                              Indoor_Lighting;                    \
@@ -75,15 +78,19 @@ procedure map_enter_p_proc begin
    Check_Create_Car(CAR_NEW_RENO2_HEX, CAR_NEW_RENO_ELEV)
 
    newr2_lighting;
+   
 end
 
 procedure map_update_p_proc begin
    newr2_lighting;
    if (all_party_hidden) then begin
       debug_msg("all_party_hidden: elevation == " + dude_elevation);
-      if (dude_elevation < 2) then begin
+      if (dude_elevation == 1) then begin
          party_member_unhide_all
          attempt_place_party(dude_tile, dude_elevation)
       end
    end
+   
+   if (dude_has_car) then
+    Create_Trunk(CAR_NEW_RENO2_HEX, CAR_NEW_RENO_ELEV) //added by killap - trunk could be lost after sleeping with the bishop woomen
 end

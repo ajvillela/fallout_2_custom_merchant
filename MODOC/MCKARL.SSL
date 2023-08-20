@@ -130,13 +130,13 @@ end
 
 procedure map_enter_p_proc begin
    if (is_loading_game == false) then begin
-      if (map_first_run) then begin
+      //if (map_first_run) then begin --comment out by killap
          if (karl_in_modoc) then begin
             critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_MODOC);
          end else begin
             critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_DEN_MOMS);
          end
-      end
+      //end
       debug_msg("karl: map_enter_p_proc");
       if (karl_dead) then begin
          debug_msg("   karl_dead");
@@ -165,11 +165,11 @@ end
 
 procedure critter_p_proc begin
    if (self_visible) then begin
-      if (self_tile == map_exit_tile) then begin
+      if (self_tile == 30302) then begin //edit by killap - was map_exit_tile
          destroy_object(self_obj);
       end else if (karl_nuts) then begin
          anim_run_to_point_rate(map_next_tile, 4)
-      end else if (karl_going_home) then begin
+      end else if ( (karl_going_home) and not(karl_in_modoc)) then begin //edit by killap - added not(karl_in_modoc)
          anim_move_to_point_rate(map_next_tile, 4)
       end else if ((passed_out) or (is_critter_prone(self_obj))) then begin
          if (game_time > say_message_time) then begin
@@ -234,7 +234,12 @@ end
 
 procedure talk_p_proc begin
    script_overrides;
-   if (passed_out) then begin
+   
+   //added by killap
+   if ((hostile)) then begin 
+      self_attack_dude;  
+   //end added
+   end else if (passed_out) then begin
       debug_msg("passed_out");
       if (herebefore) then begin
          display_msg(mstr(159));
@@ -534,6 +539,8 @@ procedure Node033 begin
 end
 procedure Node040 begin
    display_mstr(400);
+   set_ghost_pip(state_ghost_pip_complete);  //added by killap
+   set_ghost_farm_seeds_inactive; //added by killap
    set_karl_going_home;
    set_karl_seed_inactive;
    Reply(233);
@@ -543,7 +550,7 @@ procedure Node041 begin
    set_ghost_pip(state_ghost_pip_complete);
    set_karl_flag_state(karl_nuts_bit, true)
    set_karl_seed_declined;
-   inc_global_var(GVAR_TOWN_REP_MODOC,REP_TOWN_DRIVE_KARL_NUTS);
+   inc_global_var_amt(GVAR_TOWN_REP_MODOC,REP_TOWN_DRIVE_KARL_NUTS); // Seraph's Fix: changed 'inc_global_var' to 'inc_global_var_amt'. Thanks Rob!
    Reply(234);
    NOption(g_mstr(350),Node999,001);
 end
@@ -558,7 +565,7 @@ procedure Node043 begin
       NOption(239,Node044,001);
    end
    NOption(240,Node045,001);
-   NOption(241,Node014,010);
+   NOption(241,Node014,001); //edit by killap - was 010
    NOption(242,Node999,001);
 end
 procedure Node044 begin
@@ -568,6 +575,7 @@ procedure Node044 begin
 end
 procedure Node045 begin
 variable karl_money;
+   up_sex_status; //added by killap
    karl_money := self_caps;
    if (karl_money > 0) then begin
       if (karl_money >= 1000) then begin

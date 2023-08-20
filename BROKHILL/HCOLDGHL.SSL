@@ -99,10 +99,15 @@ procedure map_enter_p_proc begin
 end
 
 procedure timed_event_p_proc begin
-   if( fixed_param == 0 ) then begin
-      floater( random( 102, 135 ) );
+   if (not combat_is_initialized) then begin //added check by killap
+      if( fixed_param == 0 ) then begin
+         floater( random( 102, 135 ) );
+         add_timer_event( self_obj, game_ticks( random( 10, 20 ) ), 0 );
+      end
+   //added by killap
+   end else
       add_timer_event( self_obj, game_ticks( random( 10, 20 ) ), 0 );
-   end
+   //end added
 end
 
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from

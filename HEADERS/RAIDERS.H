@@ -15,7 +15,7 @@
                                                             end                                                   \
                                                          end else                                                 \
                                                             dec_global_var(GVAR_RAIDERS_COUNT)
-#define check_kill_raider                                if (raiders_dead) then kill_critter(self_obj, random(ANIM_fall_back_sf, ANIM_chunks_of_flesh_sf))
+#define check_kill_raider                                if (raiders_dead) then destroy_object(self_obj)
 
 #define check_set_raider_party_flags                     if (Marcus_In_Party) then if (obj_can_see_obj(self_obj, Marcus_Ptr)) then set_raiders_marcus;        \
                                                          if (Robobrain_In_Party) then if (obj_can_see_obj(self_obj, Robobrain_Ptr)) then set_raiders_robobrain;  \

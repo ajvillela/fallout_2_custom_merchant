@@ -197,14 +197,14 @@ end
 //~~~~~~~~~~~~~~~~ DESIGN TOOL STARTS HERE
 
 procedure Node001 begin
-   if not (global_var(GVAR_VAULT_CITIZEN)) then begin
+   if not ((global_var(GVAR_VAULT_CITIZEN) > 0) and (global_var(GVAR_VAULT_CITIZEN) < CITIZEN_KICKED_OUT)) then begin //edit by killap - was if (global_var(GVAR_VAULT_CITIZEN)
       float_msg(self_obj, mstr(105 + n1count), FLOAT_MSG_NORMAL);
       n1count += 1;
-      if (n1count > 5) then n1count := 0;
+      if (n1count > 6) then n1count := 0; //edit by killap - was > 5
    end else begin
-      float_msg(self_obj, mstr(111 + n1count), FLOAT_MSG_NORMAL);
+      float_msg(self_obj, mstr(112 + n1count), FLOAT_MSG_NORMAL); //edit by killap - was mstr(111 + n1count)
       n1count += 1;
-      if (n1count > 5) then n1count := 0;
+      if (n1count > 4) then n1count := 0; //edit by killap - was > 5
    end
 end
 

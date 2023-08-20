@@ -44,7 +44,7 @@ procedure spatial_p_proc begin
                set_stolen_car(stolen_car_stolen);
             end
             set_said_message;
-            dude_floater(100 + herebefore);
+            dude_floater((100 + herebefore) + (10*dude_is_stupid)); //edit by killap - (10*dude_is_stupid)
             set_herebefore;
          end else begin
             debug_msg("said_message");

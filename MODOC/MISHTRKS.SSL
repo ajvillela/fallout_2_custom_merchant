@@ -119,7 +119,8 @@ variable should_explode := false;
             gfade_out(5);
             remove_rocks(EXP_BLOW_UP_ROCKS);
          end else begin
-            //set_global_var(GVAR_MODOC_SHITTY_DEATH, 1);
+            set_global_var(GVAR_MODOC_SHITTY_DEATH, 1);
+            debug_msg("variable being set!");
             debug_msg("doing death_explostion");
             add_explosion(0);
             add_explosion(1);

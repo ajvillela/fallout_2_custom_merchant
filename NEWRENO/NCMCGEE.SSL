@@ -84,15 +84,15 @@ procedure Node024;
 /* Local variables which do not need to be saved between map changes. */
 
 
-#define mcgee_easy_on_dude                ((dude_charisma > 8) or (has_trait(TRAIT_TRAIT,self_obj,TRAIT_good_natured)))
+#define mcgee_easy_on_dude                ((dude_charisma > 8) or (has_trait(TRAIT_TRAIT,dude_obj,TRAIT_good_natured))) //killap's fix: changed from self_obj
 #define give_warning                      if (mcgee_easy_on_dude == false) then begin  \
                                              set_local_var(LVAR_Warning, true);        \
                                           end
 
-#define payoff_mcgee(x)                   if (x >= 473) then begin                                          \
-                                             inc_general_rep(REP_BONUS_NEW_RENO_MCGEE_JACKPOT_HALF);        \
+#define payoff_mcgee(x)                   if (x >= 500) then begin                                          \ 
+                                             inc_general_rep(REP_BONUS_NEW_RENO_MCGEE_JACKPOT_FULL);    /*swapped -killap*/    \
                                           end else begin                                                    \
-                                             inc_general_rep(REP_BONUS_NEW_RENO_MCGEE_JACKPOT_FULL);        \
+                                             inc_general_rep(REP_BONUS_NEW_RENO_MCGEE_JACKPOT_HALF);   /*swapped -killap*/     \
                                           end                                                               \
                                           item_caps_adjust(self_obj, x);                                    \
                                           item_caps_adjust(dude_obj, -x);                                   \
@@ -102,6 +102,8 @@ procedure Node024;
                                           end else begin                                                                \
                                              Reply(x);                                                                  \
                                           end
+#define option_w_rifle_check(x,y)         BOption(x+(obj_is_carrying_obj_pid(self_obj, PID_HUNTING_RIFLE)), Node998, y); 
+
 
 import variable mcGeeSlotMachineOBJ;
 import variable mcGeeOBJ;
@@ -183,6 +185,15 @@ procedure map_update_p_proc begin
 end
 procedure critter_p_proc begin
    if (self_can_see_dude) then begin
+   //begin killap's code
+      if ((mcgee_jackpot) and (not(mcgee_jackpot_settled)) and (not(hostile))) then begin
+         start_gdialog(NAME,self_obj,4,-1,-1);
+         gSay_Start;
+            call Node007;
+         gSay_End;
+         end_dialogue;
+      end
+   //end killap cdoe
       if ((hostile) or ((mcgee_jackpot) and (local_var(LVAR_Warning)) and (dude_leaving_mcgee_casino))) then begin
          self_attack_dude;
       end
@@ -325,18 +336,18 @@ procedure Node009 begin
 end
 procedure Node010 begin
    reply_w_rifle_check(315 + dude_is_female)
-   NOption(318, Node998, 001);
+   option_w_rifle_check(318+(dude_is_stupid*2), 001)
 end
 procedure Node011 begin
    reply_w_rifle_check(325 + dude_is_female)
-   NOption(318, Node998, 001);
+   option_w_rifle_check(318+(dude_is_stupid*2), 001)
 end
 procedure Node012 begin
    Reply(335);
    if (dude_caps >= 250) then begin
       NOption(336, Node987, 004);
    end
-   if (dude_caps >= 473) then begin
+   if (dude_caps >= 500) then begin
       NOption(337, Node015, 004);
    end
    NOption(338, Node022, 004);
@@ -349,16 +360,16 @@ procedure Node013 begin
 end
 procedure Node014 begin
    reply_w_rifle_check(355 + dude_is_female)
-   NOption(318, Node998, 001);
+   option_w_rifle_check(318+(dude_is_stupid*2), 001)
 end
 procedure Node015 begin
-   payoff_mcgee(473)
+   payoff_mcgee(500)
    Reply(mstr(345 + (mcgee_unknown)) + mstr(367) + mstr(368 + dude_is_female));
    NOption(370, Node024, 001);
 end
 procedure Node016 begin
    reply_w_rifle_check(375 + dude_is_female)
-   NOption(318, Node998, 001);
+   option_w_rifle_check(318+(dude_is_stupid*2), 001)
 end
 procedure Node017 begin
    Reply(mstr(385) + mstr(387 + (2*(herebefore)) + dude_is_female));
@@ -389,15 +400,15 @@ procedure Node020 begin
 end
 procedure Node021 begin
    reply_w_rifle_check(435)
-   NOption(318, Node998, 001);
+   option_w_rifle_check(318+(dude_is_stupid*2), 001)
 end
 procedure Node022 begin
    reply_w_rifle_check(445 + dude_is_female)
-   NOption(318, Node998, 001);
+   option_w_rifle_check(318+(dude_is_stupid*2), 001)
 end
 procedure Node023 begin
    reply_w_rifle_check(455)
-   NOption(318, Node998, 001);
+   option_w_rifle_check(318+(dude_is_stupid*2), 001)
 end
 procedure Node024 begin
    Reply(mstr(465) + mstr(466 + dude_is_female));

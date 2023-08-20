@@ -197,11 +197,11 @@ procedure talk_p_proc begin
       end
    end else if ((game_time_hour <= 800) and (tile_in_tubbys(self_tile))) then begin
       call Node002;
-   end else if (fred(state_fred_paid)) then begin
+   end else if (global_var(GVAR_DEN_FRED_PAID) == 1) then begin	//killap's fix
       call Node003;
-   end else if (fred(state_fred_covered)) then begin
+   end else if (global_var(GVAR_DEN_FRED_COVERED) == 1) then begin	//killap's fix
       call Node004;
-   end else if (fred(state_fred_loan)) then begin
+   end else if (global_var(GVAR_DEN_FRED_LOAN) == 1) then begin	//killap's fix
       call Node005;
    end else if ((becky_job(state_becky_job_collect)) and (becky_work)) then begin
       if (fred_remembers) then begin
@@ -241,7 +241,7 @@ end
 procedure Node999 begin
 end
 procedure Node990 begin
-   if (fred(state_fred_covered)) then begin
+   if (global_var(GVAR_DEN_FRED_COVERED) == 1) then begin //killap's fix
       call Node012;
    end else begin
       call Node013;
@@ -303,8 +303,8 @@ procedure Node007 begin
    Reply(310);
    set_node_7;
    GOption(312, Node008, 004);
-   NOption(313, Node009, 004);
-   NOption(314, Node009, -003);
+   BOption(313, Node009, 004); //was NOption - killap
+   BOption(314, Node009, -003); //was NOption - killap
    NOption(315, Node009, -003);
 end
 procedure Node007b begin
@@ -324,17 +324,17 @@ end
 procedure Node010 begin
    Reply(340);
    GOption(341, Node990, 004);
-   if (fred(state_fred_covered)) then begin
+   if (global_var(GVAR_DEN_FRED_COVERED) == 1) then begin //killap's fix
       BOption(342, Node011, 004);
-   end else if (fred(state_fred_loan)) then begin
+   end else if (global_var(GVAR_DEN_FRED_LOAN) == 1) then begin //killap's fix
       BOption(343, Node011, 004);
    end
 end
 procedure Node011 begin
    item_caps_adjust(dude_obj, 500);
    Reply(350);
-   GOption(351, Node990, 004);
-   BOption(352, Node990, 004);
+   GOption(351, Node999, 004); //was 990 - killap
+   BOption(352, Node999, 004); //was 990 - killap
 end
 procedure Node012 begin
    Reply(360);
@@ -409,7 +409,7 @@ procedure Node023 begin
    NOption(473, Node026, 004);
 end
 procedure Node024 begin
-   set_fred(state_fred_paid);
+   set_global_var(GVAR_DEN_FRED_PAID,1);	//killap's fix
    Reply(480);
    GOption(481, Node026, 004);
    BOption(482, Node986, 004);
@@ -423,7 +423,7 @@ procedure Node025 begin
    NOption(493, Node999, 004);
 end
 procedure Node026 begin
-   set_fred(state_fred_covered);
+   set_global_var(GVAR_DEN_FRED_COVERED,1);	//killap's fix
    set_fred_money(100);
    item_caps_adjust(dude_obj, 100);
    Reply(500 + dude_is_female);
@@ -453,13 +453,14 @@ procedure Node030 begin
 end
 procedure Node031 begin
    item_caps_adjust(dude_obj, -50);
-   set_fred(state_fred_loan);
+   set_global_var(GVAR_DEN_FRED_LOAN,1);	//killap's fix
+   set_global_var(GVAR_DEN_FRED_COVERED,0);   //killap's fix
    set_fred_money(150);
    Reply(550);
    NOption(551, Node999, 004);
 end
 procedure Node032 begin
-   set_fred(state_fred_loan);
+//   set_global_var(GVAR_DEN_FRED_LOAN,1);	//killap's fix
    Reply(560);
    GOption(561, Node031, 004);
    BOption(562, Node999, 004);

@@ -65,7 +65,8 @@ end
    default from the prototype, and needs to be set in scripts. */
 procedure map_enter_p_proc begin
    Only_Once:=0;
-   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_RND_RAIDERS);
+   //critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_RND_RAIDERS);
+   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_RND_GANGS); //added by killap
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_BERSERKER);
 end
 
@@ -90,7 +91,7 @@ procedure critter_p_proc begin
    this as well. */
 
    if (obj_can_see_obj(self_obj,dude_obj)) then begin
-       floater(random(200,211));
+       floater(random(200,209)); //edit by killap - ended with 211, but this included Raider specific dialogue
        attack(dude_obj);
    end
 

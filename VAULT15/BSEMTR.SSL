@@ -136,11 +136,13 @@ procedure use_skill_on_p_proc begin
 
    if (Skill_Used == SKILL_SCIENCE) then begin
       if (skill_success(dude_obj, Skill_Used, 0)) then begin
+         script_overrides; //added by killap
          slvar(LVAR_Known, 1);
          display_msg(mstr(103));
       end
    end else if (Skill_Used == SKILL_REPAIR) then begin
       if (skill_success(dude_obj, Skill_Used, 0)) then begin
+         script_overrides; //added by killap
          if (i_field_obj != -1) then
             add_timer_event(i_field_obj, 0, FIELD_TIMER_DELAY);
       end

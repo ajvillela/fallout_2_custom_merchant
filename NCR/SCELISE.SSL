@@ -88,7 +88,37 @@ procedure Node028;
 procedure Node029;
 procedure Node030;
 procedure Node031;
+//added by killap - expansion
+procedure Node032;
+procedure Node033;
+procedure Node034;
+procedure Node035;
+procedure Node036;
+procedure Node037;
+procedure Node038;
+procedure Node039;
+procedure Node040;
+procedure Node041;
+procedure Node042;
+procedure Node043;
+procedure Node044;
+procedure Node045;
+procedure Node046;
+procedure Node047;
+procedure Node048;
+procedure Node049;
+procedure Node050;
 
+procedure Node990;
+procedure Node990a;
+procedure Node991;
+procedure Node992;
+procedure Node993;
+procedure Node994;
+procedure Node995;
+procedure Node996;
+procedure Node997;
+//end added
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
 // seen by the design Tool
@@ -101,6 +131,7 @@ procedure Node031;
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Starttile                  (7)
 #define LVAR_State                      (8)
+#define LVAR_Prepare_For_Attack         (9) //added by killap - expansion
 
 #define STATE_GOND_MSG  bit_1
 
@@ -151,8 +182,9 @@ procedure critter_p_proc begin
    the player should the game be saved and loaded repeatedly. Additionally, if any special
    actions need to be taken by the critter based on previous combat, the critter will remember
    this as well. */
-
-   if ((local_var(LVAR_Hostile) != 0) and (obj_can_see_obj(self_obj,dude_obj))) then begin
+   
+   // edit by killap - added (global_var(GVAR_NCR_VORTIS_QUEST_STATE) == VORTIS_QUEST2_DONE)
+   if ( ((global_var(GVAR_NCR_VORTIS_QUEST_STATE) == VORTIS_QUEST2_DONE) or (local_var(LVAR_Hostile) != 0)) and (obj_can_see_obj(self_obj,dude_obj)) ) then begin
        set_local_var(LVAR_Hostile,1);
        self_attack_dude;
    end
@@ -215,6 +247,8 @@ procedure talk_p_proc begin
    CheckKarma;
 
    GetReaction;
+   
+   ReactToLevel; //added by killap
 
    if (has_rep_slaver) then begin
       start_gdialog(NAME,self_obj,4,-1,-1);
@@ -222,8 +256,41 @@ procedure talk_p_proc begin
          call Node029;
       gSay_End;
       end_dialogue;
+   //added by killap - expansion
+   end else if (global_var(GVAR_WIPED_OUT_SLAVER_CAMP) == 1) then begin
+      set_local_var(LVAR_Prepare_For_Attack,0);
+      if (local_var(LVAR_Herebefore) == 0) then begin
+         start_gdialog(NAME,self_obj,4,-1,-1);
+         gSay_Start;
+            call Node044;
+         gSay_End;
+         end_dialogue;
+      end else begin
+         start_gdialog(NAME,self_obj,4,-1,-1);
+         gSay_Start;
+            call Node040;
+         gSay_End;
+         end_dialogue;
+      end
+   end else if (local_var(LVAR_Prepare_For_Attack) == 1) then begin
+      start_gdialog(NAME,self_obj,4,-1,-1);
+      gSay_Start;
+         call Node038;
+      gSay_End;
+      end_dialogue;
+   end else if (global_var(GVAR_NCR_ATTACK_SLAVER_CAMP) == 1) then begin
+      floater(235);
+   //end added
    end else if (dude_is_ranger) then begin
-      call Node024;
+      if ( (town_known(AREA_SLAVER_CAMP) != MARK_STATE_UNKNOWN) and (global_var(GVAR_WIPED_OUT_SLAVER_CAMP) == 0) ) then begin
+         start_gdialog(NAME,self_obj,4,-1,-1);
+         gSay_Start;
+            call Node050;
+         gSay_End;
+         end_dialogue;      
+      end else begin
+         call Node024;
+      end
    end else if (get_elise_seed == ELISE_REJECTED) then begin
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
@@ -498,8 +565,17 @@ procedure Node023 begin
    give_xp(EXP_BECAME_RANGER);
    set_global_var(GVAR_NCR_FREE_SLAVES_QST, 2);
 
-   Reply(163);
-   ENDOPTION;
+   Reply(200); //edit by killap - expansion
+   //Reply(163);
+   
+   //added by killap - expansion
+   if ( (town_known(AREA_SLAVER_CAMP) != MARK_STATE_UNKNOWN) and (global_var(GVAR_WIPED_OUT_SLAVER_CAMP) == 0) ) then begin
+      NOption(201, Node032, 4);
+      NOption(240, Node999, 4);
+   end else begin
+   //end added
+      ENDOPTION;
+   end
 end
 
 procedure Node024 begin
@@ -543,17 +619,209 @@ end
 procedure Node029 begin
    Reply(175);
    NOption(176, Node999, 4);
-   NOption(177, Node998, 4);
+   BOption(177, Node998, 4); //edit by killap: was NOption
 end
 
 procedure Node030 begin
    Reply(179);
-   NOption(161, Node022, 4);
+   if (ncr_global_state(NCR_SLAVES_FREE)) then
+      NOption(161, Node022, 4);
+   else
+      NOption(161, Node014, 4);
    NOption(180, Node999, 4);
 end
 
 procedure Node031 begin
    float_msg(self_obj, mstr(181), FLOAT_MSG_RED);
 end
+
+//added by killap - expansion pack
+procedure Node032 begin
+   Reply(202);
+   NOption(203, Node033, 4);
+end
+
+procedure Node033 begin
+   Reply(204);
+   if (global_var(GVAR_WIPED_OUT_SLAVER_CAMP) == 1) then
+      NOption(205, Node034, 4);
+   else if (town_known(AREA_SLAVER_CAMP) == MARK_STATE_VISITED) then
+      NOption(206, Node035, 4);
+   else
+      NOption(207, Node035, 4);
+end
+
+procedure Node034 begin
+   Reply(208);
+   GOption(209, Node991, 4);
+   BOption(210, Node037, 4);
+end
+
+procedure Node035 begin
+   Reply(211);
+   NOption(213, Node036, 4);
+   NOption(212, Node997, 4);
+end
+
+procedure Node036 begin
+   Reply(214);
+   
+   if (has_skill(dude_obj,SKILL_CONVERSANT) >= 80) then
+      NOption(219, Node992, 4);
+   //NOption(215, Node033, 4);
+   NOption(216, Node990, 4);
+   //NOption(217, Node033, 4);
+   NOption(218, Node997, 4);
+end
+
+procedure Node037 begin
+   display_msg(mstr(236));
+   item_caps_adjust( dude_obj, 1000 );
+   set_global_var(GVAR_NCR_ATTACK_SLAVER_CAMP,2);
+   set_global_var(GVAR_WIPED_OUT_SLAVER_CAMP,2);
+   Reply(227);
+   NOption(228, Node994, 4);
+end
+
+procedure Node038 begin
+   Reply(229);
+   NOption(230, Node999, 4);
+   NOption(231, Node039, 4);
+end
+
+procedure Node039 begin
+   Reply(232);
+   NOption(233, Node990a, 4);
+end
+
+procedure Node040 begin
+   Reply(234);
+   GOption(209, Node991, 4);
+   BOption(210, Node037, 4);
+end
+
+procedure Node041 begin
+   Reply(224);
+   NOption(225, Node993, 4);
+   NOption(226, Node039, 4);
+   NOption(217, Node039, 4);
+end
+
+procedure Node042 begin
+   Reply(220);
+   NOption(221, Node990, 4);
+   NOption(223, Node997, 4);
+end
+
+procedure Node990 begin
+   set_global_var(GVAR_NCR_ATTACK_SLAVER_CAMP,1);
+   set_local_var(LVAR_Prepare_For_Attack,0);
+end
+
+procedure Node990a begin
+   set_global_var(GVAR_NCR_ATTACK_SLAVER_CAMP,1);
+   set_local_var(LVAR_Prepare_For_Attack,0);
+   load_map(MAP_SLAVER_CAMP, 5);
+end
+
+procedure Node991 begin
+   display_msg(mstr(236));
+   give_xp(800);
+   set_global_var(GVAR_NCR_ATTACK_SLAVER_CAMP,2);
+   set_global_var(GVAR_WIPED_OUT_SLAVER_CAMP,2);
+   call Node994;
+end
+
+procedure Node992 begin
+   if( is_success( roll_vs_skill( dude_obj, SKILL_CONVERSANT, -10 ) ) ) then
+      call Node041;
+   else 
+      call Node042;
+end
+
+procedure Node993 begin
+   set_local_var(LVAR_Prepare_For_Attack,1);
+end
+
+procedure Node994 begin
+      //if (ncr_global_state(NCR_SLAVES_FREE)) then
+   if (global_var(GVAR_NCR_FREE_SLAVES_QST) == 2) then
+      call Node999;
+   else 
+      call Node043;
+end
+
+procedure Node043 begin
+   Reply(250);
+   NOption(251, Node015, 4);
+   NOption(252, Node995, 4);
+end
+
+procedure Node044 begin
+   Reply(260);
+   NOption(261, Node045, 4);
+   NOption(262, Node046, 4);
+   NOption(263, Node047, 4);
+   NOption(264, Node999, 4);
+end
+
+procedure Node045 begin
+   Reply(270);
+   NOption(273, Node048, 4);
+   NOption(274, Node996, 4);
+end
+
+procedure Node046 begin
+   Reply(271);
+   NOption(273, Node048, 4);
+   NOption(274, Node996, 4);
+end
+
+procedure Node047 begin
+   Reply(272);
+   NOption(273, Node048, 4);
+   NOption(274, Node996, 4);
+end
+
+procedure Node048 begin
+   display_msg(mstr(236));
+   item_caps_adjust( dude_obj, 1000 );
+   set_global_var(GVAR_NCR_ATTACK_SLAVER_CAMP,2);
+   set_global_var(GVAR_WIPED_OUT_SLAVER_CAMP,2);
+   
+   Reply(280);
+   NOption(281, Node999, 4);
+   NOption(282, Node049, 4);
+end
+
+procedure Node049 begin
+   Reply(290);
+   NOption(291, Node015, 4);
+   NOption(292, Node999, 4);
+end
+
+procedure Node050 begin
+   Reply(300);
+   NOption(201, Node032, 4);
+   NOption(180, Node999, 4);
+end
+
+procedure Node995 begin
+   set_elise_seed(ELISE_OFFERED);
+end
+
+procedure Node996 begin
+   display_msg(mstr(236));
+   give_xp(800);
+   set_global_var(GVAR_NCR_ATTACK_SLAVER_CAMP,2);
+   set_global_var(GVAR_WIPED_OUT_SLAVER_CAMP,2);
+   call Node049;
+end
+
+procedure Node997 begin
+   set_global_var(GVAR_WIPED_OUT_SLAVER_CAMP,3);
+end
+
+//end added
 
 //xxxxxxxxxxxxxxxxxxxx

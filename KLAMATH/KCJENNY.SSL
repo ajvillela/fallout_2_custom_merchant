@@ -27,12 +27,14 @@
 */
 #include "..\headers\define.h"
 #include "..\headers\kladwtn.h"
+#include "..\headers\den.h" //added by killap
 
 #define NAME                    SCRIPT_KCJENNY
 #define TOWN_REP_VAR            (GVAR_TOWN_REP_KLAMATH)
 
 #include "..\headers\command.h"
 #include "..\headers\ModReact.h"
+
 
 #define Vault_Known             (1)     // Temp Until get command from Jesse
 #define Visited_City            (1)     // Temp Until get command from Jesse
@@ -100,6 +102,7 @@ procedure Node021;
 
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
+variable from_node13; //added by killap
 
 procedure start begin
 end
@@ -176,6 +179,7 @@ end
 procedure talk_p_proc begin
    GetReaction;
 
+   from_node13 := false; //added by killap
 
    if ((REP_ENEMY_KLAMATH) or (local_var(LVAR_Personal_Enemy) == 1)) then begin
        call Node998;
@@ -352,7 +356,8 @@ end
 procedure Node010 begin
    Reply(290);
    NOption(291,Node011,004);
-   NOption(292,Node012,004);
+   if not(vic_free) then //added by killap
+      NOption(292,Node012,004);
    NOption(293,Node014,006);
    NOption(301,Node007,004);
    NOption(295,Node021,004);
@@ -372,6 +377,7 @@ procedure Node012 begin
 end
 
 procedure Node013 begin
+   from_node13 := true;
    Reply(320);
    NOption(321,Node015,004);
    NOption(322,Node014,004);
@@ -381,14 +387,22 @@ procedure Node013 begin
 end
 
 procedure Node014 begin
-mark_den_on_map
+   mark_den_on_map
    Reply(330);
+   //added by killap
+   if (from_node13) then begin
+     NOption(321,Node015,004); 
+     NOption(323,Node020,007);
+   end
    NOption(331,Node010,004);
    NOption(332,Node007,004);
+   from_node13 := false;
 end
 
 procedure Node015 begin
    Reply(340);
+   NOption(322,Node014,004); //added by killap
+   NOption(323,Node020,007); //added by killap
    NOption(341,Node010,004);
    NOption(342,Node007,004);
 end
@@ -398,7 +412,8 @@ procedure Node016 begin
    NOption(351,Node007,004);
    NOption(352,Node018,004);
    NOption(353,Node010,004);
-   NOption(354,Node012,007);
+   if not(vic_free) then //added by killap
+      NOption(354,Node012,007);
 end
 
 procedure Node017 begin
@@ -406,7 +421,8 @@ procedure Node017 begin
    NOption(361,Node007,004);
    NOption(362,Node018,004);
    NOption(363,Node010,004);
-   NOption(364,Node012,007);
+   if not(vic_free) then //added by killap
+      NOption(364,Node012,007);
 end
 
 procedure Node018 begin
@@ -418,11 +434,14 @@ procedure Node019 begin
    NOption(381,Node007,004);
    NOption(382,Node018,004);
    NOption(383,Node010,004);
-   NOption(384,Node012,007);
+   if not(vic_free) then //added by killap
+      NOption(384,Node012,007);
 end
 
 procedure Node020 begin
    Reply(390);
+   NOption(321,Node015,004); //added by killap - expansion
+   NOption(322,Node014,004); //added by killap - expansion
    NOption(391,Node010,004);
    NOption(392,Node007,004);
 end

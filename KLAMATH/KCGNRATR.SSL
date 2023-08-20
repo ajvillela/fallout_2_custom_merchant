@@ -89,6 +89,41 @@ end
 procedure pickup_p_proc begin
 end
 */
+
+//added by killap - expansion
+procedure map_enter_p_proc begin
+   if (global_var(GVAR_KLAMATH_GENERATOR) == 1) then begin
+      reg_anim_begin();
+      reg_anim_animate_forever(self_obj, ANIM_stand);
+      reg_anim_end();
+      
+      add_timer_event(self_obj, 1, 1);
+   end
+end
+
+procedure map_update_p_proc begin
+   if (global_var(GVAR_KLAMATH_GENERATOR) == 1) then begin
+      if (combat_is_initialized == 0) then
+      begin
+         reg_anim_begin();
+         reg_anim_animate_forever(self_obj, ANIM_stand);
+         reg_anim_end();
+      end
+   end
+end
+
+procedure timed_event_p_proc begin
+  if (fixed_param == 1) then begin
+      if ( (anim_busy(self_obj) == false) and (combat_is_initialized == 0) ) then begin
+         reg_anim_begin();
+         reg_anim_animate_forever(self_obj, ANIM_stand);
+         reg_anim_end();
+      end
+      add_timer_event(self_obj, 1, 1);
+  end
+end
+//end added by killap
+
 procedure use_p_proc begin
    //make a strength roll 3 times
    if (global_var(GVAR_KLAMATH_GENERATOR) == 0) then begin
@@ -103,7 +138,7 @@ procedure use_obj_on_p_proc begin
    script_overrides;
 
    Tool:=obj_pid(obj_being_used_with);
-   if (Tool == PID_MULTI_TOOL) then begin
+   if ( (Tool == PID_MULTI_TOOL) or (Tool == PID_SUPER_TOOL_KIT) ) then begin //added super_tool_kit - killap
    //make a repair roll
       call repair_it;
    end
@@ -145,6 +180,7 @@ procedure repair_it begin
    if (is_success(repair_check)) then begin
       set_global_var(GVAR_KLAMATH_GENERATOR, 1); //generator is repaired!
       display_msg(mstr(400));
+      add_timer_event(self_obj, 1, 1); //added by killap - expansion
       //give_xp(EXP_REPAIR_REACTOR);
    end
    else begin

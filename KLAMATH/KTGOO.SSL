@@ -65,7 +65,7 @@ end
 procedure pain begin
    if (critter_inven_obj(source_obj,INVEN_TYPE_WORN) != 0) then
       worn := obj_pid(critter_inven_obj(source_obj,INVEN_TYPE_WORN));
-   if ( worn != PID_POWERED_ARMOR) then begin
+   if ( (worn != PID_POWERED_ARMOR) and (worn != PID_HARDENED_POWER_ARMOR) and (worn != PID_ADVANCED_POWER_ARMOR) and (worn != PID_ADVANCED_POWER_ARMOR_MK2) and  (worn != PID_ENVIRONMENTAL_ARMOUR) ) then begin //edit by killap - added  (worn != PID_ENVIRONMENTAL_ARMOUR)
         //if not wearing powered armor then do damage
         //debug_msg("It hurts!");
         if ( (source_obj == dude_obj) and (global_var(GVAR_MUTATE_STAGE) < 1) ) then begin

@@ -46,6 +46,7 @@ procedure use_skill_on_p_proc;
 procedure damage_p_proc;
 procedure map_enter_p_proc;
 procedure push_p_proc;
+procedure poziv;
 
 /* Script Specific Procedure Calls */
 procedure Attempted_Theft;
@@ -186,6 +187,11 @@ end
          end
 
 procedure map_enter_p_proc begin
+   //added by killap - expansion pack
+   if (global_var(GVAR_DEN_ORPHANAGE) == 7) then begin
+      destroy_object(self_obj);
+   end
+   //end added
    if (is_loading_game == false) then begin
       if (map_first_run) then begin
          set_local_var(LVAR_Home_Tile, self_tile);
@@ -234,7 +240,8 @@ procedure critter_p_proc begin
          if (self_distance_from_dude <= STEAL_DISTANCE) then begin
             if (Trying_To_Steal == 0) then begin
                Trying_To_Steal:=1;
-               call Attempted_Theft;
+               call poziv;
+ //              call Attempted_Theft;
             end
          end
       end
@@ -278,7 +285,8 @@ procedure talk_p_proc begin
 end
 
 procedure destroy_p_proc begin
-   inc_childkiller
+   //inc_childkiller
+   inc_good_critter //edit by killap
    item_caps_adjust(self_obj, local_var(LVAR_Caps));
 end
 
@@ -325,8 +333,16 @@ procedure Attempted_Theft begin
          debug_msg("Orphan Stole "+item+" NCR Brahma Bucks.");
       end
    end
-   anim(self_obj, ANIM_magic_hands_middle, rotation_to_tile(self_tile,dude_tile));
-   animate_stand;
+   
+   //new code by killap - 2 lines below are commented out by killap as well
+   reg_anim_clear(self_obj);
+   reg_anim_begin();
+      reg_anim_animate(self_obj, ANIM_magic_hands_middle, rotation_to_tile(self_tile,dude_tile));
+   reg_anim_end();
+   //end added
+   
+   //anim(self_obj, ANIM_magic_hands_middle, rotation_to_tile(self_tile,dude_tile));
+   //animate_stand;
    set_local_var(LVAR_Time_Last_Steal,game_time + steal_again_time);
    Trying_To_Steal:=0;
 end
@@ -342,4 +358,10 @@ end
 /* Anytime that there is a need for an ending to dialog, this node is to be called. It will just
    exit from the dialog system without any reprisals from the NPC. */
 procedure Node999 begin
+end
+
+procedure poziv
+begin
+  if ((local_var(8) == 1) and (((global_var(445) bwand 4) != 0) == 0) or ((local_var(8) == 3) and (((global_var(445) bwand 8) != 0) == 0)) or ((local_var(8) == 2) and (((global_var(445) bwand 4) != 0) == 0)) or ((local_var(8) == 4) and (((global_var(445) bwand 2) != 0) == 0))) then
+    call Attempted_Theft;
 end

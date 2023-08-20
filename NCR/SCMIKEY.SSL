@@ -62,6 +62,7 @@ procedure Node002;
 procedure Node003;
 procedure Node004;
 procedure Node005;
+procedure Node006; // added by killap
 
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
@@ -75,6 +76,7 @@ procedure Node005;
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Node004_Count              (7)
 #define LVAR_Restock_Time               (8)
+#define LVAR_Weapon_Check               (9) // added by killap
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -86,6 +88,8 @@ import variable scmikey_player_molest_stand;
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
 variable Bought_this_map := 0;
+variable number; // added by killap
+variable number1; // added by killap
 
 procedure start begin
 end
@@ -97,11 +101,12 @@ procedure map_enter_p_proc begin
    Only_Once:=0;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NCR_ENTRANCE);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_STORE_OWNER);
-   if (local_var(LVAR_Restock_Time) < game_time) then begin
-      check_restock_item(PID_BOTTLE_CAPS, 50, 100, 100)
-      check_restock_item(PID_MEAT_ON_A_STICK, 25, 30, 100)
-      set_local_var(LVAR_Restock_Time, (random(6,12) * ONE_GAME_DAY) + game_time);
-   end
+   // comment out by killap
+   //if (local_var(LVAR_Restock_Time) < game_time) then begin
+   //   check_restock_item(PID_BOTTLE_CAPS, 50, 100, 100)
+   //   check_restock_item(PID_MEAT_ON_A_STICK, 25, 30, 100)
+   //   set_local_var(LVAR_Restock_Time, (random(6,12) * ONE_GAME_DAY) + game_time);
+   //end
 end
 
 
@@ -146,6 +151,17 @@ procedure pickup_p_proc begin
        set_local_var(LVAR_Hostile,2);
    end
 end
+
+// added by killap
+procedure combat_p_proc begin
+   variable item;
+   if ( (local_var(LVAR_Weapon_Check) == 0) and (obj_is_carrying_obj_pid(self_obj,PID_SPIKED_KNUCKLES) == 0) ) then begin
+      item := create_object(PID_SPIKED_KNUCKLES,0,0);
+      add_obj_to_inven(self_obj, item);
+      set_local_var(LVAR_Weapon_Check,1);
+   end
+end
+//end added
 
 /* The dialog system is setup and prepares the player to talk to this NPC. Where To Go
    written by designers are placed in here. Additionally, Reactions are generated and
@@ -226,17 +242,12 @@ end
 //~~~~~~~~~~~~~~~~ DESIGN TOOL STARTS HERE
 
 procedure Node0203a begin
-   variable number := 0;
-   variable number1 := 0;
-
+   // edited by killap
    number := obj_is_carrying_obj_pid(self_obj, PID_IGUANA_ON_A_STICK);
+   number1 := obj_is_carrying_obj_pid(self_obj, PID_MEAT_ON_A_STICK);
    gdialog_barter;
-   number1 := obj_is_carrying_obj_pid(self_obj, PID_IGUANA_ON_A_STICK);
-
-   if (number == number1) then
-      call Node003;
-   else
-      call Node002;
+   Reply("");
+   NOption(g_mstr(352), Node006, 4);
 end
 
 procedure Node001 begin
@@ -283,4 +294,20 @@ procedure Node005 begin
    NOption(120, Node001, 4);
    NOption(121, Node999, 4);
 end
+
+// added by killap
+procedure Node006 begin
+   variable num_iquana := 0;
+   variable num_meat := 0;
+
+   num_iquana := obj_is_carrying_obj_pid(self_obj, PID_IGUANA_ON_A_STICK);
+   num_meat := obj_is_carrying_obj_pid(self_obj, PID_MEAT_ON_A_STICK);
+   
+   if ((number == num_iquana) and (number1 == num_meat)) then
+      call Node003;
+   else
+      call Node002;
+end
+// end added
+
 //xxxxxxxxxxxxxxxxxxxx

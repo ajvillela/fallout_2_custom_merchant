@@ -25,6 +25,8 @@
 
 #include "..\headers\command.h"
 #include "..\headers\ncr.h"
+#include "..\headers\ncr1.h"  //added by killap
+#include "..\headers\ncr3.h"  //added by killap
 
 /* Standard Script Procedures */
 procedure start;
@@ -123,7 +125,8 @@ procedure use_skill_on_p_proc begin
    script_overrides;
    if (skill_success(source_obj, SKILL_SCIENCE, 30) or skill_success(source_obj, SKILL_REPAIR, 0)) then begin
       if (i_westin_emitter_obj != -1) then begin
-         EMITTER_SET_FIELD_DELAY(i_westin_emitter_obj);
+         //EMITTER_SET_FIELD_DELAY(i_westin_emitter_obj);
+         set_map_var(MVAR_Emitter_Wes_Control, EMITTER_CONTROL_DELAY); //edit by killap
       end
 
       if (i_westin_guard_obj != -1) then begin

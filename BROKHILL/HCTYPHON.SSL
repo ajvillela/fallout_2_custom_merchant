@@ -657,7 +657,7 @@ procedure Node027 begin
    Reply(215);
 
    NLowOption(216, Node999);
-   NOption(217, Node998, 004);
+   BOption(217, Node998, 004); //edit by killap: was NOption
    NOption(218, Node027a, 004);
    NOption(219, Node999, 004);
    NOption(220, Node027b, 004);

@@ -783,6 +783,7 @@ procedure Node031 begin
    paperCount := obj_is_carrying_obj_pid( dude_obj, PID_FAKE_CITIZENSHIP );
    papers := obj_carrying_pid_obj( dude_obj, PID_FAKE_CITIZENSHIP );
    dummy := rm_mult_objs_from_inven( dude_obj, papers, paperCount );
+   destroy_object(papers); // added by killap
    NMessage(221);
    exile_skeeve := 1;
    call Node031a;
@@ -791,6 +792,9 @@ end
 procedure Node031a begin
    Reply(341);
 
+   set_global_var(GVAR_VAULT_CITIZEN,0); //added by killap
+   set_global_var(GVAR_VAULT_CITIZENSHIP,0); //added by killap
+    
    if( ( local_var(LVAR_Gave_Day_Pass) == 0 ) and
        ( global_var(GVAR_VAULT_CITIZEN) != CITIZEN_CAPTAIN_GUARD ) and
        ( global_var(GVAR_VAULT_CITIZEN) != CITIZEN_REAL_CITIZEN ) ) then
@@ -814,6 +818,7 @@ procedure Node032 begin
    paperCount := obj_is_carrying_obj_pid( dude_obj, PID_FAKE_CITIZENSHIP );
    papers := obj_carrying_pid_obj( dude_obj, PID_FAKE_CITIZENSHIP );
    dummy := rm_mult_objs_from_inven( dude_obj, papers, paperCount );
+   destroy_object(papers); //added by killap
    NMessage(225);
    exile_skeeve := 1;
    call Node032a;
@@ -911,12 +916,17 @@ procedure Node036 begin
        ( local_var(LVAR_Wallace_Redding) == 1 ) ) then
       GOption(253, Node041, 004);
    if( ( global_var(GVAR_VAULT_RAIDERS) == RAIDERS_FOUND ) and
-       ( not(raiders_dead) ) and
+       ( ( not(raiders_dead) and not(raiders_scout_left) ) ) and //edit by killap - expansion
        ( local_var(LVAR_Wallace_Raiders) == 1 ) ) then
       GOption(254, Node050, 004);
-   if( ( raiders_dead ) and
+   if( ( raiders_dead )  and
        ( local_var(LVAR_Wallace_Raiders) == 1 ) ) then
       GOption(255, Node050, 004);
+   //added by killap - expansion
+   if( ( raiders_scout_left )  and
+       ( local_var(LVAR_Wallace_Raiders) == 1 ) ) then
+      GOption(1255, Node050, 004);
+   //end added
    if( ( global_var(GVAR_VAULT_CITIZEN) != CITIZEN_CAPTAIN_GUARD ) and
          ( global_var(GVAR_VAULT_CITIZEN) != CITIZEN_REAL_CITIZEN ) ) then
       NOption(256, Node043, 004);
@@ -1061,16 +1071,20 @@ procedure Node047 begin
    Reply(313);
 
    if( ( global_var(GVAR_VAULT_RAIDERS) == RAIDERS_FOUND ) and
-       ( not(raiders_dead) ) and
+       ( (not(raiders_dead) and not(raiders_scout_left)) ) and //edit by killap - expansion
        ( local_var(LVAR_Wallace_Raiders) == 1 ) ) then
       GOption(254, Node050, 004);
    if( raiders_dead ) then
       NOption(314, Node050, 004);
-   if( not(raiders_dead) ) then
+   //added by killap - expansion
+   if( raiders_scout_left ) then
+      NOption(1314, Node050, 004);
+   //end added
+   if( (not(raiders_dead) and not(raiders_scout_left)) ) then //edit by killap - expansion
       NOption(315, Node048, 004);
    NOption(316, Node045, 004);
    NOption(317, Node051, 004);
-   if( not(raiders_dead) ) then
+   if( (not(raiders_dead) and not(raiders_scout_left)) ) then //edit by killap - expansion
       NOption(318, Node999, 004);
 end
 

@@ -74,7 +74,7 @@ procedure timed_event_p_proc begin
       next_param += 1;
    end else if (next_param <= 202) then begin
       gfade_in(ONE_GAME_SECOND);
-      dude_floater(next_param);
+      dude_floater(next_param + (500*dude_is_stupid)); //edit by killap -added (500*dude_is_stupid)
       next_param += 1;
    end else if (combat_is_initialized == false) then begin
       if (next_param > 206) then begin

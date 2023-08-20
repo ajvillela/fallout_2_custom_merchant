@@ -20,6 +20,7 @@
 #define TOWN_REP_VAR         GVAR_TOWN_REP_NEW_RENO
 #include "..\headers\command.h"
 #include "..\headers\NewReno.h"
+#include "..\headers\NewR2.h"
 
 /* Standard Script Procedures */
 procedure start;
@@ -105,6 +106,7 @@ procedure Node106;
 #define angela_in_bed                     ((self_tile == angela_bed_tile) and (self_elevation == angela_self_room_elev))
 
 variable prev_node;
+
 import variable angela_guard_obj;
 import variable angela_bishop_safe_obj;
 
@@ -169,6 +171,19 @@ procedure map_exit_p_proc begin
 end
 
 procedure combat_p_proc begin
+   //added by killap - prevent angela from getting stuck in bed during combat
+   if (angela_in_bed) then begin
+      if (hostile) then begin
+         reg_anim_clear( self_obj );
+         //reg_anim_begin();
+            anim(self_obj, ANIM_stand, 2);
+         //reg_anim_end();
+         critter_attempt_placement(self_obj, 13691, angela_self_room_elev);
+      end else begin
+         script_overrides;
+      end
+   end
+   //end added
 end
 
 procedure critter_p_proc begin
@@ -249,6 +264,10 @@ procedure description_p_proc begin
       display_mstr(690);
    end else if (angela_in_bed) then begin
       display_mstr(680);
+   //added by killap
+   end else if (bishop_dead) then begin
+      display_mstr(150 + 2*(examined and herebefore));
+   //end added
    end else if (dude_is_male) then begin
       display_mstr(150 + (examined and herebefore));
    end else begin
@@ -738,5 +757,5 @@ procedure Node106 begin
    Reply(830);
    BOption(831, Node998, -003);
    BOption(832, Node998, -003);
-   NOption(833, Node998, 004);
+   BOption(833, Node998, 004); //edit by killap - was NOption
 end

@@ -145,6 +145,9 @@
 #define HEAD_HAKUNIN        (10)    // Hakunin -- Found in Arroyo
 #define HEAD_BOSS           (11)
 #define HEAD_DYING_HAKUNIN  (12)
+#define HEAD_CASSIDY        (13)	//Continuum version
+#define HEAD_DYING_HAKUNIN_NIGHT  (14)
+
 /*
 #define HEAD_OVERSEER    (1)  //ovrsr  -- vault
 */
@@ -169,6 +172,12 @@
 #define BACKGROUND_PRESIDENT (18)       // pres.frm
 #define BACKGROUND_TENT      (19)       // tent.frm
 #define BACKGROUND_ADOBE     (20)       // Adobe.frm
+#define BACKGROUND_WASTELAND_NIGHT (21)       //wasteln2.frm
+#define BACKGROUND_MAINTENANCE      (22)       //epa1.frm
+#define BACKGROUND_VAULT2	        (23)       //epa2.frm
+#define BACKGROUND_SAN_FRAN_SUB	    (24)       //shisub.frm
+
+
 // Mood defines //
 #define GOOD_REACTION    (49)
 #define NEUTRAL_REACTION (50)
@@ -659,19 +668,20 @@
 #define signal_end_game   metarule(METARULE_SIGNAL_END_GAME, 0)
 #define METARULE_ELEVATOR         15
 #define elevator(X)       metarule(METARULE_ELEVATOR, X)
-#define ELEV_BOS1    (0)  // Brotherhood of Steel main elevator
-#define ELEV_BOS2    (1)  // Brotherhood of Steel surface elevator
-#define ELEV_MASTR1  (2)  // Master's upper-level elevator
-#define ELEV_MASTR2  (3)  // Master's lower-level elevator
-#define ELEV_MILB1   (4)  // Military Base upper-level elevator
-#define ELEV_MILB2   (5)  // Military Base lower-level elevator
-#define ELEV_GLOW1   (6)  // Glow Elevator upper
-#define ELEV_GLOW2   (7)  // Glow elevator lower
-#define ELEV_VAULT   (8)  // Vault13 elevator
-#define ELEV_NECVLT  (9)  // Necropolis elevator
+#define ELEV_BOS1    (0)  // Brotherhood of Steel main elevator; EL_BOS 1-2-3-4
+#define ELEV_BOS2    (1)  // Brotherhood of Steel surface elevator; EL_BOS2 G-1
+#define ELEV_MASTR1  (2)  // Master's upper-level elevator; EL_MAST1 1-2-3
+#define ELEV_MASTR2  (3)  // Master's lower-level elevator; EL_MAST2 3-4
+#define ELEV_MILB1   (4)  // Military Base upper-level elevator; EL_MIL1 1-2-3
+#define ELEV_MILB2   (5)  // Military Base lower-level elevator; EL_MIL2 3-4
+#define ELEV_GLOW1   (6)  // Glow Elevator upper; EL_MIL1 1-2-3
+#define ELEV_GLOW2   (7)  // Glow elevator lower; ELMIL3 3-4-6
+#define ELEV_VAULT   (8)  // Vault13 elevator; EL_VAULT 1-2-3
+#define ELEV_NECVLT  (9)  // Necropolis elevator; EL_VAULT 1-2-3
 #define ELEV_SIERRA1 (10) // Sierra Elev 1 (1-2-3)
 #define ELEV_SIERRA2 (11) // Sierra Elev 2 (3-4)
 #define ELEV_SIERRAS (12) // Sierra Service Elev (1-2-3-4)
+
 #define METARULE_PARTY_COUNT      16
 #define party_member_count(X)    metarule(METARULE_PARTY_COUNT, X)
 #define DONT_LIST_HIDDEN_MEMBERS (0)
@@ -773,6 +783,14 @@
 #define METARULE3_TILE_SET_CENTER           (108)
 #define tile_set_center(tileNum)             metarule3(METARULE3_TILE_SET_CENTER,tileNum,0,0)
 
+#define METARULE3_CHEM_USE_LEVEL            (109)
+#define chem_use_level(WHO)                  metarule3(METARULE3_CHEM_USE_LEVEL,WHO,0,0)
+
+#define METARULE3_CAR_OUT_OF_FUEL           (110)
+#define car_out_of_fuel                      metarule3(METARULE3_CAR_OUT_OF_FUEL,0,0,0)
+
+#define METARULE3_MAP_GET_LOAD_AREA         (111)
+#define map_get_load_area                    metarule3(METARULE3_MAP_GET_LOAD_AREA,0,0,0)
 
 // Used with mark_area_known
 #define MARK_TYPE_TOWN  (0)
@@ -975,5 +993,24 @@ end
 
 //Misc commands
 #define obj_get_rot(obj)  (has_trait(TRAIT_OBJECT, obj, OBJECT_CUR_ROT))
+
+//added by killap - appearance mod
+#define MASH_CRITTER_LIST_SIZE 		151
+
+//races  - added by killap
+#define WHITE_RACE					0
+#define BLACK_RACE					1
+
+//styles - added by killap
+#define REG_HAIR                    0
+#define LONG_HAIR                   1
+#define BALD_HAIR                   2
+//end added
+
+
+//added by killap -misc
+//NPC critter fid offset
+//add this to the fids (artfid) when using obj_art_fid
+#define NPC_ARTFID_WEAPON_OFFSET	4096
 
 #endif // DEFINE_H

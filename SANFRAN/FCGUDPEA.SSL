@@ -104,6 +104,7 @@ procedure timed_event_p_proc begin
    variable tile;
    variable hello;
 
+ if (combat_is_initialized == false) then begin //added check by killap
    if (fixed_param == TIMER_MOVE) then begin
       if (i_dragon_obj != -1 and i_dragon_obj != 0) then begin
          if (not obj_can_see_obj(self_obj, i_dragon_obj)) then begin
@@ -131,6 +132,7 @@ procedure timed_event_p_proc begin
       end
       add_timer_event(self_obj, ONE_GAME_SECOND * Random(1, 7), TIMER_FLOAT);
    end
+ end //end by killap
 end
 
 /* This procedure will get called each time that the map is first entered. It will
@@ -212,14 +214,16 @@ procedure talk_p_proc begin
 
    if (san_fran_flag(SF_SHI_ENEMY)) then begin
       call Node008;
+   //moved up two by killap
+   end else if (san_fran_flag(SF_OZ9_DEAD)) then begin
+      call Node007;
+   //end      
    end else if (san_fran_flag(SF_DRAGON_DEAD)) then begin
       call Node004;
    end else if (san_fran_flag(SF_LOPAN_DEAD)) then begin
       call Node003;
    end else if (check_general_rep < KARMA_DEFENDER) then begin
       call Node002;
-   end else if (san_fran_flag(SF_OZ9_DEAD)) then begin
-      call Node007;
    end else if (san_fran_flag(SF_LEE_DEAD)) then begin
       call Node005;
    end else begin

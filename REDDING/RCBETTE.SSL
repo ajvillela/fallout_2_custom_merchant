@@ -79,6 +79,7 @@ procedure Node013;
 procedure Node014;
 procedure Node015;
 procedure Node016;
+procedure Node017; // Seraph's Code
 
 procedure Node008a;
 procedure Node008b;
@@ -122,6 +123,11 @@ end
 /* This procedure will get called each time that the map is first entered. It will
    set up the Team number and AI packet for this critter. This will override the
    default from the prototype, and needs to be set in scripts. */
+procedure map_update_p_proc begin
+   Bette_Ptr:=self_obj;
+end
+
+
 procedure map_enter_p_proc begin
    Bette_Ptr:=self_obj;
 
@@ -234,7 +240,7 @@ procedure talk_p_proc begin
 
    GetReaction;
 
-   if (In_Bar(self_obj)) then begin
+   if (In_Bar(self_obj) and global_var(GVAR_BAR_BRAWL) != BRAWL_TALKED_BETTE and global_var(GVAR_BAR_BRAWL) != BRAWL_TALKED_BOTH) then begin //edit by killap
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node005;
@@ -244,6 +250,10 @@ procedure talk_p_proc begin
 
    else if (global_var(GVAR_BAR_BRAWL) == BRAWL_BOTH_JAILED) then
        call Node003;
+// Begin Seraph's Code
+   else if ((global_var(GVAR_BAR_BRAWL) == BRAWL_TALKED_BETTE) or (global_var(GVAR_BAR_BRAWL) == BRAWL_TALKED_BOTH)) then
+       call Node017;
+// End Seraph's Code
    else
        call Node004;
 end
@@ -412,8 +422,28 @@ procedure Node008b begin
 end
 
 procedure Node009 begin
+// Begin Seraph's Code
+   if (global_var(GVAR_BAR_BRAWL) == BRAWL_TALKED_CAMINT) then begin
+      gfade_out(600);
+   
+      set_global_var(GVAR_BAR_BRAWL,BRAWL_TALKED_BOTH);
+      display_msg(g_mstr(1020)); //added by killap
+      give_xp(EXP_STOP_BAR_BRAWL);
+      inc_global_var_amt(GVAR_TOWN_REP_REDDING, 10); //added by killap
+      
+      move_to(self_obj,5000,0);
+      move_to(Caminetto_Ptr,5000,0);
+      set_obj_visibility(Caminetto_Ptr,1);
+      set_obj_visibility(self_obj,1);
+      
+      gfade_in(600);
+      
+   end
+   else if (global_var(GVAR_BAR_BRAWL) != BRAWL_TALKED_BOTH) then
+      set_global_var(GVAR_BAR_BRAWL,BRAWL_TALKED_BETTE);
+// End Seraph's Code
    Reply(157);
-   set_global_var(GVAR_BAR_BRAWL,BRAWL_NEITHER_JAILED);
+//   set_global_var(GVAR_BAR_BRAWL,BRAWL_NEITHER_JAILED); //killap's fix - would make it seem you just ran out the door
    GOption(158,Node999,004);
 end
 
@@ -445,9 +475,10 @@ procedure Node011a begin
    move_to(Bette_Ptr,Tile1,0);
    move_to(Caminetto_Ptr,Tile2,0);
    move_to(dude_obj,Tile3,0);
-
+   
+   display_msg(g_mstr(1020)); //added by killap
    give_xp(EXP_STOP_BAR_BRAWL);
-
+   
    set_global_var(GVAR_BAR_BRAWL,BRAWL_BOTH_JAILED);
 end
 
@@ -473,9 +504,11 @@ procedure Node013a begin
    move_to(Caminetto_Ptr,5000,0);
    set_obj_visibility(Caminetto_Ptr,1);
    move_to(dude_obj,Tile3,0);
-
+   
+   display_msg(g_mstr(1020)); //added by killap
    give_xp(EXP_STOP_BAR_BRAWL);
-
+   
+   inc_global_var_amt(GVAR_TOWN_REP_REDDING, 2); //added by killap
    set_global_var(GVAR_BAR_BRAWL,BRAWL_MORNINGSTAR_JAILED);
 end
 
@@ -514,5 +547,11 @@ procedure Node016 begin
    NOption(179,Node011a,004);
    BOption(180,Node998,004);
 end
+
+// Begin Seraph's Code
+procedure Node017 begin
+   floater(181);
+end
+// End Seraph's Code
 
 //xxxxxxxxxxxxxxxxxxxx

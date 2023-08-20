@@ -237,6 +237,7 @@ procedure checkdone begin
          if (obj_is_carrying_obj_pid(self_obj, PID_HY_MAG_PART)) then begin
             item:=obj_carrying_pid_obj(self_obj, PID_HY_MAG_PART);
             rm_obj_from_inven(self_obj,item);
+            destroy_object(item); //added by killap
             //need to give exp and KARMA here -NBK
             if (global_var(GVAR_VAULT_GECKO_PLANT) < PLANT_REPAIRED) then begin
                if (global_var(GVAR_PLANT_SCHEDULED_FOR_CHANGE) == SCHEDULED_FOR_REPAIRS) then
@@ -317,9 +318,9 @@ procedure analyze_prog begin
       good_prog := 0;
    if (map_var(MVAR_MoveVar3) != 1) then
       good_prog := 0;
-   if (map_var(MVAR_MoveVar4) != 5) then
+   if (map_var(MVAR_MoveVar4) != 3) then  //killap's fix: was !=5
       good_prog := 0;
-   if (map_var(MVAR_MoveVar5) != 3) then
+   if (map_var(MVAR_MoveVar5) != 5) then  //killap's fix: was !=3
       good_prog := 0;
    if (good_prog == 1) then begin //proper command sequence was given and robot should eventually do something
       if (map_var(MVAR_MoveVar6) == 6) then begin //repairing

@@ -35,6 +35,11 @@
 #define HOUSE       1
 #define SHOP        2
 
+//added by killap
+#define HOME_TILE           (22285)
+#define SHOP_TILE           (24885) //edit by killap - moved for RP map
+#define BRAHMIN_TILE        (19912)
+//end added
 
 #include "..\headers\command.h"
 #include "..\headers\ModReact.h"
@@ -113,6 +118,9 @@ procedure Node025;
 #define LVAR_18_before                  (8)
 #define LVAR_20_before                  (9)
 
+#define LVAR_Destination                (10)
+#define LVAR_In_Transit                 (11)
+
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
    Needs to be saved, make it a map variable (MVAR_) */
@@ -137,6 +145,20 @@ procedure map_enter_p_proc begin
    Only_Once:=0;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_GECKO);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_CITIZEN);
+   
+   //added by killap
+   if (not (is_loading_game)) then begin 
+      if (night) then
+         move_to(self_obj, HOME_TILE, self_elevation);
+      else begin
+         if (random(1,2) == 1) then
+            move_to(self_obj, SHOP_TILE, self_elevation);
+         else
+            move_to(self_obj, BRAHMIN_TILE, self_elevation);
+      end
+   end
+   //end added
+      
 end
 
 
@@ -149,7 +171,45 @@ procedure critter_p_proc begin
    actions need to be taken by the critter based on previous combat, the critter will remember
    this as well. */
 
-   if ( (global_var(GVAR_GECKO_MELTDOWN) == 1) and (obj_can_see_obj(self_obj,dude_obj))) then begin
+   //move lumpy to his house if it becomes night
+   //if it becomes morning and Lumpy is in his house, move him to either the brahmin pasture or Skeeter's workshop
+   //added by killap
+   if (night) then begin
+      if (self_tile != HOME_TILE) then begin
+         if (anim_busy(self_obj) == false) then begin
+            animate_move_to_tile(HOME_TILE);
+         end
+      end else begin
+         if (obj_get_rot(self_obj) != 2) then begin
+            reg_anim_clear( self_obj );
+            animate_rotation(2);
+         end
+      end
+   end else begin
+      if (self_tile == HOME_TILE) then begin
+         if (self_tile == SHOP_TILE or self_tile == BRAHMIN_TILE) then begin
+            //do nothing
+            if (obj_get_rot(self_obj) != 2) then begin
+               reg_anim_clear( self_obj );
+               animate_rotation(2);
+            end
+         end else begin
+            if ( (anim_busy(self_obj) == false) and (self_tile != local_var(LVAR_Destination)) and (local_var(LVAR_In_Transit) == 1) ) then begin
+               animate_move_to_tile(local_var(LVAR_Destination));
+            end else begin
+               if (random(1,2) == 1) then
+                  set_local_var(LVAR_Destination,SHOP_TILE);
+               else
+                  set_local_var(LVAR_Destination,SHOP_TILE);
+               set_local_var(LVAR_In_Transit,1);
+               animate_move_to_tile(local_var(LVAR_Destination));
+            end
+         end
+      end
+   end
+   //end added
+   
+   if ( ((global_var(GVAR_GECKO_MELTDOWN) == 1) or (global_var(GVAR_ENEMY_GECKO))) and (obj_can_see_obj(self_obj,dude_obj))) then begin //edit by killap - added (global_var(GVAR_ENEMY_GECKO))
       set_local_var(LVAR_Hostile,1);
       attack(dude_obj);
    end
@@ -191,7 +251,7 @@ visit_04_before:=0; //according to Matts doc these need to be
 visit_14_before:=0; //reset aat the beginning of each conversation
 
    GetReaction;
-
+   
    call checkarea;
    // CHANGE -nbk (Aldo doesn't care if your an enemy of the either side in Klamath)
    //             -he just wants a drink
@@ -211,7 +271,8 @@ visit_14_before:=0; //reset aat the beginning of each conversation
        end_dialogue;
    end
 
-   else if (area == WORKSHOP) then begin
+   //else if (area == WORKSHOP) then begin
+   else if (area == SHOP) then begin //edit by killap
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node005;
@@ -243,7 +304,11 @@ end
 
 procedure description_p_proc begin
    script_overrides;
-   display_msg(mstr(101));
+   if (local_var(LVAR_Herebefore)) then
+      display_msg(mstr(101));
+   else
+      display_msg(mstr(102));
+   
 end
 
 procedure use_skill_on_p_proc begin
@@ -252,8 +317,14 @@ end
 procedure checkarea begin
    here:=tile_num(self_obj);
    area:=UNKNOWN;
-   if (tile_distance(here,17926) < 5) then area:=HOUSE;//these distances should be small
-   else if (tile_distance(here,18100) < 4) then area:=SHOP;//so the duntons wont block doorways
+   
+   //modifed by killap
+   if (tile_distance(here,HOME_TILE) < 5) then area:=HOUSE;//these distances should be small
+   else if (tile_distance(here,SHOP_TILE) < 12) then area:=SHOP;//so the duntons wont block doorways
+   //end modified
+   
+   //if (tile_distance(here,17926) < 5) then area:=HOUSE;//these distances should be small
+   //else if (tile_distance(here,18100) < 4) then area:=SHOP;//so the duntons wont block doorways
 end
 
 
@@ -303,24 +374,35 @@ end
 //~~~~~~~~~~~~~~~~ DESIGN TOOL STARTS HERE
 
 procedure Node001 begin
-   k := random(1,5);
+   /*k := random(1,5);
    if (k == 1) then floater(110);
    else if (k == 2) then floater(111);
    else if (k == 3) then floater(112);
    else if (k == 4) then floater(113);
-   else if (k == 5) then floater(114);
+   else if (k == 5) then floater(114);*/
+   
+   float_msg(self_obj, message_str(NAME,random(110,114)),FLOAT_MSG_NORMAL); //edit by killap
+   
 end
 
 procedure Node01a begin
-   k := random(1,5);
+   /*k := random(1,5);
    if (k == 1) then NMessage(110);
    else if (k == 2) then NMessage(111);
    else if (k == 3) then NMessage(112);
    else if (k == 4) then NMessage(113);
-   else if (k == 5) then NMessage(114);
+   else if (k == 5) then NMessage(114);*/
+   
+   NMessage(random(110,114)); //edit by killap
+   
 end
 
 procedure Node002 begin
+   //added by killap
+   if (local_var(LVAR_Herebefore) == 0) then
+      set_local_var(LVAR_Herebefore,1);
+   //end added
+
    Reply(120);
    NOption(121,Node003,004);
    NOption(122,Node007,004);
@@ -328,6 +410,11 @@ procedure Node002 begin
 end
 
 procedure Node003 begin
+   //added by killap
+   if (local_var(LVAR_Herebefore) == 0) then
+      set_local_var(LVAR_Herebefore,1);
+   //end added
+
    Reply(130);
    NOption(131,Node008,004);
    NOption(132,Node999,004);
@@ -359,7 +446,7 @@ end
 procedure Node006 begin
    Reply(160);
    NLowOption(161,Node01a);
-   NOption(162,Node017,004);
+   //NOption(162,Node017,004); // edit by killap - we do not know who skeeter is yet
    NOption(163,Node014,004);
    NOption(164,Node999,004);
 end
@@ -424,7 +511,7 @@ else begin
 end
    NOption(243,Node016,004);
    NOption(244,Node007,004);
-   NOption(245,Node009,004);
+   //NOption(245,Node009,004);  // edit by killap - we do not know who skeeter is yet
    NOption(246,Node018,004);
 end
 
@@ -443,7 +530,7 @@ end
 
 procedure Node017 begin
 //need a 1st time
-   ss:=global_var(GVAR_GECKO_SKEETER_STATUS);
+   /*ss:=global_var(GVAR_GECKO_SKEETER_STATUS);
    if (ss == 0) then begin //skeeter in workshop CHANGE THESE TO DEFINES
       Reply(270);
    end
@@ -452,7 +539,17 @@ procedure Node017 begin
    end
    else if (ss == 2) then begin //skeeter dead
       Reply(273);
-   end
+   end*/
+
+   // changed by killap
+   if (global_var(GVAR_GECKO_SKEETER_STATUS) == 1) then
+      Reply(273);
+   else if (area == SHOP) then
+      Reply(270);
+   else
+      Reply(271);
+   // end
+   NOption(172,Node014,004); // added by killap
    NOption(272,Node999,004);
 end
 

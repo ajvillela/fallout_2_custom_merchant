@@ -53,6 +53,19 @@ procedure damage_p_proc;
 procedure map_enter_p_proc;
 procedure timed_event_p_proc;
 
+//added by killap - expansion pack
+procedure map_exit_p_proc;
+procedure Node001;
+procedure Node002;
+procedure Node003;
+procedure Node004;
+procedure Node005;
+procedure Node006;
+procedure Node007;
+procedure Node008;
+procedure Node009;
+//end added
+
 /* Script Specific Procedure Calls */
 procedure Node998;                                      // This Node is Always Combat
 procedure Node999;                                      // This Node is Always Ending
@@ -73,6 +86,7 @@ procedure Node999;                                      // This Node is Always E
 #define LVAR_Hostile                    (5)
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Caught_Thief               (7)
+#define LVAR_Name                       (8) // added by killap - expansion
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -95,12 +109,41 @@ procedure map_enter_p_proc begin
 
    if( not( is_loading_game ) ) then begin
       add_timer_event( self_obj, game_ticks( random( 20, 30 ) ), 0 );
+      
+      
+      //added by killap - expansion pack
+      if ( (get_critter_stat(self_obj,STAT_gender)) == GENDER_MALE) then begin //i am male
+            set_global_var(GVAR_BH_MALE_NAMES_USED, global_var(GVAR_BH_MALE_NAMES_USED) + 1);
+            set_local_var(LVAR_Name, (300 + global_var(GVAR_BH_MALE_NAMES_USED))); //now i know my name
+      end
+      else begin
+            set_global_var(GVAR_BH_FEMALE_NAMES_USED, global_var(GVAR_BH_FEMALE_NAMES_USED) + 1);
+            set_local_var(LVAR_Name, (400 + global_var(GVAR_BH_FEMALE_NAMES_USED))); //now i know my name
+      end
+      
+      //dumb hack...not sure why this error is occuring.
+      if (local_var(LVAR_Name) == 30) then 
+         set_local_var(LVAR_Name, 300); //now i know my name
+      else if (local_var(LVAR_Name) == 40) then
+         set_local_var(LVAR_Name, 400); //now i know my name
+      //end dumb hack  
+         
+      //end added
    end
+   
 end
+
+//added by killap - expansion pack
+procedure map_exit_p_proc begin
+   set_global_var(GVAR_BH_MALE_NAMES_USED, 0);
+   set_global_var(GVAR_BH_FEMALE_NAMES_USED, 0);
+end
+//end added
 
 procedure timed_event_p_proc begin
    if( fixed_param == 0 ) then begin
-      floater( random( 103, 119 ) );
+      if (not combat_is_initialized) then //added by killap
+         floater( random( 103, 119 ) );
       add_timer_event( self_obj, game_ticks( random( 20, 30 ) ), 0 );
    end
 end
@@ -155,8 +198,17 @@ procedure talk_p_proc begin
 
    GetReaction;
 
-   floater( random( 103, 119 ) );
+   //if ( (global_var(GVAR_BH_CHAD) >= CHAD_SUSPICIOUS) and (global_var(GVAR_BH_CHAD) < CHAD_ARRESTED) ) then begin
+       start_gdialog(NAME,self_obj,4,-1,-1);
+       gSay_Start;
+           call Node001;
+       gSay_End;
+       end_dialogue;
+   //end
+      //floater( random( 103, 119 ) );
+      
    set_local_var( LVAR_Herebefore, 1 );
+   debug_msg("NameNum: " + local_var(LVAR_Name));
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -187,7 +239,10 @@ end
    if the critter is known to the player. */
 procedure description_p_proc begin
    script_overrides;
-   display_mstr(102);
+   if( local_var( LVAR_Herebefore ) == 0 ) then
+      display_mstr(102);
+   else
+      display_msg(mstr(450) + mstr(local_var(LVAR_Name)) + mstr(451));
 end
 
 /* Any time a skill is used on a critter this call is made. This can be to give examinations
@@ -207,6 +262,68 @@ end
 procedure Node999 begin
 end
 
+//added by killap - expansion pack
+procedure Node001 begin
+   Reply(200);
+
+   NOption(201,Node002,004);
+   if ( (global_var(GVAR_BH_CHAD) >= CHAD_SUSPICIOUS) and (global_var(GVAR_BH_CHAD) < CHAD_ARRESTED) ) then
+      NOption(202,Node003,004);
+   NOption(203,Node009,004);
+   NOption(204,Node999,004);
+   
+end
+
+procedure Node002 begin
+   Reply(205+(1845*(self_tile == 20523)));
+   NOption(206,Node001,004);
+   NOption(207,Node999,004);
+end
+
+procedure Node003 begin
+   Reply(208);
+   NOption(209,Node004,004);
+   NOption(210,Node005,004);
+   NOption(211,Node006,004);
+   NOption(212,Node007,004);
+   NOption(213,Node999,004);
+end
+
+procedure Node004 begin
+   Reply(216);
+   NOption(220,Node003,004);
+   NOption(221,Node008,004);
+end
+
+procedure Node005 begin
+   Reply(217);
+   NOption(220,Node003,004);
+   NOption(221,Node008,004);
+end
+
+procedure Node006 begin
+   Reply(218);
+   NOption(220,Node003,004);
+   NOption(221,Node008,004);
+end
+
+procedure Node007 begin
+   Reply(219);
+   NOption(220,Node003,004);
+   NOption(221,Node008,004);
+end
+
+procedure Node008 begin
+   Reply(222);
+   NOption(223,Node999,004);
+end
+
+procedure Node009 begin
+   Reply(mstr(214) + mstr(local_var(LVAR_Name)) + mstr(215));
+   NOption(220,Node001,004);
+   NOption(221,Node008,004);
+end
+//end added
 
 // Not lines are allowed to be added below here
 // The Following lines are from the Design Tool

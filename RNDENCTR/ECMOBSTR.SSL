@@ -157,9 +157,9 @@ procedure destroy_p_proc begin
 /* Increment the aligned critter counter*/
    inc_good_critter
 
-   if (cur_map_index == MAP_BH_RND_DESERT) then begin
+/*   if (cur_map_index == MAP_BH_RND_DESERT) then begin - comment out by killap - they never initiate combat + they increase the killed good people counter
        dec_map_var(MVAR_Hostile_Total);
-   end
+   end*/
 /* Set global_variable for Enemy status*/
 end
 
@@ -206,13 +206,13 @@ procedure Node001 begin
    line:=random(0,3);
 
    if (line == 0) then
-       floater(mstr(104)+made_man_name+mstr(105));
+       float_msg(self_obj,mstr(104)+made_man_name+mstr(105),FLOAT_COLOR_NORMAL); //edit by killap
    else if (line == 1) then
-       floater(mstr(106)+made_man_name+mstr(107));
+       float_msg(self_obj,mstr(106)+made_man_name+mstr(107),FLOAT_COLOR_NORMAL); //edit by killap
    else if (line == 2) then
-       floater(mstr(108)+made_man_name+mstr(109)+made_man_name+mstr(110));
+       float_msg(self_obj,mstr(108)+made_man_name+mstr(109)+made_man_name+mstr(110),FLOAT_COLOR_NORMAL); //edit by killap
    else if (line == 3) then
-       floater(mstr(111)+made_man_name+mstr(112)+dude_family_name+mstr(113)+made_man_name+mstr(114));
+       float_msg(self_obj,mstr(111)+made_man_name+mstr(112)+dude_family_name+mstr(113)+made_man_name+mstr(114),FLOAT_COLOR_NORMAL); //edit by killap
 end
 
 

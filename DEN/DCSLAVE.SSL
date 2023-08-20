@@ -54,6 +54,10 @@ procedure Node011;
 procedure Node012;
 procedure Node013;
 
+//added by killap - expansion pack
+procedure Node014;
+//end added
+
 /* Local Variables which are saved. All Local Variables need to be
    prepended by LVAR_ */
 #define LVAR_Flags                        (4)
@@ -97,8 +101,8 @@ procedure timed_event_p_proc begin
                   animate_move_to_tile(global_temp);
                end
             end else begin
-               if (self_tile != map_next_tile) then begin
-                  anim_run_to_point_rate(map_next_tile, 5)
+               if (tile_distance(tile_num(self_obj),30302) > 3)  then begin //edit by killap - was map_next_tile
+                  anim_run_to_point_rate(30302, 5)
                end else begin
                   destroy_object(self_obj);
                end
@@ -257,8 +261,14 @@ end
 procedure Node009 begin
    set_slaves_free;
    Reply(460 + slave_is_nomad);
-   GOption(462, Node999, 004);
-   GOption(463, Node999, 004);
+   //added by killap - expansion
+   if ( (global_var(GVAR_SULIK_SISTER) == 1) and (town_known(AREA_SLAVER_CAMP) == MARK_STATE_UNKNOWN) ) then begin
+      NOption(470, Node014, 004);
+      NLowOption(475, Node014);
+   end else begin
+      GOption(462, Node999, 004);
+      GOption(463, Node999, 004);
+   end
    GOption(464, Node999, -003);
 end
 procedure Node010 begin
@@ -289,3 +299,14 @@ procedure Node013 begin
       floater_rand(528, 535);
    end
 end
+
+//added by killap - expansion
+procedure Node014 begin
+   mark_on_map(AREA_SLAVER_CAMP)
+   Reply(471 + slave_is_nomad);
+   GOption(473, Node999, 004);
+   GOption(474, Node999, 004);
+   
+   NLowOption(476, Node999, 004);
+end
+//end added

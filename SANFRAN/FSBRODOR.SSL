@@ -87,7 +87,11 @@ end
 procedure use_p_proc begin
    if (not IS_BOS) then begin
       script_overrides;
-      display_mstr(100);
+      //added by killap
+      if (source_obj == dude_obj) then begin
+         display_mstr(100);
+      end
+      //end added by killap
       if (validHandle(i_brother_obj)) then begin
          add_timer_event(i_brother_obj, 0, TIMER_SCREW_WITH_DOOR);
       end

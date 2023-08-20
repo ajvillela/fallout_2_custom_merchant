@@ -132,6 +132,8 @@ procedure Node039;
          end else begin                                                                            \
             the_pistol := 0;                                                                       \
          end
+         
+#define self_family                       family_wright //added by killap
 
 variable the_pistol;
 variable set_flee;
@@ -254,6 +256,7 @@ end
 procedure damage_p_proc begin
    if (source_obj == dude_obj) then begin
       set_personal_enemy;
+      attack_family(self_family) //added by killap
    end
 end
 
@@ -279,11 +282,12 @@ procedure talk_p_proc begin
    end else if (dude_wearing_power_armor) then begin
       call Node005;
    end else begin
-      Evil_Critter:=1;
+      Evil_Critter:=0; //edit by killap - was 1
       Slavery_Tolerant := SLAVE_VERY_INTOLERANT;
       Karma_Perception := KARMA_PERCEPTION5;
       CheckKarma;
       GetReaction;
+      ReactToLevel; //added by killap
       if ((local_var(LVAR_reaction_level) < REACTION_LEVEL_NEUTRAL) or (has_rep_slaver) or ((dude_is_made_man) and (dude_family != family_wright))) then begin
          call Node006;
       end else begin
@@ -507,7 +511,7 @@ procedure Node023 begin
 end
 procedure Node024 begin
    Reply(mstr(510 + (child_playing_time)) + mstr(412));
-   if ((saw_secret_trade) and (secret_trade_disrupted)) then begin
+   if ( ((saw_secret_trade) and (secret_trade_disrupted)) or (global_var(GVAR_NEW_RENO_GUARD_ASSIGNMENT) > 1) ) then begin //added (global_var(GVAR_NEW_RENO_GUARD_ASSIGNMENT) > 1) - killap
       NOption(515, Node025, 004);
    end else if (secret_trade_nothing) then begin
       NOption(513 + (dude_iq < 9), Node036, 001);
@@ -532,7 +536,7 @@ procedure Node026 begin
 end
 procedure Node027 begin
    Reply(mstr(550 + (child_playing_time)) + mstr(552));
-   if ((saw_secret_trade) and (secret_trade_disrupted)) then begin
+   if ( ((saw_secret_trade) and (secret_trade_disrupted)) or (global_var(GVAR_NEW_RENO_GUARD_ASSIGNMENT) > 1) ) then begin //added (global_var(GVAR_NEW_RENO_GUARD_ASSIGNMENT) > 1) - killap
       NOption(515, Node025, 004);
    end else if (secret_trade_nothing) then begin
       NOption(514, Node036, 001);
@@ -594,11 +598,11 @@ procedure Node036 begin
 end
 procedure Node037 begin
    Flee_From_Dude
-   floater(701 - dude_is_male, 703 + dude_is_female);
+   floater_rand(701 - dude_is_male, 703 + dude_is_female); // Seraph's Fix: floater only takes 1 arg; changed to floater_rand. Thanks Rob!
 end
 procedure Node038 begin
-   floater(711 - dude_is_male, 711 + dude_is_female);
+   floater_rand(711 - dude_is_male, 711 + dude_is_female); // Seraph's Fix: floater only takes 1 arg; changed to floater_rand. Thanks Rob!
 end
 procedure Node039 begin
-   floater(721 - dude_is_male, 722 + dude_is_female);
+   floater_rand(721 - dude_is_male, 722 + dude_is_female); // Seraph's Fix: floater only takes 1 arg; changed to floater_rand. Thanks Rob!
 end

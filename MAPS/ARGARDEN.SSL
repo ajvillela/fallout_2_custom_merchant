@@ -99,7 +99,7 @@ procedure Make_Geckos begin
            Next_Hex;
            item:=create_object_sid(PID_GECKO_SMALL,0,0,SCRIPT_ACGECKO);
            while (item_hex <= 0) do begin
-               item_hex:=tile_num_in_direction(map_var(MVAR_Last_Spot),random(0,5),random(0,10));
+               item_hex:=tile_num_in_direction(map_var(MVAR_Last_Spot),random(0,5),random(0,3));  //edit by killap - was 0,10 but they often spawned out of reach - expansion
            end
            set_map_var(MVAR_Current_Gecko_Easy,map_var(MVAR_Current_Gecko_Easy)+1);
            critter_attempt_placement(item,item_hex,0);
@@ -114,7 +114,7 @@ procedure Make_Geckos begin
            Next_Hex;
            item:=create_object_sid(PID_GECKO_SMALL,0,0,SCRIPT_ACGECKO);
            while (item_hex <= 0) do begin
-               item_hex:=tile_num_in_direction(map_var(MVAR_Last_Spot),random(0,5),random(0,10));
+               item_hex:=tile_num_in_direction(map_var(MVAR_Last_Spot),random(0,5),random(0,3));  //edit by killap - was 0,10 but they often spawned out of reach - expansion
            end
            set_map_var(MVAR_Current_Gecko_Easy,map_var(MVAR_Current_Gecko_Easy)+1);
            SmGecko_Counter+=1;
@@ -133,7 +133,7 @@ procedure Make_Geckos begin
            Next_Hex;
            item:=create_object_sid(PID_TOUGH_GECKO_SMALL,0,0,SCRIPT_ACGECKO);
            while (item_hex <= 0) do begin
-               item_hex:=tile_num_in_direction(map_var(MVAR_Last_Spot),random(0,5),random(0,10));
+               item_hex:=tile_num_in_direction(map_var(MVAR_Last_Spot),random(0,5),random(0,6));  //edit by killap - was 0,10 but they often spawned out of reach - expansion
            end
            set_map_var(MVAR_Current_Gecko_Hard,map_var(MVAR_Current_Gecko_Hard)+1);
            critter_attempt_placement(item,item_hex,0);
@@ -148,7 +148,7 @@ procedure Make_Geckos begin
            Next_Hex;
            item:=create_object_sid(PID_TOUGH_GECKO_SMALL,0,0,SCRIPT_ACGECKO);
            while (item_hex <= 0) do begin
-               item_hex:=tile_num_in_direction(map_var(MVAR_Last_Spot),random(0,5),random(0,10));
+               item_hex:=tile_num_in_direction(map_var(MVAR_Last_Spot),random(0,5),random(0,6));  //edit by killap - was 0,10 but they often spawned out of reach - expansion
            end
            set_map_var(MVAR_Current_Gecko_Hard,map_var(MVAR_Current_Gecko_Hard)+1);
            critter_attempt_placement(item,item_hex,0);
@@ -172,7 +172,7 @@ procedure Make_Plants begin
        while (Xander_Counter < New_Xanders) do begin
            Next_Hex;
            item:=create_object(PID_XANDER_ROOT,0,0);
-           item_hex:=tile_num_in_direction(map_var(MVAR_Last_Spot),random(0,5),random(0,10));
+           item_hex:=tile_num_in_direction(map_var(MVAR_Last_Spot),random(0,5),random(0,3)); //edit by killap - was 0,10 but they often spawned out of reach - expansion
            move_to(item,item_hex,0);
            Xander_Counter+=1;
        end
@@ -183,7 +183,7 @@ procedure Make_Plants begin
        while (Broc_Counter < New_Broc) do begin
            Next_Hex;
            item:=create_object(PID_BROC_FLOWER,0,0);
-           item_hex:=tile_num_in_direction(map_var(MVAR_Last_Spot),random(0,5),random(0,10));
+           item_hex:=tile_num_in_direction(map_var(MVAR_Last_Spot),random(0,5),random(0,3)); //edit by killap - was 0,10 but they often spawned out of reach - expansion
            move_to(item,item_hex,0);
            Broc_Counter+=1;
        end
@@ -194,9 +194,9 @@ procedure Kill_Brat begin
    variable dog;
    variable cousin;
    variable gecko;
-   variable spear
+   variable spear;
 
-   kill_critter_type(PID_DOG,KILL_DONT_LEAVE_BODY);
+   //kill_critter_type(PID_DOG,KILL_DONT_LEAVE_BODY);
 
    cousin:=create_object(PID_PRIMITIVE_VILLAGER_MALE,0,0);
    gecko:=create_object(PID_TOUGH_GECKO_SMALL,0,0);

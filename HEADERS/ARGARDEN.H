@@ -22,8 +22,8 @@
 #define MAX_XANDER_ROOT                         (4)
 
 #define HEX_MARK0                               (18682)
-#define HEX_MARK1                               (23323)
-#define HEX_MARK2                               (28695)
+#define HEX_MARK1                               (22920) /*(23323)*/
+#define HEX_MARK2                               (27490) /*(28695*/
 
 #define HEX_DEAD_DOG                            (23491)
 #define HEX_DEAD_COUSIN                         (23894)

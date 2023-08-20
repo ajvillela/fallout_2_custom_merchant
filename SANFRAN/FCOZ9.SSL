@@ -108,6 +108,8 @@ procedure doCallGuards;
 #define LVAR_Herebefore                 (4)
 #define LVAR_Hostile                    (5)
 #define LVAR_Personal_Enemy             (6)
+#define LVAR_EMP_PAYMENT                (7)  //added by killap
+#define LVAR_SHIP_FUEL                  (8)  //added by killap
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -252,6 +254,13 @@ procedure destroy_p_proc begin
 /* Set global_variable for Enemy status*/
    set_san_fran_flag(SF_OZ9_DEAD);
    set_struggle_flag(STRUG_OZ9DEAD);
+   
+   //added by killap
+   if (global_var(GVAR_SAN_FRAN_ELRON_GAS_QST) == 1) then
+      set_global_var(GVAR_SAN_FRAN_ELRON_GAS_QST, 3); //set to failed - killap
+   else if (global_var(GVAR_SAN_FRAN_KILL_EMP_QST) == 1) then
+      set_global_var(GVAR_SAN_FRAN_KILL_EMP_QST, 3); //set to failed - killap
+   //end added by killap
 end
 
 /* Look_at_p_proc gets called any time that the player passes the cursor over any object.
@@ -332,7 +341,9 @@ procedure Node002 begin
       NOption(111, Node023, 4);
       GOption(112, Node23a, 4);
    end else begin
-      NOption(108, Node014, 4);
+      //if (Fallout2_tribe_kidnapped) then //added by killap
+      if ((f2_flag_any >= f2_state_tribe_kidnapped) and (f2_flag_any < f2_state_enclave_destroyed)) then //edit by killap
+         NOption(108, Node014, 4);
       NOption(109, Node022, 4);
       BOption(113, Node998a, 4);
       NOption(114, Node999, 4);
@@ -342,7 +353,9 @@ end
 procedure Node003 begin
    Reply(115);
    NLowOption(116, Node005);
-   NLowOption(117, Node006);
+   //if (Fallout2_tribe_kidnapped) then //added by killap
+   if ((f2_flag_any >= f2_state_tribe_kidnapped) and (f2_flag_any < f2_state_enclave_destroyed)) then //edit by killap
+      NLowOption(117, Node006);
    NLowOption(118, NOde999);
 end
 
@@ -353,7 +366,9 @@ end
 
 procedure Node005 begin
    Reply(121);
-   NLowOption(122, Node006);
+   //if (Fallout2_tribe_kidnapped) then //added by killap
+   if ((f2_flag_any >= f2_state_tribe_kidnapped) and (f2_flag_any < f2_state_enclave_destroyed)) then //edit by killap
+      NLowOption(122, Node006);
    NLowOption(123, Node999);
 end
 
@@ -404,16 +419,28 @@ procedure Node011 begin
    NLowOption(140, Node999);
 end
 
-procedure Node012 begin
-   COMPLETE_KILL_EMP_QST
+procedure Node012 begin\
+//killap's code
+   if((local_var(LVAR_EMP_PAYMENT) == 0)) then begin
+      COMPLETE_KILL_EMP_QST
+      set_local_var(LVAR_EMP_PAYMENT,1);
+   end
+//end killap's code
    Reply(141);
    NLowOption(142, Node013);
    NOption(143, Node019, 4);
 end
 
 procedure Node013 begin
-   set_tanker_flag(TANK_NAVCOMP);
-   COMPLETE_TANKER_FUEL;
+//killap's code
+   if((local_var(LVAR_SHIP_FUEL) == 0)) then begin
+      if (not tanker_flag(TANK_FUEL)) then begin //added check by killap
+         set_tanker_flag(TANK_NAVCOMP);
+         COMPLETE_TANKER_FUEL;
+      end
+      set_local_var(LVAR_SHIP_FUEL,1);
+   end
+//end killap's code  
    Reply(144);
    NLowOption(145, Node999);
 end
@@ -455,7 +482,7 @@ end
 
 procedure Node020 begin
    Reply(163);
-   NOption(164, Node998a, 4);
+   BOption(164, Node998a, 4); //edit by killap - was NOption
    NOption(165, Node999, 4);
 end
 
@@ -481,14 +508,14 @@ end
 procedure Node021 begin
    call TakeLetter;
    Reply(166);
-   NOption(167, Node998a, 4);
+   BOption(167, Node998a, 4); //edit by killap - was NOption
    NOption(168, Node2224, 4);
    NOption(169, Node999, 4);
 end
 
 procedure Node022 begin
    Reply(170);
-   NOption(171, Node998a, 4);
+   BOption(171, Node998a, 4); //edit by killap - was NOption
    NOption(172, Node999, 4);
 end
 
@@ -554,7 +581,7 @@ end
 
 procedure Node028 begin
    Reply(190);
-   NOption(191, Node998a, 4);
+   BOption(191, Node998a, 4); //edit by killap - was NOption
    NOption(192, Node029, 4);
 end
 
@@ -578,8 +605,8 @@ end
 procedure Node032 begin
    Reply(201);
    NOption(202, Node033, 4);
-   NOption(203, Node998a, 4);
-   NOption(204, Node998a, 4);
+   BOption(203, Node998a, 4); //edit by killap - was NOption
+   BOption(204, Node998a, 4); //edit by killap - was NOption
 end
 
 procedure Node034a begin
@@ -590,19 +617,19 @@ end
 
 procedure Node033 begin
    Reply(205);
-   NOption(206, Node998a, 4);
+   BOption(206, Node998a, 4); //edit by killap - was NOption
    NOption(207, Node034a, 4);
 end
 
 procedure Node034 begin
    Reply(208);
    NOption(209, Node999, 4);
-   NOption(210, Node998a, 4);
+   BOption(210, Node998a, 4); //edit by killap - was NOption
 end
 
 procedure Node035 begin
    Reply(211);
-   NOption(212, Node998a, 4);
+   BOption(212, Node998a, 4); //edit by killap - was NOption
 end
 
 procedure Node036 begin

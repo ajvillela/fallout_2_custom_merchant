@@ -45,7 +45,7 @@ procedure map_enter_p_proc begin
 
    Lighting;
 
-   debug_msg("Check_Create_Car(" + CAR_VAULT_CITY_HEX + "," + CAR_VAULT_CITY_ELEV + ")");
+   /*debug_msg("Check_Create_Car(" + CAR_VAULT_CITY_HEX + "," + CAR_VAULT_CITY_ELEV + ")");
    if (not is_loading_game) then begin
       if (dude_has_car != false) then begin
          debug_msg("car_current_town == " + car_current_town + " / map_get_load_area == " + map_get_load_area);
@@ -62,7 +62,18 @@ procedure map_enter_p_proc begin
       end
    end else begin
       debug_msg("sorry, can't place the car, the game's loading");
-   end
+   end*/
+   
+   //added by killap - prevent car from disappearing if the car runs out of gas while on the town circle
+   if ((metarule(30, 0) == 21) and (cur_map_index != MAP_CAR_DESERT) and (car_out_of_fuel)) then begin
+      set_global_var(GVAR_CAR_PLACED_TILE, 0);
+      Create_Car(CAR_VAULT_CITY_HEX,CAR_VAULT_CITY_ELEV)
+      if (tile_contains_pid_obj(CAR_VAULT_CITY_HEX, CAR_VAULT_CITY_ELEV, PID_DRIVABLE_CAR) != 0) then begin
+         Create_Trunk(CAR_VAULT_CITY_HEX,CAR_VAULT_CITY_ELEV)
+      end 
+   end else 
+      Check_Create_Car(CAR_VAULT_CITY_HEX, CAR_VAULT_CITY_ELEV)
+   //end added
 
    if ((global_var(GVAR_WADE_PAYOUT) == 0) and (global_var(GVAR_WADE_STATUS) == 1) and (map_var(MVAR_Made_Payoff) == 0)) then begin
        inc_map_var(MVAR_Made_Payoff);

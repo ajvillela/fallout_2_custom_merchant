@@ -198,6 +198,7 @@ procedure destroy_p_proc begin
    inc_good_critter
 
 /* Set global_variable for Enemy status*/
+   i_tmer_merchant := -1; //added by killap
 end
 
 /* Look_at_p_proc gets called any time that the player passes the cursor over any object.
@@ -243,9 +244,9 @@ end
 procedure Node001 begin
    Reply(103);
 
-   NLowOption(104, Node002, 4);
-   NLowOption(105, Node003, 4);
-   NLowOption(106, Node999, 4);
+   NLowOption(104, Node002); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
+   NLowOption(105, Node003); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
+   NLowOption(106, Node999); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
    NOption(107, Node002, 4);
    NOption(108, Node003, 4);
    NOption(109, Node999, 4);

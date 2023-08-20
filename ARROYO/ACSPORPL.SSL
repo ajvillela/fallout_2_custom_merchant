@@ -83,8 +83,20 @@ procedure description_p_proc begin
    display_msg(mstr(101));
 end
 
+//added by killap - expansion pack
 procedure use_obj_on_p_proc begin
+   if ((obj_pid(obj_being_used_with) == PID_PLANT_SPRAY)) then begin
+      inc_map_var(MVAR_Kill_Evil_Plants);
+      if (KILLED_ALL_EVIL_PLANTS) then begin
+         display_msg(mstr(150));
+         set_global_var(GVAR_KILL_EVIL_PLANTS,QUEST_COMPLETED);
+         inc_general_rep(REP_BONUS_KILL_EVIL_PLANTS);
+         give_xp(EXP_KILL_EVIL_PLANTS);
+      end
+      kill_critter(self_obj, ANIM_melted_to_nothing_sf);
+   end
 end
+//end added by killap
 
 procedure use_skill_on_p_proc begin
    if (action_being_used == SKILL_SCIENCE) then begin

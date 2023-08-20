@@ -197,6 +197,10 @@ procedure destroy_p_proc begin
    smitty_obj := 0;
    move_obj_inven_to_obj(den_smitty_box_obj,self_obj);
    inc_good_critter
+   //added by killap
+   if (smitty_deliver(state_smitty_deliver_in_progress)) then
+      set_smitty_deliver(state_smitty_deliver_failed);
+   //end added by killap
 end
 
 procedure look_at_p_proc begin
@@ -289,7 +293,7 @@ end
 
 procedure Node008 begin
    if (smitty_deliver_time_up) then begin
-      set_smitty_deliver(state_smitty_deliver_finished);
+      set_smitty_deliver(state_smitty_deliver_failed); //changed to failed - killap
       Reply(322);
       BOption(323, Node999, 004);
       NOption(324, Node999, 004);

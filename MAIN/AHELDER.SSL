@@ -46,6 +46,7 @@ procedure description_p_proc;
 procedure use_skill_on_p_proc;
 procedure damage_p_proc;
 procedure map_enter_p_proc;
+procedure combat_p_proc; //added by killap
 
 /* Script Specific Procedure Calls */
 procedure Node998;                                      // This Node is Always Combat
@@ -133,6 +134,16 @@ procedure map_enter_p_proc begin
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_ARROYO_ELDER);
 end
 
+//added by killap -- done to prevent the Elder from escaping her cell at the Enclave
+procedure combat_p_proc begin
+   if (cur_map_index != MAP_ARROYO_VILLAGE) then begin
+      if (combat_is_initialized) then begin 
+         script_overrides;
+         reg_anim_clear(self_obj);
+      end
+   end
+end
+//end added
 
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from
    Movement to attacking the player on sight can be placed in here.*/
@@ -148,7 +159,7 @@ procedure critter_p_proc begin
        attack(dude_obj);
    end
 
-   if (REP_ENEMY_ARROYO) then begin
+   if ( (REP_ENEMY_ARROYO) and (obj_can_see_obj(self_obj,dude_obj)) ) then begin //added and (obj_can_see_obj(self_obj,dude_obj)) by killap
        attack(dude_obj);
    end
 
@@ -189,6 +200,8 @@ procedure talk_p_proc begin
 
    GetReaction;
 
+   ReactToLevel; //added by killap
+      
    set_global_var(GVAR_TALKED_TO_ELDER,1);
 
 // in the Village
@@ -312,6 +325,8 @@ end
    in here. */
 procedure destroy_p_proc begin
 
+   set_global_var(GVAR_ENDGAME_MOVIE_ELDER,-1); // Seraph's Code - expansion
+
 /* Increment the aligned critter counter*/
    inc_good_critter
    set_global_var(GVAR_TOWN_REP_ARROYO, global_var(GVAR_TOWN_REP_ARROYO) - 50);
@@ -392,9 +407,11 @@ end
 procedure Node003 begin
    Reply(114);
 
-   if (local_var(LVAR_Vault_Looking)) then
+   if (local_var(LVAR_Vault_Looking)) then begin
        GOption(115,Node003a,004);
-   BOption(116,Node003b,004);
+   end
+   NOption(116,Node999,004);
+   //was Node003b
 end
 
 procedure Node003a begin
@@ -660,7 +677,7 @@ end
 procedure Enc010 begin
    Reply(227);
 
-   NLowOption(228,Enc011,004);
+   NLowOption(228,Enc011); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
    NOption(229,Enc012,004);
    NOption(230,Node999,004);
 end
@@ -686,7 +703,7 @@ procedure Enc013a begin
    Reply(237);
 
    NOption(238,Enc007,004);
-   NOption(239,Enc004,004);
+   NOption(239,Enc007,004); //edit by killap - was Enc004
 end
 
 

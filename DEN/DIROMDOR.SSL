@@ -6,6 +6,7 @@ import variable metzger_room_door_guard_obj;
 
 procedure def_use_p_proc;
 procedure def_use_skill_on_p_proc;
+procedure my_map_update_proc; //added by killap
 
 procedure test_use_tamper;
 procedure test_use_skill_tamper;
@@ -22,10 +23,30 @@ procedure use_skill_on_p_proc begin
    end
 end
 
+//added by killap
+procedure map_update_p_proc begin
+   call my_map_update_proc;
+end
+//end added by killap
+
 #define use_p_proc                        def_use_p_proc
 #define use_skill_on_p_proc               def_use_skill_on_p_proc
+#define map_update_p_proc                 def_map_update_p_proc //added by killap
+
+#define LOCKED_STATUS                STATE_ACTIVE //added by killap
 
 #include "..\den\diDoor.ssl"
+
+//added by killap
+variable do_once := false;
+procedure my_map_update_proc begin
+   if (metzger_sex and obj_is_locked(self_obj) and do_once == false) then begin
+      obj_unlock(self_obj);
+      do_once := true;
+   end
+   call def_map_update_p_proc;
+end
+//end added
 
 procedure test_use_tamper begin
    if (metzger_sex == false) then begin

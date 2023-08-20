@@ -179,13 +179,13 @@ procedure talk_p_proc begin
    if (dude_level > 4 and local_var(LVAR_Herebefore) == 0) then begin
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
-         call Node010;
+         call Node001; //edit by killap - was 010
       gSay_End;
       end_dialogue;
    end else if (local_var(LVAR_Herebefore) == 0) then begin
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
-         call Node001;
+         call Node010; //edit by killap - was 001
       gSay_End;
       end_dialogue;
    end else begin

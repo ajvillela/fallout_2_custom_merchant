@@ -124,6 +124,7 @@ variable Only_Once:=0;
 variable From_WTG := 0;
 variable From_19 := 0;
 
+
 procedure start begin
    Randal_Ptr := self_obj;
 end
@@ -239,6 +240,8 @@ procedure talk_p_proc begin
    From_WTG := 1;
    From_19 := 0;
 
+   gdialog_set_barter_mod(35); //added by killap
+      
    move_inven_to_temp_box
    if( ( local_var( LVAR_Randal_Status ) == RANDAL_CONVINCED ) or
        ( global_var( GVAR_VAULT_CITIZEN ) == CITIZEN_CAPTAIN_GUARD ) or
@@ -281,6 +284,13 @@ procedure talk_p_proc begin
    move_inven_from_temp_box
 
    set_local_var( LVAR_Herebefore, 1 );
+   
+   //added by killap
+   if ( local_var( LVAR_Randal_Status ) < RANDAL_KNOWN ) then begin
+      set_local_var( LVAR_Randal_Status, RANDAL_KNOWN);
+   end
+   //end added
+   
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -339,7 +349,8 @@ procedure Node001 begin
 
    val := random(104, 106);
    if( val == 104 ) then
-      floater( mstr(104) + dude_name + mstr(225) );
+      //floater( mstr(104) + dude_name + mstr(225) );
+      float_msg(self_obj,mstr(104) + dude_name + mstr(225),FLOAT_COLOR_NORMAL); //edit by killap
    else
       floater( val );
 end
@@ -377,6 +388,7 @@ end
 
 procedure Node009 begin
    From_WTG := 0;
+
    Reply(120);
 
    if( not( dude_found_geck ) ) then
@@ -405,13 +417,16 @@ procedure Node011 begin
    NOption(135, Node012, 004);
    NOption(136, Node014, 004);
    NOption(137, Node999, 004);
+   
+   From_WTG := 1;
+   
 end
 
 procedure Node012 begin
    Reply(138);
 
-   NLowOption(139, Node013, 004);
-   NLowOption(140, Node999, 004);
+   NLowOption(139, Node013); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
+   NLowOption(140, Node999); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
    NOption(141, Node013, 004);
    NOption(142, Node014, 004);
    NOption(143, Node999, 004);
@@ -427,15 +442,16 @@ procedure Node013 begin
    NLowOption(146, Node999);
    NOption(147, Node014, 004);
    NOption(148, Node999, 004);
+
 end
 
 procedure Node014 begin
    if( From_WTG == 1 ) then begin
       From_WTG := 0;
       Reply(149);
-   end
+   end else
       Reply(150);
-
+   
    NLowOption(151, Node010);
    NLowOption(152, Node999);
    NOption(153, Node015, 004);
@@ -476,7 +492,7 @@ procedure Node015a begin
    if( ( global_var( GVAR_VAULT_CITIZEN ) == CITIZEN_CAPTAIN_GUARD ) or
        ( global_var( GVAR_VAULT_CITIZEN ) == CITIZEN_REAL_CITIZEN ) or
        ( local_var( LVAR_Randal_Status ) == RANDAL_CONVINCED ) ) then begin
-      gdialog_mod_barter(-35);
+      gdialog_mod_barter(35); // Seraph's Fix: changed '-35' to '35'
 
       Reply(228);
       NOption(229, Node028, 004);
@@ -563,7 +579,7 @@ procedure Node022 begin
 end
 
 procedure Node022a begin
-   gdialog_mod_barter(-35);
+   gdialog_mod_barter(35);   //killap's fix: was -35
 
    Reply(228);
    NOption(229, Node028, 004);

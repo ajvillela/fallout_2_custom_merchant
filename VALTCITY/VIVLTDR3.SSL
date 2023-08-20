@@ -135,6 +135,7 @@ procedure Damage_Critter;
    Local variables which do not need to be saved between map changes.
 *******************************************************************/
 
+import variable vault_city_martin_obj; // Seraph's Code
 variable Locks_Roll;
 variable Traps_Roll;
 variable last_source_obj;
@@ -187,7 +188,7 @@ procedure use_p_proc begin
    // Detect if the player is caught by Martin. Martin is not on
    // the map at night, so make sure to check his Map Var.
    if( ( map_var( MVAR_Martin_In_Area ) == 1 ) and
-       ( obj_can_see_obj( self_obj, source_obj ) ) and
+       ( obj_can_see_obj( vault_city_martin_obj, source_obj ) ) and  //killap - added martin_obj
        ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_CAPTAIN_GUARD ) and
        ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_REAL_CITIZEN ) ) then begin
       script_overrides;
@@ -295,7 +296,7 @@ procedure use_skill_on_p_proc begin
       // Detect if the player is caught by Martin. Martin is not on
       // the map at night, so make sure to check his Map Var.
        if( ( map_var( MVAR_Martin_In_Area ) == 1 ) and
-           ( obj_can_see_obj( self_obj, source_obj ) ) and
+           ( obj_can_see_obj( vault_city_martin_obj, source_obj ) ) and //killap - added martin_obj
            ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_CAPTAIN_GUARD ) and
            ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_REAL_CITIZEN ) ) then begin
          script_overrides;
@@ -316,7 +317,7 @@ procedure use_skill_on_p_proc begin
       // Detect if the player is caught by Martin. Martin is not on
       // the map at night, so make sure to check his Map Var.
        if( ( map_var( MVAR_Martin_In_Area ) == 1 ) and
-           ( obj_can_see_obj( self_obj, source_obj ) ) and
+           ( obj_can_see_obj( vault_city_martin_obj, source_obj ) ) and //killa - added martin_obj
            ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_CAPTAIN_GUARD ) and
            ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_REAL_CITIZEN ) ) then begin
          script_overrides;
@@ -327,6 +328,7 @@ procedure use_skill_on_p_proc begin
            call Skill_Disarm_Traps;
        end
        else begin
+           script_overrides; //added by killap
            if (source_obj == dude_obj) then begin
                display_msg(mstr(195));
            end
@@ -356,7 +358,7 @@ procedure use_obj_on_p_proc begin
             // Detect if the player is caught by Martin. Martin is not on
             // the map at night, so make sure to check his Map Var.
             if( ( map_var( MVAR_Martin_In_Area ) == 1 ) and
-                ( obj_can_see_obj( self_obj, source_obj ) ) and
+                ( obj_can_see_obj( vault_city_martin_obj, source_obj ) ) and //killap - added martin_obj
                 ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_CAPTAIN_GUARD ) and
                 ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_REAL_CITIZEN ) ) then begin
                script_overrides;
@@ -375,7 +377,7 @@ procedure use_obj_on_p_proc begin
             // Detect if the player is caught by Martin. Martin is not on
             // the map at night, so make sure to check his Map Var.
             if( ( map_var( MVAR_Martin_In_Area ) == 1 ) and
-                ( obj_can_see_obj( self_obj, source_obj ) ) and
+                ( obj_can_see_obj( vault_city_martin_obj, source_obj ) ) and //killap - added martin_obj
                 ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_CAPTAIN_GUARD ) and
                 ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_REAL_CITIZEN ) ) then begin
                script_overrides;
@@ -398,7 +400,7 @@ procedure use_obj_on_p_proc begin
             // Detect if the player is caught by Martin. Martin is not on
             // the map at night, so make sure to check his Map Var.
             if( ( map_var( MVAR_Martin_In_Area ) == 1 ) and
-                ( obj_can_see_obj( self_obj, source_obj ) ) and
+                ( obj_can_see_obj( vault_city_martin_obj, source_obj ) ) and //killap - add martin_obj
                 ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_CAPTAIN_GUARD ) and
                 ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_REAL_CITIZEN ) ) then begin
                script_overrides;
@@ -418,7 +420,7 @@ procedure use_obj_on_p_proc begin
             // Detect if the player is caught by Martin. Martin is not on
             // the map at night, so make sure to check his Map Var.
             if( ( map_var( MVAR_Martin_In_Area ) == 1 ) and
-                ( obj_can_see_obj( self_obj, source_obj ) ) and
+                ( obj_can_see_obj( vault_city_martin_obj, source_obj ) ) and //killap - added martin_obj
                 ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_CAPTAIN_GUARD ) and
                 ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_REAL_CITIZEN ) ) then begin
                script_overrides;
@@ -440,7 +442,7 @@ procedure use_obj_on_p_proc begin
      // Detect if the player is caught by Martin. Martin is not on
      // the map at night, so make sure to check his Map Var.
      if( ( map_var( MVAR_Martin_In_Area ) == 1 ) and
-         ( obj_can_see_obj( self_obj, source_obj ) ) and
+         ( obj_can_see_obj( vault_city_martin_obj, source_obj ) ) and //killap - added martin_obj
          ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_CAPTAIN_GUARD ) and
          ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_REAL_CITIZEN ) ) then begin
         script_overrides;
@@ -456,7 +458,7 @@ procedure use_obj_on_p_proc begin
      // Detect if the player is caught by Martin. Martin is not on
      // the map at night, so make sure to check his Map Var.
      if( ( map_var( MVAR_Martin_In_Area ) == 1 ) and
-         ( obj_can_see_obj( self_obj, source_obj ) ) and
+         ( obj_can_see_obj( vault_city_martin_obj, source_obj ) ) and //killap - added martin_obj
          ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_CAPTAIN_GUARD ) and
          ( global_var( GVAR_VAULT_CITIZEN ) != CITIZEN_REAL_CITIZEN ) ) then begin
         script_overrides;

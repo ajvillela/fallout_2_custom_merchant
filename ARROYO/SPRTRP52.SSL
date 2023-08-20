@@ -107,7 +107,7 @@ procedure spatial_p_proc begin
        if ((tile_distance_objs(self_obj,source_obj) == 0) and
            (local_var(LVAR_Trap_Exploded) == 0) and (map_var(TRAP_MVAR) == 0)) then begin
 
-           game_ui_disable;
+           //game_ui_disable;
 
            Projectile:=create_object(PID_FLYING_SPEAR,INITIAL_TILE,elevation(self_obj));
            Face_Critter(source_obj,Projectile);
@@ -118,7 +118,13 @@ procedure spatial_p_proc begin
            end
            Trap:=create_object(PID_CAVE_FLOOR_TRAP_DEPRESSED,tile_num(self_obj),elevation(self_obj));
 
-           call Check_Hit;
+           //added by killap
+           if ((source_obj == dude_obj) and (has_trait(TRAIT_PERK,dude_obj,PERK_light_step_perk)) and (random(0,1) == 1)) then
+               debug_msg("Used Light Step.");
+           else begin
+               call Check_Hit;
+           end
+           //end added by killap
 
            set_local_var(LVAR_Trap_Exploded,1);
            set_map_var(TRAP_MVAR,1);
@@ -137,7 +143,8 @@ procedure use_skill_on_p_proc begin
        Traps_Roll:=roll_vs_skill(source_obj,SKILL_TRAPS,TRAP_BONUS);
        if (source_obj == dude_obj) then begin
            if (is_success(Traps_Roll)) then begin
-               Trap:=create_object_sid(PID_CAVE_FLOOR_TRAP_DISARMED,tile_num(self_obj),elevation(self_obj),CUR_SCRIPT);
+               //Trap:=create_object_sid(PID_CAVE_FLOOR_TRAP_DISARMED,tile_num(self_obj),elevation(self_obj),CUR_SCRIPT);
+               Trap:=create_object(PID_CAVE_FLOOR_TRAP_DISARMED,tile_num(self_obj),elevation(self_obj)); // edit by killap
                set_local_var(LVAR_Trap_Exploded,1);
                set_map_var(TRAP_MVAR,1);
                display_msg(message_str(SCRIPT_GENERIC,102));
@@ -150,12 +157,14 @@ procedure use_skill_on_p_proc begin
                set_local_var(LVAR_Trap_Exploded,1);
                set_map_var(TRAP_MVAR,1);
                display_msg(message_str(SCRIPT_GENERIC,104));
-               if (tile_contains_obj_pid(tile_num(self_obj),elevation(self_obj),PID_CAVE_FLOOR_TRAP_VISIBLE)) then begin
+               //for some reason this code segment causes issues - killap
+               /*if (tile_contains_obj_pid(tile_num(self_obj),elevation(self_obj),PID_CAVE_FLOOR_TRAP_VISIBLE)) then begin
                    debug_msg("Destroying Visible Trap");
                    destroy_object(tile_contains_pid_obj(tile_num(self_obj),elevation(self_obj),PID_CAVE_FLOOR_TRAP_VISIBLE));
                    debug_msg("Destroyed Visible Trap");
-               end
-               Trap:=create_object_sid(PID_CAVE_FLOOR_TRAP_DEPRESSED,tile_num(self_obj),elevation(self_obj),CUR_SCRIPT);
+               end*/
+               //Trap:=create_object_sid(PID_CAVE_FLOOR_TRAP_DEPRESSED,tile_num(self_obj),elevation(self_obj),CUR_SCRIPT);
+               Trap:=create_object(PID_CAVE_FLOOR_TRAP_DEPRESSED,tile_num(self_obj),elevation(self_obj)); // edit by killap
                call Check_Hit;
            end
            else begin
@@ -164,7 +173,8 @@ procedure use_skill_on_p_proc begin
        end
        else begin
            if (is_success(Traps_Roll)) then begin
-               Trap:=create_object_sid(PID_CAVE_FLOOR_TRAP_DISARMED,tile_num(self_obj),elevation(self_obj),CUR_SCRIPT);
+               //Trap:=create_object_sid(PID_CAVE_FLOOR_TRAP_DISARMED,tile_num(self_obj),elevation(self_obj),CUR_SCRIPT);
+               Trap:=create_object(PID_CAVE_FLOOR_TRAP_DISARMED,tile_num(self_obj),elevation(self_obj)); // edit by killap
                set_map_var(TRAP_MVAR,1);
                display_msg(obj_name(source_obj)+message_str(SCRIPT_GENERIC,105));
                if (local_var(LVAR_Gave_Exp) == 0) then begin
@@ -176,12 +186,14 @@ procedure use_skill_on_p_proc begin
                set_local_var(LVAR_Trap_Exploded,1);
                set_map_var(TRAP_MVAR,1);
                display_msg(obj_name(source_obj)+message_str(SCRIPT_GENERIC,107));
-               if (tile_contains_obj_pid(tile_num(self_obj),elevation(self_obj),PID_CAVE_FLOOR_TRAP_VISIBLE)) then begin
+               //for some reason this code segment causes issues - killap
+               /*if (tile_contains_obj_pid(tile_num(self_obj),elevation(self_obj),PID_CAVE_FLOOR_TRAP_VISIBLE)) then begin
                    debug_msg("Destroying Visible Trap");
                    destroy_object(tile_contains_pid_obj(tile_num(self_obj),elevation(self_obj),PID_CAVE_FLOOR_TRAP_VISIBLE));
                    debug_msg("Destroyed Visible Trap");
-               end
-               Trap:=create_object_sid(PID_CAVE_FLOOR_TRAP_DEPRESSED,tile_num(self_obj),elevation(self_obj),CUR_SCRIPT);
+               end*/
+               //Trap:=create_object_sid(PID_CAVE_FLOOR_TRAP_DEPRESSED,tile_num(self_obj),elevation(self_obj),CUR_SCRIPT);
+               Trap:=create_object(PID_CAVE_FLOOR_TRAP_DEPRESSED,tile_num(self_obj),elevation(self_obj)); // edit by killap
                call Check_Hit;
            end
            else begin
@@ -260,7 +272,7 @@ procedure Missile_Fired begin
 
    play_sfx("sprtrap");
 
-   while (tile_num(Projectile) != Final_Hex) do begin
+   while ((Counter < 10) and tile_num(Projectile) != Final_Hex) do begin //edit by killap - not sure what this code is for, but apparently it gets stuck on occasion. Added counter check to exit if it takes too long
        if ((Counter % PROJECTILE_ROF) == 0) then begin
            Cur_Tile_Num:=tile_num_in_direction(tile_num(Projectile),rotation_to_tile(tile_num(Projectile),Final_Hex),1);
            move_to(Projectile,Cur_Tile_Num,elevation(self_obj));

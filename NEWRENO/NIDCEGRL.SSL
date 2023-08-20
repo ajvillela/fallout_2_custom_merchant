@@ -90,7 +90,7 @@ procedure Node017;
                                            (x*-20))
 #define dice_roll(x)                      (roll_vs_skill(dude_obj, SKILL_GAMBLING, get_dice_penalty(x)))
 #define dice_mstr(x)                      message_str(SCRIPT_ZIDCEGRL, x)
-#define dice_floater(x)                   float_msg(self_obj, dice_mstr(x), FLOAT_MSG_RED)
+#define dice_floater(x)                   float_msg(self_obj, dice_mstr(x), FLOAT_COLOR_NORMAL)
 #define dice_floater_rand(x,y)            dice_floater(random(x,y))
 #define dice_reply(x)                     gSay_Reply(SCRIPT_ZIDCEGRL,x)
 #define dice_display_mstr(x)              display_msg(dice_mstr(x))
@@ -98,8 +98,8 @@ procedure Node017;
 #define regular_dice_cnt                  obj_is_carrying_obj_pid(self_obj, PID_DICE)
 #define loaded_dice_cnt                   obj_is_carrying_obj_pid(self_obj, PID_LOADED_DICE)
 #define dice_count                        (regular_dice_cnt + loaded_dice_cnt)
-#define dude_family_conflict              ((dude_family != self_family) and (self_family != family_none))
-#define dude_family_same                  ((dude_family == self_family) and (self_family != family_none))
+#define dude_family_conflict              ((dude_family != self_family) and (dude_family != family_none))
+#define dude_family_same                  ((dude_family == self_family) and (dude_family != family_none))
 #define dude_has_important_rep            ((enclave_destroyed) or (dude_has_porn_star_rep) or (dude_is_prizefighter) or (dude_is_made_man))
 #define play_dice_options  dice_option(324, Node014, -003);                                                                                                  \
                            dice_option(325, Node014, -003);                                                                                                  \
@@ -121,7 +121,8 @@ procedure Node017;
                            end else begin                                                                                                                    \
                               dice_option(329, Node015, 004);                                                                                                \
                            end                                                                                                                               \
-                           dice_option(330, Node999, 004);
+                           if (bet_amt == 0) then                                                                                                            \
+                             dice_option(330, Node999, 004);
 
 
 /* Imported variables from the Map scripts. These should only be
@@ -129,7 +130,7 @@ procedure Node017;
    Needs to be saved, make it a map variable (MVAR_) */
 /* Local variables which do not need to be saved between map changes. */
 
-variable bet_amt;
+variable bet_amt := 0;
 variable trash_it;
 
 procedure start begin
@@ -144,8 +145,8 @@ procedure timed_event_p_proc begin
             if (enclave_destroyed) then call Node002;
             else if (dude_family_same) then call Node003;
             else if (dude_family_conflict) then call Node005;
-            else if (dude_has_porn_star_rep) then call Node007;
-            else if (dude_is_prizefighter) then call Node009;
+            else if (dude_has_porn_star_rep) then call Node009; //was Node007 - killap
+            else if (dude_is_prizefighter) then call Node007; //was Node009 - killap
             else call Node011;
          end
       end
@@ -154,7 +155,7 @@ procedure timed_event_p_proc begin
 end
 
 procedure map_enter_p_proc begin
-variable temp_family;
+   variable temp_family;
 
    if (map_first_run) then begin
       set_local_var(LVAR_Home_Tile, self_tile);
@@ -163,6 +164,14 @@ variable temp_family;
    end else if (self_tile != local_var(LVAR_Home_Tile)) then begin
       critter_attempt_placement(self_obj, local_var(LVAR_Home_Tile), self_elevation);
    end
+   /*// added by killap - expansion
+   if ( (self_family == family_salvatore and salvatore_dead and warned_attack) or 
+       (self_family == family_bishop and bishop_dead and warned_attack) or
+       (self_family == family_mordino and big_jesus_dead and lil_jesus_dead and warned_attack) ) then begin
+         destroy_object(self_obj);
+         return;
+   end
+   // end added*/
 
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_CASINO);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_COWARD);
@@ -172,7 +181,14 @@ end
 procedure critter_p_proc begin
    if ((hostile) and (self_can_see_dude)) then begin
       self_attack_dude;
+   //added by killap
+   end else if (self_tile != local_var(LVAR_Home_Tile)) then begin
+      if (not(combat_is_initialized)) then begin
+         animate_move_to_tile(local_var(LVAR_Home_Tile));
+      end
    end
+   //end added
+   
 end
 
 procedure damage_p_proc begin
@@ -189,7 +205,13 @@ procedure pickup_p_proc begin
 end
 
 procedure talk_p_proc begin
-   if ((dice_count == 1) and (if_dice_tamper == false)) then begin
+   /*// added by killap - expansion
+   if ( (self_family == family_salvatore and salvatore_dead and warned_attack) or 
+       (self_family == family_bishop and bishop_dead and warned_attack) or
+       (self_family == family_mordino and big_jesus_dead and lil_jesus_dead and warned_attack) ) then begin
+         float_msg(self_obj, message_str(SCRIPT_DCGAMBLE,200), FLOAT_COLOR_NORMAL);
+   // end added
+   end else */if ((dice_count == 1) and (if_dice_tamper == false)) then begin
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
          call Node013;

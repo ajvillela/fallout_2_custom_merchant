@@ -123,22 +123,26 @@ procedure map_enter_p_proc begin
 end
 
 procedure timed_event_p_proc begin
-   if( fixed_param == 1 ) then begin
-      if( map_var( MVAR_Female_Mutant_Dead ) == 0 ) then begin
-         if( Float_State == 0 ) then begin
-            // Man's turn
-            Current_Float := random(0, 9);
-            floater( 104 + Current_Float );
-            Float_State := 1;
-            add_timer_event( self_obj, game_ticks(3), 1 );
-         end
-         else begin
-            // Woman's turn
-            float_msg( Female_Mutant, mstr( 140 + Current_Float ), FLOAT_MSG_NORMAL );
-            Float_State := 0;
-            add_timer_event( self_obj, game_ticks(10), 1 );
+   if (not combat_is_initialized) then begin //added check by killap
+      if( fixed_param == 1 ) then begin
+         if( map_var( MVAR_Female_Mutant_Dead ) == 0 ) then begin
+            if( Float_State == 0 ) then begin
+               // Man's turn
+               Current_Float := random(0, 9);
+               floater( 104 + Current_Float );
+               Float_State := 1;
+               add_timer_event( self_obj, game_ticks(3), 1 );
+            end
+            else begin
+               // Woman's turn
+               float_msg( Female_Mutant, mstr( 140 + Current_Float ), FLOAT_MSG_NORMAL );
+               Float_State := 0;
+               add_timer_event( self_obj, game_ticks(10), 1 );
+            end
          end
       end
+   end else begin
+      add_timer_event( self_obj, game_ticks(10), 1 );
    end
 end
 

@@ -188,7 +188,7 @@ variable unhealthy_members:=0;
                                                       if ((Is_Injured(Lenny_Ptr)) or (get_poison(Lenny_Ptr) > 0) or (get_critter_stat(Lenny_Ptr, STAT_current_rad)) or (Is_Crippled(Lenny_Ptr)) ) then                   \
                                                          unhealthy_members+=1;      \
                                                    if (Cyberdog_In_Party) then                         \
-                                                      if ((Is_Injured(Cyberdog_Ptr)) or (get_poison(Cyberdog_Ptr) > 0) or (get_critter_stat(Cyberdog_Ptr, STAT_current_rad)) or (Is_Crippled(Cyberdog_Ptr)) ) then                   \
+                                                      if ((Is_Injured(Cyberdog_Ptr)) or (get_poison(Cyberdog_Ptr) > 0) or (get_critter_stat(Cyberdog_Ptr, STAT_current_rad)) or (Is_Crippled(Cyberdog_Ptr)) ) then            \
                                                          unhealthy_members+=1;      \
                                                    if (Doc_In_Party) then                              \
                                                       if ((Is_Injured(Doc_Ptr)) or (get_poison(Doc_Ptr) > 0) or (get_critter_stat(Doc_Ptr, STAT_current_rad)) or (Is_Crippled(Doc_Ptr)) ) then                   \
@@ -206,10 +206,25 @@ variable unhealthy_members:=0;
                                                       if ((Is_Injured(Laddie_Ptr)) or (get_poison(Laddie_Ptr) > 0) or (get_critter_stat(Laddie_Ptr, STAT_current_rad)) or (Is_Crippled(Laddie_Ptr)) ) then                   \
                                                          unhealthy_members+=1;      \
                                                    if (Robobrain_In_Party) then                        \
-                                                      if ((Is_Injured(Robobrain_Ptr)) or (get_poison(Robobrain_Ptr) > 0) or (get_critter_stat(Robobrain_Ptr, STAT_current_rad)) or (Is_Crippled(Robobrain_Ptr)) ) then                   \
+                                                      if ((Is_Injured(Robobrain_Ptr)) or (get_poison(Robobrain_Ptr) > 0) or (get_critter_stat(Robobrain_Ptr, STAT_current_rad)) or (Is_Crippled(Robobrain_Ptr)) ) then              \
                                                          unhealthy_members+=1;      \
                                                    if (Bess_In_Party) then                             \
                                                       if ((Is_Injured(Bess_Ptr)) or (get_poison(Bess_Ptr) > 0) or (get_critter_stat(Bess_Ptr, STAT_current_rad)) or (Is_Crippled(Bess_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (Dogmeat_In_Party) then                             \
+                                                      if ((Is_Injured(Dogmeat_Ptr)) or (get_poison(Dogmeat_Ptr) > 0) or (get_critter_stat(Dogmeat_Ptr, STAT_current_rad)) or (Is_Crippled(Dogmeat_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (K9_In_Party) then                             \
+                                                      if ((Is_Injured(K9_Ptr)) or (get_poison(K9_Ptr) > 0) or (get_critter_stat(K9_Ptr, STAT_current_rad)) or (Is_Crippled(K9_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (Kitsune_In_Party) then                             \
+                                                      if ((Is_Injured(Kitsune_Ptr)) or (get_poison(Kitsune_Ptr) > 0) or (get_critter_stat(Kitsune_Ptr, STAT_current_rad)) or (Is_Crippled(Kitsune_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (Dex_In_Party) then                             \
+                                                      if ((Is_Injured(Dex_Ptr)) or (get_poison(Dex_Ptr) > 0) or (get_critter_stat(Dex_Ptr, STAT_current_rad)) or (Is_Crippled(Dex_Ptr)) ) then                   \
+                                                         unhealthy_members+=1;      \
+                                                   if (Cat_Jules_In_Party) then                             \
+                                                      if ((Is_Injured(Cat_Jules_Ptr)) or (get_poison(Cat_Jules_Ptr) > 0) or (get_critter_stat(Cat_Jules_Ptr, STAT_current_rad)) or (Is_Crippled(Cat_Jules_Ptr)) ) then           \
                                                          unhealthy_members+=1;      \
                                                    if (unhealthy_members > 0)
 
@@ -244,8 +259,8 @@ procedure map_enter_p_proc begin
       end
       else begin
          // I'm WORKING!!!!
-         move_to( self_obj, 13084, 0 );
-         critter_attempt_placement( self_obj, 13084, 0 );
+         move_to( self_obj, 13284, 0 ); //edit by killap (expansion) - was 13084
+         critter_attempt_placement( self_obj, 13284, 0 ); //edit by killap (expansion) - was 13084
          animate_rotation( 2 );
          rm_timer_event(self_obj);
          add_timer_event( self_obj, game_ticks(random(10,20)), 1 );
@@ -326,10 +341,10 @@ procedure talk_p_proc begin
    if( ( game_time_hour > 200 ) and ( game_time_hour < 700 ) ) then
       floater(398);
 
-   else if ((Marcus_Ptr != 0) and (global_var(GVAR_VAULT_CITIZEN) != CITIZEN_CAPTAIN_GUARD)) then
+   else if ((Marcus_Ptr != 0) and (not(Fallout2_enclave_destroyed) and (global_var(GVAR_VAULT_CITIZEN) != CITIZEN_CAPTAIN_GUARD))) then
        call Node003;
 
-   else if ((Lenny_Ptr != 0) and (global_var(GVAR_VAULT_CITIZEN) != CITIZEN_CAPTAIN_GUARD)) then
+   else if ((Lenny_Ptr != 0) and (not(Fallout2_enclave_destroyed) and (global_var(GVAR_VAULT_CITIZEN) != CITIZEN_CAPTAIN_GUARD))) then
        call Node004;
 
    else if (global_var(GVAR_VAULT_JET_QUEST) == JET_BLACKMAIL_ON) then begin
@@ -349,7 +364,7 @@ procedure talk_p_proc begin
        end_dialogue;
    end
 
-   else if (herebefore) then begin
+   else if not(herebefore) then begin //edit by killap (added "not")
        set_herebefore;
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
@@ -368,8 +383,10 @@ procedure talk_p_proc begin
    end
 
 
-   if (Insta_Kill_Player) then
+   if (Insta_Kill_Player) then begin
        critter_damage(dude_obj,10000);
+       display_msg(g_mstr(400)); //added by killap
+   end
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -452,7 +469,7 @@ procedure Node005 begin
    if (get_critter_stat(dude_obj,STAT_current_hp) < get_critter_stat(dude_obj,STAT_max_hp)) then
        NLowOption(118,Node054);
    NLowOption(119,Node054);
-   NLowOption(120,Node999,004);
+   NLowOption(120,Node999); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
    NOption(121,Node008,004);
    NOption(122,Node009,004);
    NOption(123,Node005a,004);
@@ -558,7 +575,7 @@ procedure Node015 begin
    Reply(160);
 
    NOption(161,Node015a,004);
-   NOption(162,Node999,004);
+   //NOption(162,Node999,004); //need to change this..killap
 end
 
 procedure Node015a begin
@@ -568,7 +585,8 @@ procedure Node015a begin
        call Node012;
    end
    else
-       call Node1000;
+       //call Node1000;
+       call Node999; //edit by killap -  makes no sense for him to attack you here...
 end
 
 procedure Node016 begin
@@ -749,6 +767,7 @@ procedure Node023 begin
 end
 
 procedure Node024 begin
+   display_msg(mstr(399)); //added by killap
    give_xp(EXP_JET_SOURCE_HINTED_AT);
    set_local_var(LVAR_Antidote_Time,(game_time-30*ONE_GAME_DAY));
 
@@ -762,6 +781,7 @@ procedure Node024 begin
 end
 
 procedure Node025 begin
+   display_msg(mstr(399)); //added by killap
    give_xp(EXP_JET_SOURCE_DISCOVERED);
    set_local_var(LVAR_Antidote_Time,(game_time-60*ONE_GAME_DAY));
 
@@ -799,7 +819,8 @@ procedure Node029 begin
    give_xp(EXP_JET_ANTIDOTE_INFO);
    set_global_var( GVAR_TOWN_REP_VAULT_CITY, (global_var(GVAR_TOWN_REP_VAULT_CITY) + REP_TOWN_GAVE_TROY_FORMULA ) );
    inc_general_rep( REP_BONUS_GAVE_TROY_FORMULA );
-
+   //set_jet_source(jet_source_cure_made);   //added by killap
+   
    From_29:=1;
 
    if (global_var(GVAR_VAULT_JET_QUEST) > 0) then
@@ -827,6 +848,7 @@ procedure Node031 begin
 end
 
 procedure Node032 begin
+   display_msg(mstr(399)); //added by killap
    give_xp(EXP_JET_SOURCE_DISCOVERED);
    set_local_var(LVAR_Antidote_Time,(game_time-60*ONE_GAME_DAY));
 
@@ -1006,7 +1028,7 @@ procedure Node044 begin
    else
        Reply(285);
 
-   if (dude_cur_hits < dude_max_hits) then
+   if ( (dude_cur_hits < dude_max_hits) or  ( dude_is_crippled ) ) then //added  ( dude_is_crippled ) - killap
        NLowOption(286,Node054);
    NLowOption(287,Node054);
    NLowOption(288,Node999);
@@ -1028,7 +1050,7 @@ procedure Node044 begin
        NOption(293,Node017,004);
    if ((global_var(GVAR_VAULT_JET_QUEST) == JET_DECLINED_JOB) or (global_var(GVAR_VAULT_JET_QUEST) == JET_WILL_GET)) then
        NOption(294,Node038,004);
-   NOption(295,Node999,004);
+   NOption(295,Node005a,004); // Seraph's Fix: changed 'Node999' to 'Node005a'
 end
 
 procedure Node044a begin
@@ -1064,7 +1086,7 @@ end
 procedure Node049 begin
    Reply(301);
 
-   if (dude_cur_hits < dude_max_hits) then
+   if ( (dude_cur_hits < dude_max_hits) or ( dude_is_crippled ) ) then //added  ( dude_is_crippled ) - killap
        NOption(302,Node052,004);
    if (dude_is_poisoned) then
        NOption(303,Node052,004);
@@ -1088,7 +1110,7 @@ procedure Node050 begin
 
    Reply(308);
 
-   if (dude_cur_hits < dude_max_hits) then
+   if ( (dude_cur_hits < dude_max_hits) or ( dude_is_crippled ) ) then //added  ( dude_is_crippled ) - killap
        NOption(309,Node052,004);
    if (dude_is_poisoned) then
        NOption(310,Node052,004);
@@ -1100,7 +1122,7 @@ end
 procedure Node051 begin
    Reply(313);
 
-   if (dude_cur_hits < dude_max_hits) then
+   if ( (dude_cur_hits < dude_max_hits) or ( dude_is_crippled ) ) then //added  ( dude_is_crippled ) - killap
        NOption(314,Node052,004);
    if (dude_is_poisoned) then
        NOption(315,Node052,004);
@@ -1133,7 +1155,7 @@ end
 procedure Node054 begin
    Reply(326);
 
-   NLowOption(327,Node1000);
+   BLowOption(327,Node1000); //was NLowOption - killap
    NLowOption(328,Node054a);
 end
 
@@ -1153,11 +1175,13 @@ procedure Node054a begin
     if( DayPass_KickOutCount > 0 ) then begin
         DayPass_KickOutObj := obj_carrying_pid_obj(dude_obj, PID_DAY_PASS);
         KickOutTemp := rm_mult_objs_from_inven(dude_obj, DayPass_KickOutObj, DayPass_KickOutCount );
+        destroy_object(DayPass_KickOutObj); //added by killap
     end
     CitizenPapers_KickOutCount := obj_is_carrying_obj_pid(dude_obj, PID_FAKE_CITIZENSHIP);
     if( CitizenPapers_KickOutCount > 0 ) then begin
         CitizenPapers_KickOutObj := obj_carrying_pid_obj(dude_obj, PID_FAKE_CITIZENSHIP);
         KickOutTemp := rm_mult_objs_from_inven(dude_obj, CitizenPapers_KickOutObj, CitizenPapers_KickOutCount );
+        destroy_object(CitizenPapers_KickOutObj); //added by killap
     end
     load_map( MAP_VAULTCITY_COURTYARD, 0);
     gfade_in(600);
@@ -1169,7 +1193,8 @@ procedure Node055 begin
         gfade_out(600);
         gfade_in(600);
     end
-
+   
+   set_global_var(GVAR_NEW_RENO_JET_SOURCE,JET_SOURCE_CURE_MADE); //added by killap
    set_global_var(GVAR_VAULT_JET_QUEST,JET_ANTIDOTE_FOUND);
 
    if (From_WTG) then begin
@@ -1380,13 +1405,55 @@ procedure Node062 begin
          critter_uninjure(Robobrain_Ptr, (DAM_CRIP_LEG_LEFT bwor DAM_CRIP_LEG_RIGHT bwor DAM_CRIP_ARM_LEFT bwor DAM_CRIP_ARM_RIGHT));
       end
    end
-
-   if (dude_cur_hits < dude_max_hits) then
+   //added by killap - RP
+   if (Dogmeat_In_Party) then begin
+      if (Is_Injured(Dogmeat_Ptr) or Is_Crippled(Dogmeat_Ptr)) then begin
+         critter_heal(Dogmeat_Ptr,Injured_How_Much(Dogmeat_Ptr));
+         poison(Dogmeat_Ptr,-(get_poison(Dogmeat_Ptr)));
+         radiation_dec(Dogmeat_Ptr,get_critter_stat(Dogmeat_Ptr,STAT_current_rad));
+         critter_uninjure(Dogmeat_Ptr, (DAM_CRIP_LEG_LEFT bwor DAM_CRIP_LEG_RIGHT bwor DAM_CRIP_ARM_LEFT bwor DAM_CRIP_ARM_RIGHT));
+      end
+   end
+   if (K9_In_Party) then begin
+      if (Is_Injured(K9_Ptr) or Is_Crippled(K9_Ptr)) then begin
+         critter_heal(K9_Ptr,Injured_How_Much(K9_Ptr));
+         poison(K9_Ptr,-(get_poison(K9_Ptr)));
+         radiation_dec(K9_Ptr,get_critter_stat(K9_Ptr,STAT_current_rad));
+         critter_uninjure(K9_Ptr, (DAM_CRIP_LEG_LEFT bwor DAM_CRIP_LEG_RIGHT bwor DAM_CRIP_ARM_LEFT bwor DAM_CRIP_ARM_RIGHT));
+      end
+   end
+   if (Kitsune_In_Party) then begin
+      if (Is_Injured(Kitsune_Ptr) or Is_Crippled(Kitsune_Ptr)) then begin
+         critter_heal(Kitsune_Ptr,Injured_How_Much(Kitsune_Ptr));
+         poison(Kitsune_Ptr,-(get_poison(Kitsune_Ptr)));
+         radiation_dec(Kitsune_Ptr,get_critter_stat(Kitsune_Ptr,STAT_current_rad));
+         critter_uninjure(Kitsune_Ptr, (DAM_CRIP_LEG_LEFT bwor DAM_CRIP_LEG_RIGHT bwor DAM_CRIP_ARM_LEFT bwor DAM_CRIP_ARM_RIGHT));
+      end
+   end
+   if (Dex_In_Party) then begin
+      if (Is_Injured(Dex_Ptr) or Is_Crippled(Dex_Ptr)) then begin
+         critter_heal(Dex_Ptr,Injured_How_Much(Dex_Ptr));
+         poison(Dex_Ptr,-(get_poison(Dex_Ptr)));
+         radiation_dec(Dex_Ptr,get_critter_stat(Dex_Ptr,STAT_current_rad));
+         critter_uninjure(Dex_Ptr, (DAM_CRIP_LEG_LEFT bwor DAM_CRIP_LEG_RIGHT bwor DAM_CRIP_ARM_LEFT bwor DAM_CRIP_ARM_RIGHT));
+      end
+   end
+   if (Cat_Jules_In_Party) then begin
+      if (Is_Injured(Cat_Jules_Ptr) or Is_Crippled(Cat_Jules_Ptr)) then begin
+         critter_heal(Cat_Jules_Ptr,Injured_How_Much(Cat_Jules_Ptr));
+         poison(Cat_Jules_Ptr,-(get_poison(Cat_Jules_Ptr)));
+         radiation_dec(Cat_Jules_Ptr,get_critter_stat(Cat_Jules_Ptr,STAT_current_rad));
+         critter_uninjure(Cat_Jules_Ptr, (DAM_CRIP_LEG_LEFT bwor DAM_CRIP_LEG_RIGHT bwor DAM_CRIP_ARM_LEFT bwor DAM_CRIP_ARM_RIGHT));
+      end
+   end
+   //end added
+   
+   if ( (dude_cur_hits < dude_max_hits) or ( dude_is_crippled ) ) then //added ( dude_is_crippled ) - killap
        NOption(363,Node064,004);
    if (dude_is_poisoned) then
-       NOption(364,Node065,004);
+       NOption(365,Node065,004); //killap's fix: changed from '364'
    if (dude_is_irradiated) then
-       NOption(365,Node065,004);
+       NOption(364,Node065,004);  //killap's fix: changed from '365'
    If_Companion_Needs_Healing then begin
         if( party_size == 2 ) then
             NOption(375,Node063a,004);
@@ -1407,12 +1474,12 @@ procedure Node063 begin
    else
        Reply(371);
 
-   if (dude_cur_hits < dude_max_hits) then
+   if ( (dude_cur_hits < dude_max_hits) or ( dude_is_crippled ) ) then //added (( dude_is_crippled ) - killap
        NOption(372,Node064,004);
    if (dude_is_poisoned) then
-       NOption(373,Node065,004);
+       NOption(374,Node065,004); //killap's fix: changed from '373'
    if (dude_is_irradiated) then
-       NOption(374,Node065,004);
+       NOption(373,Node065,004); //killap's fix: changed from '374'
    If_Companion_Needs_Healing then begin
         if( party_size == 2 ) then
             NOption(375,Node063a,004);

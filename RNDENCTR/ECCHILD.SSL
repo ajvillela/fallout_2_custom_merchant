@@ -148,7 +148,8 @@ end
 procedure destroy_p_proc begin
 
 /* Increment the aligned critter counter*/
-   inc_childkiller
+   //inc_childkiller
+   inc_good_critter //edit by killap
 
 /* Set global_variable for Enemy status*/
 end

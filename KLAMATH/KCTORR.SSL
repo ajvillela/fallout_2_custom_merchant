@@ -32,10 +32,11 @@
 #include "..\headers\define.h"
 #include "..\headers\klamath.h"
 #include "..\headers\klagraz.h"
+#include "..\headers\den.h" //added by killap
 
 #define NAME                    SCRIPT_KCTORR
 #define TOWN_REP_VAR            (GVAR_TOWN_REP_KLAMATH)
-#define floater(x)		float_msg(self_obj, message_str(NAME,x),FLOAT_MSG_RED)
+#define floater(x)		float_msg(self_obj, message_str(NAME,x),FLOAT_MSG_NORMAL)
 #define NOW                     1
 #define TONIGHT                 2
 
@@ -134,6 +135,8 @@ procedure Node031;
 //#define LVAR_Torr_In_Party              (11)
 #define LVAR_Follow_Dude                (10)
 
+#define LVAR_Torr_Guard_Wait           (11)
+
 //#define LVAR_Center                     (13) //is Torr at center of map
 //#define LVAR_Edge                       (14) //is Torr at edge
 
@@ -218,7 +221,8 @@ end
 
 procedure leave_player begin
 //on leaving canyon map we need to remove Torr from players party
-   floater(600);
+   //floater(600);
+   float_msg(self_obj, message_str(NAME,600),FLOAT_MSG_GREEN); //edit by killap
    set_global_var(GVAR_TORR_MISSING, 0);
    set_global_var(GVAR_QUEST_RESCUE_TORR, TORR_RESCUE_SUCCESS);
    set_local_var(LVAR_Follow_Dude, 0);
@@ -234,7 +238,7 @@ procedure critter_p_proc begin
    call rustle_status;
 
    /* DUDE_BAD is set if player starts killing the brahmin */
-   if ( (local_var(LVAR_Hostile) == 0) and (map_var(MVAR_Dude_Bad) > 0) ) then begin //dude must've killed brahmin
+   if ( (local_var(LVAR_Hostile) == 0) and (map_var(MVAR_Dude_Bad) > 0) and (self_visible) ) then begin //dude must've killed brahmin; added (self_visible) by killap
       call Node021;
       set_local_var(LVAR_Hostile,2);
    end
@@ -326,7 +330,8 @@ procedure talk_p_proc begin
    else if (cur_map_index == MAP_KLAMATH_CANYON) then begin//TORR ON CANYON MAP
 
       if (global_var(GVAR_QUEST_RESCUE_TORR) == TORR_RESCUE_SUCCESS) then begin
-         floater(600);
+         //floater(600);
+         float_msg(self_obj, message_str(NAME,600),FLOAT_MSG_GREEN); //edit by killap
       end
       else begin
          start_gdialog(NAME,self_obj,4,-1,-1);
@@ -355,7 +360,7 @@ procedure talk_p_proc begin
    end
 
    else if (cur_map_index == MAP_KLAMATH_1) then begin
-      if ( (local_var(LVAR_not_first_time_downtown) == 0) and (global_var(GVAR_RUSTLE_OVER) != 1) ) then begin //first_time? (ask Matt)
+      if ( ( (local_var(LVAR_not_first_time_downtown) == 0) or (local_var(LVAR_Torr_Guard_Wait) == 1) ) and (global_var(GVAR_RUSTLE_OVER) != 1) ) then begin //first_time? (ask Matt); added Torr guard wait variable check - killap
          set_local_var(LVAR_not_first_time_downtown,1);
          start_gdialog(NAME,self_obj,4,-1,-1);
          gSay_Start;
@@ -386,7 +391,7 @@ procedure talk_p_proc begin
                end_dialogue;
             end
             else begin
-               float_msg(self_obj, message_str(NAME,301),FLOAT_MSG_RED);
+               float_msg(self_obj, message_str(NAME,301),FLOAT_MSG_GREEN);
 //               floater(301); //tell player he can go..danger is gone
             end
       end
@@ -447,7 +452,7 @@ procedure rustle_status begin
    if (global_var(GVAR_RUSTLE_ACCEPT) == 1) then
       rustle_triggered := 1;
    if (global_var(GVAR_RUSTLE_REFUSE) == 1) then
-      rustle_triggered := 1;
+      rustle_triggered := 0; //edit by killap - was 1
    if (global_var(GVAR_TORR_GUARD_STATUS) == TORR_GUARD_ACCEPT) then
       rustle_triggered := 1;
    if (global_var(GVAR_RUSTLE_SUCCESS) == 1) then
@@ -508,6 +513,7 @@ procedure Node930 begin
    KC_REP_ADJUST(-8)
    set_global_var(GVAR_RUSTLE_OVER,1);
    set_global_var(GVAR_TORR_MISSING,1); //now that Torr is missing, Ardin will ask about him
+   set_global_var(GVAR_TORR_GUARD_STATUS,3);  //set to failure - killap
    call scampera;
    //mark Brahmin Rustling Quest Completed in log
    //if Torr_Guard_Accept then set_Torr_Guard_Fail
@@ -595,6 +601,10 @@ procedure Node004 begin
       Reply(141);
 
    GLowOption(142, Node006);
+   //added by killap
+   if (local_var(LVAR_Torr_Guard_Wait) == 1) then
+      NOption(144, Node007, 004);
+   //end added
    NOption(143, Node006, 004);
 end
 
@@ -622,7 +632,8 @@ procedure Node006 begin
 end
 
 procedure Node007 begin
-   set_global_var(GVAR_TORR_GUARD_STATUS, TORR_GUARD_ACCEPT);
+   //set_global_var(GVAR_TORR_GUARD_STATUS, TORR_GUARD_ACCEPT); //moved to node20 by killap
+   set_local_var(LVAR_Torr_Guard_Wait,1); //added by killap
    if dude_low_iq then begin
       //if (tym == TONIGHT) then
       //   Reply(170);
@@ -649,13 +660,15 @@ procedure Node008 begin
    NLowOption(dude_name + mstr(181),Node009);
    NLowOption(dude_name + mstr(182),Node010);
    NLowOption(183,Node011);
-   NLowOption(184,Node012);
+   if not(dude_found_geck) then
+      NLowOption(184,Node012);
    NLowOption(185,Node999);
 end
 
 procedure Node009 begin
    Reply(190);
-   GLowOption(191,Node008);
+   GLowOption(701,Node006); //added by killap
+   NLowOption(191,Node008); //edit by killap - was GOption
    NLowOption(192,Node999);
 end
 
@@ -674,7 +687,8 @@ end
 
 procedure Node012 begin
    Reply(220);
-   GLowOption(221,Node008);
+   if not(vic_free) then
+      GLowOption(221,Node008);
    GLowOption(222,Node999);
 end
 
@@ -686,7 +700,7 @@ procedure Node013 begin
 
    NLowOption(232, Node999);
    NOption(233, Node999, 004);
-   if (global_var(GVAR_RUSTLE_ACCEPT) == 1) then
+   if ((global_var(GVAR_RUSTLE_ACCEPT) == 1) and (global_var(GVAR_RUSTLE_FAIL) != 1)) then   //killap's fix: added gvar_rustle_fail
       GOption(234, Node018, 004);
 end
 
@@ -699,8 +713,9 @@ procedure Node014 begin
    GLowOption(dude_name + mstr(242), Node915);
    NLowOption(243, Node999);
    GOption(244, Node915, 004);
-   GOption(245, Node018, 004); //need to have a speech roll here...this is too easy
-   GOption(246, Node999, 004);
+   if ((global_var(GVAR_RUSTLE_ACCEPT) == 1) and (global_var(GVAR_RUSTLE_FAIL) != 1)) then   //added by killap   
+      GOption(245, Node018, 004); //need to have a speech roll here...this is too easy
+   NOption(246, Node999, 004); //was GOption - killap
 end
 
 procedure Node015 begin
@@ -716,7 +731,9 @@ procedure Node015 begin
 end
 
 procedure Node016 begin
-   k:=random(1,18);
+   floater(random(260,277)); //edit by killap
+   
+   /*k:=random(1,18);
    if (k == 1) then floater(260);
    else if (k == 2) then floater(261);
    else if (k == 3) then floater(262);
@@ -734,7 +751,7 @@ procedure Node016 begin
    else if (k == 15) then floater(274);
    else if (k == 16) then floater(275);
    else if (k == 17) then floater(276);
-   else if (k == 18) then floater(277);
+   else if (k == 18) then floater(277);*/
 end
 
 procedure Node017 begin //shouldn't get here with iq > 3
@@ -749,6 +766,8 @@ procedure Node018 begin
 end
 
 procedure Node020 begin
+   set_global_var(GVAR_TORR_GUARD_STATUS, TORR_GUARD_ACCEPT); //moved by killap
+   set_local_var(LVAR_Torr_Guard_Wait,0);
    gfade_out(600);
    game_time_advance(game_ticks(900)); //15min to get to other map
    load_map(MAP_KLAMATH_GRAZE, 13); //signal map script to set up things
@@ -756,22 +775,22 @@ end
 
 procedure Node021 begin
    k:=random(1,5);
-   if (k == 1) then floater(500);
-   else if (k == 2) then floater(501);
+   if (k == 1) then float_msg(self_obj, message_str(NAME,500),FLOAT_MSG_RED);
+   else if (k == 2) then float_msg(self_obj, message_str(NAME,501),FLOAT_MSG_RED);
    else if (k == 3) then begin
       if dude_is_female then
-         floater(502);
+         float_msg(self_obj, message_str(NAME,502),FLOAT_MSG_RED);
       else
-         floater(503);
+         float_msg(self_obj, message_str(NAME,503),FLOAT_MSG_RED);
    end
    else if (k == 4) then begin
       if dude_is_female then
-         floater(504);
+         float_msg(self_obj, message_str(NAME,504),FLOAT_MSG_RED);
       else
-         floater(505);
+         float_msg(self_obj, message_str(NAME,505),FLOAT_MSG_RED);
    end
-   else if (k == 5) then floater(506);
-   else if (k == 6) then floater(507);
+   else if (k == 5) then float_msg(self_obj, message_str(NAME,506),FLOAT_MSG_RED);
+   else if (k == 6) then float_msg(self_obj, message_str(NAME,507),FLOAT_MSG_RED);
 end
 
 procedure Node031 begin

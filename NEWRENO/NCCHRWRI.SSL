@@ -137,6 +137,7 @@ end
 procedure damage_p_proc begin
    if (source_obj == dude_obj) then begin
       set_personal_enemy;
+      attack_family(self_family) //added by killap
    end
 end
 
@@ -152,6 +153,7 @@ procedure talk_p_proc begin
    Karma_Perception := KARMA_PERCEPTION2;
    CheckKarma;
    GetReaction;
+   ReactToLevel; //added by killap
 
    if (pissed) then begin
       call Node005;
@@ -162,7 +164,7 @@ procedure talk_p_proc begin
       gSay_Start;
          if (dude_family == self_family) then begin
             call Node006;
-         end else if ((has_rep_slaver) or (dude_is_made_man)) then begin
+         end else if ( (has_rep_slaver) or (dude_is_made_man) ) then begin
             call Node011;
          end else begin
             call Node006;
@@ -197,11 +199,12 @@ procedure Node998 begin
    if (hostile == false) then begin
       set_hostile;
    end
+   attack_family(self_family) //added by killap
 end
 procedure Node999 begin
 end
 procedure Node990 begin
-   if ((has_rep_berserker) or (has_rep_childkiller) or (check_general_rep < -100)) then begin
+   if ( (not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) and ( (has_rep_berserker) or (has_rep_childkiller) or (check_general_rep < -100)) ) then begin //edit by killap - added not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       call Node013;
    end else begin
       call Node012;
@@ -259,7 +262,7 @@ procedure Node006 begin
    BOption(250, Node007, -003);
    NOption(251, Node999, -003);
    if (know_chris) then begin
-      NOption(257, Node009, 009);
+      //NOption(257, Node009, 004); // comment out by killap (was ,009) -- too many options here and you can get to this one elsewhere
       if ((reject == false) and (chris_recommends == false)) then begin
          NOption(253, Node990, 004);
       end
@@ -339,7 +342,7 @@ procedure Node011 begin
    end else begin
       Reply(315);
    end
-   NOption(318, Node998, 004);
+   BOption(318, Node998, 004); //edit by killap - was NOption
    NOption(251, Node999, 004);
    NOption(320, Node999, 004);
    prev_node := 11;
@@ -422,7 +425,7 @@ procedure Node021 begin
    NOption(421, Node988, 004);
    BOption(422, Node024, 004);
    NOption(423, Node987, 004);
-   NOption(412, Node010, 004);
+   NOption(412, Node025, 004); // edit by killap - was 010
    NOption(425, Node999, 004);
    prev_node := 21;
 end

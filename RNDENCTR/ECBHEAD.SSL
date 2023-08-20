@@ -285,7 +285,7 @@ procedure Node006 begin
 //         game_ui_disable;
 
    if (n6count == 0) then
-      float_msg(dude_obj, mstr(129 + n6count), FLOAT_MSG_NORMAL);
+      float_msg(dude_obj, mstr((129 + n6count)+(1000*dude_is_stupid)), FLOAT_MSG_NORMAL); //edit by killap - added (1000*dude_is_stupid)
    else if (n6count > 0 and n6count < 5) then
       float_msg(self_obj, mstr(129 + n6count), FLOAT_MSG_GREEN);
    else if (n6count == 5) then
@@ -349,7 +349,8 @@ procedure Node008 begin
    if (n8count > 1) then begin
       n8count := 0;
       talking := 0;
-      critter_damage(dude_obj, 40000);
+      critter_dmg(dude_obj, 40000, DMG_plasma); //added by killap - prevent rare occurence of sliding off map and not getting killed
+      //critter_damage(dude_obj, 40000); //commented out (see above)
    end else begin
       add_timer_event(self_obj, game_ticks(3), TIMER_NODE8);
    end

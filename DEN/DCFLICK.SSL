@@ -53,9 +53,22 @@ procedure Node011;
 procedure Node012;
 procedure Node013;
 
+//added by killap - expansion
+procedure Node014;
+procedure Node015;
+procedure Node016;
+procedure Node017;
+procedure Node018;
+procedure Node019;
+procedure Node020;
+procedure Node021;
+//end
+
 /* Local Variables which are saved. All Local Variables need to be
    prepended by LVAR_ */
 #define LVAR_Flags                        (4)
+#define LVAR_Told_Arrangement             (5) //added by killap - expansion
+#define LVAR_Told_Angry                   (6) //added by killap - expansion
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -112,15 +125,37 @@ procedure talk_p_proc begin
    if (dude_is_stupid) then begin
       call Node001;
    end else begin
-      move_obj_inven_to_obj(self_obj,generic_temp_box);
-      move_obj_inven_to_obj(den_flick_box_obj,self_obj);
-         start_gdialog(NAME,self_obj,4,-1,-1);
-         gSay_Start;
-            call Node002;
-         gSay_End;
-         end_dialogue;
+      //added by killap - expansion
+      if (global_var(GVAR_DEN_ORPHANAGE) == 7) then begin
+         move_obj_inven_to_obj(self_obj,generic_temp_box);
+         move_obj_inven_to_obj(den_flick_box_obj,self_obj);
+         if (local_var(LVAR_Told_Angry) == 0) then begin
+            start_gdialog(NAME,self_obj,4,-1,-1);
+            gSay_Start;
+               call Node014;
+            gSay_End;
+            end_dialogue;
+         end else begin
+            start_gdialog(NAME,self_obj,4,-1,-1);
+            gSay_Start;
+               call Node020;
+            gSay_End;
+            end_dialogue;
+         end
       move_obj_inven_to_obj(self_obj,den_flick_box_obj);
       move_obj_inven_to_obj(generic_temp_box,self_obj);
+      //end
+      end else begin
+         move_obj_inven_to_obj(self_obj,generic_temp_box);
+         move_obj_inven_to_obj(den_flick_box_obj,self_obj);
+            start_gdialog(NAME,self_obj,4,-1,-1);
+            gSay_Start;
+               call Node002;
+            gSay_End;
+            end_dialogue;
+         move_obj_inven_to_obj(self_obj,den_flick_box_obj);
+         move_obj_inven_to_obj(generic_temp_box,self_obj);
+      end
    end
 end
 
@@ -153,7 +188,11 @@ end
 
 procedure Node990 begin
    gdialog_mod_barter(0);
-   call Node003;
+   // added by killap - expansion
+   if (global_var(GVAR_DEN_ORPHANAGE) == 7) then
+      call Node021;
+   else
+      call Node003;
 end
 
 procedure Node001 begin
@@ -201,6 +240,8 @@ procedure Node008 begin
    NOption(316, Node009, 004);
 end
 procedure Node009 begin
+   //added by killap - expansion
+   set_local_var(LVAR_Told_Arrangement,1);
    Reply(325);
    GOption(326, Node002, 004);
    GOption(327, Node990, 004);
@@ -238,3 +279,47 @@ procedure Node013 begin
    NOption(403, Node002, 004);
    NOption(404, Node999, 004);
 end
+//added by killap - expansion
+procedure Node014 begin
+   Reply(410 + dude_is_female);
+   if not(local_var(LVAR_Told_Arrangement)) then
+      NOption(412, Node017, 004);
+   else
+      NOption(413, Node015, 004);
+end
+procedure Node015 begin
+   Reply(420);
+   NOption(421, Node018, 004);
+   NOption(422, Node016, 004);
+end
+procedure Node016 begin
+   Reply(430);
+   NOption(431, Node019, 004);
+   BOption(432, Node998, 004);
+end
+procedure Node017 begin
+   Reply(440);
+   NOption(441, Node018, 004);
+end
+procedure Node018 begin
+   Reply(450);
+   NOption(451, Node019, 004);
+end
+procedure Node019 begin
+   set_local_var(LVAR_Told_Angry,1);
+   Reply(460);
+   NOption(461, Node990, 004);
+   NOption(462, Node999, 004);
+   BOption(463, Node998, 004);
+end
+procedure Node020 begin
+   Reply(470);
+   NOption(471, Node990, 004);
+   NOption(472, Node999, 004);
+end
+procedure Node021 begin
+   Reply(480);
+   GOption(481, Node990, 004);
+   NOption(482, Node999, 004);
+end
+//end

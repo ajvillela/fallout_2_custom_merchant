@@ -59,6 +59,7 @@ procedure Node015;
 procedure Node016;
 procedure Node017;
 procedure Node018;
+procedure Node018a; //added by killap
 procedure Node019;
 procedure Node020;
 procedure Node021;
@@ -148,9 +149,10 @@ end
 procedure talk_p_proc begin
    script_overrides;
    GetReaction;
+   ReactToLevel; //added by killap
    if ((bad_critter_reaction) or (REP_ENEMY_DEN) or (mom_attacked)) then begin
       start_dialog_at_node(Node007);
-   end else if (still_quest(state_still_quest_destroyed)) then begin
+   end else if ( (still_quest(state_still_quest_asked_to_destroy)) or (still_quest(state_still_quest_destroyed)) ) then begin //added (still_quest(state_still_quest_asked_to_destroy)) - by killap
       start_dialog_at_node(Node014);
    end else if (still_quest(state_still_quest_serching)) then begin
       start_dialog_at_node(Node012);
@@ -229,7 +231,10 @@ procedure Node991 begin
    if (is_success(roll_vs_skill(dude_obj,SKILL_CONVERSANT,0))) then begin
       call Node019;
    end else begin
-      call Node018;
+      if (still_quest(state_still_quest_finished) == false) then
+         call Node018;
+      else
+         call Node018a; //added by killap 
    end
 end
 procedure Node990 begin
@@ -296,7 +301,7 @@ end
 procedure Node003 begin
    Reply(165);
    DownReactMinor;
-   NOption(166,Node998,004);
+   BOption(166,Node998,004); //was NOption - killap
    if (rebecca_dead == false) then begin
       NOption(167,Node004,004);
    end
@@ -385,7 +390,8 @@ procedure Node014 begin
       if (still_broken) then begin
          NOption(207,Node015,004);
       end
-      NOption(208,Node017,006);
+      if not(still_quest(state_still_quest_destroyed)) then //added check by killap
+         NOption(208,Node017,006);
       NOption(209,Node999,004);
    end else begin
       Reply(300);
@@ -421,6 +427,13 @@ procedure Node018 begin
    NOption(222,Node993,004);
    NOption(223,Node988,004);
 end
+//added by killap
+procedure Node018a begin
+   Reply(420);
+   NOption(222,Node999,004);
+   BOption(266,Node998,004);
+end
+//end added
 procedure Node019 begin
    den_display_mstr(600);
    give_xp(EXP_CONVINCE_FRANKIE_TRADE);
@@ -499,6 +512,6 @@ procedure Node027 begin
    end else begin
       Reply(267);
       NOption(188,Node999,004);
-      NOption(266,Node998,004);
+      BOption(266,Node998,004); //was NOption - killap
    end
 end

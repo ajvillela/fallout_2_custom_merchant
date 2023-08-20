@@ -21,6 +21,7 @@
 #include "..\headers\command.h"
 #include "..\headers\NewReno.h"
 #include "..\headers\ModReact.h"
+#include "..\headers\NewR2.h"
 
 /* Standard Script Procedures */
 procedure start;
@@ -227,6 +228,18 @@ procedure map_exit_p_proc begin
 end
 
 procedure combat_p_proc begin
+   //added by killap - prevent mrs. bishop from getting stuck in bed during combat
+   if (mrs_bishop_in_bed) then begin
+     if (hostile) then begin
+       reg_anim_clear( self_obj );
+       //reg_anim_begin();
+         anim(self_obj, ANIM_stand, 2);
+       //reg_anim_end();
+       critter_attempt_placement(self_obj, 16093, mrs_bishop_room_elev);
+     end else begin
+       script_overrides;
+     end
+   end
 end
 
 procedure critter_p_proc begin
@@ -297,9 +310,12 @@ procedure use_skill_on_p_proc begin
 end
 
 procedure Node998 begin
-   set_hostile;
+   //set_hostile; //CAUSES THE GAME TO CRASH - NO IDEA WHY --killap
    attack_family(family_bishop)
-   nr_add_timer_event_tic(angela_guard_obj, 0, heard_help_param);
+   if (angela_guard_obj != 0) then begin
+      debug_msg("sending call guard to bismen");
+      nr_add_timer_event_tic(angela_guard_obj, 0, heard_help_param);
+   end
 end
 procedure Node999 begin
 end
@@ -486,7 +502,7 @@ procedure Node011 begin
       Reply(270);
    end else begin
       Reply(271);
-      if ((bishop_raiders != false) and (raiders_dead == false)) then begin
+      if ((bishop_raiders != false) and ( (raiders_dead == false) and (raiders_scout_left == false) )) then begin //edit by killap - expansion
          BOption(272, Node034, 004);
       end
       BOption(273, Node012, 004);
@@ -513,7 +529,7 @@ procedure Node013 begin
    Reply(285);
    NOption(286, Node014, 005);
    if (bishop_dead == false) then begin
-      if ((bishop_raiders != false) and (raiders_dead == false)) then begin
+      if ((bishop_raiders != false) and ( (raiders_dead == false) and (raiders_scout_left == false) )) then begin //edit by killap - expansion
          BOption(287, Node034, 004);
       end
    end
@@ -884,6 +900,7 @@ procedure Node127 begin
    prev_node := 127;
 end
 procedure Node128 begin
+   set_mrs_bishop_rape
    Reply(575);
    BOption(576, Node998, 004);
    BOption(577, Node998, 004);

@@ -121,7 +121,17 @@ end
    default from the prototype, and needs to be set in scripts. */
 procedure map_enter_p_proc begin
    Only_Once:=0;
-   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_PLAYER);
+   //critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_PLAYER);
+   //edits by killap
+   if (cur_map_index == MAP_NCR_DOWNTOWN) then
+      critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NCR);
+   else if (cur_map_index == MAP_NCR_BAZAAR) then
+      critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NCR_ENTRANCE);
+   else if (cur_town == AREA_REDDING) then
+      critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_REDDING);
+   else
+      critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_PLAYER);
+   //end edits
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_GUARD);
    if (is_loading_game == FALSE) then
       call checkLoadConditions;
@@ -185,7 +195,12 @@ procedure talk_p_proc begin
       gSay_End;
       end_dialogue;
    end else begin
-      call Node007;
+      //added by killap
+      if (cattle_drive(CATTLE_ABANDON)) then
+         float_msg(self_obj, mstr(112), FLOAT_MSG_RED);
+      //end added
+      else
+         call Node007;
    end
 end
 
@@ -249,7 +264,12 @@ procedure Node006 begin
    number := caravan_brahmin_left;
 
    debug_msg("SCDRVPAY: caravan_brahmin_left: " + caravan_brahmin_left);
-   if (number == 0) then begin
+   
+   //added by killap
+   if (cattle_drive(CATTLE_FAIL)) then begin 
+      set_cattle_drive(CATTLE_ABANDON);
+   //end added
+   end else if (number == 0) then begin
       debug_msg("SCDRVPAY: in 0 case number: " + number);
       set_cattle_drive(CATTLE_SCREWED);
    end else if (caravan_brahmin_left < 4) then begin
@@ -264,7 +284,12 @@ procedure Node006 begin
    end
    debug_msg("SCDRVPAY: caravan_brahmin_left: " + caravan_brahmin_left);
 
-   if (cattle_drive(CATTLE_SCREWED)) then begin
+   //added by killap
+   if (cattle_drive(CATTLE_ABANDON)) then begin
+      amount := 0;
+      Reply(118);
+   //end added
+   end else if (cattle_drive(CATTLE_SCREWED)) then begin
       amount := 0;
       Reply(113);
    end else if (cattle_drive(CATTLE_FAIL)) then begin

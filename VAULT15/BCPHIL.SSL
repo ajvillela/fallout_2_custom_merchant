@@ -287,32 +287,32 @@ procedure Node001 begin
    NLowOption(104, Node002);
    NLowOption(105, Node010);
    NLowOption(106, Node009);
-   NLowOption(107, Node998);
+   BLowOption(107, Node998); //edit by killap - was NLowOption
 
    if (andV15Status(V15_SPY)) then
       NOption(109, Node002, 4);
    if (andV15Status(V15_LOOK_GIRL)) then
       NOption(110, Node010, 4);
    NOption(111, Node009, 4);
-   NOption(112, Node998, 4);
+   BOption(112, Node998, 4); //edit by killap - was NOption
 end
 
 procedure Node002 begin
    Reply(114);
    NLowOption(115, Node003);
-   NLowOption(116, Node998);
+   BLowOption(116, Node998); //edit by killap - was NLowOption
    NLowOption(117, Node009);
    NOption(118, Node003, 4);
-   NOption(119, Node998, 4);
+   BOption(119, Node998, 4); //edit by killap - was NOption
    NOption(120, Node009, 4);
 end
 
 procedure Node003 begin
    Reply(121);
-   NLowOption(122, Node998);
+   BLowOption(122, Node998); //edit by killap - was NLowOption
    NLowOption(123, Node004);
    NLowOption(124, Node009);
-   NOption(125, Node998, 4);
+   BOption(125, Node998, 4); //edit by killap - was NOption
    BOption(126, Node009, 4);
    GOption(127, Node005, 4);
 end
@@ -369,10 +369,10 @@ end
 
 procedure Node010 begin
    Reply(147);
-   NLowOption(148, Node998);
+   BLowOption(148, Node998); //edit by killap - was NLowOption
    NLowOption(149, Node004);
    NLowOption(150, Node009);
-   NOption(151, Node998, 4);
+   BOption(151, Node998, 4); //edit by killap - was NOption
    BOption(152, Node009, 4);
    GOption(153, Node005, 4);
 end

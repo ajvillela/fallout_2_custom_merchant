@@ -265,7 +265,7 @@ procedure Node001 begin
    NOption(111, Node008, 4);
    if (ncr_flag(NCR_BOMB_JACK) or global_var(GVAR_NCR_MIRA_STATE) == MJACKDEAD and local_var(LVAR_N25_Count) == 0) then begin
       NOption(186, Node025, 4);
-      NLowOption(187, Node025, 4);
+      NLowOption(187, Node025); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
    end
 end
 
@@ -298,7 +298,8 @@ procedure Node003 begin
          ENDOPTION;
       end else begin
          Reply(185);
-         MOREOPTION(Node005);
+         MOREOPTION(Node001); //edit by killap
+         //MOREOPTION(Node005);
       end
    end else begin
       if (local_var(LVAR_N3_Count) == 0) then begin
@@ -307,7 +308,8 @@ procedure Node003 begin
          ENDOPTION;
       end else begin
          Reply(116);
-         MOREOPTION(Node005);
+         MOREOPTION(Node001); //edit by killap
+         //MOREOPTION(Node005);
       end
    end
    inc_local_var(LVAR_N3_Count);
@@ -403,7 +405,12 @@ procedure Node011 begin
       NOption(145, Node015, 4);
    if (global_var(GVAR_NCR_MIRA_STATE) == MJACKTALK) then
       NOption(146, Node016, 4);
-   NOption(147, Node999, 4);
+   
+
+   if (dude_charisma < 8 and local_var(LVAR_Herebefore) == 0) then //added by killap
+      NOption(147, Node999, 4);
+   else  //added by killap
+      NOption(168, Node999, 4); //added by killap
 end
 
 procedure Node12Rep begin
@@ -522,6 +529,7 @@ procedure Node025 begin
 end
 
 procedure Node026 begin
+   add_obj_to_inven(dude_obj, create_object(PID_BOOZE, tile_num(self_obj), 0)); //added by killap
    Reply(193);
    NLowOption(194, Node009);
    NLowOption(195, Node999);

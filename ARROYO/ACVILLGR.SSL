@@ -69,6 +69,9 @@ procedure Node007;
 procedure Node008;
 procedure Node009;
 procedure Node010;
+//added by killap - expansion
+procedure Node011;
+//end
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
 // seen by the design Tool
@@ -79,6 +82,7 @@ procedure Node010;
 #define LVAR_Hostile                    (5)
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Home_Tile                  (7)
+#define LVAR_Kaga_Question              (8) //added by killap - expansion
 
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
@@ -110,7 +114,7 @@ procedure critter_p_proc begin
       Flee_From_Dude
    end
 
-   if (REP_ENEMY_ARROYO) then begin
+   if ( (REP_ENEMY_ARROYO) and (obj_can_see_obj(self_obj,dude_obj)) ) then begin //added and (obj_can_see_obj(self_obj,dude_obj)) by killap
        attack(dude_obj);
    end
 
@@ -229,6 +233,9 @@ procedure Node001 begin
    else
        Reply(mstr(152));
 
+   //added by killap - expansion
+   if ((kaga_bg) and (local_var(LVAR_Kaga_Question) == 0)) then
+      NOption(400,Node011,004);
    NOption(153,Node003,004);
    NOption(154,Node004,004);
    NOption(155,Node999,004);
@@ -277,6 +284,13 @@ procedure Node010 begin
    NOption(186,Node006,004);
    NOption(185,Node999,004);
 end
+//added by killap - expansion
+procedure Node011 begin
+   set_local_var(LVAR_Kaga_Question,1);
+   Reply(401);
+   NOption(402,Node999,004);
+end
+//end
 procedure Node997 begin
    if (get_critter_stat(dude_obj,STAT_iq) <= (0-LOW_IQ)) then begin
       call Node007;

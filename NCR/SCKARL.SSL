@@ -176,6 +176,7 @@ end
    written by designers are placed in here. Additionally, Reactions are generated and
    stored which affects player interactions. */
 procedure talk_p_proc begin
+   Node1Count := 0;
    Evil_Critter:=0;
    Slavery_Tolerant:=SLAVE_VERY_INTOLERANT;
    Karma_Perception:=KARMA_PERCEPTION5;
@@ -184,6 +185,8 @@ procedure talk_p_proc begin
 
    GetReaction;
 
+   ReactToLevel; //added by killap
+   
    if (doWalking == 0) then begin
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
@@ -259,8 +262,10 @@ procedure Node001 begin
    NOption(106, Node003, 4);
    if (not V13KNOWN) then
       NOption(107, Node004, 4);
-   if (global_var(GVAR_NCR_TANDI_JOB_ACCEPT) == 1) then
+   if ((global_var(GVAR_NCR_TANDI_JOB_ACCEPT) == 1) and not(ncr_global_state(NCR_OSWALD_DEAD))) then begin //edit by killap - added not(ncr_global_state(NCR_OSWALD_DEAD))
       NOption(108, Node005, 4);
+      NLowOption(153, Node005); //added by killap
+   end
    NOption(mstr(109) + " " + dude_name + mstr(152), Node006, 4);
    if (global_var(GVAR_NCR_MIRA_STATE) == MJOBTAKEN) then
       BOption(110, Node007, 4);
@@ -270,9 +275,11 @@ end
 
 procedure Node002 begin
    if (party_size > 1) then
-      Reply(112);
+      //Reply(112);
+      Reply(113); //swapped replies - killap
    else
-      Reply(113);
+      //Reply(113);
+      Reply(112); //swapped replies - killap
    ENDOPTION;
 end
 
@@ -292,6 +299,7 @@ procedure Node005 begin
    Reply(120);
    NOption(121, Node009, 4);
    NOption(122, NOde010, 4);
+   NLowOption(154, Node015); //added by killap
 end
 
 procedure Node006 begin
@@ -302,8 +310,13 @@ procedure Node006 begin
       set_global_var(GVAR_NCR_TANDI_WORK, 1);
       Reply(124);
    end
+   
    NOption(125, Node001, 4);
-   NOption(126, NOde999, 4);
+   
+   if (good_critter_reaction) then //added by killap
+      NOption(133, Node999, 4);  //added by killap
+   else  //added by killap
+      NOption(126, NOde999, 4);
 end
 
 procedure Node007 begin
@@ -384,12 +397,14 @@ procedure anim_end_call begin
    if (doWalking == 1) then begin
       if (i_cell_door_obj != -1) then begin
          if (openCloseDoor == 0) then begin
+            debug_msg("opening door");
             obj_unlock(i_cell_door_obj);
             if (not obj_is_open(i_cell_door_obj)) then begin
                use_obj(i_cell_door_obj);
             end
             openCloseDoor := 1;
          end else begin
+            debug_msg("closing door");
             if (obj_is_open(i_cell_door_obj)) then begin
                use_obj(i_cell_door_obj);
             end
@@ -401,6 +416,7 @@ procedure anim_end_call begin
          doWalking := 2;
       end
    end else if (doWalking == 2) then begin
+      debug_msg("doWalk == 2");
       doWalking := 3;
       call walkBack;
       if (openCloseDoor == 0) then

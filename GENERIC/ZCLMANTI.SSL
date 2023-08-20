@@ -85,7 +85,11 @@ procedure use_obj_on_p_proc begin
       rm_obj_from_inven(source_obj,obj_being_used_with);
       destroy_object(obj_being_used_with);
       critter_dmg(self_obj,get_critter_stat(self_obj,STAT_current_hp)+10,DMG_explosion);
+   //added by killap - expansion
+   end else if ((obj_pid(obj_being_used_with) == PID_BUG_SPRAY)) then begin
+      kill_critter(self_obj, ANIM_melted_to_nothing_sf);
    end
+   //end added
 end
 
 procedure use_skill_on_p_proc begin

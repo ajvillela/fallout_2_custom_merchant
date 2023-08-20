@@ -56,5 +56,13 @@
 
 #define lang_filter_on     language_filter_is_on
 
+#define HOMESTEAD_NONE        bit_1
+#define HOMESTEAD_FAIL        bit_2
+#define HOMESTEAD_SAVED       bit_3
+#define HOMESTEAD_REWARDED    bit_4
+
+#define set_rnd_enc_flag(x)  set_gvar_bit_on(GVAR_RND_ENCOUNTER_FLAGS, x)
+#define unset_rnd_flag(x)    set_gvar_bit_off(GVAR_RND_ENCOUNTER_FLAGS, x)
+#define rnd_enc_flag(x)      gvar_bit(GVAR_RND_ENCOUNTER_FLAGS, x)
 
 #endif // SPECENC_H

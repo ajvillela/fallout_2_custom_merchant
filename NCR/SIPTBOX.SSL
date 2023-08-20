@@ -47,6 +47,7 @@
 /* Penalties for Lock difficulty based on whether or not you are using lockpicks. */
 #define Lock_Bonus                      (-20)
 #define Lockpick_Bonus                  (0)
+#define Exd_Lockpick_Bonus              (20) //added by killap
 
 /* Penalties for disarming the trap */
 #define Trap_Bonus                      (0)
@@ -92,7 +93,8 @@ procedure Set_Lockpick_Lock;
 procedure Set_Trap;
 procedure Pry_Door;
 procedure Damage_Critter;
-
+procedure Super_Lockpick_Lock; //added by killap
+procedure Super_Set_Lockpick_Lock; //added by killap
 
 /*****************************************************************
    Local Variables which are saved. All Local Variables need to be
@@ -114,7 +116,6 @@ procedure Damage_Critter;
    Needs to be saved, make it a map variable (MVAR_)
 *******************************************************************/
 import variable playerTmpBox;
-
 
 
 /*******************************************************************
@@ -301,6 +302,16 @@ procedure use_obj_on_p_proc begin
                call Set_Lockpick_Lock;
            end
        end
+       //added by killap
+       else if (Tool == PID_EXP_LOCKPICK_SET) then begin
+            if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
+               call Super_Lockpick_Lock;
+            end
+            else begin
+               call Super_Set_Lockpick_Lock;
+            end
+       end
+       //end added by killap
    end
 
    else if (LOCK_STATUS == STATE_ELECTRIC_LOCK) then begin
@@ -312,6 +323,16 @@ procedure use_obj_on_p_proc begin
                call Set_Lockpick_Lock;
            end
        end
+       //added by killap
+       else if (Tool == PID_ELEC_LOCKPICK_MKII) then begin
+           if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
+               call Super_Lockpick_Lock;
+           end
+           else begin
+               call Super_Set_Lockpick_Lock;
+           end
+       end
+       //end added by killap
    end
 
    else if (Tool == PID_CROWBAR) then begin
@@ -385,7 +406,7 @@ end
 procedure map_enter_p_proc begin
 
    playerTmpBox := self_obj;
-
+   
 /* Set up the door state when the player first enters the map */
    if (local_var(LVAR_Set_Door_Status) == 0) then begin
        set_local_var(LVAR_Set_Door_Status,1);
@@ -1200,7 +1221,13 @@ procedure Lockpick_Lock begin
    call Lockpick_Door;
 end
 
+procedure Super_Lockpick_Lock begin
+/* Locks_Roll is a global variable to this script, defined at the beginning
+   of the script. */
+   Locks_Roll:=roll_vs_skill(source_obj,SKILL_LOCKPICK,Exd_Lockpick_Bonus);
 
+   call Lockpick_Door;
+end
 /***************************************************************************
    This procedure will check against the roll_vs_lockpick to see if the
    source_object will unlock the door and display the appropriate messages
@@ -1277,7 +1304,14 @@ procedure Set_Lockpick_Lock begin
    call Lock_Door;
 end
 
+procedure Super_Set_Lockpick_Lock begin
+/* Locks_Roll is a global variable to this script, defined at the beginning
+   of the script. */
 
+   Locks_Roll:=roll_vs_skill(source_obj,SKILL_LOCKPICK,Exd_Lockpick_Bonus);
+
+   call Lock_Door;
+end
 /***************************************************************************
    This procedure will actively set the lock on the door and set all of
    the coresponding varaibles for it.

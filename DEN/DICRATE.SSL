@@ -29,6 +29,12 @@ procedure use_p_proc;
 procedure start begin
 end
 
+//added by killap
+procedure use_skill_on_p_proc begin
+  script_overrides;
+end
+//added
+
 procedure use_p_proc begin
    script_overrides;
    display_mstr(100);

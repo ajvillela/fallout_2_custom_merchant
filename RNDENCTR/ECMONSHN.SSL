@@ -21,6 +21,8 @@ procedure map_enter_p_proc;
 procedure timed_event_p_proc;
 procedure look_at_p_proc;
 procedure description_p_proc;
+procedure use_skill_on_p_proc; //added by killap
+procedure pickup_p_proc; //added by killap
 
 procedure Node001;
 procedure Node002;
@@ -103,3 +105,18 @@ end
 
 procedure Node999 begin
 end
+
+//added by killap
+procedure destroy_p_proc begin
+   inc_good_critter
+end
+
+procedure use_skill_on_p_proc begin
+end
+
+procedure pickup_p_proc begin
+   if (source_obj == dude_obj) then begin
+     self_attack_dude;
+   end
+end
+//end added

@@ -274,7 +274,7 @@ end
 procedure Node001 begin
    Reply(103);
    NLowOption(mstr(104) + " " + dude_name + mstr(178), Node002);
-   NLowOption(105, Node002);
+   NLowOption(105, Node003); //edit by killap, was - NLowOption(105, Node002);
    NLowOption(106, Node999);
    GOption(mstr(107) + " " + dude_name + mstr(179), Node002, 4);
    NOption(108, Node003, 4);

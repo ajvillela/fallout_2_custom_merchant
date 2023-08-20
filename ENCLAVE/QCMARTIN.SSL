@@ -331,10 +331,11 @@ end
 procedure Node012 begin
    Reply(157);
 
-   if (global_var(GVAR_ENCLAVE_POWER_PLANT) == PLANT_KNOWN) then
-       NOption(158,Node013,004);
-   else
+   if (global_var(GVAR_ENCLAVE_POWER_PLANT) == PLANT_KNOWN) then begin
+      NOption(158,Node013,004);
+   end else begin
        NOption(159,Node014,004);
+   end
    BOption(160,Node999,004);
 end
 
@@ -361,15 +362,16 @@ procedure Node015 begin
 
    Reply(167);
 
-   if ((obj_is_carrying_obj_pid(dude_obj,PID_DYNAMITE)) or (obj_is_carrying_obj_pid(dude_obj,PID_PLASTIC_EXPLOSIVES))) then
-       GOption(168,Node013,004);
-   else
-       NOption(169,Node016,004);
+   if ((obj_is_carrying_obj_pid(dude_obj,PID_DYNAMITE)) or (obj_is_carrying_obj_pid(dude_obj,PID_PLASTIC_EXPLOSIVES))) then begin
+      GOption(168,Node013,004);
+   end else begin
+      NOption(169,Node016,004);
+   end
 end
 
 procedure Node016 begin
    Reply(170);
-
+   
    GOption(171,Node013,004);
 end
 
@@ -399,9 +401,13 @@ procedure Node020 begin
    else
        Reply(181);
 
-   NOption(182,Node014,004);
+   //added check by killap
+   if (global_var(GVAR_ENCLAVE_POWER_PLANT) == PLANT_KNOWN) then
+       NOption(158,Node013,004);
+   else
+       NOption(182,Node014,004);
    BOption(183,Node012,004);
    NOption(184,Node003,004);
-end
+end 
 
 //xxxxxxxxxxxxxxxxxxxx

@@ -102,6 +102,8 @@ procedure Node062;
 procedure Node063;
 procedure Node064;
 
+procedure Node065; //added by killap - expansion pack
+
 /* Local Variables which are saved. All Local Variables need to be
    prepended by LVAR_ */
 
@@ -320,6 +322,7 @@ procedure Node998 begin
    if (hostile == false) then begin
       set_hostile;
    end
+   attack_family(self_family) //added by killap
 end
 procedure Node999 begin
 end
@@ -487,7 +490,7 @@ end
 procedure Node009 begin
    Reply(mstr(275) + mstr(276 + dude_is_female));
    NOption(278, Node056, 004);
-   NOption(279, Node998, 004);
+   BOption(279, Node998, 004); //edit by killap: was NOption
    prev_node := 9;
 end
 procedure Node010 begin
@@ -550,22 +553,26 @@ procedure Node017 begin
    end else begin
       Reply(mstr(357) + mstr(358));
    end
-   NOption(366, Node030, 004);
+   if (lloyd_dead) then //added by killap
+      NOption(366, Node030, 004);
    NOption(359, Node019, 004);
    NOption(360, Node020, 004);
    NOption(361, Node022, 004);
    BOption(362, Node987, 004);
    NOption(364, Node999, 004);
+   NOption(367, Node065, 004); //added by killap - expansion pack
    BOption(365, Node978, 004);
    prev_node := 17;
 end
 procedure Node018 begin
    Reply(375);
-   NOption(366, Node030, 004);
+   if (lloyd_dead) then //added by killap
+      NOption(366, Node030, 004);
    NOption(359, Node019, 004);
    NOption(360, Node020, 004);
    NOption(361, Node022, 004);
    BOption(362, Node023, 004);
+   NOption(367, Node065, 004); //added by killap - expansion pack
    NOption(381, Node986, 004);
    BOption(382, Node985, 004);
    prev_node := 18;
@@ -618,10 +625,12 @@ end
 procedure Node026 begin
    set_mason_pissed;
    Reply(465 + local_var(LVAR_Node026));
-   inc_local_var(LVAR_Node026);
-   NOption(470, Node030, 004);
+//   inc_local_var(LVAR_Node026);
+   if (lloyd_dead) then //added by killap
+      NOption(470, Node030, 004);
    BOption(472, Node029, 004);
-   if (local_var(LVAR_Node026) < 3) then begin
+   if (local_var(LVAR_Node026) < 2) then begin //killap's fix: was < 3
+      inc_local_var(LVAR_Node026); //moved by killap
       NOption(468, Node018, 004);
       BOption(473, Node027, 004);
    end else begin
@@ -676,13 +685,14 @@ end
 procedure Node034 begin
    set_mason_pissed;
    Reply(535 + local_var(LVAR_Node034));
-   inc_local_var(LVAR_Node034);
+//   inc_local_var(LVAR_Node034);
    if (dude_caps >= 1000) then begin
       NOption(542, Node042, 004);
    end else begin
       BOption(543, Node037, 004);
    end
-   if (local_var(LVAR_Node034) < 3) then begin
+   if (local_var(LVAR_Node034) < 2) then begin  //killap's fix: was < 3
+      inc_local_var(LVAR_Node034);  //moved by killap
       BOption(539, Node984, 004);
       if (get_tribute(tribute_refused)) then begin
          BOption(540, Node983, 004);
@@ -771,7 +781,7 @@ procedure Node045 begin
    set_salvatore_pistol(salvatore_pistol_received);
    give_pid_qty(dude_obj, PID_LASER_PISTOL, 1)
    Reply(655);
-   if (taught == false) then begin
+   if ( (taught == false) and (has_skill(dude_obj, SKILL_ENERGY_WEAPONS) <= 295) ) then begin //added (has_skill(dude_obj, SKILL_ENERGY_WEAPONS) <= 295) - killap
       BOption(656, Node052, 004);
    end
    BOption(643, Node046, 004);
@@ -794,7 +804,8 @@ procedure Node047 begin
    prev_node := 47;
 end
 procedure Node048 begin
-   set_guard_time;
+   //   set_guard_time; // Commented (c) Avega
+   set_local_var(LVAR_Guard_Counter, game_time_hour + 24); //(c) Avega 
    Reply(685);
    NOption(686, Node999, 004);
    prev_node := 48;
@@ -806,7 +817,7 @@ procedure Node049 begin
    BOption(698, Node048, 004);
    if (get_salvatore_pistol(salvatore_pistol_mason)) then begin
       BOption(642, Node045, 004);
-   end else if ((get_salvatore_pistol(salvatore_pistol_received)) and (obj_is_carrying_obj_pid(dude_obj, PID_LASER_PISTOL)>1) and (taught == false)) then begin
+   end else if ((get_salvatore_pistol(salvatore_pistol_received)) and (obj_is_carrying_obj_pid(dude_obj, PID_LASER_PISTOL)>1) and (taught == false) and (has_skill(dude_obj, SKILL_ENERGY_WEAPONS) <= 295) ) then begin //added (has_skill(dude_obj, SKILL_ENERGY_WEAPONS) <= 295) - killap
       BOption(699, Node052, 004);
    end
    prev_node := 49;
@@ -821,7 +832,7 @@ procedure Node051 begin
    Reply(715);
    BOption(696, Node046, 004);
    NOption(697, Node047, 004);
-   if ((get_salvatore_pistol(salvatore_pistol_received)) and (obj_is_carrying_obj_pid(dude_obj, PID_LASER_PISTOL)>1) and (taught == false)) then begin
+   if ((get_salvatore_pistol(salvatore_pistol_received)) and (obj_is_carrying_obj_pid(dude_obj, PID_LASER_PISTOL)>1) and (taught == false) and (has_skill(dude_obj, SKILL_ENERGY_WEAPONS) <= 295) ) then begin //added (has_skill(dude_obj, SKILL_ENERGY_WEAPONS) <= 295) - killap
       BOption(699, Node052, 004);
    end
    BOption(698, Node048, 004);
@@ -845,7 +856,7 @@ procedure Node053 begin
    if (get_salvatore_pistol(salvatore_pistol_received) == false) then begin
       give_pid_qty(dude_obj, PID_LASER_PISTOL, 1)
    end
-   if (salvatore_respect > 15) then begin
+   if (salvatore_respect >= 15) then begin //edit by killap - was only possible to get to 15 without any dialogue exploiting
       if (local_var(LVAR_Patience) > 4) then begin
          give_pid_qty(dude_obj, PID_METAL_ARMOR_MK_II, 1)
          give_pid_qty(dude_obj, PID_SMALL_ENERGY_CELL, 2)
@@ -918,3 +929,11 @@ end
 procedure Node064 begin
    floater(840);
 end
+
+//added by killap - expansion pack
+procedure Node065 begin
+   Reply(900);
+   NOption(901, Node018, 004);
+   set_nikki_lloyd;
+end
+//end added

@@ -91,10 +91,10 @@ procedure use_p_proc begin
       wrench := create_object( PID_WRENCH, 0, 0 );
       add_obj_to_inven( dude_obj, wrench );
       set_map_var( MVAR_Wrench, WRENCH_FOUND );
-      float_dude(103);
+      float_dude(103 + (7*dude_is_stupid)); //edit by killap - added + 7*dude_is_stupid
    end
    else if( map_var( MVAR_Wrench ) == WRENCH_FOUND ) then begin
-      float_dude(104);
+      float_dude(104 + (7*dude_is_stupid)); //edit by killap - added + 7*dude_is_stupid
    end
 end
 

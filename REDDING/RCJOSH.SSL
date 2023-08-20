@@ -415,10 +415,10 @@ procedure Node016 begin
        inc_local_var(LVAR_Said_16);
        Reply(164);
 
-       NOption(165,Node016a,004);
+       NOption(166,Node016a,004); //was 165 - killap
    end
    else begin
-       Reply(166);
+       Reply(165); //was 166 - killap
 
        NOption(167,Node017,004);
    end

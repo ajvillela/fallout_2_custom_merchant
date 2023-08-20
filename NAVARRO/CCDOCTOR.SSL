@@ -3,7 +3,7 @@
 */
 
 /*
-        Name: Dr. Shreber
+        Name: Dr. Schreber
         Location: Navarro
         Description:
 
@@ -203,6 +203,7 @@ procedure destroy_p_proc begin
 /* Increment the aligned critter counter*/
    //call check_hearing;
    set_map_var(MVAR_Doctor_Dead,1);
+   set_global_var(GVAR_SCHREBER_DEAD,1); // Seraph's Code - expansion
    if (source_obj == dude_obj) then begin
       display_msg(mstr(800));
       give_xp(EXP_SCHREBER_KILL);
@@ -373,7 +374,9 @@ procedure Node12a begin
 end
 
 procedure Node013 begin
-   set_global_var(GVAR_NAVARRO_XARN, NAVARRO_XARN_KNOW_ABOUT);
+   if (global_var(GVAR_NAVARRO_XARN) < NAVARRO_XARN_FINISHED) then
+      set_global_var(GVAR_NAVARRO_XARN, NAVARRO_XARN_KNOW_ABOUT);
+   
    set_map_var(MVAR_Exterminate,1);
    Reply(152);
 

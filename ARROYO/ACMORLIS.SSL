@@ -3,9 +3,9 @@
 */
 
 /*
-        Name:
-        Location:
-        Description:
+        Name: Aunt Morlis
+        Location: Arroyo village
+        Description: She has the flint
 
         Log:
            Please note any changes that have been made to the file in Updated. Then comment
@@ -60,19 +60,31 @@ procedure Node002;
 procedure Node003;
 procedure Node004;
 procedure Node005;
+//added by Darek
+procedure Node005a;
+procedure Node005b;
+procedure Node005c;
+//end
 procedure Node006;
 procedure Node007;
 procedure Node008;
+//added by Darek
+procedure Node007a;
+//end
 procedure Node009;
 procedure Node010;
 procedure Node011;
 procedure Node012;
-procedure NOde013;
+procedure Node013;
 procedure Node014;
 procedure Node015;
 procedure Node016;
 procedure Node017;
 procedure Node018;
+//added by Darek
+procedure Node018a;
+procedure Node018b;
+//end
 
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
@@ -86,6 +98,7 @@ procedure Node018;
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Gave_Flint                 (7)
 #define LVAR_Said_17                    (8)
+#define LVAR_Stole_Flint                (9)
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -97,6 +110,7 @@ variable Only_Once:=0;
 variable Caught_Stealing;
 
 procedure start begin
+   set_local_var(LVAR_Stole_Flint,0); //added by killap
 end
 
 /* This procedure will get called each time that the map is first entered. It will
@@ -117,13 +131,21 @@ procedure critter_p_proc begin
    the player should the game be saved and loaded repeatedly. Additionally, if any special
    actions need to be taken by the critter based on previous combat, the critter will remember
    this as well. */
-
+   
+   //added by killap
+   if (not(obj_is_carrying_obj_pid(self_obj,PID_FLINT)) and (local_var(LVAR_Stole_Flint) == 0)) then begin
+      set_local_var(LVAR_Stole_Flint,1);
+   end else if ((obj_is_carrying_obj_pid(self_obj, PID_FLINT)) and (local_var(LVAR_Stole_Flint) == 1)) then begin
+      set_local_var(LVAR_Stole_Flint, 0);
+   end
+   //end added
+   
    if ((local_var(LVAR_Hostile) == 2) and (obj_can_see_obj(self_obj,dude_obj))) then begin
        set_local_var(LVAR_Hostile,1);
        attack(dude_obj);
    end
 
-   if (REP_ENEMY_ARROYO) then begin
+   if ( (REP_ENEMY_ARROYO) and (obj_can_see_obj(self_obj,dude_obj)) ) then begin //added and (obj_can_see_obj(self_obj,dude_obj)) by killap
        attack(dude_obj);
    end
 end
@@ -186,7 +208,8 @@ procedure talk_p_proc begin
        end_dialogue;
    end
 
-   else if (global_var(GVAR_ARROYO_SPEAR) == SPEAR_GET_FLINT) then begin
+   else if ( (global_var(GVAR_ARROYO_SPEAR) == SPEAR_GET_FLINT) and
+              (local_var(LVAR_Stole_Flint) == 0)) then begin //edit by killap LVAR_Stole_Flint
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node002;
@@ -225,9 +248,16 @@ procedure talk_p_proc begin
        gSay_End;
        end_dialogue;
    end
-
-   else begin
-           call Node001;
+   //code by Darek
+   else if ((global_var(GVAR_ARROYO_SPEAR) == SPEAR_GET_FLINT) and (local_var(LVAR_Stole_Flint) == 1) and (local_var(LVAR_Said_17) < 2)) then begin
+       start_gdialog(NAME,self_obj,4,-1,-1);
+       gSay_Start;
+           call Node002;
+       gSay_End;
+       end_dialogue;
+   //end code by Darek
+   end else begin
+       call Node001;
    end
 end
 
@@ -300,13 +330,37 @@ procedure Node003 begin
    NOption(106,Node004,004);
 end
 
-procedure Node004 begin
+/*procedure Node004 begin
    Reply(107);
 
    NOption(108,Node005,004);
-end
+end*/
 
-procedure Node005 begin
+//edits by Darek
+procedure Node004 begin
+   if ((obj_is_carrying_obj_pid(self_obj, PID_FLINT) or (local_var(LVAR_Stole_Flint) == 1)) and (local_var(LVAR_Gave_Flint) == 0)) then begin
+      Reply(107);
+      NOption(108,Node005,004);
+   end else begin
+      Reply(304);
+      NOption(156,Node999,004);
+   end
+end
+//end
+
+//edits by Darek
+procedure Node005
+begin
+  if ((local_var(LVAR_Stole_Flint) == 1) and (local_var(LVAR_Gave_Flint) == 0) and (local_var(LVAR_Said_17) == 0)) then
+    call Node005b;
+  else if ((local_var(LVAR_Stole_Flint) == 1) and (local_var(LVAR_Gave_Flint) == 0) and (local_var(LVAR_Said_17) == 1)) then
+    call Node005c;
+  else
+    call Node005a;
+end
+//end
+
+/*procedure Node005 begin
    set_global_var(GVAR_ARROYO_SPEAR, SPEAR_GET_POWDER);
 
    Reply(109);
@@ -316,37 +370,200 @@ procedure Node005 begin
        NOption(118,Node007,004);
    if (has_skill(dude_obj,SKILL_CONVERSANT) > 50) then
        NOption(150,Node018,004);
+end*/
+
+//added by Darek
+procedure Node005a begin
+  if (obj_is_carrying_obj_pid(self_obj, PID_FLINT)) then begin
+    set_global_var(GVAR_ARROYO_SPEAR, 1);
+    Reply(109);
+    NOption(110,Node999,004);
+    if (obj_is_carrying_obj_pid(dude_obj, PID_HEALING_POWDER) > 2) then
+      NOption(118,Node007,004);
+    if (has_skill(dude_obj, SKILL_CONVERSANT) > 50) then
+      NOption(150,Node018,004);
+  end else begin
+      Reply(304);
+      NOption(156,Node999,004);
+  end
 end
 
+procedure Node005b begin
+  set_global_var(GVAR_ARROYO_SPEAR, 1);
+  Reply(109);
+  NOption(110,Node999,004);
+  if (obj_is_carrying_obj_pid(dude_obj, PID_HEALING_POWDER) > 2) then
+     NOption(118,Node007a,004);
+  if (has_skill(dude_obj, SKILL_CONVERSANT) > 50) then
+    NOption(150,Node018a,004);
+end
+
+procedure Node005c begin
+  set_global_var(GVAR_ARROYO_SPEAR, 1);
+  Reply(109);
+  NOption(110,Node999,004);
+  if (obj_is_carrying_obj_pid(dude_obj, PID_HEALING_POWDER) > 2) then
+    NOption(118,Node007a,004);
+  if (has_skill(dude_obj, SKILL_CONVERSANT) > 50) then
+    NOption(150,Node018b,004);
+end
+//end added by Darek
+
+//edits by Darek
 procedure Node006 begin
+  Reply(111);
+  if (obj_is_carrying_obj_pid(dude_obj, PID_HEALING_POWDER) > 2) then begin
+    if ((local_var(LVAR_Stole_Flint) == 1) and (local_var(LVAR_Gave_Flint) == 0)) then begin
+      NOption(112,Node007a,004);
+      NOption(113,Node008,004);
+    end else begin
+      NOption(112,Node007,004);
+      NOption(113,Node008,004);
+    end
+  end else
+    NOption(113,Node008,004);
+end
+//end
+
+/*procedure Node006 begin
    Reply(111);
 
    if (obj_is_carrying_obj_pid(dude_obj,PID_HEALING_POWDER) > 2) then
        NOption(112,Node007,004);
    else
        NOption(113,Node008,004);
-end
+end*/
+
+
 
 procedure Node007 begin
    variable item;
    variable item2;
    variable JunkIt;
 
-   item:=obj_carrying_pid_obj(dude_obj,PID_HEALING_POWDER);
-   JunkIt:=rm_mult_objs_from_inven(dude_obj,item,3);
-   add_mult_objs_to_inven(self_obj,item,3);
-
-   item2:=create_object(PID_FLINT,0,0);
-   add_mult_objs_to_inven(dude_obj,item2,1);
-
-   set_local_var(LVAR_Gave_Flint,1);
-
-   Reply(114);
-
-   NOption(115,Node999,004);
+   if (obj_is_carrying_obj_pid(dude_obj, PID_HEALING_POWDER) > 2) then begin
+    //remove healing powders
+    item:=obj_carrying_pid_obj(dude_obj,PID_HEALING_POWDER);
+    JunkIt:=rm_mult_objs_from_inven(dude_obj,item,3);
+    add_mult_objs_to_inven(self_obj,item,3);
+    if (obj_is_carrying_obj_pid(self_obj, PID_FLINT)) then begin
+      Reply(114);
+      NOption(115,Node999,004);
+      //remove flint
+      item2:=obj_carrying_pid_obj(self_obj,PID_FLINT);
+      rm_obj_from_inven(self_obj,item2);
+      add_obj_to_inven(dude_obj,item2);
+      set_local_var(LVAR_Gave_Flint, 1);
+    end else begin
+      set_local_var(LVAR_Gave_Flint, 1);
+      Reply(305);
+      NOption(117,Node999,004);
+    end
+   end else
+    call Node008;
 end
 
+procedure Node007a
+begin
+   variable item;
+   variable item2;
+   variable JunkIt;
+   set_local_var(LVAR_Gave_Flint, 1);
+   
+    if (obj_is_carrying_obj_pid(dude_obj, PID_HEALING_POWDER) > 2) then begin
+      //remove healing powders
+      item:=obj_carrying_pid_obj(dude_obj,PID_HEALING_POWDER);
+      JunkIt:=rm_mult_objs_from_inven(dude_obj,item,3);
+      add_mult_objs_to_inven(self_obj,item,3);
+      if (local_var(LVAR_Said_17) == 0) then begin
+         Reply(300);
+         NOption(117,Node999,004);
+      end else begin
+         Reply(302);
+         NOption(117,Node999,004);
+      end
+    end else begin
+      call Node008;
+    end
+end
+
+
+
+
+/*procedure Node007 begin
+   variable item;
+   variable item2;
+   variable JunkIt;
+
+   if (obj_is_carrying_obj_pid(self_obj,PID_FLINT)) then begin
+      if (obj_is_carrying_obj_pid(dude_obj,PID_HEALING_POWDER) > 2) then begin //condition added by killap
+         //remove healing powders
+         item:=obj_carrying_pid_obj(dude_obj,PID_HEALING_POWDER);
+         JunkIt:=rm_mult_objs_from_inven(dude_obj,item,3);
+         add_mult_objs_to_inven(self_obj,item,3);
+         //remove flint
+         item2:=obj_carrying_pid_obj(self_obj,PID_FLINT);
+         rm_obj_from_inven(self_obj,item2);
+         add_obj_to_inven(dude_obj,item2);
+
+         set_local_var(LVAR_Gave_Flint,1);
+
+         Reply(114);
+
+         NOption(115,Node999,004);
+      end else begin
+         call Node008;  //added by killap: no more tricking Morlis that you have powder when you really dropped it.
+      end
+   end else begin
+         if (local_var(LVAR_Said_17) == 0) then
+            Reply(300); //added check if she is no longer carrying the flint.
+         else
+            Reply(302);
+            
+         NOption(115,Node999,004);
+   end
+end*/
+
+/*procedure Node007 begin
+   variable item;
+   variable item2;
+   variable JunkIt;
+   if (obj_is_carrying_obj_pid(dude_obj,PID_HEALING_POWDER) > 2) then begin //condition added by killap
+      item:=obj_carrying_pid_obj(dude_obj,PID_HEALING_POWDER);
+      JunkIt:=rm_mult_objs_from_inven(dude_obj,item,3);
+      add_mult_objs_to_inven(self_obj,item,3);
+
+      //item2:=create_object(PID_FLINT,0,0); //comment out by killap
+      //added by killap
+      if (obj_is_carrying_obj_pid(self_obj,PID_FLINT)) then begin
+         item2:=obj_carrying_pid_obj(self_obj,PID_FLINT);
+         rm_obj_from_inven(self_obj,item2);
+         add_obj_to_inven(dude_obj,item2);
+         set_local_var(LVAR_Stole_Flint,0);
+      end
+      //end added
+      
+      set_local_var(LVAR_Gave_Flint,1);
+
+      if (obj_is_carrying_obj_pid(self_obj,PID_FLINT)) then begin
+         Reply(114);
+      end else begin
+         if (local_var(LVAR_Said_17) == 0) then
+            Reply(300); //added check if she is no longer carrying the flint.
+         else
+            Reply(302);
+      end
+         
+      NOption(115,Node999,004);
+   end
+   else 
+      call Node008;  //added by killap: no more tricking Morlis that you have powder when you really dropped it.
+end*/
+
 procedure Node008 begin
+  if (not obj_is_carrying_obj_pid(self_obj, PID_FLINT)) then
+    set_local_var(LVAR_Gave_Flint, 1);
+
    Reply(116);
 
    NOption(117,Node999,004);
@@ -376,7 +593,7 @@ procedure Node012 begin
    NOption(207,Node999,001);
 end
 
-procedure NOde013 begin
+procedure Node013 begin
    Reply(208);
 
    NOption(209,Node999,001);
@@ -413,13 +630,43 @@ procedure Node017 begin
            rm_obj_from_inven(self_obj,item);
            add_obj_to_inven(dude_obj,item);
        end
+       set_local_var(LVAR_Gave_Flint, 1);
+       set_local_var(LVAR_Said_17, 2);
        Reply(152);
    end
 
    NOption(153,Node999,001);
 end
 
-procedure Node018 begin
+//edits by Darek
+procedure Node018
+begin
+  variable item;
+
+  if (obj_is_carrying_obj_pid(self_obj, PID_FLINT)) then
+  begin
+    if (is_success(roll_vs_skill(dude_obj, SKILL_CONVERSANT, 0))) then begin
+      if (local_var(LVAR_Gave_Flint) == 0) then begin
+        set_local_var(LVAR_Gave_Flint, 1);
+        give_xp(EXP_TALK_FLINT);
+        item:=obj_carrying_pid_obj(self_obj,PID_FLINT);
+        rm_obj_from_inven(self_obj,item);
+        add_obj_to_inven(dude_obj,item);
+        Reply(154);
+      end
+    end
+    else
+      Reply(155);
+  end
+  else if (local_var(LVAR_Gave_Flint) == 0) then begin
+    set_local_var(LVAR_Gave_Flint, 1);
+    Reply(304);
+  end
+  NOption(156,Node999,001);
+end
+//end
+
+/*procedure Node018 begin
    variable item;
 
    if (skill_success(dude_obj,SKILL_CONVERSANT,0)) then begin
@@ -427,18 +674,40 @@ procedure Node018 begin
            item:=obj_carrying_pid_obj(self_obj,PID_FLINT);
            rm_obj_from_inven(self_obj,item);
            add_obj_to_inven(dude_obj,item);
+           
+           if (local_var(LVAR_Gave_Flint) == 0) then begin
+               set_local_var(LVAR_Gave_Flint,1);
+               give_xp(EXP_TALK_FLINT);
+           end
+           
+           Reply(154);
+       end else begin
+           Reply(303); //added check if she is no longer carrying the flint.
        end
-       if (local_var(LVAR_Gave_Flint) == 0) then begin
-           set_local_var(LVAR_Gave_Flint,1);
-           give_xp(EXP_TALK_FLINT);
-       end
-       Reply(154);
    end
    else begin
        Reply(155);
    end
 
    NOption(156,Node999,001);
+end*/
+
+//added by Darek
+procedure Node018a begin
+  if (is_success(roll_vs_skill(dude_obj, SKILL_CONVERSANT, 0))) then begin
+    set_local_var(LVAR_Gave_Flint, 1);
+    give_xp(EXP_TALK_FLINT);
+    Reply(303);
+  end else
+     Reply(155);
+  NOption(156,Node999,001);
 end
+
+procedure Node018b begin
+  set_local_var(7, 1);
+  Reply(302);
+  NOption(156,Node999,001);
+end
+//end added
 
 //xxxxxxxxxxxxxxxxxxxx

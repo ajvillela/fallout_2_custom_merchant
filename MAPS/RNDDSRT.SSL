@@ -64,6 +64,20 @@ procedure map_enter_p_proc begin
    debug_msg("RNDDSRT map_enter_p_proc == " + cur_map_index);
    set_map_exit_tiles(0,0);
    Lighting;
+   
+   /*if (global_var(GVAR_LOAD_MAP_INDEX) == 5) then begin
+      if ( (global_var(GVAR_RND_KAGA_STATE) == 0) or (global_var(GVAR_RND_KAGA_STATE) == 1) ) then begin
+         Critter:=create_object_sid(PID_KAGA,0,0,SCRIPT_ECKAGA1);
+      end else if (global_var(GVAR_RND_KAGA_STATE) == 2) then begin
+         Critter:=create_object_sid(PID_KAGA2,0,0,SCRIPT_ECKAGA2);
+      end else if (global_var(GVAR_RND_KAGA_STATE) == 3) then begin
+         Critter:=create_object_sid(PID_KAGA3,0,0,SCRIPT_ECKAGA3);
+      end else if (global_var(GVAR_RND_KAGA_STATE) == 4) then begin
+         Critter:=create_object_sid(PID_KAGA4,0,0,SCRIPT_ECKAGA4);
+      end else if (global_var(GVAR_RND_KAGA_STATE) == 5) then begin
+         Critter:=create_object_sid(PID_KAGA5,0,0,SCRIPT_ECKAGA5);
+      end
+   end*/
 
    if (cur_map_index == MAP_RND_DESERT_1) then begin
       debug_msg("set_car_loc(" + CAR_RND_DESERT1_HEX + ", " + CAR_RANDOM_DESERT_ELEV + ")");
@@ -125,6 +139,13 @@ procedure map_enter_p_proc begin
       the_hex := CAR_RND_DESERT12_HEX;
       the_elev := CAR_RANDOM_DESERT_ELEV;
    end
+   //added by killap - expansion pack
+   else if (cur_map_index == MAP_RND_DESERT_13) then begin
+      debug_msg("set_car_loc(" + CAR_RND_DESERT13_HEX + ", " + CAR_RANDOM_DESERT_ELEV + ")");
+      the_hex := CAR_RND_DESERT13_HEX;
+      the_elev := CAR_RANDOM_DESERT_ELEV;
+   end
+   //end added
    else if (cur_map_index == MAP_RND_CITY1) then begin
       debug_msg("set_car_loc(" + CAR_RND_CITY1_HEX + ", " + CAR_RANDOM_DESERT_ELEV + ")");
       the_hex := CAR_RND_CITY1_HEX;
@@ -210,7 +231,7 @@ procedure map_enter_p_proc begin
        Critter_Tile:=tile_num_in_direction(tile_num(dude_obj),random(0,5),random(5,10));
        critter_attempt_placement(Critter,Critter_Tile,elevation(dude_obj));
    end
-
+   set_global_var(GVAR_LOAD_MAP_INDEX,0);
 end
 
 procedure map_update_p_proc begin

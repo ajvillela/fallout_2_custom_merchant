@@ -39,7 +39,8 @@
 
 #define ENCLAVE_DOOR_PID1       (33556008)
 #define ENCLAVE_DOOR_PID2       (33556007)
-#define ENCLAVE_DOOR_TILE1      (19280)
+//#define ENCLAVE_DOOR_TILE1      (19280)
+#define ENCLAVE_DOOR_TILE1      (22701)
 #define ENCLAVE_DOOR_TILE2      (16719)
 
 #define BOSS_LEGS_PID           (33556234)
@@ -120,10 +121,10 @@ procedure map_enter_p_proc begin
    if (global_var(GVAR_ENCLAVE_REACTOR) == ENCLAVE_REACTOR_OFF) then begin
        set_obj_visibility(self_obj,0);
        if (not(is_loading_game)) then begin
-           door:=tile_contains_pid_obj(ENCLAVE_DOOR_TILE2,elevation(self_obj),ENCLAVE_DOOR_PID2);
-           debug_msg("Locking Door 2. "+door);
-           obj_close(door);
-           obj_lock(door);
+         door:=tile_contains_pid_obj(ENCLAVE_DOOR_TILE2,elevation(self_obj),ENCLAVE_DOOR_PID2);
+         debug_msg("Locking Door 2. "+door);
+         obj_close(door);
+         obj_lock(door);
        end
    end
    else begin
@@ -240,8 +241,12 @@ procedure destroy_p_proc begin
    inc_evil_critter
    set_exit_grids(0,MAP_SAN_FRAN_DOCK,0,13908,2);
    call Endgame_Info;
-   door:=tile_contains_pid_obj(ENCLAVE_DOOR_TILE2,elevation(self_obj),ENCLAVE_DOOR_PID2);
-   obj_unlock(door);
+   
+
+   
+      door:=tile_contains_pid_obj(ENCLAVE_DOOR_TILE2,elevation(self_obj),ENCLAVE_DOOR_PID2);
+      obj_unlock(door);
+   
 
    if ((global_var(GVAR_ENCLAVE_FRANK_DEAD) == 0) and (violence_filter_setting >= VLNCLVL_NORMAL)) then begin
 //       obj_open(door);
@@ -326,22 +331,22 @@ procedure Node004 begin
        Reply(116);
 
    BOption(117,Node998,004);
-   GOption(118,Node998,004);
+   NOption(118,Node005,004); //edit by killap - was GOption, Node998
    BOption(135,Node998,004);
-end
+end 
 
 procedure Node005 begin
    Reply(119);
 
    BOption(120,Node998,004);
-   GOption(121,Node998,004);
+   NOption(121,Node998,004); //edit by killap - was GOption
 end
 
 procedure Node007 begin
    Reply(130);
 
-   GOption(131,Node004,004);
-   GOption(132,Node005,004);
+   NOption(131,Node004,004); //edit by killap - was GOption
+   NOption(132,Node005,004); //edit by killap - was GOption
    NOption(133,Node998,004);
 end
 
@@ -351,6 +356,11 @@ procedure Endgame_Info begin
 
 // Arroyo Endgame
    set_global_var(GVAR_ENDGAME_MOVIE_ARROYO,1);
+
+   // Elder Endgame: Begin Seraph's Code - expansion
+   if (global_var(GVAR_ENDGAME_MOVIE_ELDER) != -1) then
+      set_global_var(GVAR_ENDGAME_MOVIE_ELDER,1);
+   // End Seraph's Code
 
 // Modoc Endgame
    if (modoc_visible_on_map) then begin
@@ -384,15 +394,17 @@ procedure Endgame_Info begin
 // Vault City Endgame
 
    if (vault_city_visible_on_map) then begin
-       // if (Vault_City_Population < 5) then begin
-          // if ((global_var(GVAR_VAULT_GECKO_PLANT) == PLANT_GHOULS_DEAD) or (global_var(GVAR_VAULT_GECKO_PLANT) == PLANT_DESTROYED))) then
-              // set_global_var(GVAR_ENDGAME_MOVIE_VAULT_CITY,10);
-          // else
-              // set_global_var(GVAR_ENDGAME_MOVIE_VAULT_CITY,11);
-       // end
-       /* else */ if (global_var(GVAR_VAULT_GECKO_PLANT) < PLANT_REPAIRED) then
+       //begin uncomment by killap
+       if ((global_var(GVAR_VAULT_LYNETTE_STATUS) == 1) and (global_var(GVAR_TOWN_REP_VAULT_CITY) <= -30)) then begin //changed from 'Vault_City_Population < 5' since that does not exist - I assume that after you kill Lynette, the city will be hunting you down, hence you killing everyone :) - killap
+          if ((global_var(GVAR_VAULT_GECKO_PLANT) == PLANT_GHOULS_DEAD) or (global_var(GVAR_VAULT_GECKO_PLANT) == PLANT_DESTROYED)) then
+              set_global_var(GVAR_ENDGAME_MOVIE_VAULT_CITY,10);
+          else
+              set_global_var(GVAR_ENDGAME_MOVIE_VAULT_CITY,11);
+       end
+       //end uncomment by killap
+       else if (global_var(GVAR_VAULT_GECKO_PLANT) < PLANT_REPAIRED) then
            set_global_var(GVAR_ENDGAME_MOVIE_VAULT_CITY,2);
-       else if ((global_var(GVAR_VAULT_LYNETTE_STATUS) == 0) and (not(get_westin_flag(WESTIN_DEAD))) and (global_var(GVAR_VAULT_RAIDERS) == RAIDERS_GIVE_REWARD)) then
+       else if ((global_var(GVAR_VAULT_LYNETTE_STATUS) == 0) and (not(get_westin_flag(WESTIN_DEAD))) and (global_var(GVAR_VAULT_RAIDERS) >= RAIDERS_GIVE_REWARD)) then //edit by killap - changed from == to >=
            set_global_var(GVAR_ENDGAME_MOVIE_VAULT_CITY,3);
        else if (global_var(GVAR_VAULT_RAIDERS) < RAIDERS_PLANS_KNOWN_RENO) then
            set_global_var(GVAR_ENDGAME_MOVIE_VAULT_CITY,4);
@@ -409,17 +421,26 @@ procedure Endgame_Info begin
    if (gecko_visible_on_map) then begin
        if ((global_var(GVAR_VAULT_GECKO_PLANT) == PLANT_GHOULS_DEAD) or (global_var(GVAR_VAULT_GECKO_PLANT) == PLANT_DESTROYED)) then
            set_global_var(GVAR_ENDGAME_MOVIE_GECKO,1);
-       else if (global_var(GVAR_VAULT_GECKO_PLANT) == PLANT_REPAIRED) then
+       //else if (global_var(GVAR_VAULT_GECKO_PLANT) == PLANT_REPAIRED) then
+       else if ( (global_var(GVAR_VAULT_GECKO_PLANT) >= PLANT_REPAIRED) and (global_var(GVAR_VAULT_GECKO_PLANT) < PLANT_OPTIMIZED) )then //edit by killap
            set_global_var(GVAR_ENDGAME_MOVIE_GECKO,2);
+       else if ((global_var(GVAR_VAULT_GECKO_PLANT) == PLANT_OPTIMIZED) and (global_var(GVAR_GECKO_ECON_DISK) >= ECON_DISK_GIVEN)) then
+           set_global_var(GVAR_ENDGAME_MOVIE_GECKO,4);
        else if (global_var(GVAR_VAULT_GECKO_PLANT) == PLANT_OPTIMIZED) then
            set_global_var(GVAR_ENDGAME_MOVIE_GECKO,3);
-       else if ((global_var(GVAR_VAULT_GECKO_PLANT) == PLANT_OPTIMIZED) and (global_var(GVAR_GECKO_ECON_DISK) == ECON_DISK_GIVEN)) then
-           set_global_var(GVAR_ENDGAME_MOVIE_GECKO,4);
+       //added by killap
+       else
+           set_global_var(GVAR_ENDGAME_MOVIE_GECKO,5);
+       //end added by killap   
    end
 
 // Redding Endgame
    if (redding_visible_on_map) then begin
-       if ((global_var(GVAR_DOC_JOHNSON_STATUS) == 0) and (global_var(GVAR_REDDING_JET_LEVEL) == JET_CURED)) then
+       //added by killap --wipe out redding == no happy ending (expansion)
+       if (global_var(GVAR_REDDING_GENPES_COUNT) <= 0) then
+         set_global_var(GVAR_ENDGAME_MOVIE_REDDING,4);
+       //end added
+       else if ((global_var(GVAR_DOC_JOHNSON_STATUS) == 0) and (global_var(GVAR_REDDING_JET_LEVEL) == JET_CURED)) then
            set_global_var(GVAR_ENDGAME_MOVIE_REDDING,1);
        else if (global_var(GVAR_REDDING_EXCAVATOR_CHIP) == CHIP_DELIVERED_DAN) then
            set_global_var(GVAR_ENDGAME_MOVIE_REDDING,2);
@@ -434,12 +455,16 @@ procedure Endgame_Info begin
    if (broken_hills_visible_on_map) then begin
        if ((global_var(GVAR_BH_CONSPIRACY) == CONSPIRACY_SUCCESSFUL) or (global_var(GVAR_BH_FTM) == FTM_SUCCESSFUL)) then
            set_global_var(GVAR_ENDGAME_MOVIE_BROKEN_HILLS,1);
-       else if (((global_var(GVAR_BH_CONSPIRACY) == CONSPIRACY_BROKEN_DOUBLECROSS) or (global_var(GVAR_BH_CONSPIRACY) == CONSPIRACY_BROKEN_HERO) or (global_var(GVAR_BH_JAIL) == JAIL_DOUBLECROSS)) and ((global_var(GVAR_BH_FTM) == FTM_EXPOSED) or (global_var(GVAR_BH_FTM) == 0))) then
+       else if (((global_var(GVAR_BH_CONSPIRACY) == CONSPIRACY_BROKEN_DOUBLECROSS) or (global_var(GVAR_BH_CONSPIRACY) == CONSPIRACY_BROKEN_HERO) or (global_var(GVAR_BH_JAIL) == JAIL_DOUBLECROSS)) and ((global_var(GVAR_BH_FTM) == FTM_EXPOSED) or (global_var(GVAR_BH_FTM) == 0))) then begin
            set_global_var(GVAR_ENDGAME_MOVIE_BROKEN_HILLS,2);
-       else
+
+           // Macus Endgame: Begin Seraph's Code - expansion
+           if ((check_general_rep >= 0) and (global_var(GVAR_MARCUS_DEAD) != 1)) then
+               set_global_var(GVAR_ENDGAME_MOVIE_MARCUS,1);
+           // End Seraph's Code
+       end else
            set_global_var(GVAR_ENDGAME_MOVIE_BROKEN_HILLS,3);
    end
-
 
 // NCR Endgame
    if (new_CA_republic_visible_on_map) then begin
@@ -465,20 +490,34 @@ procedure Endgame_Info begin
 // Vault 13 Endgame
    if (vault_13_visible_on_map) then begin
       if (gvar_bit(GVAR_V13_STATUS_FLAGS, FLG_GRUTHAR_DEAD)) then
-           set_global_var(GVAR_ENDGAME_MOVIE_VAULT_13,2);
+         set_global_var(GVAR_ENDGAME_MOVIE_VAULT_13,2);
 // There is no more good ending.
+// Not if I can help it. Begin Seraph Code - expansion
+      else if (global_var(GVAR_V13_COMP_QST) == 2) then
+         set_global_var(GVAR_ENDGAME_MOVIE_VAULT_13,1);
+// End Seraph Code
    end
 
 // San Francisco Endgame
    if (san_francisco_visible_on_map) then begin
-       if (global_var(GVAR_SAN_FRAN_FLAGS) bwand bit_1) then //Enemy of the shi
-           set_global_var(GVAR_ENDGAME_MOVIE_SAN_FRAN_SHI,1);
-       else if (gvar_bit(GVAR_SAN_FRAN_FLAGS, bit_6)) then   //Dr Wong Dead
-           set_global_var(GVAR_ENDGAME_MOVIE_SAN_FRAN_SHI,2);
-       else
-           set_global_var(GVAR_ENDGAME_MOVIE_SAN_FRAN_SHI,3);
-
-       set_global_var(GVAR_ENDGAME_MOVIE_SAN_FRAN_ELRON,1);
+      if (global_var(GVAR_SAN_FRAN_FLAGS) bwand bit_1) then //Enemy of the shi
+        set_global_var(GVAR_ENDGAME_MOVIE_SAN_FRAN_SHI,1);
+      else if ((gvar_bit(GVAR_SAN_FRAN_FLAGS, bit_6)) and (global_var(GVAR_SHI_DELIVER_SEED_SAMPLE_TO_DR_WONG) == PLANT_QUEST_DELIVERED_SEED_SAMPLE)) then //Dr Wong Dead //edit by killap - added GVAR_SHI_DELIVER_SEED_SAMPLE_TO_DR_WONG (expansion)
+        set_global_var(GVAR_ENDGAME_MOVIE_SAN_FRAN_SHI,2);
+      else
+        set_global_var(GVAR_ENDGAME_MOVIE_SAN_FRAN_SHI,3);
+      //begin killap code
+      if (not(gvar_bit(GVAR_SAN_FRAN_FLAGS, bit_19)) and not(gvar_bit(GVAR_SAN_FRAN_FLAGS, bit_3))) then begin
+         if (global_var(GVAR_SAN_FRAN_ELRON_GAS_QST) != 2) then
+            set_global_var(GVAR_ENDGAME_MOVIE_SAN_FRAN_ELRON,1);
+         else begin
+            if ((global_var(GVAR_SAN_FRAN_VERTI_ELE_QST) == 2) or (global_var(GVAR_SAN_FRAN_VERTI_STEAL_SHI_QST) == 2)) then
+               set_global_var(GVAR_ENDGAME_MOVIE_SAN_FRAN_ELRON,2);
+            else
+               set_global_var(GVAR_ENDGAME_MOVIE_SAN_FRAN_ELRON,3); 
+         end
+      end
+      //end killap code
 
        set_global_var(GVAR_ENDGAME_MOVIE_SAN_FRAN_PUNKS,1);
    end
@@ -492,7 +531,7 @@ procedure NewReno_Endgame_Info begin
             set_global_var(GVAR_ENDGAME_MOVIE_RENO, 3);
          end
       end else if ((mordino_power > 0) and (mordino_power >= salvatore_power) and (mordino_power >= bishop_power) and (mordino_power >= wright_power)) then begin
-         if ((get_jet_source(jet_source_cure_made)) or (global_var(GVAR_VAULT_JET_QUEST) == REDDING_PROBLEM_DELIVERED_ANTIDOTE)) then begin
+         if ((get_jet_source(jet_source_cure_made)) or (global_var(GVAR_VAULT_REDDING_PROBLEM) >= REDDING_PROBLEM_DELIVERED_ANTIDOTE)) then begin //was GVAR_VAULT_JET_QUEST; also became >= rather than just ==      -killap
             set_global_var(GVAR_ENDGAME_MOVIE_RENO, 7);
          end else begin
             set_global_var(GVAR_ENDGAME_MOVIE_RENO, 6);
@@ -502,7 +541,7 @@ procedure NewReno_Endgame_Info begin
       end else if ((salvatore_power > 0) and (salvatore_power >= mordino_power) and (salvatore_power >= bishop_power) and (salvatore_power >= wright_power)) then begin
          set_global_var(GVAR_ENDGAME_MOVIE_RENO, 5);
       end else if ((wright_power > 0) and (wright_power >= mordino_power) and (wright_power >= bishop_power) and (wright_power >= salvatore_power)) then begin
-         if (sad_got_in) then begin
+         if ( (sad_done) and (not(sad_contaminated)) ) then begin //edit by killap - added (not(sad_contaminated))
             set_global_var(GVAR_ENDGAME_MOVIE_RENO, 8);
          end else if (get_mystery_flag(MYSTERY_STATE_ASSIGNED)) then begin
             set_global_var(GVAR_ENDGAME_MOVIE_RENO, 9);

@@ -96,16 +96,18 @@ procedure map_enter_p_proc begin
    end
    if (global_var(GVAR_LOAD_MAP_INDEX) == 5) then begin
      fadein(1);
-     set_global_var(global_var(GVAR_LOAD_MAP_INDEX), 0);
+     //set_global_var(global_var(GVAR_LOAD_MAP_INDEX), 0);
+     set_global_var(GVAR_LOAD_MAP_INDEX, 0); //edit by killap
      override_map_start_hex(ROPE_LOAD_POS, 0, 2);
    end
 
    Lighting;
-
+   
    if ((global_var(GVAR_STANWELL_PAYOUT) == 0) and (global_var(GVAR_STANWELL_STATUS) == 1) and (map_var(MVAR_Made_Payoff) == 0)) then begin
        inc_map_var(MVAR_Made_Payoff);
        Critter:=create_object_sid(PID_AGILE_GUARD_MALE,0,0,SCRIPT_RCNORD);
-       critter_attempt_placement(Critter,10913,0);
+       critter_attempt_placement(Critter,12115,0); //was 10913 - killap (expansion)
+       animate_rotation(2); //added by killap (expansion)
    end
    set_global_var(GVAR_LOAD_MAP_INDEX,0);
 end

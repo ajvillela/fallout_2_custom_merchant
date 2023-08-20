@@ -127,8 +127,8 @@ procedure talk_p_proc begin
 
    //CURRENTLY KLAMATH CHILDREN JUST HAVE RANDOM DIALOGUE
    //IF THIS CHANGES IN FUTURE THEN JUST UNCOMMENT GETREACTION AND DIALOGUE -nbk
-   if (TOWN_REPUTATION < 6) then call Node901;
-   else if (TOWN_REPUTATION > 14) then call Node903;
+   if (TOWN_REPUTATION < 6 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then call Node901; // edit by killap added not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
+   else if (TOWN_REPUTATION > 14 or (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then call Node903; // edit by killap added (has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
    else call Node902;
    /*
    end else begin

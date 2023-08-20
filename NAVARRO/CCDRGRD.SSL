@@ -40,6 +40,8 @@ procedure use_skill_on_p_proc;
 procedure damage_p_proc;
 procedure map_enter_p_proc;
 
+procedure timed_event_p_proc; //added by killap
+
 procedure Node001;
 procedure Node002;
 procedure Node003;
@@ -56,6 +58,8 @@ procedure Node013;
 procedure Node014;
 procedure Node015;
 procedure Node016;
+
+procedure Node997; //added by killap
 
 /* Script Specific Procedure Calls */
 procedure Node998;                                      // This Node is Always Combat
@@ -77,13 +81,36 @@ procedure Node999;                                      // This Node is Always E
 #define off_armor_tip_given             set_lvar_bit_off(LVAR_Flags, armor_tip_given_bit)
 
 import variable Commander_Locker_Ptr;
+import variable commander_ptr; //added by killap
 
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
 variable said_intruder:=0;
 
+variable step := 0; //added by killap
+variable came_from := 0; //added by killap
+
+#define CHECK_ON_COMMANDER  555 //added by killap
+   
 procedure start begin
 end
+
+//added by killap
+procedure timed_event_p_proc begin
+    if (fixed_param == CHECK_ON_COMMANDER) then begin
+      if (step != 1) then begin
+         animate_run_to_tile(15480);
+         step := 1;
+         add_timer_event(self_obj, game_ticks(2), CHECK_ON_COMMANDER);
+      end else if (step == 1) then begin
+         floater(201);
+         set_global_var(GVAR_NAVARRO_BASE_ALERT,1);
+         step := 0;
+         rm_fixed_timer_event(self_obj, fixed_param);
+      end
+    end
+end
+//end added by killap
 
 procedure map_enter_p_proc begin
    Only_Once:=0;
@@ -223,14 +250,16 @@ procedure Node001 begin
    NLowOption(104,Node002);
    NLowOption(105,Node008);
    if (local_var(LVAR_Secure_Clean) == 1) then
-      NLowOption(106,Node010);
+      NLowOption(106,Node997); //edit by killap - was 010
    NLowOption(107,Node999);
 
-   NOption(104,Node002,004);
+   NOption(108,Node002,004);  //edit by killap - was 104
    NOption(109,Node008,004);
    if (local_var(LVAR_Secure_Clean) == 1) then
-      NOption(110,Node010,004);
+      NOption(110,Node997,004); //edit by killap - was 010
    NOption(111,Node999,004);
+   
+   came_from := 1;
 end
 
 procedure Node002 begin
@@ -247,12 +276,13 @@ procedure Node003 begin
 
    NLowOption(118,Node004);
    NLowOption(119,Node005);
-   NLowOption(120,Node999)
-;
+   NLowOption(120,Node999);
    NOption(121,Node004,004);
-   if (global_var(GVAR_NAVARRO_FOB) == NAVARRO_NEED_FOB) then
-      NOption(122,Node007,004);
+   if ( (global_var(GVAR_NAVARRO_FOB) == NAVARRO_NEED_FOB) and (map_var(MVAR_Secure) != 1) ) then //added (map_var(MVAR_Secure) != 1) - killap
+      NOption(122,Node997,004); //edit by killap - was 007
    NOption(123,Node999,004);
+   
+   came_from := 3;
 end
 
 procedure Node004 begin
@@ -266,7 +296,8 @@ end
 procedure Node005 begin
    Reply(128);
 
-   NLowOption(129,Node006);
+   NLowOption(129,Node997); //edit by killap - was 006
+   came_from := 5; //added by killap
 end
 
 procedure Node006 begin
@@ -367,4 +398,19 @@ end
 /* Anytime that there is a need for an ending to dialog, this node is to be called. It will just
    exit from the dialog system without any reprisals from the NPC. */
 procedure Node999 begin
+end
+
+procedure Node997 begin
+   if (commander_ptr == 0) then begin
+      NMessage(200);
+      add_timer_event(self_obj, game_ticks(1), CHECK_ON_COMMANDER);
+   end 
+   else begin
+      if (came_from == 1) then
+         call Node010;
+      else if (came_from == 3) then
+         call Node007;
+      else if (came_from == 5) then
+         call Node006;
+   end
 end

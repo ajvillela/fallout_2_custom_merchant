@@ -33,8 +33,9 @@
 
 #include "..\headers\command.h"
 #include "..\headers\ModReact.h"
+#include "..\headers\VILL.H"
 
-#define PID_IAN_GUN             (1)
+#define PID_IAN_GUN             (PID_10MM_PISTOL)
 
 /* Standard Script Procedures */
 procedure start;
@@ -71,6 +72,18 @@ procedure Node011;
 procedure Node012;
 procedure Node013;
 
+procedure Node014;
+procedure Node015;
+procedure Node016;
+procedure Node017;
+procedure Node018;
+procedure Node019;
+procedure Node020;
+procedure Node021;
+
+procedure Node022;
+procedure Node023;
+procedure Node024;
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
 // seen by the design Tool
@@ -82,6 +95,7 @@ procedure Node013;
 #define LVAR_Hostile                    (5)
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Given_Gun                  (7)
+#define LVAR_Know_Real_Name             (8)
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -101,6 +115,18 @@ procedure map_enter_p_proc begin
    Only_Once:=0;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_VAULT_OUTSIDER);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_COWARD);
+   
+   //added by killap - expansion pack
+   if (global_var(GVAR_QUEST_VAULT_VILLAGE) < VILLAGE_QUEST_GET_GUNS) then
+      set_obj_visibility(self_obj,1); //invisible
+   else begin
+      set_obj_visibility(self_obj,0); //visible
+      if( MacRae_Ptr != 0 ) then begin
+         move_to(self_obj,16255,0);
+      end
+   end
+   //end
+   
 end
 
 
@@ -160,22 +186,21 @@ procedure talk_p_proc begin
        call Node012;
    end
 
-   else if (local_var(LVAR_Herebefore) == 0) then begin
+   if (local_var(LVAR_Herebefore) == 0) then begin
        set_local_var(LVAR_Herebefore,1);
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node001;
        gSay_End;
        end_dialogue;
+   end else begin
+      if (local_var(LVAR_Given_Gun) == 1) then begin
+         call Node013;
+      end else begin
+         call Node012;
+      end
    end
 
-   else if (local_var(LVAR_Given_Gun) == 1) then begin
-       call Node013;
-   end
-
-   else begin
-       call Node012;
-   end
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -256,37 +281,49 @@ end
 procedure Node005 begin
    Reply(113);
 
-   NOption(114,Node999,004);
+   //well wait - expansion - killap
+   //if (global_var(GVAR_QUEST_VAULT_VILLAGE) < VILLAGE_QUEST_DELIVERED_GUNS) then
+      NOption(147,Node014,004);
+   //else
+     NOption(114,Node999,004);
 end
 
 procedure Node006 begin
+
+   gfade_out(600);
+   gfade_in(600);
+  
    Reply(115);
 
-   NOption(116,Node008,008);
+   NOption(116,Node008,004);
 end
 
 procedure Node007 begin
    Reply(117);
 
-   NOption(118,Node999,006);
+   //hmm ok, but wait - expansion - killap
+   //if (global_var(GVAR_QUEST_VAULT_VILLAGE) < VILLAGE_QUEST_DELIVERED_GUNS) then
+      NOption(146,Node014,004); 
+   //else
+      NOption(118,Node999,006);
 end
 
 procedure Node008 begin
    Reply(119);
-
-   NOption(120,Node009,008);
+   set_local_var(LVAR_Know_Real_Name,1);
+   NOption(120,Node009,004);
 end
 
 procedure Node009 begin
    Reply(121);
 
-   NOption(122,Node010,008);
+   NOption(122,Node010,004);
 end
 
 procedure Node010 begin
    Reply(123);
 
-   NOption(124,Node011,008);
+   NOption(124,Node011,004);
 end
 
 procedure Node011 begin
@@ -298,8 +335,11 @@ procedure Node011 begin
    add_mult_objs_to_inven(dude_obj,item,1);
 
    Reply(125);
-
-   NOption(126,Node999,008);
+   //expansion - killap
+   //if (global_var(GVAR_QUEST_VAULT_VILLAGE) < VILLAGE_QUEST_DELIVERED_GUNS) then
+      NOption(133,Node014,004);
+   //else
+      NOption(126,Node999,008);
 end
 
 procedure Node012 begin
@@ -311,3 +351,101 @@ procedure Node013 begin
 end
 
 //xxxxxxxxxxxxxxxxxxxx
+
+//added by killap - expansion pack
+procedure Node014 begin
+   Reply(134);
+   if (global_var(GVAR_QUEST_VAULT_VILLAGE) >= VILLAGE_QUEST_SPEAK_WITH_COUNCIL) then
+      NOption(150,Node019,004);
+   else
+      NOption(135,Node015,004);
+      
+end
+procedure Node015 begin
+   set_global_var(GVAR_QUEST_VAULT_VILLAGE, VILLAGE_QUEST_JOE_SPOKE);
+   Reply(136);
+
+   NOption(137,Node999,004);
+   NOption(138,Node016,004);
+end
+
+procedure Node016 begin
+   Reply(139);
+
+   NOption(140,Node999,004);
+   NOption(141,Node017,004);
+   if (local_var(LVAR_Know_Real_Name)) then
+      NOption(200,Node022,004);
+end
+
+procedure Node017 begin
+   if (local_var(LVAR_Know_Real_Name) == 1) then
+      NOption(200,Node022,004);
+   Reply(142);
+
+   NOption(143,Node018,004);
+end
+
+procedure Node018 begin
+   //set_global_var(GVAR_VAULT_VILLAGE_MOLERAT_ORIGIN_KNOWN,GAVE_INFO);
+   set_mole_rat_origin_info;
+   
+   Reply(144);
+
+   if (local_var(LVAR_Know_Real_Name)) then
+      NOption(145,Node999,004);
+   else
+      NOption(148,Node999,004);
+    //CHECK THIS AREA - killap -8/4/07 
+    //need to make a var here so that this can be used with mcclure. At the moment
+    //you can always say to mcclure that you know what is going on.
+    //also shouldn't be called Ian if you don't acutally know that...
+   //set_global_var(GVAR_
+end
+//end
+
+procedure Node019 begin
+   Reply(151);
+   //NOption(155,Node999,004);
+   //NOption(156,Node017,004);
+   //if (local_var(LVAR_Know_Real_Name)) then
+   //   NOption(200,Node022,004);
+   if (global_var(GVAR_MCCLURE_KNOWN) >= MCCLURE_KNOWN) then
+      NOption(153,Node020,004);
+   else
+      NOption(152,Node021,004);
+end
+
+procedure Node020 begin
+   Reply(157);
+   if (local_var(LVAR_Know_Real_Name)) then
+      NOption(200,Node022,004);   
+   NOption(158,Node999,004);
+   NOption(159,Node017,004);
+end
+
+procedure Node021 begin
+   Reply(154);
+   if (local_var(LVAR_Know_Real_Name)) then
+      NOption(200,Node022,004);   
+   NOption(155,Node999,004);
+   NOption(156,Node017,004);
+end
+
+procedure Node022 begin
+   Reply(201);
+   NOption(202,Node023,004);
+   set_local_var(LVAR_Know_Real_Name,2);
+end
+
+procedure Node023 begin
+   Reply(203);
+   NOption(204,Node017,004);
+   NOption(205,Node024,004);
+end
+
+procedure Node024 begin
+   Reply(206);
+   NOption(207,Node999,004);
+   NOption(208,Node017,004);
+end

@@ -190,8 +190,8 @@ procedure Node996 begin
          move_to(dude_obj, dude_tile, self_elevation);
          Face_Critter(dude_obj,self_obj);
          Face_Critter(self_obj,dude_obj);
-         flush_add_timer_event_sec(self_obj, 1, timed_event_post_sex);
       gfade_in(ONE_GAME_SECOND);
+      flush_add_timer_event_sec(self_obj, 0, timed_event_post_sex); //moved from 2 lines above - killap
    end else begin
       call Node008;
    end

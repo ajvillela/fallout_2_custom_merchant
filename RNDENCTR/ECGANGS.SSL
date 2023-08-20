@@ -33,7 +33,7 @@ procedure use_obj_on_p_proc;
 // The Following lines are for anything that is not needed to be
 // seen by the design Tool
 
-#define TAUNT_CHANCE 100
+#define TAUNT_CHANCE 50 //edit by killap - was 100
 
 procedure NodeFleeing;
 procedure NodeFighting;

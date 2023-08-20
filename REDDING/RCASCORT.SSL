@@ -440,6 +440,10 @@ procedure Node012a begin
    item_caps_adjust(self_obj,300);
 
    set_local_var(LVAR_Wanamingo_Deed,Deed_Sold_To_Player);
+   //added by killap - expansion
+   if (global_var(GVAR_MINE_DEED) < DEED_ACCEPTED) then
+      set_global_var(GVAR_MINE_DEED,DEED_ACCEPTED);
+   //end added
    call Node013;
 end
 
@@ -503,6 +507,7 @@ procedure Node018b begin
    item_caps_adjust(dude_obj,2500);
    set_local_var(LVAR_Wanamingo_Deed,Deed_Sold_To_Ascorti);
    give_xp(EXP_SELL_MINE_DEED);
+   inc_global_var_amt(GVAR_TOWN_REP_REDDING, 15); //added by killap
 end
 
 procedure Node019 begin
@@ -584,6 +589,16 @@ end
 
 procedure Node028a begin
    set_map_var(MVAR_Widow_Rooney,WIDOW_PAID);
+   
+   //added by killap
+   item_caps_adjust(dude_obj,-120);
+   set_global_var(GVAR_WIDOW_ROONEY,WIDOW_PAID);
+   inc_general_rep(REP_BONUS_HELPED_ROONEY);
+   inc_global_var_amt(GVAR_TOWN_REP_REDDING, 5);
+   display_msg(g_mstr(1008));
+   give_xp(EXP_HELPED_ROONEY);
+   //added by killap
+   
    call Node029;
 end
 

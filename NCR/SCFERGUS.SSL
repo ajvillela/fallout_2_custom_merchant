@@ -406,16 +406,18 @@ procedure Node016 begin
    ENDOPTION;
 end
 
-procedure Node012a begin
-   set_map_var(MVAR_Fergus_Knows, 1);
-   call Node012;
-end
+//begin comment out by killap
+//procedure Node012a begin
+//   set_map_var(MVAR_Fergus_Knows, 1);
+//   call Node012;
+//end
+//end killap comment out
 
 procedure Node017 begin
    Reply(152);
    NOption(153, Node018, 4);
    if (dude_item(PID_SPY_HOLO)) then
-      NOption(154, Node012a, 4);
+      NOption(154, Node012, 4);  //killap's fix: changed from 012a
 end
 
 procedure Node018 begin
@@ -429,6 +431,7 @@ procedure checkFergusState begin
 end
 
 procedure anim_end_call begin
+   if (map_var(MVAR_Fergus_Knows) == 1) then //added by killap
    call leaveMap;
 end
 

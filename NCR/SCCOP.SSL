@@ -131,12 +131,24 @@ procedure getArmedPartyMember(variable last) begin
    if (Miria_In_Party) then
       if (Is_Armed(Miria_Ptr)) then
             return Miria_Ptr;
-   if (Laddie_In_Party) then
-      if (Is_Armed(Laddie_Ptr)) then
-            return Laddie_Ptr;
+   //if (Laddie_In_Party) then --dumb since even if laddie was armed there is no way to fix it.
+   //   if (Is_Armed(Laddie_Ptr)) then
+   //         return Laddie_Ptr;
    if (Robobrain_In_Party) then
       if (Is_Armed(Robobrain_Ptr)) then
             return Robobrain_Ptr;
+   //added by killap
+   if (Robobrain_Human_In_Party) then
+      if (Is_Armed(Robobrain_Human_Ptr)) then
+            return Robobrain_Human_Ptr;
+   if (Robobrain_Abnormal_In_Party) then
+      if (Is_Armed(Robobrain_Abnormal_Ptr)) then
+            return Robobrain_Abnormal_Ptr;
+   if (Robobrain_Chimp_In_Party) then
+      if (Is_Armed(Robobrain_Chimp_Ptr)) then
+            return Robobrain_Chimp_Ptr;
+   //end added
+     
    return 0;
 end
 
@@ -363,7 +375,7 @@ end
 //~~~~~~~~~~~~~~~~ DESIGN TOOL STARTS HERE
 
 procedure Node001 begin
-   float_msg(self_obj, mstr(103 + Random(0, 2)), FLOAT_MSG_NORMAL);
+   float_msg(self_obj, mstr(103 + Random(0, 2)), FLOAT_MSG_RED); //edit by killap - was FLOAT_MSG_NORMAL
 end
 
 procedure Node002 begin

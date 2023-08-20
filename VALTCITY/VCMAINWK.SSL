@@ -202,9 +202,9 @@ procedure timed_event_p_proc begin
    // Standard float output
    if( ( fixed_param == 1 ) and ( local_var( LVAR_Prevent_Floats ) == 0 ) ) then begin
       if( not( combat_is_initialized ) ) then begin
-         if( ( day ) and (Marcus_Ptr != 0) ) then
+         if( ( day ) and (Marcus_Ptr != 0 and not(Fallout2_enclave_destroyed)) ) then //added by killap - not(Fallout2_enclave_destroyed)
             call Node004;
-         else if( ( day ) and (Lenny_Ptr != 0) ) then
+         else if( ( day ) and (Lenny_Ptr != 0 and not(Fallout2_enclave_destroyed)) ) then //added by killap - not(Fallout2_enclave_destroyed)
             call Node005;
          else if( day ) then
             call Node006;
@@ -257,12 +257,16 @@ procedure critter_p_proc begin
    end
 
    if( Vic_Ptr != 0 ) then begin
-      if ( (tile_distance_objs( self_obj, Vic_Ptr ) <= 5 ) and (Floated_With_Vic == 0) ) then begin
+      if ( (tile_distance_objs( self_obj, Vic_Ptr ) <= 4 ) and (Floated_With_Vic == 0) and (self_visible) ) then begin //added (self_visible); decreased distance from 5 to 4 - by killap
          Floated_With_Vic := 1;
 
          // Make Vic and Val face each other
          Face_Critter( self_obj, Vic_Ptr );
          Face_Critter( Vic_Ptr, self_obj );
+
+         //added by killap
+         Face_Critter( dude_obj, self_obj );
+         //end added
 
          if( local_var(LVAR_Vic_Relationship) == RELATION_KNOWN ) then
             call Node002;
@@ -287,7 +291,7 @@ procedure damage_p_proc begin
       set_global_var( GVAR_VAULT_CITIZENSHIP, 0 );
 
       // If Vic is in party, alert him that the player attacked his daughter.
-      if( Vic_Ptr != 0 ) then
+      if ( Vic_Ptr != 0 ) then
          add_timer_event( Vic_Ptr, 0, 666 );
    end
 end
@@ -931,7 +935,8 @@ procedure Node036b begin
    weapon := obj_carrying_pid_obj( dude_obj, PID_CATTLE_PROD );
    rm_obj_from_inven( dude_obj, weapon );
    destroy_object( weapon );
-   weapon := create_object( PID_CATTLE_PROD, 0, 0 );
+//   weapon := create_object( PID_CATTLE_PROD, 0, 0 );
+   weapon := create_object( PID_SUPER_CATTLE_PROD, 0, 0 );  //added by killap
    add_obj_to_inven( dude_obj, weapon );
 
    call Node037;
@@ -990,6 +995,11 @@ procedure Node039a begin
    //critter_attempt_placement( Vic_Ptr, 20295, 0 );
    Face_Critter( self_obj, Vic_Ptr );
    Face_Critter( Vic_Ptr, self_obj );
+   
+   //added by killap
+   Face_Critter( dude_obj, self_obj );
+   //end added
+   
    //set_obj_visibility( Vic_Ptr, false );
    //set_obj_visibility( dude_obj, false );
    add_timer_event( self_obj, game_ticks(1), 3);

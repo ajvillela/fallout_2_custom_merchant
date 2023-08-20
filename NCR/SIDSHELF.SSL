@@ -60,4 +60,5 @@ procedure map_enter_p_proc begin
 end
 
 procedure map_update_p_proc begin
+   i_doc_shelf_obj := self_obj; //added by killap
 end

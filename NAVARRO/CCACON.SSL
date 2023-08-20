@@ -55,21 +55,37 @@ procedure Node999;                                      // This Node is Always E
 #define LVAR_Hostile                    (5)
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_second_look                (7)
+#define LVAR_Touch_Warn                 (8) //added by killap - expansion
 
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
 variable said_intruder:=0;
 variable i_am_a_warrior:=0;
 
+import variable air_guard_obj; //added by killap - expansion
+
 procedure start begin
 end
 
 procedure map_enter_p_proc begin
+
+   //added by killap - expansion
+   if (self_tile == 13906) then
+      air_guard_obj := self_obj;
+   //end added
+      
    Only_Once:=0;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NAVARRO);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_NAV_GUARD);
 end
 
+//added by killap - expansion
+procedure map_update_p_proc begin
+   if (self_tile == 13906) then
+      air_guard_obj := self_obj;
+end
+//end added
+   
 procedure critter_p_proc begin
    if (obj_can_see_obj(self_obj,dude_obj)) then begin
       if( not_alone ) then begin
@@ -179,3 +195,19 @@ end
    exit from the dialog system without any reprisals from the NPC. */
 procedure Node999 begin
 end
+
+//added by killap - expansion
+procedure timed_event_p_proc begin
+   if (fixed_param == 2) then begin
+      if (local_var(LVAR_Touch_Warn) == 0) then begin
+         float_msg(self_obj, mstr(200), FLOAT_MSG_RED);
+         set_local_var(LVAR_Touch_Warn,1);
+      end else if (local_var(LVAR_Touch_Warn) == 1) then begin
+         float_msg(self_obj, mstr(200), FLOAT_MSG_RED);
+         set_local_var(LVAR_Touch_Warn,2);
+      end else begin
+         call Node998;
+      end
+   end
+end
+//end added

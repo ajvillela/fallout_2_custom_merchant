@@ -112,7 +112,8 @@ end
 ***************************************************************************/
 
 procedure look_at_p_proc begin
-   display_msg(100);
+   //display_msg(100);
+   display_msg(mstr(100)); //edit by killap
 end
 
 

@@ -141,6 +141,7 @@ procedure Node070;
 procedure Node071;
 procedure Node072;
 procedure Node073;
+procedure Node073a; //added by killap
 procedure Node074;
 procedure Node075;
 procedure Node076;
@@ -407,6 +408,8 @@ procedure talk_p_proc begin
 
    GetReaction;
 
+   ReactToLevel; //added by killap
+      
    if (Fallout2_enclave_destroyed) then begin
        start_gdialog(NAME,self_obj,4,HEAD_LYNETTE,BACKGROUND_ADOBE);
        gSay_Start;
@@ -624,11 +627,13 @@ procedure Node010a begin
     if( DayPass_KickOutCount > 0 ) then begin
         DayPass_KickOutObj := obj_carrying_pid_obj(dude_obj, PID_DAY_PASS);
         KickOutTemp := rm_mult_objs_from_inven(dude_obj, DayPass_KickOutObj, DayPass_KickOutCount );
+        destroy_object(DayPass_KickOutObj); //added by killap
     end
     CitizenPapers_KickOutCount := obj_is_carrying_obj_pid(dude_obj, PID_FAKE_CITIZENSHIP);
     if( CitizenPapers_KickOutCount > 0 ) then begin
         CitizenPapers_KickOutObj := obj_carrying_pid_obj(dude_obj, PID_FAKE_CITIZENSHIP);
         KickOutTemp := rm_mult_objs_from_inven(dude_obj, CitizenPapers_KickOutObj, CitizenPapers_KickOutCount );
+        destroy_object(CitizenPapers_KickOutObj); //added by killap
     end
     set_global_var( GVAR_TOWN_REP_VAULT_CITY, (global_var(GVAR_TOWN_REP_VAULT_CITY) + REP_TOWN_KICKED_OUT ) );
     load_map(MAPSTR_VCTYCTYD,0);
@@ -1296,7 +1301,7 @@ end
 
 procedure Node049 begin
    Reply(362);
-
+   NOption(356,Node048,004); //added by killap
    NOption(363,Node048a,004);
    BOption(364,Node049a,004);
    NOption(365,Node049b,004);
@@ -1449,6 +1454,13 @@ procedure Node056 begin
    From_WTG := 0;
    Reply(416);
 
+   //added by killap
+   BLowOption(383,Node053a);
+   BLowOption(384,Node053a);
+   BLowOption(385,Node053a);
+   NLowOption(386,Node999);
+   //added by killap
+   
    BOption(417,Node056a,004);
    if ((dude_speech >= 75) or (dude_charisma > 7)) then
        NOption(418,Node056b,004);
@@ -1525,7 +1537,7 @@ procedure Node060 begin
 
    NOption(434,Node062,004);
    BOption(435,Node069,004);
-   NOption(436,Node998,004);
+   BOption(436,Node998,004); //edit by killap: was NOption
 end
 
 procedure Node061 begin
@@ -1666,7 +1678,7 @@ end
 procedure Node072 begin
    if (local_var(LVAR_Info_Paid) == 0) then begin
        inc_local_var(LVAR_Info_Paid);
-       inc_local_var(LVAR_Raiders_Done,1);
+       inc_local_var(LVAR_Raiders_Done); // Seraph's Fix: inc_local_var only takes 1 arg. Thanks Rob!
        item_caps_adjust(dude_obj,1000);
        display_msg( mstr(872) );
        give_xp(EXP_FINISHED_RAIDERS);
@@ -1684,15 +1696,16 @@ procedure Node073 begin
    Reply(487);
 
    BOption(488,Node074,004);
-   GOption(489,Node076,004);
+   //GOption(489,Node076,004);
+   GOption(489,Node073a,004); //edit by killap
 end
 
 procedure Node073a begin
    if( ( global_var( GVAR_VAULT_CITIZEN ) == CITIZEN_REAL_CITIZEN ) or
        ( global_var( GVAR_VAULT_CITIZEN ) == CITIZEN_CAPTAIN_GUARD ) ) then
-      call Node076c;
+      call Node076; //edit by killap - was Node076c
    else
-      call Node076;
+      call Node076c; //edit by killap - was Node076
 end
 
 procedure Node074 begin
@@ -2173,10 +2186,14 @@ end
 procedure Node107 begin
    Reply(661);
 
-   if (not(raiders_dead)) then
-       NOption(662,Node108,004);
-   else
+
+   if (raiders_scout_left) then //added by killap - expansion
+       NOption(1663,Node072,004);
+   else if (raiders_dead) then
        NOption(663,Node072,004);
+   else
+       NOption(662,Node108,004);
+       
    if (local_var(LVAR_Info_Paid) == 0) then
        BOption(664,Node107a,004);
    NOption(665,Node999,004);
@@ -2260,12 +2277,30 @@ procedure Node113 begin
 end
 
 procedure Node114 begin
+   variable obj; //added by killap
+
    set_global_var(GVAR_VAULT_RAIDERS,RAIDERS_PLANS_KNOWN_RENO);
 
    Reply(689);
 
-   if (obj_is_carrying_obj_pid(dude_obj,PID_BISHOPS_HOLODISK)) then
-       NOption(690,Node116,004);
+   //added by killap
+   if (obj_is_carrying_obj_pid(dude_obj,PID_ACCOUNT_BOOK)) then begin
+      obj := obj_carrying_pid_obj(dude_obj, PID_ACCOUNT_BOOK);
+      rm_obj_from_inven(dude_obj, obj);
+   end
+   //end added
+   
+   if (obj_is_carrying_obj_pid(dude_obj,PID_BISHOPS_HOLODISK)) then begin
+   //killap code
+      item_caps_adjust(dude_obj,500);
+      display_msg( mstr(874) );
+      give_xp(EXP_RENO_RAIDER_CONNECTION);
+      set_global_var( GVAR_TOWN_REP_VAULT_CITY, (global_var(GVAR_TOWN_REP_VAULT_CITY) + REP_TOWN_EXPOSED_BISHOP_RAIDERS ) );
+      set_good_critter_reaction;
+      
+      NOption(690,Node116,004);
+   end
+   //end killap code
    else
        NOption(691,Node115,004);
 end
@@ -2356,10 +2391,13 @@ procedure Node118 begin
 
    Reply(706);
 
-   if (not(raiders_dead)) then
-       NOption(707,Node108,004);
-   else
+   if (raiders_scout_left) then //added by killap - expansion
+       NOption(1708,Node072,004);
+   else if (raiders_dead) then
        NOption(708,Node072,004);
+   else
+       NOption(707,Node108,004);
+       
    BOption(709,Node101,004);
    BOption(710,Node101,004);
 end
@@ -2629,6 +2667,5 @@ procedure Node138a begin
    inc_general_rep(REP_BONUS_BUST_MOORE);
    call Node119;
 end
-
 
 //xxxxxxxxxxxxxxxxxxxx

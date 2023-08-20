@@ -133,14 +133,21 @@ procedure map_update_p_proc begin
 end
 
 procedure map_enter_p_proc begin
+   match_dude_elevation; //added by killap
    if (is_loading_game == false) then begin
-      if ((cur_map_index == MAP_GHOST_LAKE) or jonny_at_home) then begin
+      /*if ((cur_map_index == MAP_GHOST_LAKE) or jonny_at_home) then begin
          if (obj_is_visible_flag(self_obj) == false) then begin
-            set_obj_visibility(self_obj, false);
+            set_obj_visibility(self_obj, false); //visible
          end
       end else if (laddie_bit(q10_bit)) then begin
          if (obj_is_visible_flag(self_obj) == true) then begin
-            set_obj_visibility(self_obj, true);
+            set_obj_visibility(self_obj, true); //invisible
+         end*/
+      if (jonny_at_home) then begin //edits by killap
+         if (cur_map_index == MAP_GHOST_LAKE) then begin
+            destroy_object(self_obj);
+         end else if (obj_is_visible_flag(self_obj) == false) then begin
+            set_obj_visibility(self_obj, false); //visible
          end
       end else if (cur_map_index == MAP_MODOC_MAINSTREET) then begin
          if (map_first_run) then begin
@@ -156,6 +163,10 @@ end
 procedure critter_p_proc begin
    if (obj_is_visible_flag(self_obj)) then begin
       if ((self_can_see_dude) and ((hostile) or (dude_enemy_modoc))) then begin
+         //killap code
+         if (dude_enemy_modoc) then
+            set_self_abandon_party;
+         //end killap code
          self_attack_dude;
       end else if (Laddie_In_Party) then begin
          if (cur_map_index == MAP_MODOC_MAINSTREET) then begin
@@ -170,6 +181,7 @@ procedure critter_p_proc begin
             if (jonny_obj != 0) then begin
                set_laddie_bit(q10_bit);
                Get_In_Face_Run_Dist(jonny_obj, random(1,3))
+               set_self_abandon_party; //added by killap
             end
          end else begin
             party_member_follow_dude
@@ -228,6 +240,15 @@ end
 
 procedure use_skill_on_p_proc begin
 end
+
+//added by killap
+procedure use_obj_on_p_proc begin
+   if ( (obj_pid(obj_being_used_with) == PID_MICRO_FUSION_CELL) or (obj_pid(obj_being_used_with) == PID_SMALL_ENERGY_CELL) ) then begin
+      script_overrides;
+      display_msg(g_mstr(20000));
+   end
+end
+//end added
 
 // dialog action functions
 procedure Node999 begin

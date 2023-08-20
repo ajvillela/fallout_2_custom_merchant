@@ -9,12 +9,13 @@
 #define ENTER_LOCK_CONDITION        (map_first_run)
 #define LOCKPICK_SKILL_PENALTY      HARD_LOCK_PENALTY
 #define DO_CHECK_TAMPER_CONDITION   ( map_var( MVAR_Open_Sesame ) == 0 )
-
-#define watch_box_conditions                   ( not( dude_is_sneaking ) ) or                                                 \
+// edit by killap - added check that the player is actually seen
+#define watch_box_conditions                   ((obj_can_see_obj(WATCHER_OBJ, user_obj)) and                                  \
+                                               (( not( dude_is_sneaking ) ) or                                                \
                                                ( ( has_skill( dude_obj, SKILL_SNEAK ) < 130 ) and                             \
                                                  ( has_skill( dude_obj, SKILL_SNEAK ) >= 60 ) and                             \
                                                  ( not( is_success( roll_vs_skill( dude_obj, SKILL_SNEAK, -20 ) ) ) ) ) or    \
-                                               ( has_skill( dude_obj, SKILL_SNEAK ) < 60 )                                    \
+                                               ( has_skill( dude_obj, SKILL_SNEAK ) < 60 )))                                  \
 
 #define do_warning_action                    add_timer_event( commander_ptr, 1, 0 );
 
@@ -23,4 +24,4 @@
                                              if (not(combat_is_initialized)) then                                             \
                                              attack_setup(WATCHER_OBJ, user_obj);                                             \
 
-#include "..\generic\ziLocker.ssl"
+#include "D:\BlackIsle\Fallout 2 Mapper\scripts\GENERIC\ziLocker.ssl"

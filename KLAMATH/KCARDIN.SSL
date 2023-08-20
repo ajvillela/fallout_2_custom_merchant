@@ -26,6 +26,7 @@
         -rwh2   11/13/97
 */
 #include "..\headers\define.h"
+#include "..\headers\klamath.h" //added by killap
 #include "..\headers\kladwtn.h"
 
 #define NAME                    SCRIPT_KCARDIN
@@ -116,6 +117,17 @@ procedure Node52b;
 procedure Node053;
 procedure Node054;
 procedure Node055;
+//added by killap - expansion pack
+procedure Node032;
+procedure Node033; 
+procedure Node034;
+procedure Node035;
+
+procedure Node033a;
+procedure Node007a;
+procedure Node999a;   
+
+//end added
 
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
@@ -135,6 +147,7 @@ procedure Node055;
 #define LVAR_quest_smiley               (10) //need these because the globals to keep
 #define LVAR_quest_torr                 (11) //track of quest accept change if they die
 #define LVAR_Ardin_Angry                (12)
+#define LVAR_Discovered_Rustlers        (13) //added by killap - expansion
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -229,23 +242,27 @@ procedure talk_p_proc begin
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
 
-      if dude_low_iq then
-         call Node003;
-      else if (global_var(GVAR_TORR_HARMED) == 1) then
+      if dude_low_iq then begin
+         if (local_var(LVAR_quest_smiley) == 0) then
+            call Node005;
+         else
+            call Node004; //was Node003 -edit by killap --RP;
+      end else if (global_var(GVAR_TORR_HARMED) == 1) then begin
          call Node002;
-      else if ( (global_var(GVAR_TORR_MISSING) == 1) and (local_var(LVAR_17_before) == 0) ) then
+      end else if ( (global_var(GVAR_TORR_MISSING) == 1) and (local_var(LVAR_17_before) == 0) ) then begin
          call Node017;
-      else if ( (global_var(GVAR_QUEST_RESCUE_TORR) == TORR_RESCUE_SUCCESS) and (local_var(LVAR_quest_torr) == 1 ) ) then
+      end else if ( (global_var(GVAR_QUEST_RESCUE_TORR) == TORR_RESCUE_SUCCESS) and (local_var(LVAR_quest_torr) == 1 ) ) then begin
          call Node52a;
-      else if ( (global_var(GVAR_SMILEY_STATUS) == SMILEY_IS_HERE) and (local_var(LVAR_quest_smiley) == 1 ) ) then
+      end else if ( (global_var(GVAR_SMILEY_STATUS) == SMILEY_IS_HERE) and (local_var(LVAR_quest_smiley) == 1 ) ) then begin
          call Node52b;
-      else if ( (local_var(LVAR_quest_torr) == 1) or (local_var(LVAR_quest_smiley) == 1) ) then
+      end else if ( (local_var(LVAR_quest_torr) == 1) or (local_var(LVAR_quest_smiley) == 1) ) then begin
          call Node053;
-      else if (local_var(LVAR_quest_smiley) == 0) then
+      end else if (local_var(LVAR_quest_smiley) == 0) then begin
          call Node005;
-      else
+      end else begin
          call Node007;
-
+      end
+      
       set_local_var(LVAR_05_before,1); //so Ardin will not introduce herself if you have already spoken to her
       gSay_End;
       end_dialogue;
@@ -326,7 +343,7 @@ end
 
 procedure Node930 begin
    //set_local_var(LVAR_Sulik_Freed, 1);
-   give_exp_points(EXP_KC_FREE_SULIK);
+   //give_xp(EXP_KC_FREE_SULIK); //killap's fix: changed from give_exp_points - commented out aug 06
    inc_general_rep(REP_BONUS_KC_FREE_SULIK);
    //+200 EP end
 end
@@ -451,6 +468,9 @@ procedure Node005 begin
    else begin
       Reply(510);
    end
+   
+   GLowOption(2000,Node008); //added by killap - RP
+   
    GOption(151,Node008,004);
    NOption(152,Node007,004);
    NOption(153,Node999,004);
@@ -463,7 +483,7 @@ procedure Node006 begin
 end
 
 procedure Node007 begin
-   if (TOWN_REPUTATION < 5) then
+   if (TOWN_REPUTATION < 5 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then // edit by killap - added not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       Reply(170);
    else
       Reply(171);
@@ -478,6 +498,14 @@ procedure Node007 begin
    //NBK ADD THIS PLAYER REPLY
    //if (PC knows that Duntons are rustling Brahmin) then
    //   GOption(500,Node031,004); //set rustling to failure, ep+50, Karma+25, Town Rep+4
+   //added by killap - RP
+   if ( (global_var(GVAR_KLAMATH_FIND_RUSTLERS) >= FIND_RUSTLERS_ACCEPT) and  (global_var(GVAR_KLAMATH_FIND_RUSTLERS) < FIND_RUSTLERS_SUCCESS) ) then begin
+      if (local_var(LVAR_Discovered_Rustlers) == 0) then
+         GOption(500,Node032,004);
+      else if (map_var(MVAR_Different_Brands) == 1) then
+         GOption(540,Node034,004);
+   end
+   //end added by killap
    GOption(176,Node009,004);
    NOption(177,Node999,004);
 end
@@ -485,6 +513,7 @@ end
 procedure Node008 begin
    Reply(180);
    NOption(181,Node023,004);
+   GLowOption(2001,Node023); //added by killap - RP
 end
 
 procedure Node009 begin
@@ -612,7 +641,9 @@ end
 
 procedure Node023 begin
    Reply(330);
-   NOption(331,Node024,001);
+   NOption(331,Node024,004); //edit by killap - was 001, which is again more evidence that this was to be open for dumb characters.
+   
+   GLowOption(2002,Node024); //added by killap - RP
 end
 
 procedure Node024 begin
@@ -620,14 +651,23 @@ procedure Node024 begin
    GOption(341,Node025,004);
    NOption(342,Node007,004);
    BOption(343,Node999,004);
+   
+   GLowOption(2003,Node025); //added by killap - RP
+   GLowOption(2004,Node999); //added by killap - RP
 end
 
 procedure Node025 begin
 mark_area_known(MARK_TYPE_TOWN, AREA_KLAMATH_TOXIC_CAVES, MARK_STATE_KNOWN);
-   Reply(350);
+   if not(dude_is_stupid) then
+      Reply(350);
+   else
+      Reply(2005); //added by killap - RP
    GOption(351,Node960,004);
    GOption(352,Node970,004);
-   BOption(353,Node999,004);
+   
+   GLowOption(2006,Node970); //added by killap - RP
+   
+   //BOption(353,Node999,004); - comment out by killap
 end
 
 procedure Node026 begin
@@ -646,6 +686,12 @@ procedure Node027 begin
    NLowOption(374,Node999);
    NOption(375,Node007,004);
    NOption(376,Node999,004);
+   
+   //added by killap - 3 == dead
+   set_local_var(LVAR_quest_torr,3);
+   if (global_var(GVAR_QUEST_RESCUE_TORR) == TORR_RESCUE_ACCEPT) then
+      set_global_var(GVAR_QUEST_RESCUE_TORR,3);
+   //end added by killap
 end
 
 procedure Node028 begin
@@ -668,11 +714,109 @@ procedure Node030 begin
       NOption(413,Node044,004); //KARMA +5
 end
 
+
 procedure Node031 begin
+   //added by killap
+   //ep+50, Karma+25, Town Rep+4
+   /*inc_general_rep(25);
+   KC_REP_ADJUST(4)
+   give_xp(50);
+   //end added by killap
+   
    Reply(420);
       NOption(421,Node007,004);
-      BOption(422,Node999,004);
+      NOption(422,Node999,004);
+      //NOption(422,Node999,004);*/
+   
+   set_local_var(LVAR_Discovered_Rustlers,1);
+      
+   Reply(417);
+   
+   if (global_var(GVAR_SCARE_DUNTONS) == 1) then
+      NOption(418,Node033,004);
+   else
+      NOption(419,Node033,004);
+   //if (map_var(MVAR_Different_Brands) == 1) then
+   //   NOption(422,Node033,004);
+   //else
+   //   NOption(421,Node999,004);
+
 end
+
+//added by killap - RP
+procedure Node032 begin
+   Reply(414);
+   if ( (obj_is_carrying_obj_pid(dude_obj, PID_RADSCORPION_PARTS) > 0) ) then
+      NOption(415,Node031,004);
+   else
+      NOption(416,Node999,004);
+end
+
+procedure Node033 begin
+   if (global_var(GVAR_DUNTON_DEAD)) then
+      Reply(421);
+   else
+      Reply(420);
+
+   if (map_var(MVAR_Different_Brands) == 1) then
+      NOption(423,Node035,004);
+   else
+      NOption(422,Node999,004);
+end
+
+procedure Node035 begin
+   variable item;
+   inc_general_rep(10);
+   KC_REP_ADJUST(2)
+   display_msg(mstr(1000));
+   //give_xp(300);
+   set_global_var(GVAR_KLAMATH_FIND_RUSTLERS,FIND_RUSTLERS_SUCCESS);
+   
+   if (obj_is_carrying_obj_pid(dude_obj, PID_RADSCORPION_PARTS ) > 0) then begin
+      item:=obj_carrying_pid_obj(dude_obj, PID_RADSCORPION_PARTS);
+      rm_obj_from_inven(dude_obj,item);
+      destroy_object(item);
+   end
+   
+   if (global_var(GVAR_DUNTON_DEAD)) then begin
+      Reply(425);
+           
+      NOption(1010,Node033a,004);
+      NOption(426,Node007a,004);
+      NOption(428,Node999a,004);
+   end else begin
+      Reply(424);
+      
+      NOption(1010,Node033a,004);
+      NOption(426,Node007a,004);
+      NOption(427,Node999a,004);
+   end
+end
+
+procedure Node033a begin
+   Reply(1011);
+   item_caps_adjust(dude_obj,150); //give 150 coins
+   NOption(426,Node007,004);
+   NOption(1012,Node999,004);
+end
+
+procedure Node007a begin
+   give_xp(300);
+   KC_REP_ADJUST(2)
+   call Node007;
+end
+
+procedure Node999a begin
+   give_xp(300);
+   KC_REP_ADJUST(2)
+end
+
+procedure Node034 begin
+   Reply(429);
+   NOption(430,Node035,004);
+end
+
+//end added by killap
 
 procedure Node038 begin
    set_local_var(LVAR_Ardin_Angry,1);

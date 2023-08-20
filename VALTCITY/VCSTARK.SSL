@@ -135,6 +135,23 @@ procedure Node062;
 procedure Node063;
 procedure Node064;
 
+//added by killap - expansion pack (Village)
+procedure Node058_1;
+procedure Node058_2;
+procedure Node058_3;
+procedure Node058_4;
+procedure Node058_5;
+procedure Node058_6;
+procedure Node058_7;
+procedure Node058_8;
+procedure Node058_9;
+procedure Node058_10;
+procedure Node058_11;
+procedure Node058_12;
+procedure Node058_13;
+//end
+
+
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
 // seen by the design Tool
@@ -208,7 +225,7 @@ procedure map_update_p_proc begin
    Stark_Ptr := self_obj;
 end
 
-procedure timed_event_p_proc begin
+/*procedure timed_event_p_proc begin
    if( fixed_param == 1 ) then begin
       if( not( combat_is_initialized ) ) then begin
          if( Fallout2_enclave_destroyed ) then
@@ -219,13 +236,47 @@ procedure timed_event_p_proc begin
                   ( global_var( GVAR_VAULT_CITIZEN ) == CITIZEN_CAPTAIN_GUARD ) ) then
             call Node002;
          else if( ( day ) and
-                  ( Marcus_Ptr != 0 ) ) then
+                  ( Marcus_Ptr != 0 ) and
+                  obj_can_see_obj(self_obj, Marcus_Ptr) ) then // Seraph's Fix: now Stark must actually see Marcus. Thanks Rob!
             call Node005;
          else if( ( day ) and
-                  ( Lenny_Ptr != 0 ) ) then
+                  ( Lenny_Ptr != 0 ) and
+                  obj_can_see_obj(self_obj, Lenny_Ptr) ) then // Seraph's Fix: now Stark must actually see Lenny. Thanks Rob!
             call Node006;
          else if( ( day ) and
                   ( global_var( GVAR_VAULT_CITIZEN ) == CITIZEN_REAL_CITIZEN ) ) then
+            call Node003;
+         else if( day ) then
+            call Node007;
+      end
+      add_timer_event( self_obj, game_ticks( random( 20, 40 ) ), 1 );
+   end
+end*/
+
+procedure timed_event_p_proc begin
+   if( fixed_param == 1 ) then begin
+      if( not( combat_is_initialized ) ) then begin
+         if( ( Fallout2_enclave_destroyed ) and
+             ( self_can_see_dude ) ) then
+            call Node001;
+         else if( ( global_var( GVAR_VAULT_CITIZEN ) == CITIZEN_KICKED_OUT) and
+                  ( self_can_see_dude ) ) then
+            call Node004;
+         else if( ( day ) and
+                  ( global_var( GVAR_VAULT_CITIZEN ) == CITIZEN_CAPTAIN_GUARD ) and
+                  ( self_can_see_dude ) ) then
+            call Node002;
+         else if( ( day ) and
+                  ( Marcus_Ptr != 0 ) and
+                  ( obj_can_see_obj( self_obj, Marcus_Ptr ) ) ) then // Seraph's Fix: now Stark must actually see Marcus. Thanks Rob!
+            call Node005;
+         else if( ( day ) and
+                  ( Lenny_Ptr != 0 ) and
+                  ( obj_can_see_obj( self_obj, Lenny_Ptr ) ) ) then // Seraph's Fix: now Stark must actually see Lenny. Thanks Rob!
+            call Node006;
+         else if( ( day ) and
+                  ( global_var( GVAR_VAULT_CITIZEN ) == CITIZEN_REAL_CITIZEN ) and
+                  ( self_can_see_dude ) ) then
             call Node003;
          else if( day ) then
             call Node007;
@@ -488,8 +539,8 @@ procedure Node012 begin
    else
       Reply(132);
 
-   BLowOption(133, Node013, 004);
-   NLowOption(134, Node999, 004);
+   BLowOption(133, Node013); // Seraph's Fix: BLowOption only takes 2 args. Thanks Rob!
+   NLowOption(134, Node999); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
    NOption(135, Node012a, 004);
    NOption(136, Node999, 004);
 end
@@ -761,11 +812,13 @@ procedure Node029a begin
    if( DayPass_KickOutCount > 0 ) then begin
       DayPass_KickOutObj := obj_carrying_pid_obj(dude_obj, PID_DAY_PASS);
       KickOutTemp := rm_mult_objs_from_inven(dude_obj, DayPass_KickOutObj, DayPass_KickOutCount );
+      destroy_object(DayPass_KickOutObj); //added by killap
    end
    CitizenPapers_KickOutCount := obj_is_carrying_obj_pid(dude_obj, PID_FAKE_CITIZENSHIP);
    if( CitizenPapers_KickOutCount > 0 ) then begin
       CitizenPapers_KickOutObj := obj_carrying_pid_obj(dude_obj, PID_FAKE_CITIZENSHIP);
       KickOutTemp := rm_mult_objs_from_inven(dude_obj, CitizenPapers_KickOutObj, CitizenPapers_KickOutCount );
+      destroy_object(CitizenPapers_KickOutObj); //added by killap
    end
    load_map( MAP_VAULTCITY_COURTYARD, 0 );
 end
@@ -781,13 +834,20 @@ procedure Node031 begin
    Reply(213);
 
    if( ( global_var( GVAR_VAULT_RAIDERS ) == RAIDERS_FOUND ) and
-       ( not( raiders_dead ) ) ) then
+       ( ( not( raiders_dead ) and not( raiders_scout_left ) ) ) ) then //edit by killap - expansion
       NOption(214, Node032, 004);
    if( raiders_dead ) then
       NOption(215, Node033, 004);
-   if( ( global_var( GVAR_VAULT_RAIDERS ) == RAIDERS_ACCEPTED_QUEST ) or
+   else if ( raiders_scout_left) then //added by killap -expansion
+      NOption(1215, Node033, 004);
+      
+   /*if( ( global_var( GVAR_VAULT_RAIDERS ) == RAIDERS_ACCEPTED_QUEST ) or
        ( global_var( GVAR_VAULT_RAIDERS ) == RAIDERS_DECLINED_QUEST ) ) then
+      NOption(216, Node044, 004); --comment out by killap; was never obtainable anyway*/
+   
+   if (global_var(GVAR_VAULT_RAIDERS) == RAIDERS_PROBLEM_KNOWN) then //added by killap
       NOption(216, Node044, 004);
+      
    BOption(217, Node064, 004);
    BOption(218, Node999, 004);
 end
@@ -816,7 +876,10 @@ end
 procedure Node033 begin
    if( local_var( LVAR_Told_About_Wipe_Out ) == 0 ) then begin
       set_local_var( LVAR_Told_About_Wipe_Out, 1 );
-      Reply(224);
+      if (raiders_dead) then
+        Reply(224);
+      else
+        Reply(1224); //added by killap
 
       GOption(226, Node034, 004);
    end
@@ -837,6 +900,12 @@ end
 
 procedure Node035 begin
    set_local_var( LVAR_Stark_Raiders, 1 );
+   
+   //added by killap
+   if (global_var(GVAR_VAULT_RAIDERS) < RAIDERS_PROBLEM_KNOWN) then
+      set_global_var(GVAR_VAULT_RAIDERS,RAIDERS_PROBLEM_KNOWN);
+   //end
+
    Reply(232);
 
    NOption(233, Node036, 004);
@@ -873,10 +942,12 @@ procedure Node038 begin
    Reply(249);
 
    if( ( global_var( GVAR_VAULT_RAIDERS ) == RAIDERS_FOUND ) and
-       ( not( raiders_dead ) ) ) then
+       ( ( not( raiders_dead ) and not( raiders_scout_left ) ) ) ) then //edit by killap - expansion
       GOption(250, Node032, 004);
    if( raiders_dead ) then
       GOption(251, Node033, 004);
+   else if ( raiders_scout_left ) then //added by killap - expansion
+      GOption(1251, Node033, 004);
    NOption(252, Node044, 004);
    NOption(253, Node064, 004);
    NOption(254, Node999, 004);
@@ -964,7 +1035,6 @@ end
 
 procedure Node049 begin
    Reply(295);
-
    NOption(296, Node064, 004);
    NOption(297, Node999, 004);
 end
@@ -1105,6 +1175,46 @@ procedure Node059 begin
    NOption(344, Node999, 004);
 end
 
+//added by killap - expansion pack (Village)
+/*procedure Node058
+begin
+  From_58_or_59 := 1;
+  gsay_reply(SCRIPT_VCSTARK, 334);
+  giq_option(4, SCRIPT_VCSTARK, 336, Node059, 50);
+  if (global_var(GVAR_QUEST_VAULT_SERVANT) == 0) then
+    giq_option(4, SCRIPT_VCSTARK, 335, Node058_1, 50);
+  giq_option(4, SCRIPT_VCSTARK, 337, Node064, 50);
+  giq_option(4, SCRIPT_VCSTARK, 338, Node999, 50);
+end
+
+procedure Node059
+begin
+  if (metarule(17, 10) == 0) then
+  begin
+    debug_msg("  mark_on_map(" + 10 + ")");
+    mark_area_known(0, AREA_NCR, MARK_STATE_KNOWN);
+  end
+  From_58_or_59 := 1;
+  gsay_reply(SCRIPT_VCSTARK, 339);
+  if (global_var(GVAR_FINISHED_STARK_RECON) == 1) then
+    giq_option(4, SCRIPT_VCSTARK, 340, Node060, 50);
+  if (global_var(GVAR_FINISHED_STARK_RECON) == 0) then
+  begin
+    giq_option(4, SCRIPT_VCSTARK, 341, Node059a, 50);
+    giq_option(4, SCRIPT_VCSTARK, 342, Node059b, 50);
+  end
+  if (global_var(GVAR_QUEST_VAULT_SERVANT) == 0) then
+  begin
+    if (local_var(13) == 1) then
+      giq_option(4, SCRIPT_VCSTARK, 401, Node058_1, 50);
+    else
+      giq_option(4, SCRIPT_VCSTARK, 335, Node058_1, 50);
+  end
+  giq_option(4, SCRIPT_VCSTARK, 343, Node064, 50);
+  giq_option(4, SCRIPT_VCSTARK, 344, Node999, 50);
+end
+//end*/
+
 procedure Node059a begin
    set_global_var( GVAR_VAULT_STARK_RECON, RECON_NCR_ASSIGNED );
    // End Dialogue
@@ -1205,7 +1315,164 @@ procedure Node064 begin
    if( ( global_var( GVAR_VAULT_STARK_RECON ) == RECON_NCR_ASSIGNED ) and
        ( global_var( GVAR_FINISHED_STARK_RECON ) == 1 ) ) then
       NOption(370, Node060, 004);
+   
+   //added by killap - expansion pack (Village)
+   if ( (global_var(GVAR_QUEST_VAULT_SERVANT) >= SERVANT_QUEST_ACCEPTED) and (global_var(GVAR_QUEST_VAULT_SERVANT) < SERVANT_QUEST_FINISHED) ) then
+      giq_option(4, SCRIPT_VCSTARK, 402, Node058_4, 50);
+   if ( (global_var(GVAR_VAULT_STARK_RECON) == 4) and (global_var(GVAR_QUEST_VAULT_SERVANT) < SERVANT_QUEST_ACCEPTED) ) then
+      giq_option(4, SCRIPT_VCSTARK, 369, Node058_1, 50);
+   //end
+   
    if( local_var( LVAR_Stark_Raiders ) == 1 ) then
       NOption(371, Node031, 004);
    NOption(372, Node999, 004);
 end
+
+//added by killap - expansion pack (Village)
+procedure Node058_1
+begin
+  //set_local_var(13, 1);
+  gsay_reply(SCRIPT_VCSTARK, 391);
+  giq_option(4, SCRIPT_VCSTARK, 392, Node058_2, 50);
+  giq_option(4, SCRIPT_VCSTARK, 393, Node058_3, 50);
+  //if (global_var(GVAR_VAULT_STARK_RECON) == 2) then
+    //giq_option(4, SCRIPT_VCSTARK, 394, Node059, 50);
+  giq_option(4, SCRIPT_VCSTARK, 395, Node064, 50);
+  giq_option(4, SCRIPT_VCSTARK, 396, Node999, 50);
+end
+
+procedure Node058_2
+begin
+  if (town_known(49) == MARK_STATE_UNKNOWN) then
+    mark_area_known(0, 49, MARK_STATE_KNOWN);
+  set_global_var(GVAR_QUEST_VAULT_SERVANT, SERVANT_QUEST_ACCEPTED);
+  set_global_var(GVAR_SERVANT_RAID_DATE, game_time);
+  gsay_reply(SCRIPT_VCSTARK, 397);
+  giq_option(4, SCRIPT_VCSTARK, 222, Node064, 50);
+  giq_option(4, SCRIPT_VCSTARK, 398, Node999, 50);
+end
+
+procedure Node058_3
+begin
+  gsay_reply(SCRIPT_VCSTARK, 399);
+  giq_option(4, SCRIPT_VCSTARK, 400, Node058_2, 50);
+  //if (global_var(GVAR_VAULT_STARK_RECON) == 2) then
+  //  giq_option(4, SCRIPT_VCSTARK, 394, Node059, 50);
+  giq_option(4, SCRIPT_VCSTARK, 395, Node064, 50);
+  giq_option(4, SCRIPT_VCSTARK, 396, Node999, 50);
+end
+
+procedure Node058_4 begin
+   //display_msg("GVAR_VAULT_SERVANT == " + global_var(GVAR_VAULT_SERVANT));
+   
+   if ( (global_var(GVAR_QUEST_VAULT_VILLAGE) == VILLAGE_QUEST_DELIVERED_GUNS) and (global_var(GVAR_VAULT_VILLAGE) != VILLAGE_SCREWED) ) then begin
+         set_global_var(GVAR_QUEST_VAULT_SERVANT, SERVANT_QUEST_FINISHED);
+         
+         gsay_reply(SCRIPT_VCSTARK, 423);
+    //if (global_var(GVAR_ENEMY_VAULT_VILLAGE) == 8) then
+         //if (global_var(GVAR_QUEST_VAULT_VILLAGE) == VILLAGE_QUEST_DELIVERED_GUNS) then begin
+            giq_option(4, SCRIPT_VCSTARK, 175, Node999, 50);
+            BOption(426, Node058_13, 004);
+         //end 
+   end else if (global_var(GVAR_VAULT_SERVANT) == SERVANT_TIME_EXTENDED) then begin
+      gsay_reply(SCRIPT_VCSTARK, 428);
+      giq_option(4, SCRIPT_VCSTARK, 429, Node999, 50);
+   end else begin if ((game_time - global_var(GVAR_SERVANT_RAID_DATE)) >= (ONE_GAME_MONTH) and (global_var(GVAR_QUEST_VAULT_VILLAGE) < VILLAGE_QUEST_DELIVERED_GUNS) ) then begin
+      set_global_var(GVAR_VAULT_SERVANT, SERVANT_FINISHED_VIOLENT);
+      set_global_var(GVAR_VAULT_VILLAGE, VILLAGE_SCREWED);
+      set_global_var(GVAR_QUEST_VAULT_SERVANT, SERVANT_QUEST_FINISHED);
+      
+      gsay_reply(SCRIPT_VCSTARK, 424);
+      giq_option(4, SCRIPT_VCSTARK, 425, Node058_12, 50);
+   end else begin
+      gsay_reply(SCRIPT_VCSTARK, 403);
+      if (global_var(GVAR_VAULT_MONSTER_COUNT) == 0) then
+        giq_option(4, SCRIPT_VCSTARK, 405, Node058_10, 50);
+      else
+        giq_option(4, SCRIPT_VCSTARK, 406, Node058_9, 50);
+      if ((global_var(GVAR_VAULT_VILLAGE) != 0) and (global_var(GVAR_QUEST_VAULT_SERVANT) == SERVANT_QUEST_ACCEPTED)) then
+        giq_option(4, SCRIPT_VCSTARK, 404, Node058_5, 50);
+    end
+  end
+end
+
+procedure Node058_5
+begin
+  gsay_reply(SCRIPT_VCSTARK, 407);
+  giq_option(4, SCRIPT_VCSTARK, 408, Node058_6, 50);
+end
+
+procedure Node058_6
+begin
+  gsay_reply(SCRIPT_VCSTARK, 409);
+  giq_option(4, SCRIPT_VCSTARK, 410, Node058_7, 50);
+  giq_option(4, SCRIPT_VCSTARK, 411, Node058_8, 50);
+end
+
+procedure Node058_7
+begin
+  gsay_reply(SCRIPT_VCSTARK, 412);
+  giq_option(4, SCRIPT_VCSTARK, 414, Node999, 50);
+end
+
+procedure Node058_8
+begin
+  set_global_var(GVAR_VAULT_VILLAGE, VILLAGE_SCREWED);
+  set_global_var(GVAR_QUEST_VAULT_SERVANT, SERVANT_QUEST_FINISHED);
+  set_global_var(GVAR_VAULT_SERVANT, SERVANT_FINISHED_VIOLENT);
+  //set_global_var(GVAR_QUEST_VAULT_SERVANT, 2);
+  //set_global_var(GVAR_VAULT_SERVANT, 3);
+  set_global_var(GVAR_TOWN_REP_VAULT_CITY, global_var(GVAR_TOWN_REP_VAULT_CITY) - 1);
+  gsay_reply(SCRIPT_VCSTARK, 413);
+  giq_option(4, SCRIPT_VCSTARK, 414, Node999, 50);
+end
+
+procedure Node058_9
+begin
+  gsay_reply(SCRIPT_VCSTARK, 415);
+  giq_option(4, SCRIPT_VCSTARK, 414, Node999, 50);
+end
+
+procedure Node058_10
+begin
+  give_xp(800);
+  set_global_var(GVAR_PLAYER_REPUTATION, global_var(GVAR_PLAYER_REPUTATION) + -30);
+  debug_msg("Player gains " + -30 + " Karma Points.");
+  CheckKarma;
+  item_caps_adjust(dude_obj, 750);
+  set_global_var(GVAR_VAULT_VILLAGE, VILLAGE_SCREWED);
+  set_global_var(GVAR_QUEST_VAULT_SERVANT, SERVANT_QUEST_FINISHED);
+  set_global_var(GVAR_VAULT_SERVANT, SERVANT_FINISHED_VIOLENT);
+  //set_global_var(GVAR_QUEST_VAULT_SERVANT, 2);
+  //set_global_var(GVAR_VAULT_SERVANT, 4);
+  set_global_var(GVAR_TOWN_REP_VAULT_CITY, global_var(GVAR_TOWN_REP_VAULT_CITY) + 4);
+  gsay_reply(SCRIPT_VCSTARK, 416);
+  giq_option(4, SCRIPT_VCSTARK, 417, Node058_11, 50);
+  giq_option(4, SCRIPT_VCSTARK, 418, Node999, 50);
+end
+
+procedure Node058_11
+begin
+  gsay_reply(SCRIPT_VCSTARK, 419);
+  giq_option(4, SCRIPT_VCSTARK, 420, Node058_12, 50);
+  giq_option(4, SCRIPT_VCSTARK, 418, Node999, 50);
+end
+
+procedure Node058_12
+begin
+  gsay_reply(SCRIPT_VCSTARK, 421);
+  giq_option(4, SCRIPT_VCSTARK, 422, Node999, 50);
+  giq_option(4, SCRIPT_VCSTARK, 1422, Node999, 50);
+end
+
+procedure Node058_13
+begin
+  set_global_var(GVAR_QUEST_VAULT_SERVANT, SERVANT_TURNED_IN_HARRY);
+  gsay_reply(SCRIPT_VCSTARK, 427);
+  set_global_var(GVAR_PLAYER_REPUTATION, global_var(GVAR_PLAYER_REPUTATION) + -15);
+  debug_msg("Player gains " + -15 + " Karma Points.");
+  CheckKarma;
+  set_global_var(GVAR_TOWN_REP_VAULT_CITY, global_var(GVAR_TOWN_REP_VAULT_CITY) + 1);
+  giq_option(4, SCRIPT_VCSTARK, 414, Node999, 50);
+end
+//end

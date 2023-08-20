@@ -321,7 +321,8 @@ procedure Node000 begin
       gSay_End;
       end_dialogue;
    end else if (obj_type(self_obj) == 1) then begin
-      floater(BJ_mstr(129));
+      //floater(BJ_mstr(129));
+      float_msg(self_obj,BJ_mstr(129),FLOAT_COLOR_NORMAL); //edit by killap
    end
 end
 procedure Node001 begin

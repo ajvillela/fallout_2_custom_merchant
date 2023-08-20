@@ -34,12 +34,14 @@
 #include "..\headers\command.h"
 #include "..\headers\ModReact.h"
 #include "..\headers\caravan.h"
-
+#include "..\headers\bhrnddst.h" //added by killap
 #include "..\headers\ncr.h"
 
 
 /* Standard Script Procedures */
 procedure start;
+procedure map_update_p_proc;
+procedure timed_event_p_proc;
 procedure critter_p_proc;
 procedure pickup_p_proc;
 procedure talk_p_proc;
@@ -82,6 +84,7 @@ procedure checkNextDay;
 #define LVAR_Hostile                    (5)
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Vis                        (7)
+#define LVAR_Called_Clear               (8) //added by killap
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -94,6 +97,7 @@ variable Node1Rep := 0;
 
 #define TIMER_APPEAR    1
 #define TIMER_DISAPPEAR 2
+#define TIMER_ALL_CLEAR 3
 
 procedure combat_p_proc begin
    if (not self_visible) then
@@ -124,7 +128,12 @@ procedure timed_event_p_proc begin
             destroy_object(self_obj);
          end
       end
+   //added by killap
+   end else if( fixed_param == TIMER_ALL_CLEAR ) then begin
+      float_msg(self_obj,g_mstr(450),FLOAT_COLOR_NORMAL);
+      add_timer_event( self_obj, game_ticks(10), TIMER_ALL_CLEAR );
    end
+   //end added
 end
 
 /* This procedure will get called each time that the map is first entered. It will
@@ -132,7 +141,15 @@ end
    default from the prototype, and needs to be set in scripts. */
 procedure map_enter_p_proc begin
    Only_Once:=0;
-   critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_PLAYER);
+   //edits by killap
+   if (cur_map_index == MAP_NCR_DOWNTOWN) then
+      critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NCR);
+   else if (cur_map_index == MAP_NCR_BAZAAR) then
+      critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NCR_ENTRANCE);
+   else
+      critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_PLAYER);
+   //end edits
+   
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_GUARD);
    if (is_loading_game == FALSE) then begin
       call checkLoadConditions;
@@ -142,6 +159,18 @@ procedure map_enter_p_proc begin
    end
 end
 
+//added by killap
+procedure map_update_p_proc begin
+   if ((not(is_loading_game)) and (not(combat_is_initialized)) ) then begin   //check added by killap - probably doesn't help, but doesn't hurt either.
+      if (cur_map_index == MAP_BH_RND_DESERT) then begin
+         if ((local_var(LVAR_Called_Clear) == 0) and (map_var(MVAR_Hostile_Total) <= 0)) then begin //edit by killap (incase you drop below zero, things will still run)
+           set_local_var(LVAR_Called_Clear,1);
+           add_timer_event( self_obj, game_ticks(10), TIMER_ALL_CLEAR );
+         end
+      end
+   end
+end
+//end added
 
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from
    Movement to attacking the player on sight can be placed in here.*/
@@ -186,8 +215,8 @@ end
    written by designers are placed in here. Additionally, Reactions are generated and
    stored which affects player interactions. */
 procedure talk_p_proc begin
-   variable rnd;
-   variable grds;
+//   variable rnd;
+//   variable grds;
    Evil_Critter:=0;
    Slavery_Tolerant:=SLAVE_TOLERANT;
    Karma_Perception:=KARMA_PERCEPTION2;
@@ -203,12 +232,13 @@ procedure talk_p_proc begin
        gSay_End;
        end_dialogue;
        set_local_var(LVAR_Herebefore, 1);
-   end else if (cur_map_index == 0/* Redding */) then begin
+   end else if ((cattle_drive(CATTLE_ON)) or (cur_map_index == MAP_BH_RND_DESERT)) then begin    //added by killap
+//   end else if (cur_map_index == 0/* Redding */) then begin
       call Node002;
    end else if (cur_map_index == 0/* Redding */ and cattle_drive(CATTLE_FINISHED)) then
       call Node007;
 
-   if (cattle_drive(CATTLE_ON) and not cattle_drive(CATTLE_FINISHED)) then begin
+/*   if (cattle_drive(CATTLE_ON) and not cattle_drive(CATTLE_FINISHED)) then begin
       //Don't forget to do raider stuff
       set_caravan_start(CARAVAN_NCR);
       set_caravan_masters(1);
@@ -220,7 +250,7 @@ procedure talk_p_proc begin
       set_caravan_encounters(rnd);
       set_caravan_end(CARAVAN_REDDING);
       load_map(MAP_BH_RND_DESERT, 7);
-   end
+   end - comment out by killap */
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -230,6 +260,7 @@ procedure destroy_p_proc begin
 
 /* Increment the aligned critter counter*/
    inc_good_critter
+   set_cattle_drive(HAL_DEAD);
 
 /* Set global_variable for Enemy status*/
 end
@@ -238,7 +269,8 @@ end
    This should only hold the most cursory of glances for the player. */
 procedure look_at_p_proc begin
    script_overrides;
-   if (local_var(LVAR_Herebefore) == 0) then
+   //if (local_var(LVAR_Herebefore) == 0) then
+   if (cur_map_index == MAP_NCR_DOWNTOWN) then 
       display_msg(mstr(100));
    else
       display_msg(mstr(101));
@@ -290,10 +322,28 @@ procedure Node002 begin
 end
 
 procedure Node003 begin
+   variable rnd;
+   variable grds;
+
    set_cattle_drive(CATTLE_ON);
    set_cattle_drive(CATTLE_ON1);
    //Don't forget to do raider stuff
    Reply(110);
+   
+   if (cattle_drive(CATTLE_ON) and not cattle_drive(CATTLE_FINISHED)) then begin //moved from talk_p_pro to here - killap
+      //Don't forget to do raider stuff
+      set_caravan_start(CARAVAN_NCR);
+      set_caravan_masters(1);
+      grds := 7 - party_size;
+      set_caravan_guards(grds);
+      set_caravan_brahmin(10);
+      set_caravan_carts(1);
+      rnd := Random(1, 4);
+      set_caravan_encounters(rnd);
+      set_caravan_end(CARAVAN_REDDING);
+      load_map(MAP_BH_RND_DESERT, 7);
+   end
+   
    ENDOPTION;
 end
 

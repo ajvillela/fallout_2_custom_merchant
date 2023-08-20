@@ -76,6 +76,12 @@ procedure Node012;
 procedure Node013;
 procedure Node014;
 
+//added by killap - expansion
+procedure Node015;
+procedure Node016;
+procedure Node017;
+//end added
+
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
 // seen by the design Tool
@@ -168,6 +174,8 @@ procedure talk_p_proc begin
 
    GetReaction;
 
+   ReactToLevel; //added by killap
+
    if (spleen_flag(SP_REINSERTED) and local_var(LVAR_Spleen_Reaction) == 0) then begin
       debug_msg("FCRONMEY: should be setting good reaction 1");
       set_local_var(LVAR_Spleen_Reaction, 1);
@@ -182,7 +190,7 @@ procedure talk_p_proc begin
 
    if (san_fran_flag(SF_PUNKS_ENEMY)) then begin
       call Node014;
-   end else if ((not good_critter_reaction) and (not local_var(LVAR_Girl_Reaction)) and (not local_var(LVAR_Spleen_Reaction))) then begin
+   end else if ( /*(not good_critter_reaction) and */(not local_var(LVAR_Girl_Reaction)) and (not local_var(LVAR_Spleen_Reaction))) then begin
       call Node001;
    end else begin
       start_gdialog(NAME,self_obj,4,-1,-1);
@@ -277,6 +285,8 @@ procedure Node004 begin
    SHOW_TANKER_FOB_QST;
 
    Reply(113);
+   if (sub_flag(0)) then
+      NOption(200, Node015, 4); //added by killap - expansion
    NOption(114, Node005, 4);
    NOption(115, Node007, 4);
    NOption(116, Node006, 4);
@@ -302,6 +312,8 @@ procedure Node006 begin
       Reply(152);
    else
       Reply(123);
+   if (sub_flag(0)) then
+      NOption(200, Node015, 4); //added by killap - expansion
    NOption(124, Node005, 4);
    NOption(125, Node007, 4);
    NOption(126, Node011, 4);
@@ -334,7 +346,13 @@ procedure Node010 begin
 end
 
 procedure Node011 begin
-   Reply(141);
+// Begin Seraph's Code
+   //if (f2_flag_any == f2_state_tribe_kidnapped) then
+   if ((f2_flag_any >= f2_state_tribe_kidnapped) and (f2_flag_any < f2_state_enclave_destroyed)) then
+      Reply(mstr(141) + mstr(155));
+   else
+      Reply(mstr(141) + mstr(156));
+// End Seraph's Code
    NOption(142, Node012, 4);
    NOption(143, Node013, 4);
    NOption(144, Node999, 4);
@@ -356,4 +374,28 @@ procedure Node014 begin
    float_msg(self_obj, mstr(151), FLOAT_MSG_RED);
    call Node998;
 end
+
+//added by killap - RP
+procedure Node015 begin
+   Reply(210);
+   NOption(126, Node011, 4);
+   NOption(211, Node016, 4);
+end
+
+procedure Node016 begin
+   Reply(220);
+   NOption(221, Node017, 4);
+   NOption(114, Node005, 4);
+   NOption(150, Node999, 4);
+end
+
+procedure Node017 begin
+   if (sub_flag(0)) then
+      set_sub_flag(SHI_SUB_KNOWN);
+   Reply(230);
+   NOption(114, Node005, 4);
+   NOption(150, Node999, 4);
+end
+//end added
+
 //xxxxxxxxxxxxxxxxxxxx

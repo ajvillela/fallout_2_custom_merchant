@@ -83,6 +83,14 @@ procedure Node041;
 procedure Node042;
 procedure Node043;
 
+//added by killap - expansion pack
+procedure Node044;
+procedure Node045;
+procedure Node046;
+procedure Node047;
+procedure Node900;
+//end added
+
 /* Local Variables which are saved. All Local Variables need to be
    prepended by LVAR_ */
 #define LVAR_Flags                        (4)
@@ -90,6 +98,7 @@ procedure Node043;
 #define LVAR_METZGER_BAN                  (6)
 #define LVAR_Home_Tile                    (7)
 #define LVAR_Home_Rotation                (8)
+#define LVAR_Asked_About_Other_Facilities (9) // added by killap - expansion
 
 #define node_6_bit                        bit_10
 #define node_10_bit                       bit_11
@@ -180,8 +189,11 @@ end
 
 procedure critter_p_proc begin
    if (self_can_see_dude) then begin
-      if ((hostile) or (hostile_slavers)) then begin
-         self_attack_dude;
+      if ( (global_var(GVAR_WIPED_OUT_SLAVER_CAMP) == 1) or (hostile) or (hostile_slavers)) then begin
+         //added check since his script crashes if he cannot see you when he is mad - killap
+         if (self_can_see_dude) then begin
+           self_attack_dude;
+         end
       end else if (herebefore == false) then begin
          dialogue_system_enter;
       end
@@ -209,10 +221,15 @@ procedure pickup_p_proc begin
 end
 
 procedure talk_p_proc begin
+   //if (global_var(GVAR_KNOW_METZGER) == 0) then
+   //   set_global_var(GVAR_KNOW_METZGER,1);
    debug_msg("global_var(GVAR_DEN_GANGWAR) == "+global_var(GVAR_DEN_GANGWAR));
    prev_node := 0;
-   if ((hostile) or (hostile_slavers)) then begin
-      self_attack_dude;
+   if ((global_var(GVAR_WIPED_OUT_SLAVER_CAMP) == 1) or (hostile) or (hostile_slavers)) then begin
+      //added check since his script crashes if he cannot see you when he is mad - killap
+      if (self_can_see_dude) then begin
+        self_attack_dude;
+      end
    end else begin
       move_obj_inven_to_obj(self_obj,generic_temp_box);
          if ( attacked_slaver_on_run ) then begin
@@ -297,6 +314,23 @@ procedure set_sell_sulik begin
    party_being_sold := Sulik_Ptr;
    call Node013;
 end
+
+//added by killap - expansion
+procedure set_sell_dex begin
+   party_being_sold := Dex_Ptr;
+   call Node013;
+end
+
+procedure set_sell_cat_jules begin
+   party_being_sold := Cat_Jules_Ptr;
+   call Node013;
+end
+
+procedure set_sell_kitsune begin
+   party_being_sold := Kitsune_Ptr;
+   call Node013;
+end
+//end added
 
 procedure Node990 begin
    if (has_rep_slaver) then begin
@@ -384,7 +418,7 @@ procedure Node002 begin
    call Node005;
 end
 procedure Node003 begin
-   if ((Davin_In_Party) or (Miria_In_Party) or (Vic_In_Party) or (Myron_In_Party) or (MacRae_In_Party) or (Sulik_In_Party)) then begin
+   if ((Davin_In_Party) or (Miria_In_Party) or (Vic_In_Party) or (Myron_In_Party) or (MacRae_In_Party) or (Sulik_In_Party) or (Dex_In_Party) or (Cat_Jules_In_Party) or (Kitsune_In_Party) ) then begin
       Reply(230);
       if (Davin_In_Party) then begin
          NOption(234, set_sell_davin, 004);
@@ -404,6 +438,19 @@ procedure Node003 begin
       if (Sulik_In_Party) then begin
          NOption(238, set_sell_sulik, 004);
       end
+      
+      //added by killap - expansion
+      if (Dex_In_Party) then begin
+         NOption(241, set_sell_dex, 004);
+      end
+      if (Cat_Jules_In_Party) then begin
+         NOption(242, set_sell_cat_jules, 004);
+      end
+      if (Kitsune_In_Party) then begin
+         NOption(243, set_sell_kitsune, 004);
+      end
+      //end added
+      
    end else begin
       debug_msg("true_party_size == " + true_party_size);
       Reply(231 + (true_party_size == 0));
@@ -455,6 +502,9 @@ end
 procedure Node007 begin
    Reply(285);
    NOption(286, Node008, 004);
+   //added by killap - expansion pack
+   if ( (global_var(GVAR_SULIK_SISTER) == 1) and (local_var(LVAR_Asked_About_Other_Facilities) == 0) )then
+      NOption(265, Node900, 004);
    NOption(287, Node006, 004);
    NOption(288, Node004, 004);
    NOption(289, Node999, 004);
@@ -519,13 +569,13 @@ procedure Node012 begin
 end
 procedure Node013 begin
    if (party_being_sold == Davin_Ptr) then begin
-      party_price := amt_cost_barter(dude_obj, self_obj, 450);
+      party_price := amt_cost_barter(self_obj, dude_obj, 450); // Seraph Fix: Swapped self_obj and dude_obj
       Reply(mstr(361) + party_price + mstr(1361));
    end else if (party_being_sold == Miria_Ptr) then begin
-      party_price := amt_cost_barter(dude_obj, self_obj, 550);
+      party_price := amt_cost_barter(self_obj, dude_obj, 550); // Seraph Fix: Swapped self_obj and dude_obj
       Reply(mstr(360) + party_price + mstr(1360));
    end else if (party_being_sold == Myron_Ptr) then begin
-      party_price := amt_cost_barter(dude_obj, self_obj, 400);
+      party_price := amt_cost_barter(self_obj, dude_obj, 400); // Seraph Fix: Swapped self_obj and dude_obj
       Reply(mstr(363) + party_price + mstr(1363));
    end else if (party_being_sold == Vic_Ptr) then begin
       party_price := 0;
@@ -533,12 +583,26 @@ procedure Node013 begin
       NOption(368, Node999, 004);
       NOption(369, Node999, 004);
    end else if (party_being_sold == MacRae_Ptr) then begin
-      party_price := amt_cost_barter(dude_obj, self_obj, 650);
+      party_price := amt_cost_barter(self_obj, dude_obj, 650); // Seraph Fix: Swapped self_obj and dude_obj
       Reply(mstr(364) + party_price + mstr(1364));
    end else if (party_being_sold == Sulik_Ptr) then begin
-      party_price := amt_cost_barter(dude_obj, self_obj, 600);
+      party_price := amt_cost_barter(self_obj, dude_obj, 600); // Seraph Fix: Swapped self_obj and dude_obj
       Reply(mstr(365) + party_price + mstr(1365));
    end
+   
+   //added by killap - expansion
+   else if (party_being_sold == Dex_Ptr) then begin
+      party_price := amt_cost_barter(self_obj, dude_obj, 600); // Seraph Fix: Swapped self_obj and dude_obj
+      Reply(mstr(361) + party_price + mstr(1361));
+   end else if (party_being_sold == Cat_Jules_Ptr) then begin
+      party_price := amt_cost_barter(self_obj, dude_obj, 650); // Seraph Fix: Swapped self_obj and dude_obj
+      Reply(mstr(361) + party_price + mstr(1361));
+   end else if (party_being_sold == Kitsune_Ptr) then begin
+      party_price := amt_cost_barter(self_obj, dude_obj, 650); // Seraph Fix: Swapped self_obj and dude_obj
+      Reply(mstr(360) + party_price + mstr(1360));
+   end
+   //end added
+   
    if (true_party_size > 1) then begin
       NOption(366, Node003, 004);
    end
@@ -583,7 +647,7 @@ end
 procedure Node020 begin
    if (vic_known(state_vic_known_name)) then begin
       Reply(441 + node_20);
-      if (see_vic(state_see_vic_no)) then begin
+      if ( (see_vic(state_see_vic_no)) and (radio_fixed == false) ) then begin //edit by killap - added (radio_fixed == false)
          NOption(444, Node022, 004);
       end
       NOption(445, Node021, 004);
@@ -678,7 +742,7 @@ variable slaving_money;
    if (temp_score >= slave_score_good) then begin
       the_rand := random(0, 3);
       if (the_rand == 0) then begin
-         Reply(mstr(540) + slaving_money + mstr(1540) + dude_name + mstr(2540));
+         Reply(mstr(540) + slaving_money + mstr(15401) + dude_name + mstr(2540));
       end else if (the_rand == 3) then begin
          Reply(mstr(543) + dude_name + mstr(1543) + slaving_money + mstr(2543));
       end else begin
@@ -796,3 +860,43 @@ procedure Node043 begin
    BOption(602, Node998, 004);
    prev_node := 30;
 end
+
+//added by killap - expansion
+procedure Node044 begin
+   Reply(900);
+   NOption(901, Node004, 004);
+   NOption(902, Node999, 004);
+   BOption(903, Node998, 004); //edit by killap: was NOption
+end
+
+procedure Node900 begin
+   set_local_var(LVAR_Asked_About_Other_Facilities,1);
+
+   if ( (dude_charisma > 5)  or (has_skill(dude_obj, SKILL_CONVERSANT) > 50) ) then
+      call Node045;
+   else
+      call Node044;
+end
+
+procedure Node045 begin
+   Reply(910);
+   if (is_success(roll_vs_skill(dude_obj, SKILL_CONVERSANT, -10))) then
+      NOption(911, Node047, 004);
+   else
+      NOption(912, Node046, 004);
+end
+
+procedure Node046 begin
+   Reply(913);
+   NOption(901, Node004, 004);
+   NOption(902, Node999, 004);
+   BOption(903, Node998, 004); //edit by killap: was NOption
+end
+
+procedure Node047 begin
+   mark_on_map(AREA_SLAVER_CAMP)
+   Reply(914);
+   NOption(915, Node004, 004);
+   NOption(916, Node999, 004);
+end
+//end added

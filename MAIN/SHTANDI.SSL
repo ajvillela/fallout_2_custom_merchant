@@ -92,13 +92,17 @@ procedure Node030;
 procedure Node031;
 procedure Node032;
 procedure Node033;
+procedure Node033a;
+procedure Node033b;
 procedure Node034;
+procedure Node034a;
 procedure Node035;
 procedure Node036;
 procedure Node037;
 procedure Node038;
 procedure Node039;
 procedure Node040;
+procedure Node040a;
 procedure Node041;
 procedure Node042;
 procedure Node043;
@@ -131,6 +135,7 @@ procedure Node001;
 #define LVAR_Node002_Count              (11)
 #define LVAR_Node7_Rep                  (12)
 #define LVAR_Tandi_Done                 (13)
+#define LVAR_Tandi_Node32               (14) //added by killap
 
 #define TANDI_HOLO_PID PID_NCR_HISTORY_HOLODISK
 
@@ -217,8 +222,10 @@ procedure talk_p_proc begin
 
    GetReaction;
 
+   ReactToLevel; //added by killap
    //WTG
-
+   set_local_var(LVAR_Talked_Tandi,1);//added by killap
+   
    if (NCR_ENEMY) then
       set_local_var(LVAR_Hostile, 2);
 
@@ -234,6 +241,14 @@ procedure talk_p_proc begin
          call Node040;
       gSay_End;
       end_dialogue;
+   // added by killap
+   end else if ((global_var(GVAR_NCR_V15_DARION_DEAL) == 1) and (global_var(GVAR_V15_NCR_DEAL) != 2)) then begin
+      start_gdialog(NAME, self_obj, 4, HEAD_TANDI, BACKGROUND_ADOBE);
+      gSay_Start;
+         call Node040a;
+      gSay_End;
+      end_dialogue;      
+   // end added
    end else if (global_var(GVAR_NCR_TANDI_JOB_ACCEPT) == TJOB_DONE or local_var(LVAR_Tandi_Done)) then begin
       call Node048;
    end else if (local_var(LVAR_Job_Offered)) then begin
@@ -280,7 +295,8 @@ end
    This should only hold the most cursory of glances for the player. */
 procedure look_at_p_proc begin
    script_overrides;
-   if (LVAR_Talked_Tandi) then
+   //if (LVAR_Talked_Tandi) then
+   if (local_var(LVAR_Talked_Tandi)) then //edit by killap
       display_msg(mstr(101));
    else
       display_msg(mstr(100));
@@ -515,11 +531,11 @@ procedure Node007 begin
       NLowOption(150, Node018a);
       NOption(160, Node018a, 4);
    end
-   if (not q6 and q1 and get_westin_flag(WESTIN_ACCEPT_SNUFF)) then begin
+   if (not q6 and q1 and get_westin_flag(WESTIN_ACCEPT_SNUFF) and (not westin_dead) ) then begin //edit by killap - (not westin_dead)
       NLowOption(151, Node022a);
       NOption(161, Node022a, 4);
    end
-   if (not q7 and q2 and get_carlson_flag(CARLSON_ACCEPT_SNUFF)) then begin
+   if (not q7 and q2 and get_carlson_flag(CARLSON_ACCEPT_SNUFF) and (not carlson_dead) ) then begin //edit by killap - (not carlson_dead)
       NLowOption(152, Node023a);
       NOption(162, Node023a, 4);
    end
@@ -575,7 +591,7 @@ procedure Node014 begin
    end else begin
       n14Rep := 0;
       Reply(315);
-      NLowOption(184, Node007, 4);
+      NLowOption(184, Node007); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
       NOption(185, Node007, 4);
    end
 end
@@ -634,7 +650,7 @@ end
 procedure Node021 begin
    Reply(216);
    NLowOption(217, Node007);
-   if (not know_westin) then begin
+   if ( (not know_westin) and (not get_westin_flag(WESTIN_DEAD)) ) then begin
       NLowOption(218, Node022);
       NOption(220, Node022, 4);
    end
@@ -664,9 +680,10 @@ procedure Node024 begin
 end
 
 procedure Node025 begin
-   Reply(230);
-   NLowOption(231, Node007);
-   NOption(232, Node007, 4);
+   //Reply(230);
+   Reply(231); //edit by killap - was 230
+   //NLowOption(231, Node007); --comment out
+   NOption(232, Node007, 1);
 end
 
 procedure Node026 begin
@@ -683,7 +700,7 @@ end
 
 procedure Node028 begin
    Reply(239);
-   NLowOption(240, Node029, 4);
+   NLowOption(240, Node029); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
    NOption(241, Node029, 4);
 end
 
@@ -701,16 +718,20 @@ end
 
 procedure Node031 begin
    Reply(248);
-   NLowOption(249, Node032);
+   if (local_var(LVAR_Tandi_Node32) == 0) then begin //added check by killap
+      NLowOption(249, Node032);
+      NOption(251, Node032, 4);
+   end
    NLowOption(250, Node007);
-   NOption(251, Node032, 4);
    NOption(252, Node007, 4);
 end
 
 procedure Node032 begin
-   add_obj_to_inven(dude_obj, create_object_sid(TANDI_HOLO_PID, 0, 0, SCRIPT_SIHISHOL));
+   set_local_var(LVAR_Tandi_Node32,1);
+   //add_obj_to_inven(dude_obj, create_object_sid(TANDI_HOLO_PID, 0, 0, SCRIPT_SIHISHOL));
+   add_obj_to_inven(dude_obj, create_object_sid(TANDI_HOLO_PID, 0, 0, -1)); //edit by killap - this is now done through the dude_obj script; part of the too manly items fix
    Reply(253);
-   NOption(254, Node007, 4);
+   NOption(254, Node007, 1);
 end
 
 procedure Node033 begin
@@ -718,6 +739,13 @@ procedure Node033 begin
    Reply(255);
    NLowOption(256, Node034);
    NOption(257, Node034, 4);
+end
+
+procedure Node033b begin
+   set_global_var(GVAR_V15_NCR_DEAL, 2);
+   Reply(255);
+   NLowOption(410, Node999);
+   NOption(411, Node999, 4);
 end
 
 procedure Node034 begin
@@ -741,7 +769,7 @@ end
 
 procedure Node035 begin
    Reply(264);
-   NLowOption(265, Node999, 4);
+   NLowOption(265, Node999);  // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
    if (GETDSTATUS) then begin
       NLowOption(266, Node042);
       NOption(267, Node042, 4);
@@ -800,6 +828,12 @@ procedure Node040 begin
    end
 end
 
+procedure Node040a begin
+   Reply(301);
+   NLowOption(400, Node033b);
+   NOption(401, Node033b, 4);
+end
+
 procedure Node041 begin
    Reply(293);
    NOption(294, Node999, 1);
@@ -812,7 +846,7 @@ procedure Node042 begin
       NLowOption(296, Node043);
       NOption(298, Node043, 4);
    end else begin
-      GLowOption(297, Node045, 4);
+      GLowOption(297, Node045); // Seraph's Fix: GLowOption only takes 2 args. Thanks Rob!
       NOption(299, Node045, 4);
       BOption(300, Node046, 4);
    end

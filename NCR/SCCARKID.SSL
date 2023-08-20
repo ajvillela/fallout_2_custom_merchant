@@ -93,6 +93,8 @@ procedure walkToCarlson;
 #define BACK_FROM_BISHOP_NEWS  6
 
 #define TIMER_WALKBACK         1
+#define TELL_ON_PLAYER         2 //added by killap
+
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
 // seen by the design Tool
@@ -133,7 +135,11 @@ procedure timed_event_p_proc begin
          if (local_var(LVAR_State) == BISHOP_NEWS) then
             set_local_var(LVAR_State, BACK_FROM_BISHOP_NEWS);
          call anim_end_call;
+      //added by killap
+      end else if (fixed_param == TELL_ON_PLAYER) then begin
+         call walkToCarlson;
       end
+      //end added
    end
 end
 
@@ -326,7 +332,7 @@ end
 
 procedure Node001 begin
    Reply(103);
-   NOption(dude_name, Node002, 1);
+   NOption(dude_name + ".", Node002, 1);
    if (get_carlson_flag(CARLSON_SECURITY_DUTY)) then
       NOption(105, Node003, 4);
    NOption(106, Node004, 4);
@@ -357,6 +363,7 @@ end
 procedure Node999a begin
    set_local_var(LVAR_State, BAD_MAN);
    call Node999;
+   add_timer_event(self_obj, game_ticks(3), TELL_ON_PLAYER); //added by killap
 end
 
 procedure Node005 begin
@@ -369,6 +376,7 @@ procedure Node006 begin
    Reply(120);
    set_local_var(LVAR_State, BAD_MAN);
    ENDOPTION;
+   add_timer_event(self_obj, game_ticks(3), TELL_ON_PLAYER); //added by killap
 end
 
 procedure Node129a begin
@@ -430,6 +438,7 @@ end
 procedure Node999c begin
    set_local_var(LVAR_State, REALLY_BAD_MAN);
    call Node999;
+   add_timer_event(self_obj, game_ticks(3), TELL_ON_PLAYER); //added by killap
 end
 
 procedure Node014 begin
@@ -439,11 +448,13 @@ procedure Node014 begin
 end
 
 procedure Node015 begin
-   float_msg(self_obj, mstr(134), FLOAT_MSG_NORMAL);
+   //float_msg(self_obj, mstr(134), FLOAT_MSG_NORMAL);
+   float_msg(self_obj, mstr(135), FLOAT_MSG_NORMAL); //edit by killap
 end
 
 procedure Node016 begin
-   float_msg(self_obj, mstr(135), FLOAT_MSG_NORMAL);
+   //float_msg(self_obj, mstr(135), FLOAT_MSG_NORMAL);
+   float_msg(self_obj, mstr(136), FLOAT_MSG_NORMAL); //edit by killap
 end
 
 procedure destCall(variable tileNum) begin

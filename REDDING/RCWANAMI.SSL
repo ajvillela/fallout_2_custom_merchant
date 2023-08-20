@@ -66,8 +66,9 @@ end
 procedure destroy_p_proc begin
    dec_global_var(GVAR_TOTAL_WANAMINGOS);
 
-   if ((global_var(GVAR_TOTAL_WANAMINGOS) == 0) and (global_var(GVAR_WANAMINGO_OCCUPADO) != WANAMINGO_CLEARED_OUT)) then begin
+   if ((global_var(GVAR_TOTAL_WANAMINGOS) <= 0) and (global_var(GVAR_WANAMINGO_OCCUPADO) != WANAMINGO_CLEARED_OUT)) then begin
        set_global_var(GVAR_WANAMINGO_OCCUPADO,WANAMINGO_CLEARED_OUT);
+       set_global_var(GVAR_MINE_DEED,CLEARED_MINE); //added by killap - expansion
        display_msg(g_mstr(1014));
        give_xp(EXP_CLEAR_WANAMINGO_MINE);
    end
@@ -81,12 +82,20 @@ end
 
 procedure look_at_p_proc begin
    script_overrides;
-   display_msg(mstr(100));
+   //added by killap - expansion
+   if (self_pid == PID_QUEEN_ALIEN) then
+     display_msg(mstr(102));
+   else
+     display_msg(mstr(100));
 end
 
 procedure description_p_proc begin
    script_overrides;
-   display_msg(mstr(101));
+   //added by killap - expansion
+   if (self_pid == PID_QUEEN_ALIEN) then
+     display_msg(mstr(103));
+   else
+     display_msg(mstr(101));
 end
 
 procedure use_obj_on_p_proc begin

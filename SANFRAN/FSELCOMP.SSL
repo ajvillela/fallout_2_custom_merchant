@@ -67,7 +67,13 @@ procedure Node007;
 procedure Node008;
 procedure Node009;
 procedure Node010;
-
+// added by killap - expansion
+procedure Node007a;
+procedure Node009a;
+procedure Node009b;
+procedure Node009c;
+procedure Node011;
+//end added
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
 // seen by the design Tool
@@ -79,6 +85,7 @@ procedure Node010;
 #define LVAR_Hostile                    (5)
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Denied                     (7)
+#define LVAR_Stash_Coordinates          (8) // added by killap - expansion
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -123,6 +130,7 @@ end
    written by designers are placed in here. Additionally, Reactions are generated and
    stored which affects player interactions. */
 procedure talk_p_proc begin
+   
    if (skill_success(dude_obj, SKILL_SCIENCE, -80)) then begin
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
@@ -202,7 +210,11 @@ procedure Node004 begin
    Reply(111);
    NOption(112, Node005, 1);
    NOption(113, Node006, 1);
-   NOption(114, Node007, 1);
+   //added check by killap - expansion pack - hub stash
+   if (has_skill(dude_obj, SKILL_SCIENCE) >= 100) then
+      NOption(114, Node007a, 1);
+   else
+      NOption(114, Node007, 1);  
    NOption(115, Node003, 1);
 end
 
@@ -216,6 +228,7 @@ procedure Node006 begin
    Reply(119);
    NOption(120, Node004, 1);
    NOption(121, Node999, 1);
+   game_time_advance(30*ONE_GAME_MINUTE); // added by killap - expansion
 end
 
 procedure Node007 begin
@@ -224,9 +237,23 @@ procedure Node007 begin
    NOption(124, Node999, 1);
 end
 
+//added by killap - expansion
+procedure Node007a begin
+   if (local_var(LVAR_Stash_Coordinates) == 0) then begin
+      Reply(200);
+      set_local_var(LVAR_Stash_Coordinates,1);
+      mark_on_map(AREA_HUBOLOGIST_STASH)
+   end else 
+      Reply(201);
+   NOption(123, Node004, 1);
+   NOption(124, Node999, 1);
+end
+//end added
 
 procedure Node008 begin
    Reply(125);
+   if ( (san_fran_flag(SF_GAS_ELRONS)) and (not(tanker_flag(TANK_FUEL))) ) then
+      NOption(250, Node011, 1);
    NOption(126, Node009, 1);
    NOption(127, Node010, 1);
    NOption(128, Node003, 1);
@@ -235,8 +262,30 @@ end
 
 procedure Node009 begin
    Reply(130);
+   if (has_skill(dude_obj, SKILL_SCIENCE) >= 100) then
+      NOption(210, Node009a, 1);
    NOption(131, Node999, 1);
 end
+
+//begin added by killap - expansion pack
+procedure Node009a begin
+   Reply(211);
+   NOption(212, Node009b, 1);
+   NOption(137, Node999, 4);
+end
+
+procedure Node009b begin
+   Reply(213);
+   NOption(137, Node009c, 4);
+end
+
+procedure Node009c begin
+   set_san_fran_flag(SF_ELRON_DRIVE_FORMAT);
+   display_msg(mstr(220));
+   give_xp(100);
+   set_san_fran_flag(SF_ELRON_ENEMY);
+end
+//end added by killap
 
 //132 is used for objects
 procedure Node010 begin
@@ -244,6 +293,13 @@ procedure Node010 begin
       Reply(mstr(133) + " " + mstr(135));
    else
       Reply(mstr(134) + " " + mstr(135));
-   NOption(135, Node008, 4);
-   NOption(136, Node999, 4);
+   NOption(136, Node008, 4);  //killap's fix: changed to 136
+   NOption(137, Node999, 4);  //killap's fix: changed to 137
+end
+
+procedure Node011 begin
+   Reply(251);
+   NOption(252, Node999, 4);
+   COMPLETE_TANKER_FUEL;
+   unset_san_fran_flag(SF_GAS_ELRONS);
 end

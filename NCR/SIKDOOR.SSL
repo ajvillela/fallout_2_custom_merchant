@@ -391,12 +391,14 @@ procedure damage_p_proc begin
            set_local_var(LVAR_Locked, STATE_INACTIVE);
            Trap_Damage:=random(MIN_DAMAGE,MAX_DAMAGE);
            explosion(tile_num(self_obj), elevation(self_obj), Trap_Damage);
+           i_cell_door_obj := -1; //added by killap
            destroy_object(self_obj);
        end
 
        else begin
            set_local_var(LVAR_Trapped, STATE_INACTIVE);
            set_local_var(LVAR_Locked, STATE_INACTIVE);
+           i_cell_door_obj := -1; //added by killap
            destroy_object(self_obj);
        end
    end
@@ -414,6 +416,7 @@ procedure damage_p_proc begin
        else if (local_var(LVAR_Explosion_Attempts) > DOOR_STRENGTH) then begin
            set_local_var(LVAR_Trapped, STATE_INACTIVE);
            set_local_var(LVAR_Locked,STATE_INACTIVE);
+           i_cell_door_obj := -1; //added by killap
            destroy_object(self_obj);
        end
    end
@@ -432,7 +435,8 @@ end
 ***************************************************************************************/
 
 procedure map_enter_p_proc begin
-
+   i_cell_door_obj := self_obj; //added by killap
+   
 /* Set up the door state when the player first enters the map */
    if (local_var(LVAR_Set_Door_Status) == 0) then begin
        set_local_var(LVAR_Set_Door_Status,1);
@@ -458,13 +462,15 @@ end
 **************************************************************************************/
 
 procedure map_update_p_proc begin
-   if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
+   i_cell_door_obj := self_obj; //added by killap
+
+   /*if (local_var(LVAR_Locked) == STATE_ACTIVE) then begin
        obj_lock(self_obj);
    end
 
    else begin
        obj_unlock(self_obj);
-   end
+   end*/
 end
 
 

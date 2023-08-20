@@ -732,8 +732,8 @@ end
 
 procedure Node025c begin
    Reply(236);
-
-   BOption(237, Node025a, 004);
+   if( obj_is_carrying_obj_pid( dude_obj, PID_FAKE_CITIZENSHIP ) > 0 ) then // added by killap
+      BOption(237, Node025a, 004);
    BOption(238, Node999, 004);
 end
 

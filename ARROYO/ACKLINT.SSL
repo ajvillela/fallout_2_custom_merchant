@@ -3,9 +3,9 @@
 */
 
 /*
-        Name:
-        Location:
-        Description:
+        Name: Klint
+        Location: Arroyo temple entrance
+        Description: Is guarding the path back to the village
 
         Log:
            Please note any changes that have been made to the file in Updated. Then comment
@@ -63,7 +63,6 @@ procedure Node004;
 procedure Node005;
 procedure Node006;
 procedure Node007;
-procedure Node008;
 
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
@@ -118,6 +117,12 @@ procedure critter_p_proc begin
        set_local_var(LVAR_Hostile,1);
        attack(dude_obj);
    end
+   
+   //added by killap
+   if ( (REP_ENEMY_ARROYO) and (obj_can_see_obj(self_obj,dude_obj)) ) then begin
+       attack(dude_obj);
+   end
+   //end added by killap
 
 end
 
@@ -148,6 +153,9 @@ end
    written by designers are placed in here. Additionally, Reactions are generated and
    stored which affects player interactions. */
 procedure talk_p_proc begin
+   //variable male_tribal_proto;
+   //variable female_tribal_proto;
+
    Evil_Critter:=0;
    Slavery_Tolerant:=SLAVE_TOLERANT;
    Karma_Perception:=KARMA_PERCEPTION1;
@@ -155,8 +163,19 @@ procedure talk_p_proc begin
    CheckKarma;
 
    GetReaction;
-
-   if ((obj_art_fid(dude_obj) == FID_HMWARR) or (obj_art_fid(dude_obj) == FID_HFPRIM)) then begin
+ 
+   //added by killap - needed for appearance mod
+   /*if (get_ini_setting("ddraw.ini|Misc|EnableHeroAppearanceMod") == 1) then begin
+      male_tribal_proto := FID_HMWARR + MASH_CRITTER_LIST_SIZE;
+      female_tribal_proto := FID_HFPRIM + MASH_CRITTER_LIST_SIZE;
+   end else begin
+      male_tribal_proto := FID_HMWARR;
+      female_tribal_proto := FID_HFPRIM;
+   end*/
+   //end added
+   
+   //if ((obj_art_fid(dude_obj) == (male_tribal_proto)) or (obj_art_fid(dude_obj) == (female_tribal_proto))) then begin
+   if (global_var(GVAR_START_ARROYO_TRIAL) == TRIAL_NONE) then begin // edit by killap - work around issues with appearance mod
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node001;
@@ -271,9 +290,5 @@ end
 procedure Node007 begin
    NMessage(124);
 end
-
-procedure Node008 begin
-end
-
 
 //xxxxxxxxxxxxxxxxxxxx

@@ -6,8 +6,6 @@
    have been designed.
 */
 
-procedure start;
-
 #include "..\headers\define.h"
 #include "..\headers\bhrnddst.h"
 
@@ -28,8 +26,27 @@ variable ammo_pid;
 variable ammo_qty;
 variable val;
 variable val1;
+variable do_once := 0; //added by killap
 
 #define TIMER_WIELD 1
+
+//added by killap
+procedure combat_p_proc begin
+   if ((dude_elevation == 1) and ((cur_map_index == MAP_RND_CAVERN1) or (cur_map_index == MAP_RND_CAVERN2) or (cur_map_index == MAP_RND_CAVERN3) or (cur_map_index == MAP_RND_CAVERN4) or (cur_map_index == MAP_RND_CAVERN5))) then begin 
+      if (do_once == 0) then begin
+         //if (self_item(wep_pid)) then begin
+            do_once := 1;
+            if (wep_pid != PID_BRASS_KNUCKLES and 
+                wep_pid != PID_PLATED_BOXING_GLOVES and
+                wep_pid != PID_POWER_FIST and
+                wep_pid != PID_MEGA_POWER_FIST) then begin
+               inven_unwield(self_obj);
+            end
+         //end
+      end
+   end
+end
+//end added
 
 procedure timed_event_p_proc begin
    if (fixed_param == TIMER_WIELD) then begin
@@ -119,7 +136,8 @@ procedure map_enter_p_proc begin
                ammo_qty := Random(1, 2);
             end else if (val1 == 4) then begin
                wep_pid  := PID_HK_P90C;
-               ammo_pid := PID_9MM_AMMO;
+               //ammo_pid := PID_9MM_AMMO;
+               ammo_pid := PID_10MM_JHP; //edit by killap
                ammo_qty := Random(1, 2);
             end
          end else if (val == 3) then begin
@@ -177,7 +195,7 @@ procedure map_enter_p_proc begin
 
    stock_weapon_obj(self_obj, wep_pid, 1, ammo_pid, ammo_qty)
 
-   add_timer_event(self_obj, 0, TIMER_WIELD);
+   //add_timer_event(self_obj, 1, TIMER_WIELD); - comment out by killap
 
    reg_anim_clear(self_obj);
    reg_anim_begin();

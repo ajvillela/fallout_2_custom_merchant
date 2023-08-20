@@ -79,3 +79,35 @@ procedure description_p_proc begin
    script_overrides;
    display_msg(mstr(101));
 end
+
+//added by killap - expansion
+procedure map_enter_p_proc begin
+   reg_anim_begin();
+   reg_anim_animate_forever(self_obj, ANIM_stand);
+   reg_anim_end();
+   
+   add_timer_event(self_obj, 1, 1);
+end
+
+procedure map_update_p_proc begin
+   if (combat_is_initialized == 0) then
+   begin
+      reg_anim_begin();
+      reg_anim_animate_forever(self_obj, ANIM_stand);
+      reg_anim_end();
+   end
+end
+
+procedure timed_event_p_proc
+begin
+  if (fixed_param == 1) then begin
+      if ( (anim_busy(self_obj) == false) and (combat_is_initialized == 0) ) then begin
+         reg_anim_begin();
+         reg_anim_animate_forever(self_obj, ANIM_stand);
+         reg_anim_end();
+      end
+      add_timer_event(self_obj, 1, 1);
+  end
+  
+end
+//end added

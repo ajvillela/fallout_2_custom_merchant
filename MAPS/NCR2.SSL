@@ -35,6 +35,8 @@
 export variable merk_guard_count := 0;
 export variable merk_obj         := 0;
 export variable merk_visible     := 0;
+export variable merk_guard1_obj := 0; //added by killap
+export variable merk_guard2_obj := 0; //added by killap
 export variable num_carlson_guards  := 0;
 export variable carlson_guards_talk := 0;
 export variable Field1a_Ptr         := 0;

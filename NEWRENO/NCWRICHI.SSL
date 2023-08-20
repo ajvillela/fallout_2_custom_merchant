@@ -3,7 +3,7 @@
 */
 
 /*
-        Name:
+        Name: Wright Children
         Location: New Reno
         Description:
 
@@ -202,6 +202,7 @@ end
 procedure damage_p_proc begin
    if (source_obj == dude_obj) then begin
       set_personal_enemy;
+      attack_family(self_family) //added by killap
    end
 end
 
@@ -217,6 +218,7 @@ procedure talk_p_proc begin
    Karma_Perception := KARMA_PERCEPTION5;
    CheckKarma;
    GetReaction;
+   ReactToLevel; //added by killap
    if (children_sleep_time) then begin
       floater_rand(800, 802);
    end else if (enclave_destroyed) then begin

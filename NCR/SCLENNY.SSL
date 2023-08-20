@@ -88,6 +88,11 @@ procedure use_obj_on_p_proc begin
 
    if (tool == PID_MUTAGENIC_SYRUM) then begin
       set_ncr_flag(NCR_KILLED_LENNY_SERUM_FLAG);
+      //added by killap
+      if (not (map_var(MVAR_Lenny_Dead == 1))) then begin
+         call destroy_p_proc;
+      end 
+      //end added
    end
 end
 
@@ -121,6 +126,12 @@ procedure critter_p_proc begin
 
 end
 
+procedure map_update_p_proc begin
+   //lenny_obj := self_obj;
+   if (not (map_var(MVAR_Lenny_Dead == 1))) then begin
+      lenny_obj := self_obj;
+   end 
+end
 /* Whenever the critter takes damage of any type, this procedure will be called. Things
    like setting ENEMY_ and LVAR_Personal_Enemy can be set here. */
 procedure damage_p_proc begin
@@ -170,11 +181,18 @@ end
    in here. */
 procedure destroy_p_proc begin
 
-/* Increment the aligned critter counter*/
-   inc_evil_critter
+   /* If player uses the serum, and then kills Lenny before it */
+   /* takes effect, this will prevent the kill counter from    */
+   /* being incremented twice.                                 */
+   if (not (map_var(MVAR_Lenny_Dead == 1))) then begin
+      /* Increment the aligned critter counter*/
+      inc_evil_critter
 
-/* Set global_variable for Enemy status*/
-   set_map_var(MVAR_Lenny_Dead, 1);
+      /* Set global_variable for Enemy status*/
+      set_map_var(MVAR_Lenny_Dead, 1);
+      lenny_obj := -1; //added by killap
+   end
+
 end
 
 /* Look_at_p_proc gets called any time that the player passes the cursor over any object.

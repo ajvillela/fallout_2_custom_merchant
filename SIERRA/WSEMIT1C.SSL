@@ -36,7 +36,7 @@
 
 #define TRAPS_PENALTY           (-20)
 #define SCIENCE_PENALTY         (-40)
-#define TOOL_BONUS              (SCIENCE_PENALTY + 20)
+#define TOOL_BONUS              (SCIENCE_PENALTY + 20 + ((obj_pid(obj_being_used_with) == PID_SUPER_TOOL_KIT) * 20))
 
 #define LEVEL_MAP_VAR           MVAR_Security_Level_1
 #define FIELD_STATUS            MVAR_Field_1c
@@ -52,11 +52,49 @@ procedure map_update_p_proc;
 #define LVAR_Destroyed_Field                    (1)
 #define LVAR_Gave_Exp                           (2)
 
+#define CHECK_REPAIR                    (1)
+
+import variable repair_bot1;
+import variable repair_bot2;
+import variable repair_bot3;
+
 import variable Field1c_Ptr;
 
 variable Field_Ptr;
 
 procedure start begin
+end
+
+procedure timed_event_p_proc begin
+   //added by killap - expansion
+   if (fixed_param == CHECK_REPAIR) then begin
+      if (repair_bot1 > 0 or repair_bot2 > 0 or repair_bot3 > 0) then begin
+         if (not(combat_is_initialized) and map_var(MVAR_Security_Level_1) == 1) then begin
+            if ( (map_var(MVAR_Repair_Request1) > REPAIR_NONE) or (map_var(MVAR_Repair_Request2) > REPAIR_NONE) or (map_var(MVAR_Repair_Request3) > REPAIR_NONE) or
+                 (map_var(MVAR_Repair_Request4) > REPAIR_NONE) or (map_var(MVAR_Repair_Request5) > REPAIR_NONE) or (map_var(MVAR_Repair_Request6) > REPAIR_NONE) or 
+                 (map_var(MVAR_Repair_Request7) > REPAIR_NONE) or (map_var(MVAR_Repair_Request8) > REPAIR_NONE) or (map_var(MVAR_Repair_Request9) > REPAIR_NONE) or
+                 (map_var(MVAR_Repair_Request10) > REPAIR_NONE) or (map_var(MVAR_Repair_Request11) > REPAIR_NONE) or (map_var(MVAR_Repair_Request12) > REPAIR_NONE) )then begin
+               if (((elevation(repair_bot1) == self_elevation and obj_is_visible_flag(repair_bot1)) or (elevation(repair_bot2) == self_elevation and obj_is_visible_flag(repair_bot2)) or (elevation(repair_bot3) == self_elevation and obj_is_visible_flag(repair_bot3))) and
+                  (((tile_in_box(map_var(MVAR_Tile_Request1), 22518, 22685, 28485, 28517)) or (tile_in_box(map_var(MVAR_Tile_Request2), 22518, 22685, 28485, 28517)) or (tile_in_box(map_var(MVAR_Tile_Request3), 22518, 22685, 28485, 28517)) or
+                  (tile_in_box(map_var(MVAR_Tile_Request4), 22518, 22685, 28485, 28517)) or (tile_in_box(map_var(MVAR_Tile_Request5), 22518, 22685, 28485, 28517)) or (tile_in_box(map_var(MVAR_Tile_Request6), 22518, 22685, 28485, 28517)) or 
+                  (tile_in_box(map_var(MVAR_Tile_Request7), 22518, 22685, 28485, 28517)) or (tile_in_box(map_var(MVAR_Tile_Request8), 22518, 22685, 28485, 28517)) or (tile_in_box(map_var(MVAR_Tile_Request9), 22518, 22685, 28485, 28517)) or
+                  (tile_in_box(map_var(MVAR_Tile_Request10), 22518, 22685, 28485, 28517)) or (tile_in_box(map_var(MVAR_Tile_Request11), 22518, 22685, 28485, 28517)) or (tile_in_box(map_var(MVAR_Tile_Request12), 22518, 22685, 28485, 28517)))) ) then begin
+                      //set_map_var(FIELD_STATUS,FIELD_DISABLED);
+                     set_obj_visibility(Field_Ptr,1);         // invis  
+               end else begin
+                     //set_map_var(FIELD_STATUS,FIELD_ENABLED);
+                     if (map_var(FIELD_STATUS) == FIELD_ENABLED) then
+                        set_obj_visibility(Field_Ptr,0);         // vis
+               end
+            end else begin
+               if (map_var(FIELD_STATUS) == FIELD_ENABLED) then
+                  set_obj_visibility(Field_Ptr,0);
+            end
+         end
+         add_timer_event(self_obj, 1, CHECK_REPAIR); //added by killap
+      end
+   end
+   //end added
 end
 
 procedure map_update_p_proc begin
@@ -118,7 +156,7 @@ procedure use_obj_on_p_proc begin
 
    Tool:=obj_pid(obj_being_used_with);
 
-   if ((Tool == PID_MULTI_TOOL) and (map_var(FIELD_STATUS) < FIELD_DAMAGED) and (global_var(GVAR_SIERRA_BASE_POWER) == 0)) then begin
+   if (((Tool == PID_MULTI_TOOL) or (Tool == PID_SUPER_TOOL_KIT)) and (map_var(FIELD_STATUS) < FIELD_DAMAGED) and (global_var(GVAR_SIERRA_BASE_POWER) == 0)) then begin //added super_tool_kit - killap
        script_overrides;
        if (skill_success(source_obj,SKILL_SCIENCE,TOOL_BONUS)) then begin
            if (map_var(FIELD_STATUS) == FIELD_ENABLED) then begin
@@ -163,32 +201,41 @@ procedure damage_p_proc begin
    variable Field_Pid;
    variable Field_Elev;
 
-   if (skill_success(dude_obj,SKILL_TRAPS,TRAPS_PENALTY)) then begin
-       set_map_var(FIELD_STATUS,FIELD_DESTROYED);
-       destroy_object(Field_Ptr);
-       Field_Ptr:=0;
-       display_msg(mstr(116));
-       debug_msg("Successfully destroyed the Field.");
-   end
-   else begin
-       set_map_var(FIELD_STATUS,FIELD_DAMAGED);
-       Field_Hex:=tile_num(Field_Ptr);
-       Field_Pid:=obj_pid(Field_Ptr);
-       Field_Elev:=elevation(Field_Ptr);
-       destroy_object(Field_Ptr);
-       Field_Ptr:=0;
-       if (Field_Pid == PID_NS_FORCE_FIELD) then begin
-           debug_msg("Make NW Pain Field.");
-           create_object_sid(PID_NS_PAIN_FIELD,Field_Hex,Field_Elev,CUR_FIELD_SCRIPT);
-       end
-       else begin
-           debug_msg("Make EW Pain Field.");
-           create_object_sid(PID_EW_PAIN_FIELD,Field_Hex,Field_Elev,CUR_FIELD_SCRIPT);
-       end
-   end
+   if (map_var(FIELD_STATUS) != FIELD_DESTROYED) then begin //added check by killap
+      if (skill_success(dude_obj,SKILL_TRAPS,TRAPS_PENALTY)) then begin
+         set_map_var(FIELD_STATUS,FIELD_DESTROYED);
+         destroy_object(Field_Ptr);
+         Field_Ptr:=0;
+         display_msg(mstr(116));
+         debug_msg("Successfully destroyed the Field.");
+      end
+      else begin
+         if (map_var(FIELD_STATUS) != FIELD_DAMAGED) then begin //added check by killap
+            set_map_var(FIELD_STATUS,FIELD_DAMAGED);
+            Field_Hex:=tile_num(Field_Ptr);
+            Field_Pid:=obj_pid(Field_Ptr);
+            Field_Elev:=elevation(Field_Ptr);
+            destroy_object(Field_Ptr);
+            Field_Ptr:=0;
+            if (Field_Pid == PID_NS_FORCE_FIELD) then begin
+               debug_msg("Make NW Pain Field.");
+               create_object_sid(PID_NS_PAIN_FIELD,Field_Hex,Field_Elev,CUR_FIELD_SCRIPT);
+            end
+            else begin
+               debug_msg("Make EW Pain Field.");
+               create_object_sid(PID_EW_PAIN_FIELD,Field_Hex,Field_Elev,CUR_FIELD_SCRIPT);
+            end
+         end
+      end
 
-   set_map_var(LEVEL_MAP_VAR,1);
-   set_global_var(GVAR_SIERRA_BASE_ALERT,SIERRA_ALERT_ON);
-   set_global_var(GVAR_SIERRA_BASE_SECURITY,SIERRA_SECURITY_ON);
-   display_msg(mstr(111));
+      set_map_var(LEVEL_MAP_VAR,1);
+      set_global_var(GVAR_SIERRA_BASE_ALERT,SIERRA_ALERT_ON);
+      set_global_var(GVAR_SIERRA_BASE_SECURITY,SIERRA_SECURITY_ON);
+      display_msg(mstr(111));
+   end
+end
+
+//added by killap - expansion
+procedure map_enter_p_proc begin
+   add_timer_event(self_obj, 1, CHECK_REPAIR); //added by killap
 end

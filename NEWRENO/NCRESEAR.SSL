@@ -292,7 +292,8 @@ procedure Node014 begin
 end
 procedure Node015 begin
    Reply(375);
-   NOption(366, Node014, 004);
+   //NOption(366, Node014, 004);
+   NOption(357, Node014, 004); //edit by killap
    NOption(377, Node999, 004);
 end
 procedure Node016 begin

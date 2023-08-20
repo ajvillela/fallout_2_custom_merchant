@@ -35,6 +35,11 @@ procedure damage_p_proc;
 procedure map_enter_p_proc;
 procedure timed_event_p_proc;
 
+//added by killap - expansion
+procedure doVaultBoxerAppearance;
+procedure removeVaultBoxerAppearance;
+//end added
+
 /* Script Specific Procedure Calls */
 procedure Node998;                                      // This Node is Always Combat
 procedure Node999;                                      // This Node is Always Ending
@@ -112,6 +117,12 @@ procedure Node042;
 #define gave_second_chance             lvar_bit(LVAR_Flags, gave_second_chance_bit)
 #define set_gave_second_chance         set_lvar_bit_on(LVAR_Flags, gave_second_chance_bit)
 
+//added by killap - expansion
+#define REG_HAIR                        (0)
+#define LONG_HAIR                       (1)
+#define BALD_HAIR                       (2)
+//end added
+
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
    Needs to be saved, make it a map variable (MVAR_) */
@@ -140,6 +151,7 @@ procedure timed_event_p_proc begin
       check_set_obj_visiblility(ring_girl_obj, true);
       check_set_obj_visiblility(announcer_obj, true);
       gfade_in(ONE_GAME_SECOND);
+      call removeVaultBoxerAppearance; //added by killap - expansion
       if (dude_won_fight) then begin
          collect_fight_money
          inc_fight_level;
@@ -174,9 +186,9 @@ end
 procedure map_enter_p_proc begin
    stuart_little_obj := self_obj;
    if (is_loading_game == false) then begin
-      if ((masticator_dead) and (dude_is_prizefighter == false)) then begin
+      /*if ((masticator_dead) and (dude_is_prizefighter == false)) then begin -- COMMENT OUT BY KILLAP
          destroy_object(self_obj);
-      end else if (map_first_run) then begin
+      end else */if (map_first_run) then begin
          critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NEW_RENO_BOXER);
          critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_CITIZEN);
       end
@@ -209,6 +221,10 @@ procedure talk_p_proc begin
    else if (Fallout2_enclave_destroyed) then begin
       if (dude_is_prizefighter) then begin
          call Node001;
+      //added by killap
+      end else if ( (boxing) or (boxing_fail) ) then begin
+         start_dialog_at_node(Node024);
+      //end added by killap
       end else begin
          start_dialog_at_node(Node006);
       end
@@ -244,6 +260,59 @@ end
 procedure use_skill_on_p_proc begin
 end
 
+//added by killap - option in RP installer
+procedure doVaultBoxerAppearance begin
+   variable armor;
+   set_global_var(GVAR_TMP_GLOBAL_VAR,1);
+   if (dude_is_male) then begin
+      if ((get_sfall_global_int("HApStyle")) == LONG_HAIR) then begin
+         if (obj_carrying_pid_obj(dude_obj,PID_VAULT_BOXER_MALE_LONG_HAIR) == 0) then begin
+            armor := create_object(PID_VAULT_BOXER_MALE_LONG_HAIR,0,0);
+            add_obj_to_inven(dude_obj,armor);
+            wield_obj_critter(dude_obj, armor);
+            refresh_pc_art;
+            //metarule3(107,dude_obj,FID_HMBOXL,0);
+         end
+      end else if ((get_sfall_global_int("HApStyle")) == BALD_HAIR) then begin
+         if (obj_carrying_pid_obj(dude_obj,PID_VAULT_BOXER_MALE_BALD) == 0) then begin
+            armor := create_object(PID_VAULT_BOXER_MALE_BALD,0,0);
+            add_obj_to_inven(dude_obj,armor);
+            wield_obj_critter(dude_obj, armor);
+            refresh_pc_art;
+            //metarule3(107,dude_obj,FID_HMBOXB,0);
+         end
+      end else if ((get_sfall_global_int("HApStyle")) == REG_HAIR) then begin
+         if (obj_carrying_pid_obj(dude_obj,PID_VAULT_BOXER_MALE_NORMAL) == 0) then begin
+            armor := create_object(PID_VAULT_BOXER_MALE_NORMAL,0,0);
+            add_obj_to_inven(dude_obj,armor);
+            wield_obj_critter(dude_obj, armor);
+            refresh_pc_art;
+            //metarule3(107,dude_obj,FID_HMBOXS,0);
+         end
+      end
+   end
+end
+
+procedure removeVaultBoxerAppearance begin
+   set_global_var(GVAR_TMP_GLOBAL_VAR,0);
+   if (dude_is_male) then begin
+      if ((get_sfall_global_int("HApStyle")) == LONG_HAIR) then begin
+         remove_armor(dude_obj)   
+         destroy_object(obj_carrying_pid_obj(dude_obj,PID_VAULT_BOXER_MALE_LONG_HAIR));
+         refresh_pc_art;
+      end else if ((get_sfall_global_int("HApStyle")) == BALD_HAIR) then begin
+         remove_armor(dude_obj)       
+         destroy_object(obj_carrying_pid_obj(dude_obj,PID_VAULT_BOXER_MALE_BALD));
+         refresh_pc_art;
+      end else if ((get_sfall_global_int("HApStyle")) == REG_HAIR) then begin
+         remove_armor(dude_obj)
+         destroy_object(obj_carrying_pid_obj(dude_obj,PID_VAULT_BOXER_MALE_NORMAL));
+         refresh_pc_art;
+      end
+   end
+end
+//end added
+
 procedure Node998 begin
    if (hostile == false) then begin
       set_hostile;
@@ -260,15 +329,15 @@ procedure Node990 begin
    end
 end
 procedure Node989 begin
-   set_global_var(global_var(GVAR_NEW_RENO_PRIZEFIGHTER), 497);
+   set_global_var(GVAR_NEW_RENO_PRIZEFIGHTER, 97); //fix by killap: was set_global_var(global_var(GVAR_NEW_RENO_PRIZEFIGHTER, 497);
    call Node012;
 end
 procedure Node988 begin
-   set_global_var(global_var(GVAR_NEW_RENO_PRIZEFIGHTER), 498);
+   set_global_var(GVAR_NEW_RENO_PRIZEFIGHTER, 98); //fix by killap: was set_global_var(global_var(GVAR_NEW_RENO_PRIZEFIGHTER, 498);
    call Node012;
 end
 procedure Node987 begin
-   set_global_var(global_var(GVAR_NEW_RENO_PRIZEFIGHTER), 499);
+   set_global_var(GVAR_NEW_RENO_PRIZEFIGHTER, 99); //fix by killap: was set_global_var(global_var(GVAR_NEW_RENO_PRIZEFIGHTER, 499);
    call Node012;
 end
 procedure Node986 begin
@@ -285,7 +354,7 @@ procedure Node985 begin
    set_gave_second_chance;
 end
 procedure Node984 begin
-   set_global_var(global_var(GVAR_NEW_RENO_PRIZEFIGHTER), 496);
+   set_global_var(GVAR_NEW_RENO_PRIZEFIGHTER, 96); //killap fix: was 496
    call Node012;
 end
 procedure Node983 begin
@@ -415,12 +484,12 @@ procedure Node011 begin
 end
 procedure Node012 begin
    debug_msg("GVAR_NEW_RENO_PRIZEFIGHTER == " + dude_prizefighter_number + " / dude_prizefighter_number == " + dude_prizefighter_number + " / prizefighter_name == " + prizefighter_name);
-   if (dude_prizefighter_number == 497) then begin
+   if (dude_prizefighter_number == 97) then begin  //killap fix: was 497
       Reply(300);
-   end else if (dude_prizefighter_number == 496) then begin
+   end else if (dude_prizefighter_number == 96) then begin //killap fix: was 496
       Reply(301);
    end else begin
-      Reply(mstr(302) + prizefighter_name + mstr(1302));
+      Reply(prizefighter_name + mstr(302) + prizefighter_name + mstr(1302)); //killap fix: added prizefighter_name in the front
    end
    NOption(391, Node986, -003);
    NOption(305, Node999, -003);
@@ -539,8 +608,13 @@ procedure Node024 begin
    if (boxing_fail == false) then begin
       NOption(435, Node021, 004);
    end else if (Fallout2_enclave_destroyed == false) then begin
-      NOption(436, Node976, 004);
+      //NOption(436, Node976, 004);
+      NOption(436, Node985, 004); //edit by killap
+   //added by killap
+   end else begin
+      NOption(436, Node977, 004);
    end
+   //end added
    NOption(437, Node999, 004);
    NOption(433, Node977, -003);
    NOption(434, Node999, -003);
@@ -600,15 +674,15 @@ procedure Node030 begin
    setup_set_prizefighter_name(mstr(490) + dude_name + mstr(1490) + dude_name + mstr(2490), "Node031")
 end
 procedure Node031 begin
-   if (dude_prizefighter_number == 11) then begin
+   if (dude_prizefighter_number == 34) then begin //was 11 - killap
       Reply(500);
-   end else if (dude_prizefighter_number == 12) then begin
+   end else if (dude_prizefighter_number == 37) then begin //was 12 - killap
       Reply(501);
-   end else if (dude_prizefighter_number == 13) then begin
+   end else if (dude_prizefighter_number == 39) then begin //was 13 - killap
       Reply(502);
-   end else if (dude_prizefighter_number == 14) then begin
+   end else if (dude_prizefighter_number == 40) then begin //was 14 - killap
       Reply(503);
-   end else if (dude_prizefighter_number == 15) then begin
+   end else if (dude_prizefighter_number == 48) then begin //was 15 - killap
       Reply(504);
    end else begin
       Reply(mstr(505) + prizefighter_name + mstr(422) + prizefighter_name + mstr(2505));

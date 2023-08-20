@@ -3,9 +3,9 @@
 */
 
 /*
-        Name:
-        Location:
-        Description:
+        Name: Feargus
+        Location: Arroyo
+        Description: He is whining about the broken well
 
         Log:
            Please note any changes that have been made to the file in Updated. Then comment
@@ -77,6 +77,7 @@ procedure Node002;
 
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
+variable did_well_thank_message := 0; //added by killap
 
 procedure start begin
 end
@@ -105,7 +106,7 @@ procedure critter_p_proc begin
        attack(dude_obj);
    end
 
-   if (REP_ENEMY_ARROYO) then begin
+   if ( (REP_ENEMY_ARROYO) and (obj_can_see_obj(self_obj,dude_obj)) ) then begin //added and (obj_can_see_obj(self_obj,dude_obj)) by killap
        attack(dude_obj);
    end
 
@@ -202,7 +203,12 @@ procedure Node001 begin
 end
 
 procedure Node002 begin
-   floater(random(104,106));
+   if not(did_well_thank_message) then begin //added check by killap - ensure that the first float is always a thank you
+      did_well_thank_message := 1;
+      float_msg( self_obj, mstr(104), FLOAT_COLOR_NORMAL );
+   end else begin
+      floater(random(104,106));
+   end
 end
 
 //xxxxxxxxxxxxxxxxxxxx

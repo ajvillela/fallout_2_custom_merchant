@@ -41,6 +41,12 @@ procedure start begin
 end
 
 procedure map_enter_p_proc begin
+   //added by killap
+   if (map_first_run) then begin
+       display_mstr(100);
+   end
+   //end added
+   
    base_lighting;
 end
 

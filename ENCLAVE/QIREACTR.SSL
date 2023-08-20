@@ -43,12 +43,13 @@ procedure start begin
 end
 
 procedure damage_p_proc begin
-   if ((weapon_dmg_type(target_obj) == DMG_explosion) and (map_var(MVAR_Reactor_Off) == 0)) then begin
+   if ( ((weapon_dmg_type(target_obj) == DMG_explosion) and (map_var(MVAR_Reactor_Off) == 0)) and (global_var(GVAR_ENCLAVE_REACTOR) < ENCLAVE_REACTOR_OFF) ) then begin //edit by killap
        set_map_var(MVAR_Reactor_Off,1);
        set_global_var(GVAR_ENCLAVE_REACTOR,ENCLAVE_REACTOR_OFF);
        if (global_var(GVAR_ENCLAVE_COUNTDOWN) == 0) then
            set_global_var(GVAR_ENCLAVE_COUNTDOWN,game_time);
        set_global_var(GVAR_ENCLAVE_ALARM,ALARM_REACTOR);
+       set_global_var(GVAR_ENCLAVE_COMPUTER,COMPUTER_DESTROYED);  //added by killap
        display_msg(g_mstr(1011));
        give_xp(EXP_DESTROY_REACTOR_COMPUTER);
 
@@ -65,6 +66,13 @@ procedure damage_p_proc begin
        ShockPerson(Davin_Ptr);
        ShockPerson(Miria_Ptr);
        ShockPerson(Robobrain_Ptr);
+       ShockPerson(Dogmeat_Ptr);
+       ShockPerson(Pariah_Dog_Ptr); //added by killap
+       ShockPerson(K9_Ptr); //added by killap
+       ShockPerson(Robobrain_Human_Ptr);
+       ShockPerson(Robobrain_Abnormal_Ptr); //added by killap
+       ShockPerson(Robobrain_Chimp_Ptr); //added by killap
+       ShockPerson(Laddie_Ptr);  //added by killap
    end
 end
 

@@ -77,7 +77,7 @@
 
 #define TRAPS_PENALTY           (-20)
 #define SCIENCE_PENALTY         (-40)
-#define TOOL_BONUS              (SCIENCE_PENALTY + 20)
+#define TOOL_BONUS              (SCIENCE_PENALTY + 20 + ((obj_pid(obj_being_used_with) == PID_SUPER_TOOL_KIT) * 20))
 
 #include "..\headers\genffld.h"
 
@@ -140,7 +140,7 @@ procedure map_enter_p_proc begin
       fieldPtr := tile_contains_pid_obj(FFIELD_TILE, FFIELD_ELEV, FFIELD_PID);
       destroy_object(fieldPtr);
       set_local_var(LVAR_Field_State, F_DESTROYED);
-      destroy_object(self_obj);
+      //destroy_object(self_obj);  - comment out by killap
    end
 end
 
@@ -217,9 +217,9 @@ procedure use_obj_on_p_proc begin
       set_global_var(GLOBAL_NOTIFY, 3);
    end
 
-   if ((Tool == PID_MULTI_TOOL) and (not FIELD_DESTROYED)) then begin
+   if ( ((Tool == PID_MULTI_TOOL) or (Tool == PID_SUPER_TOOL_KIT)) and (not FIELD_DESTROYED) ) then begin //added super_tool_kit - killap
       script_overrides;
-      if (skill_success(source_obj,SKILL_SCIENCE,TOOL_BONUS)) then begin
+      if (skill_success(source_obj,SKILL_REPAIR,TOOL_BONUS)) then begin //edit by killap: was SKILL_SCIENCE
          if (FIELD_ON) then begin
             SET_FIELD_DELAY;
             if (source_obj == dude_obj) then begin
@@ -302,7 +302,7 @@ procedure timed_event_p_proc begin
          destroy_object(fieldPtr);
          display_msg(mstr(116));
          set_local_var(LVAR_Field_State, F_DESTROYED);
-         destroy_object(self_obj);
+         //destroy_object(self_obj); - comment out by killap
       end
    end else if (fixed_param == TIMER_SET_STATE_FLICKER) then begin
       if (not FIELD_DESTROYED and not FIELD_FLICKER) then begin

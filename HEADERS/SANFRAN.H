@@ -284,20 +284,20 @@
 #define COMPLETE_TANKER_FUEL                        \
    set_tanker_flag(TANK_FUEL);                      \
    if (NAME != SCRIPT_FCDAVEH) then begin           \
-      COMP_QUEST(REP_BONUS_SAN_FRAN_GAS, REP_HERO_SAN_FRAN_GAS, EXP_SAN_FRAN_GAS); \
+      COMP_QUEST(REP_BONUS_SAN_FRAN_GAS, REP_HERO_SAN_FRAN_GAS, EXP_SAN_FRAN_GAS) \
    end                                              \
    set_global_var(GVAR_SAN_FRAN_FUEL_TANK_QST, 2)
 
 #define COMPLETE_TANKER_NAVCOMP                     \
    set_tanker_flag(TANK_NAVCOMP);                   \
-   COMP_QUEST(0, 0, EXP_TANKER_FIX_NAV);            \
+   COMP_QUEST(0, 0, EXP_TANKER_FIX_NAV)             \
    set_global_var(GVAR_SAN_FRAN_NAV_TANK_QST, 2)
 
 #define COMPLETE_TANKER_FOB                              \
    set_tanker_flag(TANK_FOB);                            \
    if (global_var(GVAR_SAN_FRAN_FOB_TANK_QST) != 2) then begin \
       set_global_var(GVAR_SAN_FRAN_FOB_TANK_QST, 2);     \
-      COMP_QUEST(0, 0, EXP_TANKER_FOB);                  \
+      COMP_QUEST(0, 0, EXP_TANKER_FOB)                   \
    end
 
 
@@ -335,7 +335,7 @@
         set_global_var(GVAR_SAN_FRAN_LOPAN_KDRAGON_QST, 1)
 
 #define COMPLETE_LOPAN_KDRAGON_QUEST     \
-    COMP_QUEST(REP_BONUS_SAN_FRAN_KILL_DRAGON, REP_HERO_SAN_FRAN_KILL_DRAGON_LOPAN, EXP_LOPAN_CHALLENGE_MISSION); \
+    COMP_QUEST(REP_BONUS_SAN_FRAN_KILL_DRAGON, REP_HERO_SAN_FRAN_KILL_DRAGON_LOPAN, EXP_LOPAN_CHALLENGE_MISSION) \
     set_global_var(GVAR_SAN_FRAN_LOPAN_KDRAGON_QST, 2)
 
 #define SHOW_DRAGON_KLOPAN_QUEST                         \
@@ -353,7 +353,7 @@
       set_global_var(GVAR_SAN_FRAN_ARMOR_QST, 1)
 
 #define COMPLETE_ARMOR_QUEST                   \
-   COMP_QUEST(REP_HERO_SAN_FRAN_ARMOR, REP_BONUS_SAN_FRAN_ARMOR, EXP_ARMOR); \
+   COMP_QUEST(REP_HERO_SAN_FRAN_ARMOR, REP_BONUS_SAN_FRAN_ARMOR, EXP_ARMOR)  \
    set_global_var(GVAR_SAN_FRAN_ARMOR_QST, 2)
 
 #define SHOW_KILL_OZ9_QST           \
@@ -415,12 +415,15 @@
 #define GET_WONG_EAT_TIME (global_var(GVAR_SAN_FRAN_WONG_EAT_TIME))
 
 #define COMP_QUEST(grep, trep, exp)     \
-   if (grep != 0) then                       \
+   if (grep != 0) then begin            \
       inc_general_rep(grep);            \
-   if (trep != 0) then                       \
+   end                                  \
+   if (trep != 0) then begin            \
       inc_san_fran_rep(trep);           \
-   if (exp  != 0) then                        \
-      give_xp(exp)
+   end                                  \
+   if (exp != 0) then begin             \
+      give_xp(exp);                     \
+   end
 
 
 #endif // SANFRAN_H

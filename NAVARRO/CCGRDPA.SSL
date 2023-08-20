@@ -46,6 +46,31 @@ procedure Node002;
 procedure Node003;
 procedure Node005;
 procedure Node004;
+procedure Node005;
+
+//added by killap - expansion
+procedure Node006;
+procedure Node007;
+procedure Node008;
+procedure Node009;
+procedure Node010;
+procedure Node011;
+procedure Node012;
+procedure Node013;
+procedure Node014;
+procedure Node015;
+procedure Node016;
+procedure Node017;
+procedure Node018;
+procedure Node019;
+procedure Node020;
+procedure Node021;
+procedure Node990;
+procedure Node991;
+procedure Node992;
+procedure Node993;
+procedure Node994;
+//end added
 
 /* Script Specific Procedure Calls */
 procedure Node998;                                      // This Node is Always Combat
@@ -63,23 +88,85 @@ variable Only_Once:=0;
 variable said_intruder:=0;
 variable i_am_a_warrior:=1;
 
+import variable guard1_obj; //added by killap - expansion
+import variable guard2_obj; //added by killap - expansion
+import variable guard3_obj; //added by killap - expansion
+
 procedure start begin
 end
 
 procedure map_enter_p_proc begin
+   //added by killap - expansion
+   if (self_tile == 21730) then begin
+      guard1_obj := self_obj;
+   end else if (self_tile == 15115) then begin
+      guard2_obj := self_obj;
+   end else if (self_tile == 21906) then begin
+      guard3_obj := self_obj;
+   end
+   //end added
+   
+   if (global_var(GVAR_CAME_ON_VERTIBIRD) == 1) then begin
+      move_to(guard1_obj,18714,2);
+      move_to(guard2_obj,19920,2);
+      move_to(guard3_obj,19715,2);
+   end
+   
    Only_Once:=0;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NAVARRO);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_NAV_GUARD);
 end
 
+//added by killap - expansion
+procedure map_update_p_proc begin
+   if (self_tile == 21730) then
+      guard1_obj := self_obj;
+   else if (self_tile == 15115) then
+      guard2_obj := self_obj;
+   else if (self_tile == 21906) then
+      guard3_obj := self_obj;
+end
+//end added
+
 procedure timed_event_p_proc begin
-   if( fixed_param == 999 ) then
+   if( fixed_param == 999 ) then begin
       floater( random( 200, 203 ) );
+   //added by killap - expansion
+   end else if( fixed_param == 2 ) then begin
+      start_gdialog(NAME,self_obj,4,-1,-1);
+      gSay_Start;
+         call Node006;
+      gSay_End;
+      end_dialogue;
+   end else if( fixed_param == 3 ) then begin
+      game_ui_enable;
+      set_global_var(GVAR_CAME_ON_VERTIBIRD,2);
+      start_gdialog(NAME,self_obj,4,-1,-1);
+      gSay_Start;
+         if ( not_wearing_power_armor or not_alone) then begin
+            call Node015;
+         end else begin
+            call Node017;
+         end
+      gSay_End;
+      end_dialogue;
+   end
+   //end added
 end
 
 procedure critter_p_proc begin
    if (obj_can_see_obj(self_obj,dude_obj)) then begin
-      if (local_var(LVAR_Hostile) == 2) then begin
+      // added by killap - expansion
+      if (global_var(GVAR_CAME_ON_VERTIBIRD) == 1) then begin
+         Face_Critter(dude_obj,guard1_obj);
+         Face_Critter(dude_obj,guard2_obj);
+         Face_Critter(dude_obj,guard3_obj);
+         if (self_obj == guard1_obj) then begin
+            add_timer_event(guard1_obj,3,3);
+         end
+      end
+   
+      else if (local_var(LVAR_Hostile) == 2) then begin
          set_local_var(LVAR_Hostile,1);
          attack(dude_obj);
       end
@@ -133,6 +220,7 @@ procedure talk_p_proc begin
    else begin
       call Node001;
    end
+   
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -208,3 +296,130 @@ end
    exit from the dialog system without any reprisals from the NPC. */
 procedure Node999 begin
 end
+
+//added by killap - expansion
+procedure Node006 begin
+   Reply(300);
+   NLowOption(301, Node007);
+   NOption(302,Node008,004);
+   NOption(303,Node013,004);
+   BOption(304,Node014,004);
+end
+
+procedure Node007 begin
+   Reply(310);
+   BOption(311,Node998,001); 
+   NOption(312,Node991,001);
+end
+
+procedure Node008 begin
+   Reply(320);
+   NOption(321,Node013,004);
+   if (skill_success(dude_obj,SKILL_CONVERSANT,-35)) then
+      NOption(322,Node009,004);
+end
+
+procedure Node009 begin
+   Reply(323);
+   NOption(324,Node992,004);
+   //if (Fallout2_tribe_kidnapped) then
+   if ((f2_flag_any >= f2_state_tribe_kidnapped) and (f2_flag_any < f2_state_enclave_destroyed) and (skill_success(dude_obj,SKILL_CONVERSANT,-90)) ) then //edit by killap
+      NOption(325,Node012,004);
+end
+
+procedure Node010 begin
+   Reply(326);
+   NOption(329,Node998,004);
+end
+
+procedure Node011 begin
+   Reply(327);
+   NOption(329,Node990,004);
+end
+
+procedure Node012 begin
+   Reply(328);
+   NOption(329,Node990,004);
+end
+
+procedure Node013 begin
+   Reply(316);
+   NOption(329,Node991,004);
+end
+
+procedure Node014 begin
+   Reply(315);
+   NOption(329,Node998,004);
+end
+
+procedure Node015 begin
+   Reply(400 + not_alone);
+   NOption(402,Node998,004);
+   NOption(403,Node016,004);
+end
+
+procedure Node016 begin
+   if (not_alone) then
+      Reply(412);
+   else
+      Reply(410 + dude_is_female);
+   NOption((g_mstr(350)),Node993,004);
+end
+
+procedure Node017 begin
+   Reply(420);
+   BOption(421,Node998,004);
+   BOption(422,Node998,004);
+   NOption(mstr(423) + dude_name + mstr(424), Node018, 004);
+   NOption(425,Node994,004);
+   BLowOption(mstr(426) + dude_name + mstr(427),Node021);
+   BLowOption(428,Node998);
+end
+
+procedure Node018 begin
+   Reply(430);
+   NOption((g_mstr(350)),Node999,004);
+end
+
+procedure Node019 begin
+   Reply(450+dude_is_female);
+   NOption((g_mstr(350)),Node999,004);
+end
+
+procedure Node020 begin
+   Reply(440);
+   NOption((g_mstr(350)),Node999,004);
+end
+
+procedure Node021 begin
+   Reply(460+dude_is_female);
+   BLowOption((g_mstr(350)),Node998);
+end
+
+procedure Node990 begin
+   set_map_var(MVAR_Verti_Status,2);
+end
+
+procedure Node991 begin
+   set_map_var(MVAR_Verti_Status,1);
+end
+
+procedure Node992 begin
+   if ( (dude_luck > 7) and (is_success(do_check(dude_obj,STAT_lu,-80))) ) then
+      call Node011;
+   else
+      call Node010;
+end
+
+procedure Node993 begin
+   move_to(dude_obj,15477,1);
+end
+
+procedure Node994 begin
+   if (is_success(roll_vs_skill(dude_obj,SKILL_CONVERSANT,-35))) then
+      call Node019;
+   else
+      call Node020;
+end
+
+//end killap

@@ -25,6 +25,7 @@
 #define CUR_SCRIPT              SCRIPT_IIPIT
 
 #include "..\headers\command.h"
+#include "..\headers\NewReno.h"
 
 #define PID_BROKEN_FLOOR                    (33556185)
 
@@ -58,8 +59,8 @@ procedure spatial_p_proc begin
    variable Detection_Roll;
    variable Trap;
 
-   //if (obj_type(source_obj) == 1) then begin
-   if ( source_obj == dude_obj ) then begin
+    if (obj_type(source_obj) == 1) then begin
+   //if ( source_obj == dude_obj ) then begin
 
        Range:=get_critter_stat(source_obj,STAT_pe) + PERCEPTION_BONUS;
        Range_Mod:=Range - (tile_distance_objs(self_obj,source_obj)*DIST_BONUS);

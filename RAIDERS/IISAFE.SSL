@@ -106,7 +106,7 @@ procedure timed_event_p_proc begin
 end
 
 procedure map_exit_p_proc begin
-   if (raiders_dead == false) then begin
+   if ( (raiders_dead == false) and (raiders_scout_left == false) ) then begin //edit by killap - expansion
       if (obj_is_open(self_obj)) then begin
          obj_close(self_obj);
       end

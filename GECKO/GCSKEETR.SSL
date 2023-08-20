@@ -22,8 +22,8 @@
 #include "..\headers\gecko.h"
 
 #define NAME                    SCRIPT_GCSKEETR
-#define TOWN_REP_VAR            50
-//#define TOWN_REP_VAR            (GVAR_TOWN_REP_GECKO)
+//#define TOWN_REP_VAR            50
+#define TOWN_REP_VAR            (GVAR_TOWN_REP_GECKO) //--was commented out for some reason and set to VC - killap
 #define floater(x)		float_msg(self_obj, message_str(NAME,x),FLOAT_MSG_RED)
 
 #define KNOWN                   1
@@ -148,12 +148,20 @@ procedure Node150;
 #define give_skeeter_money(x)         item_caps_adjust(dude_obj, -x);  \
                                        item_caps_adjust(self_obj, x)
 
-#define MCOST                          (2000 * (250/(160 + has_skill(dude_obj, SKILL_BARTER))))
-#define DECOST                         (3000 * (250/(160 + has_skill(dude_obj, SKILL_BARTER))))
-#define HRCOST                         (4000 * (250/(160 + has_skill(dude_obj, SKILL_BARTER))))
-#define ARCOST                         (6000 * (250/(160 + has_skill(dude_obj, SKILL_BARTER))))
-#define FNCOST                         (12000 * (250/(160 + has_skill(dude_obj, SKILL_BARTER))))
-#define CPCOST                         (3000 * (250/(160 + has_skill(dude_obj, SKILL_BARTER))))
+// Begin Seraph's Fixes: changed each '250' to '25000' and added '/100' to the end
+// Magnum: replaced '2000' with '400'
+#define MCOST                          ((400 * (25000/(160 + (has_skill(dude_obj, SKILL_BARTER)))))/100)
+// Desert Eagle: replaced '3000' with '1500'
+#define DECOST                         ((1500 * (25000/(160 + (has_skill(dude_obj, SKILL_BARTER)))))/100)
+// Hunting Rifle: replaced '4000' with '1750'
+#define HRCOST                         ((1750 * (25000/(160 + (has_skill(dude_obj, SKILL_BARTER)))))/100)
+// Assault Rifle: replaced '6000' with '2000'
+#define ARCOST                         ((2000 * (25000/(160 + (has_skill(dude_obj, SKILL_BARTER)))))/100)
+// FN FAL: replaced '12000' with '4000'
+#define FNCOST                         ((4000 * (25000/(160 + (has_skill(dude_obj, SKILL_BARTER)))))/100)
+// Cattle Prod: replaced '3000' with '1500'
+#define CPCOST                         ((1500 * (25000/(160 + (has_skill(dude_obj, SKILL_BARTER)))))/100)
+// End Seraph's Fixes
 
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
@@ -183,7 +191,7 @@ procedure critter_p_proc begin
    actions need to be taken by the critter based on previous combat, the critter will remember
    this as well. */
 
-   if ( (global_var(GVAR_GECKO_MELTDOWN) == 1) and (obj_can_see_obj(self_obj,dude_obj))) then begin
+   if ( ( (global_var(GVAR_GECKO_MELTDOWN) == 1) or (global_var(GVAR_ENEMY_GECKO)) ) and (obj_can_see_obj(self_obj,dude_obj))) then begin //edit by killap - (global_var(GVAR_ENEMY_GECKO))
       set_local_var(LVAR_Hostile,1);
       attack(dude_obj);
    end
@@ -298,7 +306,9 @@ procedure destroy_p_proc begin
    if (local_var(LVAR_Repair_Kit) < GIVEN) then begin
       item:=create_object(PID_CAR_FUEL_CELL_CONTROLLER,0,0);
       add_obj_to_inven(self_obj,item);
-   end 
+   end
+
+   set_global_var(GVAR_GECKO_SKEETER_STATUS,1); // added by killap - he is dead if this is set
 
 /* Increment the aligned critter counter*/
    inc_good_critter

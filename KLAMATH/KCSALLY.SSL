@@ -196,7 +196,7 @@ procedure talk_p_proc begin
    end
 
    //add this mapvar -nbk
-   else if (global_var(GVAR_RUSTLE_FAIL) == 1) then begin
+   else if ( (global_var(GVAR_RUSTLE_FAIL) == 1) and (global_var(GVAR_SCARE_DUNTONS) == 0) ) then begin //killap: added (global_var(GVAR_SCARE_DUNTONS) == 0) (expansion)
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
           call Node004;
@@ -353,7 +353,7 @@ end
 procedure Node918 begin
 //money check
 //[if <$125 in inventory then goto 23, else subtract $125 from PC and goto 20]
-   if (item_caps_total(dude_obj) >= 124) then begin
+   if (item_caps_total(dude_obj) >= 125) then begin //killap's fix: was 124
       item_caps_adjust(dude_obj, -125);
       call Node020;
    end
@@ -442,7 +442,9 @@ procedure Node006 begin
    Reply(220);
    NOption(221,Node008,004);
    NOption(222,Node009,004);
-   NOption(223,Node024,004);
+   //added by killap
+   if (global_var(GVAR_DUNTON_DEAD) == 0) then
+     NOption(223,Node024,004);
    NOption(224,Node007,004);
 end
 
@@ -491,7 +493,9 @@ procedure Node013 begin
    NOption(281,Node915,004);
    NOption(282,Node010,004);
    NOption(283,Node007,004);
-   NOption(284,Node021,004);
+   //added by killap
+   if (global_var(GVAR_DUNTON_DEAD) == 0) then
+      NOption(284,Node021,004);
 end
 
 procedure Node014 begin
@@ -525,7 +529,9 @@ end
 
 procedure Node018 begin
    debug_msg("Setting map var");
-   up_sex_status;
+   // Commenting out because a handjob does not consitute sex, as per it's definition
+   // and thus the player shouldn't lose the 'Virgin' title in this case. - killap (expansion)
+   //up_sex_status;
    set_map_var(MVAR_Just_Had_Sex,1);
    NMessage(330);
    gfade_out(600);

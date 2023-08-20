@@ -335,7 +335,7 @@ end
 procedure Node009 begin
    Reply(146);
 
-   NOption(147,Node013,004);
+   NOption(147,Node012,004); //edit by killap - was Node013
    BOption(148,Node008,004);
 end
 

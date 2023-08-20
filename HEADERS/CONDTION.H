@@ -50,10 +50,10 @@ variable ValueOfRollCheck:=ROLL_FAILURE;
 ************************************************************************/
 
 #ifndef day
-#define day                     ((game_time_hour > 600) and (game_time_hour < 1800))
+#define day                     ((game_time_hour >= 700) and (game_time_hour < 1800))
 #endif
 #ifndef night
-#define night                   ((game_time_hour <= 600) or (game_time_hour >= 1800))
+#define night                   ((game_time_hour < 600) or (game_time_hour >= 1900))
 #endif
 #define dude_low_iq             (get_critter_stat(dude_obj,STAT_iq) < 4)
 
@@ -95,6 +95,7 @@ variable ValueOfRollCheck:=ROLL_FAILURE;
                                     (obj_pid(critter_inven_obj(dude_obj,INVEN_TYPE_WORN)) != PID_COMBAT_ARMOR) and              \
                                     (obj_pid(critter_inven_obj(dude_obj,INVEN_TYPE_WORN)) != PID_LEATHER_JACKET) and            \
                                     (obj_pid(critter_inven_obj(dude_obj,INVEN_TYPE_WORN)) != PID_PURPLE_ROBE) and               \
+				            (obj_pid(critter_inven_obj(dude_obj,INVEN_TYPE_WORN)) != PID_BRIDGEKEEPERS_ROBE) and /*added by killap*/   \ 
                                     (obj_pid(critter_inven_obj(dude_obj,INVEN_TYPE_WORN)) != PID_HARDENED_POWER_ARMOR) and      \
                                     (obj_pid(critter_inven_obj(dude_obj,INVEN_TYPE_WORN)) != PID_BROTHERHOOD_COMBAT_ARMOR) and  \
                                     (obj_pid(critter_inven_obj(dude_obj,INVEN_TYPE_WORN)) != PID_TESLA_ARMOR) and				\

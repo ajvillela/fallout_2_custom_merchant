@@ -51,7 +51,7 @@ procedure start begin
 end
 
 procedure map_enter_p_proc begin
-   if (global_var(GVAR_ARROYO_DOG) == QUEST_NONE) then begin
+   if ( (global_var(GVAR_ARROYO_DOG) == QUEST_NONE) or (reached_tl_4) or (global_var(GVAR_ARROYO_DOG) == DOG_RUN_OFF) ) then begin //edit by killap - added: or (reached_tl_4) or (global_var(GVAR_ARROYO_DOG) == DOG_RUN_OFF)
        set_obj_visibility(self_obj,1);          // invis
    end
    else begin

@@ -53,7 +53,7 @@ procedure map_enter_p_proc;
 
 procedure Node001;
 procedure Node002;
-procedure Node02a;
+procedure Node02a; // Commented out by Seraph
 procedure Node003;
 procedure Node004;
 procedure Node005;
@@ -96,7 +96,7 @@ end
 procedure critter_p_proc begin
 
    if (obj_can_see_obj(self_obj,dude_obj)) then begin
-      if (global_var(GVAR_GECKO_MELTDOWN) == 1) then begin
+      if ( (global_var(GVAR_GECKO_MELTDOWN) == 1) or (global_var(GVAR_ENEMY_GECKO)) ) then begin //edit by killap - added (global_var(GVAR_ENEMY_GECKO))
          set_local_var(LVAR_Hostile,1);
          attack(dude_obj);
       end
@@ -190,7 +190,7 @@ procedure use_skill_on_p_proc begin
 end
 
 procedure Node001 begin
-   if (TOWN_REPUTATION < 5) then
+   if (TOWN_REPUTATION < 5 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then // edit by killap - added not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality)))
       Reply(110);
    else
       Reply(111);
@@ -209,6 +209,7 @@ procedure Node002 begin
    NOption(124,Node999,004);
 end
 
+
 procedure Node02a begin
    Reply(300);
    NOption(301,Node003,004);
@@ -216,6 +217,7 @@ procedure Node02a begin
       NOption(123,Node007,004);
    NOption(194,Node999,004);
 end
+
 
 procedure Node003 begin
    Reply(130);
@@ -234,7 +236,7 @@ end
 
 procedure Node005 begin
    Reply(150);
-   NOption(151,Node009,004);
+   NOption(151,Node008,004); //edit by killap - was 009
    NOption(152,Node002,004);
    NOption(153,Node004,004);
    NOption(154,Node999,004);
@@ -256,14 +258,18 @@ end
 
 procedure Node008 begin
    Reply(180);
-   NOption(181,Node02a,004);
+   NOption(181,Node02a,004); // Seraph's Fix: replaced 'Node02a' with 'Node003' - REMOVED THIS - killap
+   /*// Begin Seraph's Code
+   if (local_var(LVAR_07_before) == 0) then
+      NOption(123,Node007,004);
+   // End Seraph's Code* -COMMENTED OUT BY KILAP*/ 
    NOption(182,Node004,004);
    NOption(183,Node999,004);
 end
 
 procedure Node009 begin
    Reply(190);
-   NOption(191,Node009,004);
+   NOption(191,Node008,004); // Seraph's Fix: replaced "Node009" with "Node008"
    NOption(192,Node002,004);
    NOption(193,Node004,004);
    NOption(194,Node999,004);
@@ -271,8 +277,8 @@ end
 
 procedure Node010 begin
    Reply(200);
-   NOption(201,Node009,004);
-   NOption(202,Node002,004);
+   NOption(201,Node02a,004); //was 009 - killap
+   NOption(202,Node999,004); //was 002 - killap
 end
 
 procedure Node998 begin

@@ -112,6 +112,7 @@ variable num := 0;
 #define TIMER_DEATH 1
 #define TIMER_EXPLOSIVE_DEATH 2
 #define TIMER_DESTROY_DUDE_OBJ 3
+#define DEATH_TILE 20495 // moved here by killap
 
 procedure timed_event_p_proc begin
    variable obj;
@@ -157,6 +158,13 @@ procedure map_enter_p_proc begin
    Only_Once:=0;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NCR_WESTIN);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_CITIZEN);
+   
+   //added by killap - RP
+   if (get_westin_flag(WESTIN_HEART_PILLS_DEATH)) then begin
+      move_to(self_obj,DEATH_TILE,self_elevation);
+      critter_heal(self_obj, -self_max_hits);
+   end
+   //end added
 end
 
 
@@ -213,13 +221,14 @@ procedure talk_p_proc begin
    CheckKarma;
 
    GetReaction;
-
-   start_gdialog(NAME,self_obj,4,-1,-1);
-   gSay_Start;
-      call Node001;
-   gSay_End;
-   end_dialogue;
-   set_local_var(LVAR_Herebefore, 1);
+   if (local_var(LVAR_Pid) == 0) then begin // prevent talking to him during the ~2 second span where he is about to die from a heart attack - killap
+      start_gdialog(NAME,self_obj,4,-1,-1);
+      gSay_Start;
+         call Node001;
+      gSay_End;
+      end_dialogue;
+      set_local_var(LVAR_Herebefore, 1);
+   end
 end
 
 /* This procedure gets called only on the death of this NPC. Special things like
@@ -229,11 +238,24 @@ procedure destroy_p_proc begin
 
 /* Increment the aligned critter counter*/
    inc_good_critter
+   
+//added by killap - kill Bishop quest now gets crossed off if you double cross Westin and kill him like Bishop wanted
+   if (global_var(GVAR_NCR_ELMBISHOP_QST) == 1) then
+      set_global_var(GVAR_NCR_ELMBISHOP_QST, 3);
+//addded by killap
 
 /* Set global_variable for Enemy status*/
    if (local_var(LVAR_Hostile) > 0) then
       set_westin_flag(WESTIN_FAIL);
    set_westin_flag(WESTIN_DEAD);
+  
+  
+   // added by killap - fail the brahmin quest if it's active and Westin is killed
+   if (global_var(GVAR_NCR_BRAHMIN_QST) == 1) then begin
+     set_global_var(GVAR_NCR_BRAHMIN_QST, 2);
+     set_felix_seed(FELIX_CRITTERS_DONE);
+   end
+   // end added
 end
 
 /* Look_at_p_proc gets called any time that the player passes the cursor over any object.
@@ -277,10 +299,16 @@ end
 //~~~~~~~~~~~~~~~~ DESIGN TOOL STARTS HERE
 
 procedure Node1314a begin
-   if (get_felix_seed(FELIX_CRITTERS_DONE)) then
+   //edit by killap
+   if ( (not(get_felix_seed(FELIX_CRITTERS_DONE)) and (not (get_felix_seed(FELIX_CRITTERS_DEAD)))) and (GETDSTATUS != GDCOMPLETE) ) then
+      call Node014;
+   else
+      call Node013;
+
+   /*if (get_felix_seed(FELIX_CRITTERS_DONE)) then
       call Node013;
    else
-      call Node014;
+      call Node014;*/
 end
 
 procedure Node1516a begin
@@ -328,7 +356,8 @@ end
 
 procedure Node002 begin
    Reply(116);
-   if (get_westin_flag(WESTIN_ACCEPT_SNUFF)) then
+   //if (get_westin_flag(WESTIN_ACCEPT_SNUFF)) then
+   if (get_westin_flag(WESTIN_ACCEPT_SNUFF) and not get_westin_flag(WESTIN_CANCEL_SNUFF)) then //edit by killap
       BOption(117, Node020, 4);
    if (get_felix_seed(FELIX_DUMONT_REF)) then
       GOption(118, Node010, 4);
@@ -336,7 +365,7 @@ procedure Node002 begin
 end
 
 procedure Node999a begin
-   set_westin_flag(WESTIN_SNUFF_KNOWN, 1);
+   set_westin_flag(WESTIN_SNUFF_KNOWN); // Seraph's Fix: set_westin_flag only takes 1 arg. Thanks Rob!
    call Node998;
 end
 
@@ -403,10 +432,15 @@ procedure Node008 begin
 end
 
 procedure Node1119a begin
-   if (not get_felix_seed(FELIX_CRITTERS_DEAD)) then
+   //edit by killap
+   if ( (not(get_felix_seed(FELIX_CRITTERS_DONE)) and (not (get_felix_seed(FELIX_CRITTERS_DEAD)))) and (GETDSTATUS != GDCOMPLETE) ) then
       call Node011;
    else
       call Node019;
+   //if ( (not get_felix_seed(FELIX_CRITTERS_DEAD)) ) then //added (GETDSTATUS != GDCOMPLETE) by killap
+   //   call Node011;
+   //else
+   //   call Node019;
 end
 
 procedure Node009 begin
@@ -462,6 +496,8 @@ end
 
 procedure Node014 begin
    Reply(149);
+   
+   NLowOption(106, Node004); //added by killap
    NOption(150, Node012a, 4);
    NOption(151, Node999, 4);
 end
@@ -515,9 +551,10 @@ end
 procedure Node017 begin
    call getDisk;
    inc_general_rep(REP_BONUS_NCR_DELIVER_LYNETTE_HOLO);
+   display_msg(mstr(175)); //added by killap
    give_xp(EXP_DELIVER_LYNETTE_HOLO);
    Reply(156);
-   if (global_var(GVAR_VAULT_CITIZEN)) then
+   if ((global_var(GVAR_VAULT_CITIZEN) > 0) and (global_var(GVAR_VAULT_CITIZEN) < CITIZEN_KICKED_OUT)) then //edit by killap - was if (global_var(GVAR_VAULT_CITIZEN)
       GOption(157, Node018, 4);
    else
       NOption(158, Node019, 4);
@@ -542,8 +579,6 @@ procedure Node020 begin
    NOption(167, Node999a, 4);
 end
 
-#define DEATH_TILE 20495
-
 procedure DoDeathSequence begin
    if (local_var(LVAR_Death_Sequence) == 0) then begin
       set_local_var(LVAR_Death_Sequence, 1);
@@ -554,6 +589,11 @@ procedure DoDeathSequence begin
       float_msg(self_obj, mstr(171), FLOAT_MSG_GREEN);
       add_timer_event(self_obj, game_ticks(3), TIMER_DEATH);
    end
+   //added by killap - kill Bishop quest now gets crossed off if you double cross Westin and kill him like Bishop wanted
+   if (global_var(GVAR_NCR_ELMBISHOP_QST) == 1) then
+      set_global_var(GVAR_NCR_ELMBISHOP_QST, 3);
+   //addded by killap
+
 end
 
 procedure ContinueDeath begin
@@ -565,7 +605,7 @@ procedure ContinueDeath begin
       float_msg(self_obj, mstr(172), FLOAT_MSG_GREEN);
       add_timer_event(self_obj, game_ticks(3), TIMER_DEATH);
    end else if (local_var(LVAR_Death_Sequence) == 2) then begin
-      float_msg(dude_obj, mstr(173), FLOAT_MSG_NORMAL);
+      float_msg(dude_obj, mstr(173+(dude_is_stupid*3)), FLOAT_MSG_NORMAL);
       if (local_var(LVAR_Hostile) > 0) then begin
          set_westin_flag(WESTIN_FAIL);
       end
@@ -592,5 +632,9 @@ procedure DoExplosiveSequence begin
       set_westin_flag(WESTIN_DEAD);
       critter_damage(self_obj, 10000);
    end
+   //added by killap - kill Bishop quest now gets crossed off if you double cross Westin and kill him like Bishop wanted
+   if (global_var(GVAR_NCR_ELMBISHOP_QST) == 1) then
+      set_global_var(GVAR_NCR_ELMBISHOP_QST, 3);
+   //addded by killap
 end
 //xxxxxxxxxxxxxxxxxxxx

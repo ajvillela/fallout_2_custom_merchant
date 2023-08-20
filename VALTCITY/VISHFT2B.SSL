@@ -58,7 +58,7 @@ procedure use_skill_on_p_proc begin
         display_msg(mstr(108));
         set_global_var(GVAR_VAULT_CITY_VENT, VENT_REPAIRED);
         give_xp(EXP_FIXED_VENT);
-        float_msg(dude_obj,mstr(109),FLOAT_MSG_NORMAL);
+        float_msg(dude_obj,mstr(109 + (3*dude_is_stupid)),FLOAT_MSG_NORMAL); //edit by killap - added (3*dude_is_stupid)
         item:=create_object(PID_MICRO_FUSION_CELL,0,0);
         add_obj_to_inven(dude_obj,item);
       end
@@ -111,4 +111,3 @@ procedure description_p_proc begin
    else
        display_msg(mstr(105));
 end
-

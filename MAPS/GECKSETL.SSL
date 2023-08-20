@@ -40,12 +40,52 @@ procedure ghost_town;
 procedure start begin
 end
 
+procedure map_exit_p_proc begin
+end
+
 procedure map_enter_p_proc begin
+   variable Critter;
+   variable item;
+   
    if (map_first_run) then begin
        display_msg(mstr(100));
    end
 
-   Check_Create_Car(CAR_GECKO_HEX, CAR_GECKO_ELEV)
+   //added by killap - RP
+   if (global_var(GVAR_LOAD_MAP_INDEX) == 555) then begin
+      Critter:=create_object_sid(PID_HOLY_MAN,0,0,SCRIPT_ABJASON);
+      critter_attempt_placement(Critter,19880,0);
+      //item:=create_object(54,0,0); //stealth boy
+      //add_obj_to_inven(Critter,item);
+      item:=create_object(PID_DECK_OF_TRAGIC_CARDS,0,0);
+      add_obj_to_inven(Critter,item);
+      move_to(dude_obj, 20280, 0);
+      
+      if (car_current_town == AREA_ABBEY) then begin
+         if (dude_has_car) then begin
+            set_global_var(GVAR_CAR_PLACED_TILE, 0);
+            set_car_current_town(AREA_GECKO);
+            Create_Car(CAR_GECKO_HEX,CAR_GECKO_ELEV)
+            if (tile_contains_pid_obj(CAR_GECKO_HEX, CAR_GECKO_ELEV, PID_DRIVABLE_CAR) != 0) then begin
+               Create_Trunk(CAR_GECKO_HEX,CAR_GECKO_ELEV)
+            end 
+         end
+      end else begin
+         Check_Create_Car(CAR_GECKO_HEX, CAR_GECKO_ELEV)
+      end
+   end  else begin
+      //added by killap - prevent car from disappearing if the car runs out of gas while on the town circle
+      if ((metarule(30, 0) == 21) and (cur_map_index != MAP_CAR_DESERT) /*and (car_out_of_fuel)*/) then begin
+         set_global_var(GVAR_CAR_PLACED_TILE, 0);
+         Create_Car(CAR_GECKO_HEX,CAR_GECKO_ELEV)
+         if (tile_contains_pid_obj(CAR_GECKO_HEX, CAR_GECKO_ELEV, PID_DRIVABLE_CAR) != 0) then begin
+            Create_Trunk(CAR_GECKO_HEX,CAR_GECKO_ELEV)
+         end 
+      end else 
+         Check_Create_Car(CAR_GECKO_HEX, CAR_GECKO_ELEV)
+      //end added
+   end
+   //Check_Create_Car(CAR_GECKO_HEX, CAR_GECKO_ELEV)
 
    if (global_var(GVAR_GECKO_MELTDOWN) == 2) then begin
       if ( (GAME_TIME_IN_HOURS - global_var(GVAR_GECKO_TIMER_MELTDOWN))  > 24) then begin
@@ -59,8 +99,11 @@ procedure map_enter_p_proc begin
       set_global_var(GVAR_GECKO_TIMER_MELTDOWN, GAME_TIME_IN_HOURS);
       //one day later all ghouls should be gone
       Create_Slagged_Door(17853,CAR_GECKO_ELEV)
+      
+      //destory new flickering lights - killap (expansion)
+      destroy_object(tile_contains_pid_obj(14843,dude_elevation,33556608));
+      
    end
-
 
    Lighting;
 
@@ -78,6 +121,9 @@ procedure ghost_town begin
       kill_critter_type(PID_BRAHMIN,KILL_DONT_LEAVE_BODY);
       kill_critter_type(PID_WEAK_BRAHMIN,KILL_DONT_LEAVE_BODY);
       kill_critter_type(PID_WILD_BRAHMIN,KILL_DONT_LEAVE_BODY);
+      kill_critter_type(PID_LUMPY,KILL_DONT_LEAVE_BODY); //added by killap
+      kill_critter_type(PID_DOG,KILL_DONT_LEAVE_BODY); //added by killap
+      
       if Lenny_In_Party then begin
          //do nothing
       end

@@ -103,8 +103,7 @@ procedure critter_p_proc begin
          if ((hostile) or (attacking_slags) or (enemy_slags)) then begin
             self_attack_dude;
          end else if (protector_said_message == false) then begin
-            if ((self_tile != local_var(LVAR_Home_Tile)) and (spoke_to_vegeir == false) and (slag_in_farm)) then begin
-               set_protector_said_message;
+            if ((spoke_to_vegeir == false) and (slag_in_farm)) then begin
                dialogue_system_enter;
             end
          end
@@ -131,9 +130,9 @@ end
 procedure talk_p_proc begin
    if ((attacking_slags) or (enemy_slags)) then begin
       self_attack_dude;
-   end else if (get_ending_state == ending_state_happy) then begin
+   end else if ( (get_ending_state == ending_state_happy) and (global_var(GVAR_MODOC_JONNY_HOME) == home_flag_jonny_at_home) ) then begin
       call Node004;
-   end else if (slag_in_cave) then begin
+   end else if ( (slag_in_cave) or (global_var(GVAR_MODOC_MESSAGE) == message_state_given) ) then begin
       if (ghost_farm_seed_completed) then begin
          call node004;
       end else begin
@@ -141,6 +140,7 @@ procedure talk_p_proc begin
       end
    end else begin
       script_overrides;
+      set_protector_said_message;
       start_gdialog(NAME,self_obj,4,-1,-1);
       gSay_Start;
          if (message_flag_given) then begin

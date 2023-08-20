@@ -39,3 +39,12 @@ procedure destroy_p_proc begin
 
 /* Set global_variable for Enemy status*/
 end
+
+//added by killap - expansion pack
+procedure use_obj_on_p_proc begin
+   if ((obj_pid(obj_being_used_with) == PID_BUG_SPRAY)) then begin
+      kill_critter(self_obj, ANIM_melted_to_nothing_sf);
+      //critter_dmg(self_obj,get_critter_stat(self_obj,STAT_current_hp)+10,DMG_plasma);
+   end
+end
+//end added - expansion pack

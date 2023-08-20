@@ -64,6 +64,7 @@ end
 
 procedure critter_p_proc begin
 
+ if (obj_can_see_obj(self_obj,dude_obj)) then begin //added by killap
    if (elevation(dude_obj) == elevation(self_obj))then begin
       if (local_var(LVAR_Hostile) == 2) then begin
          set_local_var(LVAR_Hostile,1);
@@ -74,6 +75,7 @@ procedure critter_p_proc begin
          attack(dude_obj);
       end
    end //can see dude
+ end
 
 end
 

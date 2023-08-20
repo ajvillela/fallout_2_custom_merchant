@@ -172,13 +172,16 @@ procedure Node063;
 #define check_sex_counter              (local_var(LVAR_Sex_Counter) <= game_time)
 #define set_sex_counter                if (check_sex_counter) then set_local_var(LVAR_Sex_Counter, game_time + (30 * ONE_GAME_DAY))
 
-#define bad_porn_name                  (false) // change if names are not good
-#define great_porn_name                (false) // change if player chooses a great name
+//#define bad_porn_name                  (false) // change if names are not good
+//#define great_porn_name                (false) // change if player chooses a great name
+
+#define bad_porn_name                  dude_porn_star_number == 13
+#define great_porn_name                dude_porn_star_number == (50*dude_is_female) + 3
 
 #define porn_fade_out                  if (faded == false) then gfade_out(5); set_faded
 #define porn_fade_in                   if (faded) then gfade_in(5); off_faded
 
-#define do_fluf(who_fluf, the_caps, the_msg)      porn_fade_out;                                                                   \
+#define do_fluf(who_fluf, the_caps, the_msg)      porn_fade_out;                                                                  \
                                                       fluf_time := obj_sex_rating(who_fluf);                                      \
                                                       game_time_advance((11 - (fluf_time - (fluf_time%10))) * ONE_GAME_MINUTE);   \
                                                       poison(who_fluf, random(2,4));                                              \
@@ -188,7 +191,7 @@ procedure Node063;
                                                          end                                                                      \
                                                          item_caps_adjust(dude_obj, the_caps);                                    \
                                                       end                                                                         \
-                                                   porn_fade_in;                                                                   \
+                                                   porn_fade_in;                                                                  \
                                                    if (who_fluf == dude_obj) then begin                                           \
                                                       set_fluf;                                                                   \
                                                       if (the_msg != 0) then begin                                                \
@@ -196,11 +199,12 @@ procedure Node063;
                                                       end                                                                         \
                                                    end else begin                                                                 \
                                                       if (the_msg != 0) then begin                                                \
-                                                         obj_floater_type(who_fluf, the_msg, FLOAT_COLOR_SICK);                   \
+                                                         float_msg(who_fluf, mstr(the_msg), FLOAT_COLOR_SICK);                    \
                                                       end                                                                         \
                                                    end
 
-#define obj_floater_type(z,x,type)  float_msg(z, x, FLOAT_COLOR_NORMAL + ((type - FLOAT_COLOR_NORMAL) * has_trait(TRAIT_PERK, dude_obj, PERK_empathy)))
+// No floater is ever displayed if we call this macro in the maco above. Instead, we just directly call float_msg above - killap
+//#define obj_floater_type(z,x,type)  float_msg(z, message_str(NAME, x), FLOAT_COLOR_NORMAL + ((type - FLOAT_COLOR_NORMAL) * has_trait(TRAIT_PERK, dude_obj, PERK_empathy)))
 
 // timer event params
 #define finish_porn_param              (500)
@@ -332,7 +336,7 @@ procedure talk_p_proc begin
       start_dialog_at_node(Node054);
    end else if (dude_is_prizefighter) then begin
       start_dialog_at_node(Node051);
-   end else if (has_rep_slaver) then begin
+   end else if ((has_rep_slaver) and (not (get_extortion_bros(extortion_bros_assigned)))) then begin //edit by killap - added 'and (not (get_extortion_bros(extortion_bros_assigned)))'
       call Node008;
    end else if (robodog_is_dude_companion) then begin
       call Node009;
@@ -395,6 +399,7 @@ end
 
 procedure Node988 begin
    do_fluf(dude_obj, 3, 1000)
+   display_mstr(1001); // added by killap
 end
 procedure Node987 begin
    game_ui_disable;
@@ -402,7 +407,7 @@ procedure Node987 begin
    set_making_porn;
    nr_add_timer_event(self_obj, 3, finish_porn_param);
 end
-procedure Node986 begin
+/*procedure Node986 begin
    display_mstr(1250);
    give_xp(EXP_NEW_RENO_PORN_STAR);
    inc_reno_rep(REP_NEW_RENO_PORN_STAR);
@@ -413,13 +418,29 @@ procedure Node986 begin
    end else begin
       call Node030;
    end
-end
+end*/
+//commented out above and changed to this - killap
+procedure Node986 begin
+   if (bad_porn_name and dude_is_male) then begin
+      call Node031;
+   end else if (great_porn_name) then begin
+      call Node032;
+   end else begin
+      call Node030;
+   end
+end 
+//end edit
 procedure Node985 begin
    set_deal(deal_deal_500);
    call Node028;
 end
 procedure Node984 begin
-   call Node987;
+   //added by killap - expansion
+   display_mstr(1250);
+   give_xp(EXP_NEW_RENO_PORN_STAR);
+   inc_reno_rep(REP_NEW_RENO_PORN_STAR);
+   //end added
+   call Node987; 
 end
 procedure Node983 begin
    do_fluf(dude_obj, 5, 1100)
@@ -642,8 +663,8 @@ procedure Node031 begin
    prev_node := 31;
 end
 procedure Node032 begin
-   set_bad_name;
-   Reply(random(555, 556 + dude_is_female));
+   //set_bad_name; -comment out by killap
+   Reply(random(555 + (2*dude_is_female), 556 + (2*dude_is_female))); //edit by killap
    NOption(536, Node984, -003);
    NOption(537, Node984, 004);
    prev_node := 32;

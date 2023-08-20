@@ -3,9 +3,9 @@
 */
 
 /*
-        Name:
-        Location:
-        Description:
+        Name: Jordan
+        Location: Arroyo 
+        Description: Trains you in melee fighting 
 
         Log:
            Please note any changes that have been made to the file in Updated. Then comment
@@ -107,7 +107,7 @@ procedure critter_p_proc begin
        attack(dude_obj);
    end
 
-   if (REP_ENEMY_ARROYO) then begin
+   if ( (REP_ENEMY_ARROYO) and (obj_can_see_obj(self_obj,dude_obj)) ) then begin //added and (obj_can_see_obj(self_obj,dude_obj)) by killap
        attack(dude_obj);
    end
 

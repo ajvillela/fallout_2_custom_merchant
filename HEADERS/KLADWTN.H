@@ -34,5 +34,6 @@
 #define MVAR_Just_Had_Sex                       (16)
 #define MVAR_Stealing                           (17)
 #define MVAR_Dude_Bad                           (18)
+#define MVAR_Different_Brands                   (19)
 
 #endif // KLADWTN_H

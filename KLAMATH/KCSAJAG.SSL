@@ -31,6 +31,7 @@
 #include "..\headers\define.h"
 #include "..\headers\klamath.h"
 #include "..\headers\kladwtn.h"
+#include "..\headers\den.h" //added by killap
 
 #define NAME                    SCRIPT_KCSAJAG
 #define TOWN_REP_VAR            (GVAR_TOWN_REP_KLAMATH)
@@ -203,7 +204,7 @@ procedure talk_p_proc begin
 
    // CHANGE -nbk
    if ((REP_ENEMY_KLAMATH) or (local_var(LVAR_Personal_Enemy) == 1)) then begin
-       call Node019;
+       //call Node019; --comment out by killap
        call Node998;
    end
 
@@ -472,7 +473,7 @@ procedure Node002 begin
 end
 
 procedure Node003 begin
-   if (TOWN_REPUTATION < 5) then
+   if (TOWN_REPUTATION < 5 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then // added by killap - not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       Reply(130);
    else
       Reply(131);
@@ -525,14 +526,14 @@ end
 */
 
 procedure Node006 begin
-   if (TOWN_REPUTATION < 5) then
+   if (TOWN_REPUTATION < 5 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then // added by killap - not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       NMessage(160);
    else
       NMessage(161);
 end
 
 procedure Node007 begin
-   if (TOWN_REPUTATION < 5) then
+   if (TOWN_REPUTATION < 5 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then // added by killap - not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       Reply(170);
    else
       Reply(171);
@@ -543,7 +544,7 @@ procedure Node007 begin
 end
 
 procedure Node008 begin
-   if (TOWN_REPUTATION < 5) then
+   if (TOWN_REPUTATION < 5 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then // added by killap - not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       Reply(180);
    else
       Reply(181);
@@ -555,13 +556,14 @@ procedure Node008 begin
 end
 
 procedure Node009 begin
-   if (TOWN_REPUTATION < 5) then
+   if (TOWN_REPUTATION < 5 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then // added by killap - not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       Reply(190);
    else
       Reply(191);
 
    NOption(192,Node020,004);
-   NOption(193,Node021,004);
+   if not(vic_free) then //added by killap
+      NOption(193,Node021,004);
    NOption(194,Node018,004);
    NOption(195,Node019,004);
    NOption(196,Node015,004);
@@ -586,7 +588,7 @@ procedure Node011 begin
 end
 
 procedure Node012 begin
-   if (TOWN_REPUTATION < 5) then begin
+   if (TOWN_REPUTATION < 5 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then begin // added by killap - not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       Reply(230);
       NOption(232,Node013,004);
       NOption(233,Node011,004);
@@ -601,14 +603,14 @@ procedure Node012 begin
 end
 
 procedure Node013 begin
-set_global_var(GVAR_STILL_STATUS, STILL_BETRAY);
-//set_map_var(MVAR_Still_Betray,1);
-give_exp_points(EXP_KC_BETRAY_STILL);
-KC_REP_ADJUST(-8)
-inc_general_rep(REP_BONUS_KC_BETRAY_STILL);
-call addbeer;
-//add_mult_objs_to_inven(dude_obj,PID_BOTTLE_CAPS,50);
-item_caps_adjust(dude_obj,50);
+      set_global_var(GVAR_STILL_STATUS, STILL_BETRAY);
+      //set_map_var(MVAR_Still_Betray,1);
+      give_xp(EXP_KC_BETRAY_STILL); //killap's fix: changed to give_xp
+      KC_REP_ADJUST(-8)
+      inc_general_rep(REP_BONUS_KC_BETRAY_STILL);
+      call addbeer;
+      //add_mult_objs_to_inven(dude_obj,PID_BOTTLE_CAPS,50);
+      item_caps_adjust(dude_obj,50);
       Reply(240);
       NOption(241,Node004,004);
       NOption(242,Node005,004);
@@ -629,14 +631,14 @@ procedure Node015 begin
 end
 
 procedure Node016 begin
-   if (TOWN_REPUTATION < 5) then
+   if (TOWN_REPUTATION < 5 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then // added by killap - not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       call Node960;
    else
       call Node970;
 end
 
 procedure Node017 begin
-   if (TOWN_REPUTATION < 5) then begin
+   if (TOWN_REPUTATION < 5 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then begin // added by killap - not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
       Reply(280);
       NOption(282,Node003,004);
       NOption(284,Node003,004);
@@ -649,11 +651,59 @@ procedure Node017 begin
 end
 
 procedure Node018 begin
-   Reply(290);
-   NOption(291,Node024,004);
-   NOption(292,Node025,004);
-   NOption(293,Node026,004);
-   NOption(294,Node027,004);
+   //added by killap - expansion
+   variable msg;
+   variable comma_needed := false;
+   variable count := 0;
+   
+   msg := mstr(290);
+   
+   if ((global_var(GVAR_KLAMATH_FIND_RUSTLERS) < FIND_RUSTLERS_SUCCESS) and (global_var(GVAR_DUNTON_DEAD) == 0) and (global_var(GVAR_SCARE_DUNTONS) == 0)) then begin
+      msg += mstr(2901);
+      comma_needed := true;
+      count += 1;
+   end
+   
+   if (global_var(GVAR_QUEST_RAT_GOD) < RAT_GOD_SUCCESS) then begin
+      if (comma_needed) then
+         msg += ", ";
+      else 
+        comma_needed := true;
+      msg += mstr(2902);
+      count += 1;
+   end
+   
+   if not(map_is_known(MAP_KLAMATH_CANYON)) then begin
+      if (comma_needed) then
+         msg += ", ";
+      else 
+        comma_needed := true;   
+      msg += mstr(2903);
+      count += 1;
+   end
+   
+   if (global_var(GVAR_SMILEY_STATUS) < SMILEY_RETURNED) then begin
+      if (comma_needed) then
+         msg += ", ";
+      msg += mstr(2904);
+      count += 1;
+   end
+   
+   msg += mstr(2905);
+
+   if (count == 0) then
+      msg := mstr(2900);
+   //end added
+
+   Reply(msg);
+   if ((global_var(GVAR_KLAMATH_FIND_RUSTLERS) < FIND_RUSTLERS_SUCCESS) and (global_var(GVAR_DUNTON_DEAD) == 0) and (global_var(GVAR_SCARE_DUNTONS) == 0)) then
+      NOption(291,Node024,004); //brahmin mutilating
+   if (global_var(GVAR_QUEST_RAT_GOD) < RAT_GOD_SUCCESS) then
+      NOption(292,Node025,004); //rat problem
+   if not(map_is_known(MAP_KLAMATH_CANYON)) then
+      NOption(293,Node026,004); //walking spirits
+   if (global_var(GVAR_SMILEY_STATUS) < SMILEY_RETURNED) then
+      NOption(294,Node027,004); //missing trapper
    NOption(295,Node009,004);
    NOption(296,Node003,004);
 end

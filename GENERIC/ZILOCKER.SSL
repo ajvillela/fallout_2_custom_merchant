@@ -288,7 +288,9 @@ end
 procedure use_p_proc begin
    caught_tamper := false;
    user_obj := source_obj;
+   //debug_msg("using object");
    if (user_obj != 0) then begin
+     // debug_msg("about to run check_tamper");
       check_tamper
       if (caught_tamper) then begin
          caught_use_action
@@ -340,6 +342,12 @@ procedure use_skill_on_p_proc begin
          end else begin
             attempt_lock(LOCKPICK_SKILL_PENALTY)
          end
+      //added by killap - expansion
+      end else begin
+         if (obj_is_locked(self_obj)) then begin
+            script_overrides;
+         end
       end
+      //end added
    end
 end

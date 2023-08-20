@@ -78,6 +78,25 @@ procedure finishWalk;
 #define LVAR_Hostile                    (5)
 #define LVAR_Personal_Enemy             (6)
 #define LVAR_Visible                    (7)
+#define LVAR_Self_Guard_Num             (8) //added by killap
+#define LVAR_In_Transit                 (9) //added by killap
+#define LVAR_Tile                       (10) //added by killap
+#define LVAR_Time                       (11) //added by killap
+
+
+#define Follow_Obj(X,Y,Z)                   if (Current_Distance_From_Obj(X) > Y) then begin                                    \
+                                               if (Current_Distance_From_Obj(X) > Y*2) then begin                               \
+                                                  animate_run_to_tile(tile_num_in_direction(tile_num(X),random(0,5),Z));        \
+                                               end else begin                                                                   \
+                                                  animate_move_to_tile(tile_num_in_direction(tile_num(X),random(0,5),Z));       \
+                                               end                                                                              \
+                                               set_local_var(LVAR_In_Transit,1);                                                \              
+                                            end                                                                                 \
+                                            if ( (anim_busy(self_obj) == 0) and ( (tile_num(merk_obj) == MERK_BAZAAR_POS) or (tile_num(merk_obj) == MERK_CARLSON_POS) or (tile_num(merk_obj) == MERK_HOME_POS) ) ) then begin    \
+                                               call finishWalk;                                                                \
+                                               set_local_var(LVAR_In_Transit,0);                                               \
+                                            end        
+
 
 /* Imported variables from the Map scripts. These should only be
    pointers and variables that need not be saved. If a variable
@@ -85,24 +104,35 @@ procedure finishWalk;
 import variable merk_obj;
 import variable merk_guard_count;
 import variable merk_visible;
+import variable merk_guard1_obj;
+import variable merk_guard2_obj;
 
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
-variable self_guard_num := 0;
-variable inTransit := 0;
+//variable self_guard_num := 0; //comment out by killap (made into a local var)
+//variable inTransit := 0;
+//variable tile;
 
 procedure start begin
+   if ((merk_guard1_obj) == 0) then
+      merk_guard1_obj := self_obj; //added by killap
+   else
+      merk_guard2_obj := self_obj; //added by killap
 end
 
 procedure timed_event_p_proc begin
-   if (fixed_param == TIMER_EVENT) then
-      call timerEvent;
+   //if (fixed_param == TIMER_EVENT) then
+    //  call timerEvent;
 end
 
 /* This procedure will get called each time that the map is first entered. It will
    set up the Team number and AI packet for this critter. This will override the
    default from the prototype, and needs to be set in scripts. */
 procedure map_enter_p_proc begin
+   if ((merk_guard1_obj) == 0) then
+      merk_guard1_obj := self_obj; //added by killap
+   else
+      merk_guard2_obj := self_obj; //added by killap
    merk_guard_count += 1;
    Only_Once:=0;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_NCR_MERK);
@@ -112,13 +142,63 @@ procedure map_enter_p_proc begin
       if (merk_status == MERK_STATUS_DEAD) then begin
          move_to(self_obj, 7000, 0);
          destroy_object(self_obj);
-      end else begin
-         self_guard_num := merk_guard_count;
-         set_obj_visibility(self_obj, OBJ_INVIS);
-         call timerEvent;
+      end else if (merk_visible) then begin
+         set_obj_visibility(self_obj, OBJ_VIS);
+         set_local_var(LVAR_Visible, 1);
+         //call timerEvent;
       end
+      else begin
+         //self_guard_num := merk_guard_count; --COMMENT OUT AND MOVED BELOW -KILLAP
+         set_obj_visibility(self_obj, OBJ_INVIS);
+         //call timerEvent;
+      end
+      
+      set_local_var(LVAR_Self_Guard_Num,merk_guard_count); //edit by killap
+      
+      //added by killap
+      if (merk_visible) then begin
+         if (cur_map_index == MAP_NCR_BAZAAR) then begin
+            if (checktime == MAP_NCR_BAZAAR) then begin
+               if (local_var(LVAR_Self_Guard_Num) == 1) then begin 
+                  move_to(self_obj, 22352, 0);
+               end else begin
+                  move_to(self_obj, 22355, 0);
+               end
+               call finishWalk;
+            end
+         end else if (cur_map_index == MAP_NCR_COUNCIL) then begin
+            if (checktime == MAP_NCR_DOWNTOWN) then begin
+               if (local_var(LVAR_Self_Guard_Num) == 1) then begin 
+                  move_to(self_obj, 16539, 0);
+               end else begin
+                  move_to(self_obj, 16336, 0);
+               end
+               call finishWalk;
+            end
+            if (checktime == MAP_NCR_COUNCIL) then begin
+               if (local_var(LVAR_Self_Guard_Num) == 1) then begin 
+                  move_to(self_obj, 18948, 0);
+               end else begin
+                  move_to(self_obj, 18549, 0);
+               end
+               call finishWalk;
+            end
+         end
+      end
+      //end added
+      
    end
+   
 end
+
+//added by killap
+procedure map_update_p_proc begin
+   if ((merk_guard1_obj) == 0) then
+      merk_guard1_obj := self_obj; //added by killap
+   else
+      merk_guard2_obj := self_obj; //added by killap
+end
+//end added
 
 
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from
@@ -129,6 +209,16 @@ procedure critter_p_proc begin
    the player should the game be saved and loaded repeatedly. Additionally, if any special
    actions need to be taken by the critter based on previous combat, the critter will remember
    this as well. */
+   
+   //added by killap
+   if (not combat_is_initialized) then
+      Follow_Obj(merk_obj,2,1)
+ 
+   if (merk_visible) then
+      set_obj_visibility(self_obj, OBJ_VIS);
+   else
+      set_obj_visibility(self_obj, OBJ_INVIS);
+   //end added by killap
 
    if ((local_var(LVAR_Hostile) != 0 or global_var(GVAR_NCR_SCMERK_HOSTILE) != 0) and (obj_can_see_obj(self_obj,dude_obj))) then begin
        set_local_var(LVAR_Hostile,1);
@@ -171,7 +261,8 @@ procedure talk_p_proc begin
 
    GetReaction;
 
-   if (inTransit == 1) then
+   if (local_var(LVAR_In_Transit) == 1) then //edit by killap
+   //if (inTransit == 1) then
       call Node001;
    else
       call Node002;
@@ -237,22 +328,24 @@ procedure Node002 begin
 end
 
 procedure timerEvent begin
-   variable tile;
-
    if (not combat_is_initialized) then begin
       if (cur_map_index == checktime) then begin
+         debug_msg("cur_map_index == checktime");
          if (local_var(LVAR_Visible)) then begin
+             debug_msg("SCMRKGRD: local_var(LVAR_Visible) == 1");
             call checkPos;
          end else begin
             debug_msg("SCMRKGRD: Should be visible");
             if (merk_visible) then begin
-               tile := getTileNum;
-               move_to(self_obj, tile, 0);
+               set_local_var(LVAR_Tile,getTileNum);
+               //tile := getTileNum;
+               move_to(self_obj, local_var(LVAR_Tile), 0);
                set_obj_visibility(self_obj, OBJ_VIS);
                set_local_var(LVAR_Visible, 1);
             end
          end
       end else begin
+          debug_msg("cur_map_index != checktime");
          if (local_var(LVAR_Visible) and merk_visible == 0) then begin
             if (anim_busy(self_obj) == 1) then begin
                reg_anim_clear(self_obj);
@@ -267,48 +360,61 @@ procedure timerEvent begin
 end
 
 procedure checkPos begin
-   variable tile;
-
-   tile := getTileNum;
-
+   set_local_var(LVAR_Tile,getTileNum);
+   //tile := getTileNum;
+   debug_msg("SCMRKGRD: checkPos being called");
    if (anim_busy(self_obj) == 0) then begin
-      if (self_tile != tile) then begin
-         animate_move_to_tile(tile);
-         inTransit := 1;
+      if (self_tile != local_var(LVAR_Tile)) then begin //edit by killap
+      //if (self_tile != tile) then begin
+         debug_msg("SCMRKGRD: self_tile != tile");
+         animate_move_to_tile(local_var(LVAR_Tile)); //edit by killap
+         //animate_move_to_tile(tile);
+         set_local_var(LVAR_In_Transit,1); //edit by killap
+         //inTransit := 1;
       end else begin
-         inTransit := 0;
+         set_local_var(LVAR_In_Transit,0); //edit by killap
+         //inTransit := 0;
          call finishWalk;
       end
    end
 end
 
 procedure finishWalk begin
-   if (self_guard_num == 1) then begin
+   if (local_var(LVAR_Self_Guard_Num) == 1) then begin //edit by killap
+   //if (self_guard_num == 1) then begin
       animate_rotation(1);
-   end else if (self_guard_num == 2) then begin
+   end else if (local_var(LVAR_Self_Guard_Num) == 2) then begin //edit by killap
+   //end else if (self_guard_num == 2) then begin
       animate_rotation(3);
    end
 end
 
 procedure getTileNum begin
-   if (self_guard_num == 1) then begin
+   if (local_var(LVAR_Self_Guard_Num) == 1) then begin //edit by killap
+   //if (self_guard_num == 1) then begin
       return tile_num_in_direction(tile_num(merk_obj), 1, 2);
-   end else if (self_guard_num == 2) then begin
+   end else if (local_var(LVAR_Self_Guard_Num) == 2) then begin //edit by killap
+   //end else if (self_guard_num == 2) then begin
       return tile_num_in_direction(tile_num(merk_obj), 4, 1);
    end
 end
 
 procedure checktime begin
-   variable time := 0;
-   time := game_time_hour;
-
-   if (time > 800 and time < 1201) then
+   set_local_var(LVAR_Time,game_time_hour); //edit by killap
+   //variable time := 0;
+   //time := game_time_hour;
+   debug_msg("time is: " + local_var(LVAR_Time));
+   if ((local_var(LVAR_Time) >= 800) and (local_var(LVAR_Time) < 1201)) then //edit by killap
+   //if (time >= 800 and time < 1201) then
+      return MAP_NCR_DOWNTOWN;
+   if ((local_var(LVAR_Time) >= 1200) and (local_var(LVAR_Time) < 1601)) then //edit by killap
+   //if (time >= 1200 and time < 1601) then
       return MAP_NCR_COUNCIL;
-   if (time > 1200 and time < 1601) then
-      return MAP_NCR_COUNCIL;
-   if (time > 400 and time < 2401) then
+   if ((local_var(LVAR_Time) >= 400) and (local_var(LVAR_Time) < 2401)) then //edit by killap
+   //if (time >= 400 and time < 2401) then
       return MAP_NCR_BAZAAR;
-   if (time > 2400 and time < 801) then
+   if ((local_var(LVAR_Time) >= 2400) or ((local_var(LVAR_Time) >= 0) and (local_var(LVAR_Time) < 801))) then //edit by killap
+   //if (time >= 2400 or (time >= 0 and time < 801)) then
       return MAP_NCR_BAZAAR;
 end
 

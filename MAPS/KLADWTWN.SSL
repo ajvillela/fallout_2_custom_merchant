@@ -60,12 +60,22 @@ procedure map_enter_p_proc begin
           KC_REP_ADJUST(k)
        end
    end
-
+   override_map_start_hex(25075,0,3); //added by killap - expansion
+   
    //Make sure duntons are gone if one is dead
    if (global_var(GVAR_DUNTON_DEAD) > 0) then
       kill_critter_type(PID_MASTER_TRADER_MALE,KILL_DONT_LEAVE_BODY);
 
-   Check_Create_Car(CAR_KLAMATH_HEX, CAR_KLAMATH_ELEV)
+   //added by killap - prevent car from disappearing if the car runs out of gas while on the town circle
+   if ((metarule(30, 0) == 21) and (cur_map_index != MAP_CAR_DESERT) and (car_out_of_fuel)) then begin
+      set_global_var(GVAR_CAR_PLACED_TILE, 0);
+      Create_Car(CAR_KLAMATH_HEX,CAR_KLAMATH_ELEV)
+      if (tile_contains_pid_obj(CAR_KLAMATH_HEX, CAR_KLAMATH_ELEV, PID_DRIVABLE_CAR) != 0) then begin
+         Create_Trunk(CAR_KLAMATH_HEX,CAR_KLAMATH_ELEV)
+      end 
+   end else 
+      Check_Create_Car(CAR_KLAMATH_HEX, CAR_KLAMATH_ELEV)
+   //end added
 
    if (global_var(GVAR_SMILEY_STATUS) == SMILEY_RETURNED) then begin
 //   if (1) then begin
@@ -81,27 +91,35 @@ procedure map_enter_p_proc begin
       set_global_var(GVAR_RUSTLE_SUCCESS,2);
       k := MAX_BRAHMIN - global_var(GVAR_TORR_BRAHMIN_KILLED);
       debug_msg("Making cows"+k);
-      cow_ptr := create_object_sid(PID_BRAHMIN,0,0,SCRIPT_ACBRAHMN);
+      //cow_ptr := create_object_sid(PID_BRAHMIN,0,0,SCRIPT_ACBRAHMN);
+      //cow_ptr := create_object_sid(PID_BRAHMIN,0,0,SCRIPT_ZCBRAHMN); //edit by killap
+      cow_ptr := create_object_sid(PID_BRAHMIN,0,0,SCRIPT_KCDUNBRA); //edit by killap - expansion
       critter_add_trait(cow_ptr,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_BRAHMIN);
       cow_hex := 12093;
       critter_attempt_placement(cow_ptr,cow_hex, 0);
 
       if (k > 1) then begin
-         cow_ptr := create_object_sid(PID_BRAHMIN,0,0,SCRIPT_ACBRAHMN);
+         //cow_ptr := create_object_sid(PID_BRAHMIN,0,0,SCRIPT_ACBRAHMN);
+         //cow_ptr := create_object_sid(PID_BRAHMIN,0,0,SCRIPT_ZCBRAHMN); //edit by killap
+         cow_ptr := create_object_sid(PID_BRAHMIN,0,0,SCRIPT_KCDUNBRA); //edit by killap - expansion
          critter_add_trait(cow_ptr,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_BRAHMIN);
          cow_hex := 11700;
          critter_attempt_placement(cow_ptr,cow_hex, 0);
       end
 
       if (k > 2) then begin
-         cow_ptr := create_object_sid(PID_BRAHMIN,0,0,SCRIPT_ACBRAHMN);
+         //cow_ptr := create_object_sid(PID_BRAHMIN,0,0,SCRIPT_ACBRAHMN);
+         //cow_ptr := create_object_sid(PID_BRAHMIN,0,0,SCRIPT_ZCBRAHMN); //edit by killap
+         cow_ptr := create_object_sid(PID_BRAHMIN,0,0,SCRIPT_KCDUNBRA); //edit by killap - expansion
          critter_add_trait(cow_ptr,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_BRAHMIN);
          cow_hex := 12483;
          critter_attempt_placement(cow_ptr,cow_hex, 0);
       end
 
       if (k > 3) then begin
-         cow_ptr := create_object_sid(PID_BRAHMIN,0,0,SCRIPT_ACBRAHMN);
+         //cow_ptr := create_object_sid(PID_BRAHMIN,0,0,SCRIPT_ACBRAHMN);
+         //cow_ptr := create_object_sid(PID_BRAHMIN,0,0,SCRIPT_ZCBRAHMN); //edit by killap
+         cow_ptr := create_object_sid(PID_BRAHMIN,0,0,SCRIPT_KCDUNBRA); //edit by killap - expansion
          critter_add_trait(cow_ptr,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_GENERIC_BRAHMIN);
          cow_hex := 13100;
          critter_attempt_placement(cow_ptr,cow_hex, 0);

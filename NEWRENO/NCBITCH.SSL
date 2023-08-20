@@ -138,7 +138,7 @@ procedure Node003 begin
    inc_local_var(LVAR_Talk_Attempts);
    if (obj_can_see_obj(dude_obj, self_obj)) then begin
       if (local_var(LVAR_Talk_Attempts) >= random(3,5)) then begin
-         dude_floater(random(300, 301) + (2*(dude_is_stupid == false)));
+         dude_floater(random(300, 301 + (2*(dude_is_stupid == false)))); //corrected paren error - killap
       end
    end
    if (herebefore == false) then begin
@@ -147,7 +147,7 @@ procedure Node003 begin
 end
 procedure Node004 begin
    if (dude_has_porn_star_rep) then begin
-      floater_rand(602 - (3 * dude_is_male), 602 + (4 * dude_is_female));
+      floater_rand(602 - (2 * dude_is_male), 602 + (3 * dude_is_female)); //was 3* dude_is_male ... was 4* dude_is_female
    end else begin
       floater_bad_rand(402 - ((1 + (dude_charisma < 3)) * dude_is_male), 404 + ((1 + (dude_charisma < 3)) * dude_is_female));
    end

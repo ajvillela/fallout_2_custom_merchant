@@ -124,7 +124,7 @@ procedure use_obj_on_p_proc begin
 
    script_overrides;
    if ( map_var(MVAR_Auto_Doc_Fixed) == 0 ) then begin
-      if ( (Object_Used_PID == PID_WRENCH) or (Object_Used_PID == PID_MULTI_TOOL) ) then begin
+      if ( (Object_Used_PID == PID_WRENCH) or (Object_Used_PID == PID_MULTI_TOOL) or (Object_Used_PID == PID_SUPER_TOOL_KIT) ) then begin //added super_tool_kit - killap
          if( is_success( roll_vs_skill( source_obj, SKILL_REPAIR, -15 ) ) ) then begin
             gfade_out(600);
             // One hour passes

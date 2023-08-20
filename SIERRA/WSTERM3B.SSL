@@ -101,6 +101,7 @@ procedure use_p_proc begin
    if (get_critter_stat(source_obj,STAT_iq) < 4) then begin
        if (source_obj == dude_obj) then begin
            display_msg(mstr(102));
+           floater(110); //added by killap
        end
        else begin
            display_msg(obj_name(source_obj)+mstr(250));
@@ -112,13 +113,15 @@ procedure use_p_proc begin
 end
 
 procedure talk_p_proc begin
-   if (global_var(GVAR_SKYNET) == Skynet_Brain) then begin
+   //edit by killap - commented out
+   //if (global_var(GVAR_SKYNET) == Skynet_Brain) then begin
+   if (global_var(GVAR_BRAIN_BOT_BRAIN) != 0) then begin
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node003;
        gSay_End;
        end_dialogue;
-   end
+   end 
 
    else if (map_var(MVAR_Skynet_Defeat) == 1) then begin
        start_gdialog(NAME,self_obj,4,-1,-1);
@@ -266,6 +269,8 @@ procedure Node011 begin
    end
 
    Reply(mstr(153));
+   
+   NOption(161,Node999,004); //added by killap
 end
 
 procedure Node012 begin
@@ -400,4 +405,6 @@ procedure Node998 begin
    set_map_var(MVAR_Security_Level_3,1);
    set_map_var(MVAR_Skynet_Battle_3,1);
    set_global_var(GVAR_SIERRA_BASE_ENEMY,1);
+   obj_close(tile_contains_pid_obj(16282,dude_elevation,33554450)); //close door to room -added by killap
+
 end

@@ -40,7 +40,7 @@ import variable modoc_farrel_obj;
    Local variables which do not need to be saved between map changes.
 */
 #define check_farrel_catch       farrel_caught := false;                                              \
-                                 if (modoc_farrel_obj != 0) then begin                                \
+                                 if (not(farrel_dead)) then begin                                \
                                     if (obj_can_see_obj(modoc_farrel_obj, source_obj)) then begin     \
                                        debug_msg("farrel caught source_obj");                         \
                                        script_overrides;                                              \
@@ -62,10 +62,10 @@ import variable modoc_farrel_obj;
                                     end else begin                                                          \
                                        set_local_var(LVAR_Locked, 1);                                       \
                                     end                                                                     \
-                                    display_msg(obj_name(source_obj) + mstr(200 + local_var(LVAR_Locked))); \
+                                    display_msg(mstr(200 + local_var(LVAR_Locked))); \
                                  end else begin                                                             \
                                     debug_msg("message fail == "+mstr(210));                                \
-                                    display_msg(obj_name(source_obj) + mstr(210 + local_var(LVAR_Locked))); \
+                                    display_msg(mstr(210 + local_var(LVAR_Locked))); \
                                  end
 
 procedure start begin
@@ -106,7 +106,7 @@ procedure use_obj_on_p_proc begin
    debug_msg("use_obj_on_p_proc");
    check_farrel_catch;
    if (farrel_caught == false) then begin
-      if (obj_pid(obj_being_used_with) == PID_LOCKPICKS) then begin
+      if ( (obj_pid(obj_being_used_with) == PID_LOCKPICKS) or (obj_pid(obj_being_used_with) == PID_EXP_LOCKPICK_SET) ) then begin //added exp_lockpick_set - killap
          script_overrides;
          roll_lock_and_switch(-10)
       end

@@ -189,7 +189,7 @@ procedure thanks begin
 end
 
 procedure saysomething begin
-   if (TOWN_REPUTATION < 0) then begin
+   if (TOWN_REPUTATION < 0 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then begin // edit by killap - added not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) then begin
       call Node001;
    end
    else begin

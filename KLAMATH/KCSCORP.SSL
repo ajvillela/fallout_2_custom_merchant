@@ -68,18 +68,24 @@ procedure critter_p_proc begin
 end
 
 procedure destroy_p_proc begin
-  variable tail := 0;
-  tail := create_object(PID_SCORPION_TAIL,0,0);
-  add_obj_to_inven(self_obj,tail);
-  //set_global_var(GVAR_KLAMATH_SCORPIONS_KILLED,global_var(GVAR_KLAMATH_SCORPIONS_KILLED)+1);
-  ADJUST_SCORPS_KILLED
-  //if (map_var(MVAR_Scorps_Killed) >= MAX_SCORPS) then begin
-  //if (global_var(GVAR_KLAMATH_SCORPIONS_KILLED) >= global_var(GVAR_KLAMATH_SCORPION_TOTAL) then begin
-  if ( KILLED_ALL_SCORPS ) then begin
-     display_msg(mstr(500));
-  end
-  //display_msg("Scorps dead = "+map_var(MVAR_Scorps_Killed));
-  //display_msg("Scorps left = "+map_var(MVAR_Total_Scorps));
+   variable tail := 0;
+
+   // Small scorpions now drop small tails. Makes much more sense - killap (expansion)
+   if ((self_pid == PID_SMALL_RADSCORPION) or (self_pid == PID_BLACK_SCORPION)) then
+      tail := create_object(PID_SMALL_SCORPION_TAIL,0,0);
+   else
+      tail := create_object(PID_SCORPION_TAIL,0,0);
+   
+   add_obj_to_inven(self_obj,tail);
+   //set_global_var(GVAR_KLAMATH_SCORPIONS_KILLED,global_var(GVAR_KLAMATH_SCORPIONS_KILLED)+1);
+   ADJUST_SCORPS_KILLED
+   //if (map_var(MVAR_Scorps_Killed) >= MAX_SCORPS) then begin
+   //if (global_var(GVAR_KLAMATH_SCORPIONS_KILLED) >= global_var(GVAR_KLAMATH_SCORPION_TOTAL) then begin
+   if ( KILLED_ALL_SCORPS ) then begin
+   display_msg(mstr(500));
+   end
+   //display_msg("Scorps dead = "+map_var(MVAR_Scorps_Killed));
+   //display_msg("Scorps left = "+map_var(MVAR_Total_Scorps));
 end
 
 procedure damage_p_proc begin

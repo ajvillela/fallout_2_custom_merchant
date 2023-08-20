@@ -128,17 +128,19 @@ procedure use_obj_on_p_proc begin
    variable Tool;
    variable obj;
    if (self_tile == NAV_COMPUTER_TILE) then begin
-      Tool:=obj_pid(obj_being_used_with);
+      if (not tanker_flag(TANK_NAVCOMP)) then begin //added check by killap (if you get someone to do this for you (playing a dumb character) you can still put in the nav parts and get xp
+         Tool:=obj_pid(obj_being_used_with);
 
-      if (Tool == NAV_COMP_PID) then begin
-         obj := dude_item(Tool);
-         if (obj) then begin
-            rm_obj_from_inven(dude_obj, obj);
-            destroy_object(obj);
+         if (Tool == NAV_COMP_PID) then begin
+            obj := dude_item(Tool);
+            if (obj) then begin
+               rm_obj_from_inven(dude_obj, obj);
+               destroy_object(obj);
+            end
+            COMPLETE_TANKER_NAVCOMP;
          end
-         COMPLETE_TANKER_NAVCOMP;
+         call use_p_proc;
       end
-      call use_p_proc;
    end
 end
 
@@ -226,9 +228,16 @@ end
 
 procedure Node002 begin
    Reply(105);
-   NOption(106, Node005, 1);
-   NOption(107, Node003, 1);
-   NOption(108, Node999, 1);
+   //added by killap - prevents you from going back to the Encalve after it was destroyed
+   if (Fallout2_enclave_destroyed) then begin
+      NOption(104, Node999, 1);
+   end
+   //end code by killap
+   else begin
+      NOption(106, Node005, 1);
+      NOption(107, Node003, 1);
+      NOption(108, Node999, 1);
+   end
 end
 
 procedure Node003 begin
@@ -271,6 +280,13 @@ procedure Node005 begin
    end else if (not tanker_flag(TANK_NAVCOMP)) then begin
       Reply(116);
       NOption(113, Node002, 1);
+   //added by killap - RP
+   end else if (not sub_flag(SHI_SUB_DISABLED)) then begin
+      if (sub_flag(0)) then
+         set_sub_flag(SHI_SUB_KNOWN);
+      Reply(200);
+      NOption(113, Node002, 1);
+   //end added
    end else begin
       call NodeMovie;
    end
@@ -283,6 +299,7 @@ procedure LoadEnclave begin
    move_to(dude_obj, 17134, elevation(dude_obj));
    set_obj_visibility(dude_obj, OBJ_INVIS);
    play_gmovie(TANKER_MOVIE);
-   COMP_QUEST(0, 0, EXP_TANKER_GO);
+   COMP_QUEST(0, 0, EXP_TANKER_GO)
+   game_time_advance(ONE_GAME_DAY); //added by killap
    load_map(MAP_ENCLAVE_DOCK, 10);
 end

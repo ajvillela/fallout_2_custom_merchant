@@ -62,12 +62,22 @@ export variable gang_2_member_3;
 export variable gang_2_member_4;
 export variable gang_2_member_5;
 
+export variable becky_guard_obj; //added by killap
+
+
 procedure start begin
 end
 
 procedure map_enter_p_proc begin
 variable the_rand;
 
+   // added by killap - expansion
+   if (at_party_fight and gangwar(state_gangwar_2won)) then begin
+      clear_at_party_fight;
+      set_returned_to_church;
+   end
+   // end added
+   
    if (is_loading_game == false) then begin
       set_know_church;
       if (gangwar(state_gangwar_in_fight)) then begin
@@ -89,6 +99,13 @@ variable the_rand;
       end
       set_map_exit_tiles(16149,32304);
 
+
+      //added by killap
+      if not(gangwar(state_gangwar_in_fight)) then
+         override_map_start_hex(28098,0,5);
+      set_global_var(GVAR_LOAD_MAP_INDEX,0);
+      //end added
+
       Check_Create_Car(CAR_DENBUS2_HEX, CAR_DEN_ELEV)
    end
 
@@ -100,7 +117,9 @@ procedure map_exit_p_proc begin
       if (gang_trap(state_gang_trap_set)) then begin
          set_gangwar(state_gangwar_1won);
       end else begin
-         set_gangwar(state_gangwar_2won);
+         if (church_cleared_speech == false) then begin //edit by killap - expansion
+            set_gangwar(state_gangwar_2won);
+         end
       end
    end
 end

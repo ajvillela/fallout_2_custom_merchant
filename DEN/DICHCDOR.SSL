@@ -51,6 +51,12 @@ procedure map_enter_p_proc begin
    call def_map_enter_p_proc;
 end
 
+//added by killap
+procedure map_update_p_proc begin
+   church_door_obj := self_obj;
+end
+//end added
+
 procedure destroy_p_proc begin
    church_door_obj := 0;
    call check_close_door;
@@ -62,6 +68,7 @@ end
 #define timed_event_p_proc                def_map_timed_event_p_proc
 #define start                             def_start
 #define map_enter_p_proc                  def_map_enter_p_proc
+#define map_update_p_proc                 def_map_update_p_proc //added by killap
 #define destroy_p_proc                    def_destroy_p_proc
 
 #include "..\den\diDoor.ssl"
@@ -76,9 +83,10 @@ procedure check_close_door begin
 end
 
 procedure check_unlock_door begin
-   if (has_trait(TRAIT_OBJECT,source_obj,OBJECT_TEAM_NUM) == TEAM_DEN_GANG_1) then begin
+   //this code doesn't make sense to me. How can a piece of scenery be part of a TEAM -- killap
+   /*if (has_trait(TRAIT_OBJECT,source_obj,OBJECT_TEAM_NUM) == TEAM_DEN_GANG_1) then begin
       obj_unlock(self_obj);
-   end
+   end*/
 end
 
 procedure check_timed_event begin

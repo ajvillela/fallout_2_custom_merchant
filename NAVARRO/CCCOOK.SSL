@@ -149,11 +149,12 @@ procedure talk_p_proc begin
    if( not_alone ) then begin
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
+          said_alone := 1; //added by killap
           call Node020;
        gSay_End;
        end_dialogue;
    end
-   if( not_wearing_power_armor ) then begin
+   else if( not_wearing_power_armor ) then begin //added else - killap
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
           call Node018;
@@ -210,6 +211,16 @@ procedure use_skill_on_p_proc begin
       script_overrides;  //don't allow player to heal cookie
    end
 end
+
+//added by killap
+procedure use_obj_on_p_proc begin
+   if ((obj_pid(obj_being_used_with) == PID_DOCTORS_BAG) or (obj_pid(obj_being_used_with) == PID_PARAMEDICS_BAG) or (obj_pid(obj_being_used_with) == PID_FIELD_MEDIC_KIT) ) then begin
+      script_overrides;
+   end
+end
+//end added
+
+
 
 procedure Node001 begin
    Reply(103);

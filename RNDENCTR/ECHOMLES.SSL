@@ -102,7 +102,7 @@ procedure map_enter_p_proc begin
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_RND_HOMELESS);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_PEASANT);
    add_timer_event(self_obj, game_ticks(Random(1, 5)), TIMER_BEG);
-   add_timer_event(self_obj, game_ticks(15), TIMER_ATTACK);
+   add_timer_event(self_obj, game_ticks(30), TIMER_ATTACK); //doubled time before attacking since it is basically impossible to do it in 15 ticks. Really, the way this is done should be reworked, but I do not have the time these days... -killap (expansion)
 end
 
 
@@ -169,10 +169,21 @@ procedure destroy_p_proc begin
 
 /* Increment the aligned critter counter*/
    //inc_good_critter  did this because the rep hit isn't supposed to be that bad
-   set_global_var(GVAR_GOOD_MONSTER, (global_var(GVAR_GOOD_MONSTER) + 1));
+   
+   if (source_obj == dude_obj) then begin                                          
+      set_global_var(GVAR_GOOD_MONSTER, (global_var(GVAR_GOOD_MONSTER) + 1));     
+      if (critter_kill_type(self_obj) == KILL_TYPE_children_kills) then           
+         inc_childkiller                                                         
+      CHECK_REP_CHAMPION                                                          
+      CHECK_REP_BERSERKER                                                         
+      inc_general_rep(-1);                             
+   end
+   
+   /*set_global_var(GVAR_GOOD_MONSTER, (global_var(GVAR_GOOD_MONSTER) + 1));
    CHECK_REP_CHAMPION
    CHECK_REP_BERSERKER
-   inc_general_rep(-1);
+   inc_general_rep(-1);*/
+   
 /* Set global_variable for Enemy status*/
 end
 

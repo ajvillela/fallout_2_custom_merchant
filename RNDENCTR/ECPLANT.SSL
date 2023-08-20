@@ -49,3 +49,12 @@ procedure critter_p_proc begin
    if (obj_can_see_obj(self_obj,dude_obj)) then
        attack(dude_obj);
 end
+
+//added by killap - expansion pack
+procedure use_obj_on_p_proc begin
+   if ((obj_pid(obj_being_used_with) == PID_PLANT_SPRAY)) then begin
+
+      kill_critter(self_obj, ANIM_melted_to_nothing_sf);
+   end
+end
+//end added - expansion pack

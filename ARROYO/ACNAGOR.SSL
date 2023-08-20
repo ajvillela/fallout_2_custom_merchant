@@ -130,7 +130,7 @@ procedure critter_p_proc begin
        attack(dude_obj);
    end
 
-   if (REP_ENEMY_ARROYO) then begin
+   if ( (REP_ENEMY_ARROYO) and (obj_can_see_obj(self_obj,dude_obj)) ) then begin //added and (obj_can_see_obj(self_obj,dude_obj)) by killap
        attack(dude_obj);
    end
 
@@ -182,15 +182,7 @@ procedure talk_p_proc begin
 
    GetReaction;
 
-   if (dude_iq < 4) then begin
-       start_gdialog(NAME,self_obj,4,-1,-1);
-       gSay_Start;
-           call Node012;
-       gSay_End;
-       end_dialogue;
-   end
-
-   else if (reached_tl_4) then begin
+   if (reached_tl_4) then begin
        start_gdialog(NAME,self_obj,4,-1,-1);
        gSay_Start;
            call Node016;
@@ -217,7 +209,15 @@ procedure talk_p_proc begin
        gSay_End;
        end_dialogue;
    end
-
+   
+   else if (dude_iq < 4) then begin //moved here by killap
+       start_gdialog(NAME,self_obj,4,-1,-1);
+       gSay_Start;
+           call Node012;
+       gSay_End;
+       end_dialogue;
+   end
+ 
    else if (global_var(GVAR_ARROYO_DOG) == DOG_RUN_OFF) then begin
        floater(131);
    end

@@ -59,6 +59,7 @@ procedure Node999;                                      // This Node is Always E
 procedure Node001;
 procedure Node002;
 procedure Node003;
+procedure Node004; // Seraph's Code
 
 //~~~~~~~~~~~~~~~~ DESIGN TOOL ENDS HERE
 // The Following lines are for anything that is not needed to be
@@ -184,10 +185,14 @@ procedure talk_p_proc begin
 
    GetReaction;
 
-   if ((global_var(GVAR_VAULT_CITIZENSHIP) == CITIZEN_TRUE) or (global_var(GVAR_VAULT_CITIZEN) == CITIZEN_GUARD_BELIEVE_FAKE)) then begin
+   // Begin Seraph's Code
+   if( global_var( GVAR_VAULT_CITIZEN ) == CITIZEN_CAPTAIN_GUARD ) then
+      call Node004;
+   // End Seraph's Code
+   else if ((global_var(GVAR_VAULT_CITIZENSHIP) == CITIZEN_TRUE) or (global_var(GVAR_VAULT_CITIZEN) == CITIZEN_GUARD_BELIEVE_FAKE)) then begin // Seraph's Fix: added 'else'
        call Node002;
    end
-   else if ((TOWN_REPUTATION < -20) and (dude_iq < 4)) then begin
+   else if ((TOWN_REPUTATION < -20 and not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))) and (dude_iq < 4)) then begin // edit by killap - added not(has_trait(TRAIT_PERK, dude_obj, PERK_cult_of_personality))
        call Node001;
    end
    else begin
@@ -254,5 +259,11 @@ end
 procedure Node003 begin
    floater(random(110,113));
 end
+
+// Begin Seraph's Code
+procedure Node004 begin
+   floater(random(114,117));
+end
+// End Seraph's Code
 
 //xxxxxxxxxxxxxxxxxxxx

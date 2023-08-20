@@ -53,6 +53,7 @@ procedure damage_p_proc;
 procedure map_enter_p_proc;
 procedure push_p_proc;
 procedure timed_event_p_proc;
+procedure map_update_p_proc; //added by killap
 
 /* Script Specific Procedure Calls */
 procedure Node998;                                      // This Node is Always Combat
@@ -140,7 +141,14 @@ procedure map_enter_p_proc begin
    Only_Once:=0;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_LOANER);
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_GUARD);
+   
 end
+
+//added by killap
+procedure map_update_p_proc begin
+   i_matt_obj := self_obj;
+end
+//end added
 
 
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from
@@ -358,7 +366,7 @@ procedure Node008 begin
    NOption(139, Node999, 1);
    if (local_var(LVAR_Did_Sabotage) == 0 and v13_status(FLG_SABOTAGE)) then begin
       set_local_var(LVAR_Did_Sabotage, 1);
-      NLowOption(141, Node010, 4);
+      NLowOption(141, Node010); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
       NOption(142, Node010, 4);
    end
 end
@@ -382,10 +390,10 @@ end
 procedure Node012 begin
    Reply(149);
    NLowOption(150, Node999);
-   NLowOption(151, Node998);
+   BLowOption(151, Node998); //edit by killap - was NLowOption
    NLowOption(152, Node008);
    NOption(153, Node999, 4);
-   NOption(154, Node998, 4);
+   BOption(154, Node998, 4); //edit by killap - was NOption
    NOption(155, Node008, 4);
 end
 

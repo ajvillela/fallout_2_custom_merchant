@@ -47,7 +47,7 @@ procedure spatial_p_proc begin
        if (source_obj == dude_obj) then
            display_msg(g_mstr(910));
        else
-           display_msg(g_mstr(911));
+           display_msg("" + obj_name(source_obj) + g_mstr(911)); //edit by killap - added obj_name(source_obj)
        critter_dmg(source_obj,random(MIN_DMG_SPATIAL,MAX_DMG_SPATIAL),DAMAGE_TYPE);
    end
 end

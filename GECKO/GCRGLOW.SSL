@@ -93,7 +93,7 @@ end
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from
    Movement to attacking the player on sight can be placed in here.*/
 procedure critter_p_proc begin
-   if (((local_var(LVAR_Hostile) == 2)or(local_var(LVAR_Personal_Enemy) == 1)) and (obj_can_see_obj(self_obj,dude_obj))) then begin
+   if (((local_var(LVAR_Hostile) == 2)or(local_var(LVAR_Personal_Enemy) == 1) or (global_var(GVAR_ENEMY_GECKO)) ) and (obj_can_see_obj(self_obj,dude_obj))) then begin //edit by killap - added (global_var(GVAR_ENEMY_GECKO))
       set_local_var(LVAR_Hostile,1);
       attack(dude_obj);
    end

@@ -257,7 +257,7 @@ end
 procedure Node007 begin
    Reply(123);
 
-   GOption(obj_name(dude_obj),Node008,001);
+   GOption(obj_name(dude_obj) + ".",Node008,001); // edity by killap - added "."
    NOption(124,Node009,001);
 end
 

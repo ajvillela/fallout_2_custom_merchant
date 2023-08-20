@@ -311,7 +311,7 @@ end
 
 procedure Node006 begin
    Reply(125);
-   NOption(126,Node006,004);
+   //NOption(126,Node006,004); //repeated text which just loops. -killap
    if ( ( obj_is_carrying_obj_pid( dude_obj, PID_URANIUM_ORE ) > 0 ) and ( local_var( LVAR_Refined_Before ) == 0 ) ) then
       NOption(127,Node004,004);
    NOption(128,Node011,004);
@@ -334,6 +334,7 @@ procedure Node008 begin
 
    item := obj_carrying_pid_obj( dude_obj, PID_URANIUM_ORE );
    rm_obj_from_inven( dude_obj, item );
+   destroy_object(item); //added by killap
    set_local_var( LVAR_Time_Given_Ore, game_time );
    Reply(132);
    NOption(133,Node999,004);
@@ -352,7 +353,7 @@ end
 
 procedure Node011 begin
    Reply(139);
-   NOption(140,Node998,004);
+   BOption(140,Node998,004); //edit by killap: was NOption
    NOption(141,Node999,004);
 end
 
@@ -422,6 +423,7 @@ procedure Node018 begin
       set_global_var( GVAR_TOWN_REP_BROKEN_HILLS, (global_var(GVAR_TOWN_REP_BROKEN_HILLS) + REP_TOWN_RETURNED_ORE_TO_CITY_FOR_CASH ) );
    end
 
+   set_local_var( LVAR_Gave_Ore, 1 ); // Seraph's Code
    item_caps_adjust( dude_obj, 1500 );
    Reply(157);
    NOption(158, Node999, 004);

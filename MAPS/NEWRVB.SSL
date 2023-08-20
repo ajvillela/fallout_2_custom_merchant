@@ -49,11 +49,14 @@ end
 
 procedure map_enter_p_proc begin
    if (is_loading_game == false) then begin
+
       if (map_first_run) then begin
          display_mstr(100);
       end
       if (night == false) then begin
          game_time_advance_hour(0000);
+      end else begin
+         game_time_advance(ONE_GAME_MINUTE * 15); //added by killap - takes time
       end
       if (get_guard_assignment(guard_assignment_assigned)) then begin
          override_map_start_hex(hs_assignment_tile, 0, 5);
@@ -66,6 +69,7 @@ procedure map_enter_p_proc begin
 end
 
 procedure map_exit_p_proc begin
+   game_time_advance(ONE_GAME_MINUTE * 15); //added by killap - takes time
    set_saw_secret_trade;
 end
 

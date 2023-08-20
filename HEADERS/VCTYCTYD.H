@@ -22,6 +22,7 @@
 #define MVAR_Auto_Doc_Fixed						   (4)
 #define MVAR_Wrench								   (5)
 #define MVAR_Made_Payoff                        (6)
+#define MVAR_Saw_Raiders                        (7)
 
 #define set_watcher(the_var)                 if (obj_is_visible_flag(self_obj)) then begin                                                              \
 	                                             if (the_var == 0) then begin                                                                            \

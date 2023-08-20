@@ -86,6 +86,7 @@ procedure use_skill_on_p_proc;
 procedure use_obj_on_p_proc;
 procedure damage_p_proc;
 procedure map_enter_p_proc;
+procedure map_exit_p_proc;
 procedure map_update_p_proc;
 
 /* Script Specific Procedure Calls */
@@ -167,6 +168,7 @@ procedure timed_event_p_proc begin
                ((tile_distance_objs(self_obj, last_source_obj) > DOOR_CLOSE_DIST) or
                (critter_state(last_source_obj) == CRITTER_IS_DEAD))) then begin
                obj_close(self_obj);
+               debug_msg("door is closed");
             end else begin
                add_timer_event(self_obj, 10, TIMER_CLOSE);
             end
@@ -460,7 +462,11 @@ end
 */
 
 procedure map_enter_p_proc begin
-variable in_door_critter;
+   variable in_door_critter;
+   
+   obj_close(self_obj);
+   match_dude_elevation;
+      
    if (cage_door) then begin
       cage_door_obj := self_obj;
    end else if (coup_door) then begin
@@ -483,7 +489,13 @@ variable in_door_critter;
       end else begin
          obj_unlock(self_obj);
       end
-      match_dude_elevation;
+    //  match_dude_elevation;
+   end
+end
+
+procedure map_exit_p_proc begin
+   if (obj_is_open(self_obj)) then begin
+      obj_close(self_obj);
    end
 end
 

@@ -156,9 +156,9 @@ procedure map_enter_p_proc begin
             call give_headstone_name;
          end
       end
-      if (map_first_run) then begin
+//      if (map_first_run) then begin //comment out by killap
          nr_add_timer_event(self_obj, 1, float_param);
-      end
+//      end
    end
 end
 

@@ -39,6 +39,11 @@
 
 import variable i_emitter_carlson_obj;
 
+//added by killap
+import variable merk_obj;
+import variable merk_visible;
+//end added
+
 /* Standard Script Procedures */
 procedure start;
 procedure critter_p_proc;
@@ -50,6 +55,7 @@ procedure description_p_proc;
 procedure use_skill_on_p_proc;
 procedure damage_p_proc;
 procedure map_enter_p_proc;
+procedure map_update_p_proc;
 procedure use_obj_on_p_proc;
 
 /* Script Specific Procedure Calls */
@@ -65,6 +71,8 @@ procedure Node001;
 procedure Node002;
 procedure Node003;
 procedure Node004;
+procedure Node005; //added by killap
+procedure Node006; //added by killap
 
 procedure use_obj_on_p_proc;
 procedure LowerGate;
@@ -107,6 +115,19 @@ procedure map_enter_p_proc begin
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_TOUGH_GUARD);
 end
 
+// added by killap - expansion
+procedure map_exit_p_proc begin
+   if (get_carlson_flag(CARLSON_DEAD)) then
+      set_carlson_flag(CARLSON_GATE_CLOSED);
+end
+// end added
+
+//added by killap
+procedure map_update_p_proc begin
+   if (self_tile == CARLSON_GATE_GUARD_CAPTAIN_TILE) then
+      imCaptain := 1;    
+end
+//end added
 
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from
    Movement to attacking the player on sight can be placed in here.*/
@@ -128,6 +149,15 @@ procedure critter_p_proc begin
 
    if (imCaptain) then
       call checkGateAttack;
+      
+   //added by killap
+   if ( (imCaptain) and (merk_visible) ) then begin
+      if (tile_distance(tile_num(merk_obj), 19513) < 6) then begin
+         call Node005;
+         call LowerGate;
+      end
+   end
+   //end added
 end
 
 /* Whenever the critter takes damage of any type, this procedure will be called. Things
@@ -165,7 +195,11 @@ procedure talk_p_proc begin
 
    GetReaction;
    if (imCaptain) then begin
-      if (map_var(MVAR_Player_has_pass)) then begin
+      // added by killap - expansion
+      if (get_carlson_flag(CARLSON_GATE_CLOSED)) then begin
+         call Node006;
+      // end added
+      end else if (map_var(MVAR_Player_has_pass)) then begin
          call Node003;
          call LowerGate;
       end
@@ -268,6 +302,17 @@ end
 procedure Node004 begin
    float_msg(self_obj, mstr(Random(110, 112)), FLOAT_MSG_NORMAL);
 end
+
+//added by killap
+procedure Node005 begin
+   float_msg(self_obj, mstr(113), FLOAT_MSG_NORMAL);
+end
+
+// expansion
+procedure Node006 begin
+   float_msg(self_obj, mstr(114), FLOAT_MSG_NORMAL);
+end
+//end added
 
 #define EMITTER_MAP_DELAY(x) set_map_var(MVAR_Carlson_Gate, EMITTER_CONTROL_DELAY)
 

@@ -113,12 +113,13 @@ procedure talk_p_proc begin
    Karma_Perception:=KARMA_PERCEPTION1;
    CheckKarma;
    GetReaction;
-
+   ReactToLevel; //added by killap
+   
    // setup bartering values before going into dialog
    if (enclave_destroyed) then begin
-      gdialog_set_barter_mod(50);
+      gdialog_set_barter_mod(-50); //killap's fix: was 50
    end else if ((dude_is_prizefighter) or (dude_has_porn_star_rep) or (dude_is_made_man)) then begin
-      gdialog_set_barter_mod(25);
+      gdialog_set_barter_mod(-25); //killap's fix: was 25
    end else begin
       gdialog_set_barter_mod(0 + (10*(dude_caps>=100)) + (10*(dude_caps>=200)) + (10*(local_var(LVAR_reaction_level)<REACTION_LEVEL_NEUTRAL)));
    end
@@ -153,9 +154,20 @@ procedure Node998 begin
    set_hostile;
 end
 procedure Node997 begin
-   gdialog_barter;
-   Reply(" ");
-   NOption(g_mstr(350),Node999,001);
+   
+   //added by killap
+   if (enclave_destroyed) then begin
+      gdialog_mod_barter(-50);
+   end else if ((dude_is_prizefighter) or (dude_has_porn_star_rep) or (dude_is_made_man)) then begin
+      gdialog_mod_barter(-25);
+   end else begin
+      gdialog_mod_barter(0 + (10*(dude_caps>=100)) + (10*(dude_caps>=200)) + (10*(local_var(LVAR_reaction_level)<REACTION_LEVEL_NEUTRAL)));
+   end
+   //end added by killap
+   //gdialog_barter;
+   //Reply(" ");
+   //NOption(g_mstr(350),Node999,001);
+   call Node000; //edit by killap
 end
 
 procedure Node000 begin

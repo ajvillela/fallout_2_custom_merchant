@@ -53,7 +53,8 @@ procedure map_enter_p_proc begin
        inc_map_var(MVAR_Made_Froggy);
 
        Critter:=create_object_sid(PID_MALE_MAURADER,0,0,SCRIPT_RCFROG);
-       critter_attempt_placement(Critter,13294,0);
+       //critter_attempt_placement(Critter,13294,0);
+       critter_attempt_placement(Critter,13697,0); //edit by killap (expansion)
        item:=create_object(PID_HK_G11,0,0);
        add_obj_to_inven(Critter,item);
        wield_obj_critter(Critter,item);
@@ -61,7 +62,8 @@ procedure map_enter_p_proc begin
        add_obj_to_inven(Critter,item);
 
        Critter:=create_object_sid(PID_BOUNTY_MALE_7_12,0,0,SCRIPT_RCMOTGNG);
-       critter_attempt_placement(Critter,23097,0);
+       //critter_attempt_placement(Critter,23097,0);
+       critter_attempt_placement(Critter,23096,0);  //edit by killap (expansion)
        item:=create_object(PID_SAWED_OFF_SHOTGUN,0,0);
        add_obj_to_inven(Critter,item);
        wield_obj_critter(Critter,item);
@@ -85,7 +87,8 @@ procedure map_enter_p_proc begin
        add_obj_to_inven(Critter,item);
 
        Critter:=create_object_sid(PID_BOUNTY_MALE_7_12,0,0,SCRIPT_RCMOTGNG);
-       critter_attempt_placement(Critter,14290,0);
+       //critter_attempt_placement(Critter,14290,0);
+       critter_attempt_placement(Critter,14890,0); //edit by killap (expansion)
        item:=create_object(PID_COMBAT_SHOTGUN,0,0);
        add_obj_to_inven(Critter,item);
        wield_obj_critter(Critter,item);
@@ -93,7 +96,8 @@ procedure map_enter_p_proc begin
        add_obj_to_inven(Critter,item);
 
        Critter:=create_object_sid(PID_BOUNTY_MALE_7_12,0,0,SCRIPT_RCMOTGNG);
-       tile:=tile_num_in_direction(14290,1,random(2,4));
+       //tile:=tile_num_in_direction(14290,1,random(2,4));
+       tile:=tile_num_in_direction(14890,1,random(2,4)); //edit by killap (expansion)
        critter_attempt_placement(Critter,tile,0);
        item:=create_object(PID_COMBAT_SHOTGUN,0,0);
        add_obj_to_inven(Critter,item);
@@ -102,7 +106,8 @@ procedure map_enter_p_proc begin
        add_obj_to_inven(Critter,item);
 
        Critter:=create_object_sid(PID_BOUNTY_MALE_7_12,0,0,SCRIPT_RCMOTGNG);
-       tile:=tile_num_in_direction(14290,3,random(2,4));
+       //tile:=tile_num_in_direction(14290,3,random(2,4));
+       tile:=tile_num_in_direction(14890,3,random(2,4)); //edit by killap (expansion)
        critter_attempt_placement(Critter,tile,0);
        item:=create_object(PID_COMBAT_SHOTGUN,0,0);
        add_obj_to_inven(Critter,item);
@@ -111,7 +116,8 @@ procedure map_enter_p_proc begin
        add_obj_to_inven(Critter,item);
 
        Critter:=create_object_sid(PID_BOUNTY_MALE_7_12,0,0,SCRIPT_RCMOTGNG);
-       tile:=tile_num_in_direction(14290,5,random(2,4));
+       //tile:=tile_num_in_direction(14290,5,random(2,4));
+       tile:=tile_num_in_direction(14890,5,random(2,4)); //edit by killap (expansion)
        critter_attempt_placement(Critter,tile,0);
        item:=create_object(PID_COMBAT_SHOTGUN,0,0);
        add_obj_to_inven(Critter,item);

@@ -242,7 +242,7 @@ procedure Node001 begin
    Reply(102);
 
    NOption(103,Node002,004);
-   NLowOption(104,Node999,004);
+   NLowOption(104,Node999); // Seraph's Fix: NLowOption only takes 2 args. Thanks Rob!
 end
 
 procedure Node002 begin

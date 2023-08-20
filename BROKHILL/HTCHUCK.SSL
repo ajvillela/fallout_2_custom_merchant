@@ -17,6 +17,6 @@ procedure start begin
 end
 
 procedure spatial_p_proc begin
-   if( map_var( MVAR_Chuck_Awoke ) == 0 ) then
+   if ((source_obj == dude_obj) and (map_var( MVAR_Chuck_Awoke ) == 0) ) then // edit by killap - added (source_obj == dude_obj)
       set_map_var( MVAR_Chuck_Awoke, 1 );
 end

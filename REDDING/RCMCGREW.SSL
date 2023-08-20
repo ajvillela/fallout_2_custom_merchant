@@ -492,7 +492,8 @@ procedure Node025 begin
        NOption(195,Node025a,004);
    if (global_var(GVAR_REDDING_WHORE_CUT) > WHORE_CUT_CUT) then
        NOption(196,Node025b,004);
-   if (global_var(GVAR_BAR_BRAWL) > BRAWL_JOB_ACCEPTED) then
+   //if (global_var(GVAR_BAR_BRAWL) > BRAWL_JOB_ACCEPTED) then
+   if (global_var(GVAR_BAR_BRAWL) >= BRAWL_NEITHER_JAILED) then
        NOption(197,Node025c,004);
    NOption(198,Node002,004);
    NOption(199,Node999,004);
@@ -517,7 +518,7 @@ procedure Node025b begin
 end
 
 procedure Node025c begin
-   if (global_var(GVAR_BAR_BRAWL) == BRAWL_NEITHER_JAILED) then
+   if ( (global_var(GVAR_BAR_BRAWL) == BRAWL_NEITHER_JAILED) or (global_var(GVAR_BAR_BRAWL) == BRAWL_TALKED_BOTH) ) then
        call Node033;
    else if (global_var(GVAR_BAR_BRAWL) == BRAWL_MORNINGSTAR_JAILED) then
        call Node034;
@@ -666,9 +667,16 @@ procedure Node040a begin
    display_msg(g_mstr(1007));
    give_xp(EXP_DELIVERED_DAN_CHIP);
 
+   //item:=obj_carrying_pid_obj(dude_obj,PID_EXCAVATOR_CHIP);
+   //rm_obj_from_inven(dude_obj,item);
+   //add_obj_to_inven(self_obj,item);
+   
+   //added by killap
    item:=obj_carrying_pid_obj(dude_obj,PID_EXCAVATOR_CHIP);
    rm_obj_from_inven(dude_obj,item);
-   add_obj_to_inven(self_obj,item);
+   destroy_object(item);
+   //end added
+   
    set_global_var(GVAR_REDDING_EXCAVATOR_CHIP,CHIP_DELIVERED_DAN);
 end
 

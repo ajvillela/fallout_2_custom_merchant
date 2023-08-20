@@ -248,7 +248,7 @@ end
 
 procedure Node003 begin
    Reply(111);
-   NOption(112, Node999, 4);
+   NOption(112, Node999, 1); //edit by killap - was 4
 end
 
 procedure Node004 begin
@@ -312,7 +312,7 @@ procedure Node012 begin
    Reply(146);
    NOption(147, Node011, 4);
    NOption(148, Node013, 4);
-   NOption(149, Node003, 4);
+   NOption(149, Node002, 4); //edit by killap - was 003
    NOption(150, Node999, 4);
 end
 

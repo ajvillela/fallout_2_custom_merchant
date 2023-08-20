@@ -15,7 +15,7 @@
 
 // All Map Vars need to start w/ MVAR_
 
-#define MVAR_Map_Guard_Count                         (0)
+/*#define MVAR_Map_Guard_Count                         (0)
 #define MVAR_Current_Patrol_Guard                    (1)
 #define MVAR_Next_Patrol_Time                        (2)
 #define MVAR_Dead_Guard                              (3)
@@ -26,6 +26,11 @@
 #define MVAR_Joey_Home_Tile                          (8)
 #define MVAR_Res_Home_2                              (9)
 #define MVAR_Res_Home_3                              (10)
-#define MVAR_Res_Home_4                              (11)
+#define MVAR_Res_Home_4                              (11)*/
+
+#define MVAR_Johnny_Move			     (0)
+#define MVAR_Dealer_Attacked			     (1)
+#define MVAR_Squaters_Unite			     (2)
+#define MVAR_Squater_Count			     (3)
 
 #endif // DENRES1_H

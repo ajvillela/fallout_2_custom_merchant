@@ -89,7 +89,7 @@ procedure Node010;
 
 /* Local variables which do not need to be saved between map changes. */
 variable Only_Once:=0;
-
+variable Cured_Charlie := 0;
 procedure start begin
 end
 
@@ -132,11 +132,14 @@ end
 
 procedure use_obj_on_p_proc begin
    variable UsedItem;
-
-   if( local_var(LVAR_Cured_Charlie) == 0 ) then begin
-      UsedItem := obj_being_used_with;
-      if( obj_pid(UsedItem) == PID_RADAWAY ) then begin
-         call Node007;
+   
+   if not(Cured_Charlie) then begin
+      if( local_var(LVAR_Cured_Charlie) == 0 ) then begin
+         UsedItem := obj_being_used_with;
+         if( obj_pid(UsedItem) == PID_RADAWAY ) then begin
+            Cured_Charlie := 1;
+            call Node007;
+         end
       end
    end
 
@@ -237,26 +240,30 @@ end
 procedure use_skill_on_p_proc begin
    variable Skill_Used;
 
-   script_overrides;
-   if( local_var(LVAR_Cured_Charlie) == 0 ) then begin
-      Skill_Used:=action_being_used;
-      if( Skill_Used == SKILL_DOCTOR ) then begin
-         if( is_success(roll_vs_skill(dude_obj, SKILL_DOCTOR, 0)) ) then
-            call Node004;
-         else
-            call Node005;
-      end
-      else if( Skill_Used == SKILL_FIRST_AID ) then begin
-         call Node005;
-      end
-      else if( Skill_Used == SKILL_REPAIR ) then begin
-         display_msg( mstr( random(134, 138) ) );
-      end
+   if (action_being_used == SKILL_STEAL) then begin
    end
    else begin
-      Skill_Used:=action_being_used;
-      if( (Skill_Used == SKILL_DOCTOR) or (Skill_Used == SKILL_FIRST_AID) or (Skill_Used == SKILL_REPAIR) ) then begin
-         call Node006;
+      script_overrides;
+      if( local_var(LVAR_Cured_Charlie) == 0 ) then begin
+         Skill_Used:=action_being_used;
+         if( Skill_Used == SKILL_DOCTOR ) then begin
+            if( is_success(roll_vs_skill(dude_obj, SKILL_DOCTOR, 0)) ) then
+               call Node004;
+            else
+               call Node005;
+         end
+         else if( Skill_Used == SKILL_FIRST_AID ) then begin
+            call Node005;
+         end
+         else if( Skill_Used == SKILL_REPAIR ) then begin
+            display_msg( mstr( random(134, 138) ) );
+         end
+      end
+      else begin
+         Skill_Used:=action_being_used;
+         if( (Skill_Used == SKILL_DOCTOR) or (Skill_Used == SKILL_FIRST_AID) or (Skill_Used == SKILL_REPAIR) ) then begin
+            call Node006;
+         end
       end
    end
 end

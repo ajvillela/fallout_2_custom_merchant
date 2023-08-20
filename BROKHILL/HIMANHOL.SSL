@@ -76,6 +76,7 @@ procedure use_p_proc begin
    if( map_var( MVAR_Liz_Dead ) == 1 ) then begin
       if( local_var( LVAR_Gave_Exp ) == 0 ) then begin
          set_local_var( LVAR_Gave_Exp, 1 );
+         give_xp(EXP_FOUND_LIZ_WEAPONS); //added by killap
          display_msg( mstr(100) );
       end
 
@@ -84,6 +85,7 @@ procedure use_p_proc begin
    else if( map_var( MVAR_Basement_Permission ) == 1 ) then begin
       if( local_var( LVAR_Gave_Exp ) == 0 ) then begin
          set_local_var( LVAR_Gave_Exp, 1 );
+         give_xp(EXP_FOUND_LIZ_WEAPONS); //added by killap
          display_msg( mstr(100) );
       end
 
@@ -95,6 +97,7 @@ procedure use_p_proc begin
          if( is_success( roll_vs_skill( dude_obj,SKILL_SNEAK,-50 ) ) ) then begin
             if( local_var( LVAR_Gave_Exp ) == 0 ) then begin
                set_local_var( LVAR_Gave_Exp, 1 );
+               give_xp(EXP_FOUND_LIZ_WEAPONS); //added by killap
                display_msg( mstr(100) );
             end
 
@@ -107,6 +110,7 @@ procedure use_p_proc begin
          if( is_success( roll_vs_skill( dude_obj,SKILL_SNEAK,-20 ) ) ) then begin
             if( local_var( LVAR_Gave_Exp ) == 0 ) then begin
                set_local_var( LVAR_Gave_Exp, 1 );
+               give_xp(EXP_FOUND_LIZ_WEAPONS); //added by killap
                display_msg( mstr(100) );
             end
 

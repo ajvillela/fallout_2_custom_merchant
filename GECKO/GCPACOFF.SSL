@@ -271,6 +271,7 @@ procedure Node013 begin
 end
 
 procedure Node014 begin
+   set_global_var(GVAR_ENCLAVE_SENT,1); //added by killap - expansion pack
    Reply(170);
    BOption(171,Node015,004);
    BOption(172,Node016,004);

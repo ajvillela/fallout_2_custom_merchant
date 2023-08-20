@@ -101,7 +101,9 @@ procedure map_enter_p_proc begin
          if (obj_is_locked(self_obj) == false) then begin
             obj_lock(self_obj);
          end
-         set_boomw(boomw_none);
+         if (map_first_run) then begin
+            set_boomw(boomw_none);
+         end
       end
    end
 end
@@ -191,6 +193,7 @@ variable the_roll;
                      display_mstr(190);
                   end else if ((is_critical(the_roll)) and (found_trap)) then begin
                      display_mstr(181);
+                     set_boomw(boomw_disarmed); //added by killap
                   end else begin
                      display_mstr(200 + found_trap);
                   end

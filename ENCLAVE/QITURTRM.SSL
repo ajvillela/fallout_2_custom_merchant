@@ -67,6 +67,7 @@ procedure Node019;
 procedure Node020;
 procedure Node021;
 procedure Node022;
+procedure Node022a; //added by killap
 procedure Node023;
 procedure Node024;
 procedure Node025;
@@ -84,6 +85,10 @@ procedure Node027a;
 procedure Node028a;
 procedure Node029a;
 
+procedure Node020a;   //added by killap
+procedure Node030a;   //added by killap
+procedure Node033;    //added by killap
+
 procedure Alarm_Reactive;
 
 #define LVAR_Diagnostics                (0)
@@ -93,13 +98,25 @@ procedure Alarm_Reactive;
 
 variable Needed_IQ:=6;
 
+variable hacked_system := 0;   //added by killap
+variable here_before := 0;     //added by killap
+variable current_userid := 0;  //added by killap
+
+//added by killap
+#define NOUSER  0
+#define SMITH   1
+#define MURRAY  2
+#define CURLING 3
+#define BIRD    4 
+//end
+
 procedure start begin
 end
 
 procedure use_p_proc begin
    script_overrides;
 
-   if ((is_skill_tagged(dude_obj,SKILL_SNEAK)) or (skill_success(dude_obj,SKILL_SNEAK,-70))) then
+   if ((is_skill_tagged(SKILL_SCIENCE)) or (skill_success(dude_obj,SKILL_SCIENCE,-70))) then // Seraph's Fix: is_skill_tagged only takes one parameter. Thanks Rob! Also changed from SKILL_SNEAK to SKILL_SCIENCE - killap
        Needed_IQ:=4;
    else
        Needed_IQ:=6;
@@ -187,6 +204,8 @@ procedure Node004 begin
    else
        Reply(126);
 
+   current_userid := NOUSER;
+
    CompOption(127,Node008);
    CompOption(128,Node020);
    if (Science_Skill >= 125) then
@@ -200,51 +219,42 @@ end
 
 procedure Node005 begin
    Reply(mstr(133)+mstr(134)+mstr(135));
+   current_userid := MURRAY;
 
-   if (Science_Skill >= 125) then
-       CompOption(136,Node014);
-   if (Science_Skill >= 100) then
-       CompOption(137,Node009);
+   CompOption(136,Node014);
+   CompOption(137,Node009);
    CompOption(138,Node004);
 end
 
 procedure Node006 begin
    Reply(mstr(139)+mstr(140)+mstr(141)+mstr(142)+mstr(143));
+   current_userid := CURLING;
 
-   if (Science_Skill >= 150) then
-       CompOption(144,Node012);
-   if (Science_Skill >= 150) then
-       CompOption(145,Node013);
-   if (Science_Skill >= 125) then
-       CompOption(146,Node014);
-   if (Science_Skill >= 100) then
-       CompOption(147,Node009);
+   CompOption(144,Node012);
+   CompOption(145,Node013);
+   CompOption(146,Node014);
+   CompOption(147,Node009);
    CompOption(148,Node004);
 end
 
 procedure Node007 begin
    Reply(mstr(149)+mstr(150)+mstr(151)+mstr(152)+mstr(153)+mstr(154)+mstr(155));
+   current_userid := BIRD;
 
-   if (Science_Skill >= 175) then
-       CompOption(156,Node010);
-   if (Science_Skill >= 175) then
-       CompOption(157,Node011);
-   if (Science_Skill >= 150) then
-       CompOption(158,Node012);
-   if (Science_Skill >= 150) then
-       CompOption(159,Node013);
-   if (Science_Skill >= 125) then
-       CompOption(160,Node014);
-   if (Science_Skill >= 100) then
-       CompOption(161,Node009);
+   CompOption(156,Node010);
+   CompOption(157,Node011);
+   CompOption(158,Node012);
+   CompOption(159,Node013);
+   CompOption(160,Node014);
+   CompOption(161,Node009);
    CompOption(162,Node004);
 end
 
 procedure Node008 begin
    Reply(163);
+   current_userid := SMITH;
 
-   if (Science_Skill >= 100) then
-       CompOption(164,Node009);
+   CompOption(164,Node009);
    CompOption(165,Node004);
 end
 
@@ -254,15 +264,15 @@ procedure Node009 begin
 
    Reply(166);
 
-   if (Science_Skill >= 175) then
+   if (current_userid >= BIRD) then begin
        CompOption(167,Node010);
-   if (Science_Skill >= 175) then
        CompOption(168,Node011);
-   if (Science_Skill >= 150) then
+   end
+   if (current_userid >= CURLING) then begin
        CompOption(169,Node012);
-   if (Science_Skill >= 150) then
        CompOption(170,Node013);
-   if (Science_Skill >= 125) then
+   end
+   if (current_userid >= MURRAY) then
        CompOption(171,Node014);
    CompOption(172,Node004);
 end
@@ -273,15 +283,15 @@ procedure Node010 begin
 
    Reply(173);
 
-   if (Science_Skill >= 175) then
+   if (current_userid >= BIRD) then
        CompOption(174,Node011);
-   if (Science_Skill >= 150) then begin
+   if (current_userid >= CURLING) then begin
        CompOption(175,Node012);
        CompOption(176,Node013);
    end
-   if (Science_Skill >= 125) then
+   if (current_userid >= MURRAY) then
        CompOption(177,Node014);
-   if (Science_Skill >= 100) then
+   if (current_userid >= SMITH) then
        CompOption(178,Node004);
    CompOption(179,Node004);
 end
@@ -292,15 +302,15 @@ procedure Node011 begin
 
    Reply(180);
 
-   if (Science_Skill >= 175) then
+   if (current_userid >= BIRD) then
        CompOption(181,Node010);
-   if (Science_Skill >= 150) then begin
+   if (current_userid >= CURLING) then begin
        CompOption(182,Node012);
        CompOption(183,Node013);
    end
-   if (Science_Skill >= 125) then
+   if (current_userid >= MURRAY) then
        CompOption(184,Node014);
-   if (Science_Skill >= 100) then
+   if (current_userid >= SMITH) then
        CompOption(185,Node009);
    CompOption(186,Node004);
 end
@@ -351,17 +361,20 @@ procedure Node012 begin
            Reply(201);
    end
 
+   // The check below is useless since one needs a science skill of at least
+   // 150 to reach Node012 in the first place, but it is left in place just
+   // in case...
    if (Science_Skill >= 125) then
        CompOption(202,Node020);
-   if (Science_Skill >= 175) then begin
+   if (current_userid >= BIRD) then begin
        CompOption(203,Node010);
        CompOption(204,Node011);
    end
-   if (Science_Skill >= 150) then
+   if (current_userid >= CURLING) then
        CompOption(205,Node013);
-   if (Science_Skill >= 125) then
+   if (current_userid >= MURRAY) then
        CompOption(206,Node014);
-   if (Science_Skill >= 100) then
+   if (current_userid >= SMITH) then
        CompOption(207,Node009);
    CompOption(208,Node004);
 end
@@ -371,15 +384,15 @@ procedure Node013 begin
 
    Reply(209);
 
-   if (Science_Skill >= 175) then begin
+   if (current_userid >= BIRD) then begin
        CompOption(210,Node010);
        CompOption(211,Node011);
    end
-   if (Science_Skill >= 150) then
+   if (current_userid >= CURLING) then
        CompOption(212,Node012);
-   if (Science_Skill >= 125) then
+   if (current_userid >= MURRAY) then
        CompOption(213,Node014);
-   if (Science_Skill >= 100) then
+   if (current_userid >= SMITH) then
        CompOption(215,Node009);
    CompOption(216,Node004);
 end
@@ -389,18 +402,18 @@ procedure Node014 begin
 
    Reply(217);
 
-   if (Science_Skill >= 175) then begin
+   if (current_userid >= BIRD) then begin
        CompOption(218,Node010);
        CompOption(219,Node011);
    end
-   if (Science_Skill >= 150) then begin
+   if (current_userid >= CURLING) then begin
        CompOption(220,Node012);
        CompOption(221,Node013);
    end
-   if (Science_Skill >= 100) then
+   if (current_userid >= SMITH) then
        CompOption(222,Node009);
    CompOption(223,Node004);
-end
+end 
 
 procedure Node015 begin
    display_msg(mstr(224));
@@ -422,7 +435,7 @@ end
 procedure Node019 begin
    Reply(228);
 
-   CompOption(229,Node004);
+   CompOption(229,Node001); //edit by killap - was 004
    CompOption(230,NodeEnd);
 end
 
@@ -439,20 +452,27 @@ procedure Node021 begin
    Reply(236);
 
    CompOption(237,Node021a);
-   CompOption(238,Node020);
+   if (hacked_system) then //added by killap
+      CompOption(238,Node020a);
+   else
+      CompOption(238,Node020);
    CompOption(239,NodeEnd);
 end
 
 procedure Node021a begin
    if (obj_is_carrying_obj_pid(dude_obj,PID_PRES_ACCESS_KEY)) then begin
-       if (cur_map_index == MAP_ENCLAVE_END_FIGHT) then
-           call Node022;
-       else
+       if (cur_map_index == MAP_ENCLAVE_END_FIGHT) then begin
+           //added check and call to 022a - killap
+           if (global_var(GVAR_ENCLAVE_REACTOR) == ENCLAVE_REACTOR_OFF) then
+              call Node022;
+           else
+              call Node022a;
+       end else
           call Node023;
    end
    else
        call Node024;
-end
+end 
 
 procedure Node022 begin
    set_global_var(GVAR_ENCLAVE_TURRET_HELP_PLAYER,1);
@@ -462,24 +482,44 @@ procedure Node022 begin
    CompOption(241,NodeEnd);
 end
 
+//added by killap
+procedure Node022a begin
+   Reply(266);
+
+   CompOption(267,Node004);
+   if (hacked_system) then
+      CompOption(268,Node020a);
+   else
+      CompOption(268,Node020);
+end 
+//end added
+
 procedure Node023 begin
    Reply(242);
 
    CompOption(243,Node004);
-   CompOption(244,Node020);
+   if (hacked_system) then //added by killap
+      CompOption(244,Node020a);
+   else
+      CompOption(244,Node020);
 end
 
 procedure Node024 begin
    Reply(245);
-
-   CompOption(246,Node020);
+   if (Science_Skill >= 75) then  //added by killap
+      CompOption(255,Node027a);	//killap's fix: changed from 246 and from Node20
+   else
+      CompOption(256,Node020);
 end
 
 procedure Node025 begin
    Reply(247);
 
    CompOption(248,Node025a);
-   CompOption(249,Node020);
+   if (hacked_system) then //added by killap
+      CompOption(249,Node020a);
+   else
+      CompOption(249,Node020);
    CompOption(250,NodeEnd);
 end
 
@@ -492,8 +532,11 @@ end
 
 procedure Node026 begin
    Reply(251);
-
-   CompOption(252,Node020);
+   
+   if (hacked_system) then //added by killap
+      CompOption(252,Node020a);
+   else
+      CompOption(252,Node020);
    CompOption(253,Node026a);
 end
 
@@ -541,7 +584,7 @@ end
 
 procedure Node028a begin
    if (skill_success(dude_obj,SKILL_SCIENCE,-125)) then
-       call Node028;
+       call Node029;  //killap's fix: changed from Node028
    else
        call Node030;
 end
@@ -554,7 +597,7 @@ end
 
 procedure Node029a begin
    if (skill_success(dude_obj,SKILL_SCIENCE,-150)) then
-       call Node028;
+       call Node030a;  //killap's fix: changed from Node028
    else
        call Node030;
 end
@@ -584,3 +627,33 @@ procedure Alarm_Reactive begin
    else
        set_global_var(GVAR_ENCLAVE_TURRET_MAIN,TURRET_NORMAL);
 end
+
+//begin killap added code 
+procedure Node030a begin
+    if (Science_Skill >= 200) then begin
+      call Node020a;
+   end else
+      call Node030;
+   hacked_system := 1;  
+end
+ 
+procedure Node020a begin
+   Reply(264 + here_before);
+   
+   CompOption(237,Node033);
+   CompOption(248,Node026);
+   CompOption(234,Node004);
+   CompOption(235,NodeEnd);
+   here_before :=1;
+end
+
+procedure Node033 begin
+   if (cur_map_index == MAP_ENCLAVE_END_FIGHT) then begin
+      if (global_var(GVAR_ENCLAVE_REACTOR) == ENCLAVE_REACTOR_OFF) then
+         call Node022;
+      else
+         call Node022a;
+   end else
+      call Node023;
+end 
+//end killap added code

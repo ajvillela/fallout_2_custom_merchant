@@ -72,7 +72,7 @@
 
 #define TRAPS_PENALTY           (-20)
 #define SCIENCE_PENALTY         (-40)
-#define TOOL_BONUS              (SCIENCE_PENALTY + 20)
+#define TOOL_BONUS              (SCIENCE_PENALTY + 20 + ((obj_pid(obj_being_used_with) == PID_SUPER_TOOL_KIT) * 20))
 
 #include "..\headers\genffld.h"
 
@@ -179,6 +179,11 @@ procedure use_skill_on_p_proc begin
             set_local_var(LVAR_Gave_Exp, 1);
             give_xp(EXP_DISABLE_FORCE_FIELD);
          end
+         
+         if (not san_fran_flag(SF_EMPEROR_FIELD_OFF)) then begin
+            set_san_fran_flag(SF_SHI_ENEMY);
+         end
+         
       end else begin
          if (source_obj == dude_obj) then begin
             inc_local_var(LVAR_Fail_Repair);
@@ -212,9 +217,9 @@ procedure use_obj_on_p_proc begin
       set_global_var(GLOBAL_NOTIFY, 3);
    end
 
-   if ((Tool == PID_MULTI_TOOL) and (not FIELD_DESTROYED)) then begin
+   if ( ((Tool == PID_MULTI_TOOL) or (Tool == PID_SUPER_TOOL_KIT)) and (not FIELD_DESTROYED) ) then begin //added super_tool_kit - killap
       script_overrides;
-      if (skill_success(source_obj,SKILL_SCIENCE,TOOL_BONUS)) then begin
+      if (skill_success(source_obj,SKILL_REPAIR,TOOL_BONUS)) then begin //edit by killap: was SKILL_SCIENCE
          if (FIELD_ON) then begin
             SET_FIELD_DELAY;
             if (source_obj == dude_obj) then begin
@@ -234,6 +239,11 @@ procedure use_obj_on_p_proc begin
             set_local_var(LVAR_Gave_Exp, 1);
             give_xp(EXP_DISABLE_FORCE_FIELD);
          end
+         
+         if (not san_fran_flag(SF_EMPEROR_FIELD_OFF)) then begin
+            set_san_fran_flag(SF_SHI_ENEMY);
+         end
+         
       end else begin
          if (source_obj == dude_obj) then begin
             inc_local_var(LVAR_Fail_Repair);
@@ -261,6 +271,8 @@ procedure damage_p_proc begin
    end else begin
       SET_FIELD_FLICKER;
    end
+
+   set_san_fran_flag(SF_SHI_ENEMY); //added by killap
 
    if (MAP_NOTIFY != -1) then begin
       set_map_var(MAP_NOTIFY, 2);

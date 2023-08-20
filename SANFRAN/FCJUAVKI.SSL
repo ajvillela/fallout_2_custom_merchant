@@ -172,19 +172,23 @@ end
    set up the Team number and AI packet for this critter. This will override the
    default from the prototype, and needs to be set in scripts. */
 procedure map_enter_p_proc begin
+   //begin killap code
+   if (map_var(MVAR_Talk_Sequence) > 0) then
+      set_map_var(MVAR_Talk_Sequence, TALK_DONE);
+   //end killap code
    Only_Once:=0;
    critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_TEAM_NUM,TEAM_SAN_FRAN_ELRONS);
    if (self_is_male) then
       critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_SF_RON_CRUZ);
    else
       critter_add_trait(self_obj,TRAIT_OBJECT,OBJECT_AI_PACKET,AI_SF_NIKKI_GOLDMAN);
-
    if (not is_loading_game) then begin
       call checkLoadPos;
    end
 end
 
 
+   
 /* Every heartbeat that the critter gets, this procedure will be called. Anything from
    Movement to attacking the player on sight can be placed in here.*/
 procedure critter_p_proc begin
@@ -332,6 +336,7 @@ procedure talk_p_proc begin
          end else begin
             start_gdialog(NAME,self_obj,4,-1,-1);
             gSay_Start;
+               set_local_var(LVAR_Herebefore, 1); //added here by killap
                call Node001;
             gSay_End;
             end_dialogue;
@@ -477,7 +482,7 @@ end
 
 procedure Node007 begin
    Reply(127);
-   NOption(128, Node011, 4);
+   NOption(128, Node010, 4);  //killap's fix: changed to Node010
    NOption(129, Node012, 4);
    NOption(130, Node016, 4);
    NOption(131, Node008, 4);
@@ -542,7 +547,7 @@ end
 
 procedure Node013 begin
    Reply(156);
-   NOption(157, Node998a, 4);
+   BOption(157, Node998a, 4); //edit by killap - was NOption
    NOption(158, Node999, 4);
    NOption(159, Node999, 4);
 end
@@ -565,7 +570,8 @@ end
 
 procedure NodeJoin begin
    callIndoctranation := 1;
-   add_obj_to_inven(dude_obj, create_object_sid(ELRON_HOLO_PID,0,0, SCRIPT_FIELRDSK));
+   //add_obj_to_inven(dude_obj, create_object_sid(ELRON_HOLO_PID,0,0, SCRIPT_FIELRDSK));
+   add_obj_to_inven(dude_obj, create_object_sid(ELRON_HOLO_PID,0,0, -1)); //edit by killap - this is now done through the dude_obj script; part of the too many items fix
 end
 
 procedure Node016 begin

@@ -176,7 +176,7 @@ procedure critter_p_proc begin
        attack(dude_obj);
    end
 
-   if ( ( global_var( GVAR_MOORE_STATE ) < MOORE_EXILED ) and ( local_var(LVAR_In_Timed_Event) == 0 ) ) then begin
+   if ( ( global_var( GVAR_MOORE_STATE ) < MOORE_EXILED ) and ( local_var(LVAR_In_Timed_Event) == 0 ) and (self_visible) ) then begin //killap's fix: added (self_visible)
        set_local_var(LVAR_In_Timed_Event,1);
        add_timer_event(self_obj,game_ticks(random(15,25)),1);
    end

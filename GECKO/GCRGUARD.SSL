@@ -96,7 +96,7 @@ end
 procedure critter_p_proc begin
 
    if (obj_can_see_obj(self_obj,dude_obj)) then begin
-      if (global_var(GVAR_GECKO_MELTDOWN) == 1) then begin
+      if ( (global_var(GVAR_GECKO_MELTDOWN) == 1) or (global_var(GVAR_ENEMY_GECKO)) ) then begin //edit by killap - added (global_var(GVAR_ENEMY_GECKO))
          set_local_var(LVAR_Hostile,1);
          attack(dude_obj);
       end

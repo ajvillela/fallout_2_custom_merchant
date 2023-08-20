@@ -10,7 +10,8 @@
 #define state_ghost_pip_message                       (2)
 #define state_ghost_pip_delivered_message             (3)
 #define state_ghost_pip_find_karl                     (4)
-#define state_ghost_pip_complete                      (5)
+#define state_ghost_pip_send_karl_home		      (5)
+#define state_ghost_pip_complete                      (6)
 #define ghost_pip(x)                                  (global_var(GVAR_MODOC_GHOST_SEED_PIP) == x)
 #define set_ghost_pip(x)                              if (global_var(GVAR_MODOC_GHOST_SEED_PIP) < x) then set_global_var(GVAR_MODOC_GHOST_SEED_PIP, x); \
                                                       debug_msg("ghost pip == "+global_var(GVAR_MODOC_GHOST_SEED_PIP))
@@ -38,6 +39,7 @@
 #define modoc_floater_bad(x)                          float_msg(self_obj, modoc_mstr(x), FLOAT_COLOR_BAD)
 #define modoc_dude_floater(x)                         float_msg(dude_obj, modoc_mstr(x), FLOAT_COLOR_NORMAL)
 #define kill_them_all_floater                         modoc_floater_bad(random(1000, 1003))
+#define TIMER_CLOSE                                   (39)
 
 #define mod_add_timer_event(obj, sec, param)          rm_fixed_timer_event(obj, param);               \
                                                       add_timer_event(obj, game_ticks(sec), param)
@@ -288,7 +290,7 @@
 #define set_townspeople_kill_all_slags          set_global_var(GVAR_SLAG_ATTACK, slag_attack_slags_dead)
 #define set_wipeout_scenario_1                  if (global_var(GVAR_SLAG_ATTACK) == slag_attack_none) then begin           \
                                                    set_global_var(GVAR_SLAG_ATTACK, slag_attack_attacking);                \
-                                                   inc_global_var(GVAR_TOWN_REP_MODOC,REP_TOWN_SOLVE_GHOST_FARM_WORST);    \
+                                                   inc_global_var_amt(GVAR_TOWN_REP_MODOC,REP_TOWN_SOLVE_GHOST_FARM_WORST); /* Seraph's Fix: changed 'inc_global_var' to 'inc_global_var_amt'. Thanks Rob! */\
                                                 end                                                                        \
                                                 set_ghost_farm_seed_inactive
 #define set_wipeout_scenario_2                  if (global_var(GVAR_SLAG_ATTACK) == slag_attack_none) then        \
@@ -776,10 +778,11 @@
                                                 set_main_stage(rape_stage)                   \
                                                 set_sub_stage(rape_stage_help)               \
                                                 inc_general_rep(REP_BONUS_MODOC_RAPE_MIRIA); \
-                                                obj_drop_everything(dude_obj);
+                                                critter_attempt_placement(dude_obj, 27501, dude_elevation); /* Seraph's Code */ \
+                                                /*obj_drop_everything(dude_obj); Disabled by Seraph */                 \
+                                                remove_armor(dude_obj); /* Seraph's Code */
 
-
-#define setup_wedding_stage                     gfade_out(1);                                                              \
+#define setup_wedding_stage                     gfade_out(1);                                				   \
                                                 party_no_follow_on;                                                        \
                                                 game_ui_disable;                                                           \
                                                 reg_anim_clear(dude_obj);                                                  \
@@ -797,7 +800,9 @@
                                                 if (tile_distance(self_tile, local_var(LVAR_Home_Tile)) > 1) then begin    \
                                                    critter_attempt_placement(self_obj, local_var(LVAR_Home_Tile), 0);      \
                                                 end                                                                        \
-                                                obj_drop_everything(dude_obj);                                             \
+                                                /*critter_attempt_placement(dude_obj, ((27501 * is_staging_miria_wedding) + (27295 * is_staging_davin_wedding)), dude_elevation); */ /* Seraph's Code */\
+                                                /*obj_drop_everything(dude_obj); Disabled by Seraph */                     \
+                                                remove_armor(dude_obj) /* Seraph's Code */                                 \
                                                 set_sub_stage(wedding_stage_grisham_what)
 
 // slags
@@ -864,7 +869,6 @@
 #define met_rose_bit                            bit_6
 #define met_grisham_bit                         bit_7
 #define butcher_leaving_bit                     bit_8
-#define rats_killed_bit                         bit_8
 #define freed_bess_bit                          bit_9
 #define enemy_slags_bit                         bit_10
 #define sleezy_stranger_flag_bit                bit_11
@@ -888,6 +892,8 @@
 #define setup_slag_guard_bit                    bit_29
 #define spoke_to_vegeir_bit                     bit_30
 #define stole_wish_bit                          bit_31
+#define rats_killed_bit                         bit_32
+//above rats_killed_bit was bit_8, but since there was already one, I had to change it to bit_32 - killap
 
 // 2
 #define brightlight_bit                         bit_1
