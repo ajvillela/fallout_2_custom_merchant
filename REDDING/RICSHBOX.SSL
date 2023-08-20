@@ -52,6 +52,10 @@ procedure map_enter_p_proc begin
    //end added 
 
    CashBox_Ptr:=self_obj;
+   
+   if (game_time + 2592000 < local_var(LVAR_Restock_Time)) then begin
+     set_local_var(LVAR_Restock_Time, game_time - 1);
+   end
 
    //added by killap - fix for game_time going negative after 7 years
    if (((game_time) < 0) and (local_var(LVAR_Restock_Time_Fix) == 0)) then begin
@@ -312,7 +316,7 @@ procedure map_enter_p_proc begin
       //end new added
        
        destroy_obj_inven(self_obj); //added by killap - one of the preventives I am adding towards the "too many items bug"
-       check_restock_item(PID_BOTTLE_CAPS,1000,5000,100)
+       check_restock_item(PID_BOTTLE_CAPS,3000,5000,100)
        
                 //new added - killap
          move_obj_inven_to_obj(tmp, self_obj);

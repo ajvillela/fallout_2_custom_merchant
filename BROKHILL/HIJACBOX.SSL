@@ -57,6 +57,10 @@ procedure map_enter_p_proc begin
          set_local_var(LVAR_Restock_Time_Fix, 1);
       end
       //end added
+
+      if (game_time + 2592000 < local_var(LVAR_Restock_Time)) then begin
+         set_local_var(LVAR_Restock_Time, game_time - 1);
+      end
     
       if (local_var(LVAR_Restock_Time) < game_time) then begin
       
